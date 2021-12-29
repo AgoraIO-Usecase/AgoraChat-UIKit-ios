@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9ED2B232271EACE400CB1CCA"
-               BuildableName = "EaseChatKit.framework"
+               BuildableName = "chat_uikit.framework"
                BlueprintName = "chat-uikit"
                ReferencedContainer = "container:chat-uikit.xcodeproj">
             </BuildableReference>
@@ -51,7 +51,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9ED2B232271EACE400CB1CCA"
-            BuildableName = "EaseChatKit.framework"
+            BuildableName = "chat_uikit.framework"
             BlueprintName = "chat-uikit"
             ReferencedContainer = "container:chat-uikit.xcodeproj">
          </BuildableReference>

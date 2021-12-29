@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
                   DESC
     s.license          = { :type => 'MIT', :file => 'LICENSE' }
     s.author           = { 'agora' => 'dev@agora.com' }
-    s.source = { :git => 'https://github.com/easemob/easeui_ios.git', :tag => 'chat-uikit_3.8.7'}
+    s.source = { :git => 'git@github.com:AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_3.8.7'}
     #s.source = { :git => 'https://github.com/MThrone/chat-uikit.git', :tag => 'chat-uikit_1.1.0'}
     s.frameworks = 'UIKit'
     s.libraries = 'stdc++'
