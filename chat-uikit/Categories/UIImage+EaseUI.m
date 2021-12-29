@@ -10,7 +10,7 @@
 
 @implementation UIImage (EaseUI)
 + (UIImage *)easeUIImageNamed:(NSString *)name {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"EaseChatKit" ofType:@"bundle"];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"chat-uikit" ofType:@"bundle"];
     NSString *imagePath = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",name]];
     return [UIImage imageWithContentsOfFile:imagePath];
 }

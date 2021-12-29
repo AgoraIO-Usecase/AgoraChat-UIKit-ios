@@ -63,12 +63,10 @@
         if ([imgPath length] == 0 && model.direction == AgoraChatMessageDirectionSend) {
             imgPath = body.localPath;
         }
+        
         if (body.thumbnailSize.height == 0 || body.thumbnailSize.width == 0) {
-            NSBundle *resource_bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"/Frameworks/EaseChatKit.framework" ofType:nil]];
-            if (!resource_bundle) {
-                resource_bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"Frameworks/EaseChatKit.framework" ofType:nil]];
-            }
-            imgPath = [resource_bundle pathForResource:@"video_default_thumbnail" ofType:@"png"];
+            NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"chat-uikit" ofType:@"bundle"];
+            imgPath = [bundlePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",@"video_default_thumbnail"]];
         }
         [self setThumbnailImageWithLocalPath:imgPath remotePath:body.thumbnailRemotePath thumbImgSize:body.thumbnailSize imgSize:body.thumbnailSize];
     }

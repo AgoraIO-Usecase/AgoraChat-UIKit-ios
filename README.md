@@ -1,2 +1,2 @@
-# EaseChatKit
+# chat-uikit
 IM UIKIT

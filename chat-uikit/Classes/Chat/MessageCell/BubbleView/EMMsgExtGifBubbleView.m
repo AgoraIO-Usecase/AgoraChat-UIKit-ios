@@ -39,7 +39,7 @@
         EaseEmoticon *group = [EaseEmoticon getGifGroup];
         for (EaseEmoticonModel *model in group.dataArray) {
             if ([model.name isEqualToString:name]) {
-                NSString *path = [[NSBundle mainBundle] pathForResource:@"EaseChatKit" ofType:@"bundle"];
+                NSString *path = [[NSBundle mainBundle] pathForResource:@"chat-uikit" ofType:@"bundle"];
                 NSString *gifPath = [path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.gif",model.original]];
                 NSData *imageData = [NSData dataWithContentsOfFile:gifPath];
                 self.gifView.animatedImage = [EaseAnimatedImg animatedImageWithGIFData:imageData];

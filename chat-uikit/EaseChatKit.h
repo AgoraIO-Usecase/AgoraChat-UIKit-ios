@@ -13,7 +13,7 @@ FOUNDATION_EXPORT double EaseChatKitVersionNumber;
 //! Project version string for EaseChatKit.
 FOUNDATION_EXPORT const unsigned char EaseChatKitVersionString[];
 
-// In this header, you should import all the public headers of your framework using statements like #import <EaseChatKit/PublicHeader.h>
+// In this header, you should import all the public headers of your framework using statements like #import <chat-uikit/PublicHeader.h>
 
 #import "EaseChatKitManager.h"
 
