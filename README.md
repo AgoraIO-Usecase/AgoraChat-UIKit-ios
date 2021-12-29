@@ -5,10 +5,10 @@
 chat-uikit 是基于声网 IM SDK 的一款 UI 组件库，它提供了一些通用的 UI 组件，“会话列表”和“聊天界面”，开发者可根据实际业务需求通过该组件库快速地搭建自定义 IM 应用。chat-uikit 中的组件在实现 UI 功能的同时，调用 IM SDK 相应的接口实现 IM 相关逻辑和数据的处理，因而开发者在使用 chat-uikit 时只需关注自身业务或个性化扩展即可。
 
 chat-uikit 源码地址：
-  * [[https://github.com/easemob/easeui_ios/tree/EaseChatKit| chat-uikit工程]]
+  * https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git chat-uikit工程
 
 使用 chat-uikit 的声网 IM App 地址：
-  * [[https://github.com/easemob/chat-ios| 声网IM]]
+  * https://github.com/AgoraIO-Usecase/AgoraChat-ios.git 声网IM
 
 ## 前提条件
 
@@ -61,9 +61,9 @@ chat-uikit 依赖于 AgoraChat SDK，其中包含了拍照，发语音，发图�
 
 1. github 下载源码
 
-源码下载地址：https://github.com/easemob/easeui_ios.git
+源码下载地址：https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
-Terminal command : git clone https://github.com/easemob/easeui_ios.git
+Terminal command : git clone https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
 2. 项目添加 chat-uikit 源码依赖
 
@@ -104,7 +104,7 @@ App Transport Security Settings -> Allow Arbitrary Loads //开启网络服务
 
 ### 参考
 
-如果在源码自定义过程中有任何通用自定义都可以给我们仓库 https://github.com/easemob/easeui_ios.git 提交代码，成为社区贡献者。
+如果在源码自定义过程中有任何通用自定义都可以给我们仓库 https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git 提交代码，成为社区贡献者。
 
 ### 三、初始化
 
