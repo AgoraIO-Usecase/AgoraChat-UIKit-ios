@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
     s.name             = 'chat-uikit'
-    s.version          = '3.8.7'
+    s.version          = '1.0.1'
     s.summary = 'agora im UIKit'
-    s.homepage = 'http://docs-im.easemob.com/im/ios/other/chat-uikit'
+    s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
     s.description = <<-DESC
                     chat-uikit Supported features:
 
@@ -11,11 +11,10 @@ Pod::Spec.new do |s|
                   DESC
     s.license          = { :type => 'MIT', :file => 'LICENSE' }
     s.author           = { 'agora' => 'dev@agora.com' }
-    s.source = { :git => 'git@github.com:AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_3.8.7'}
-    #s.source = { :git => 'https://github.com/MThrone/chat-uikit.git', :tag => 'chat-uikit_1.1.0'}
+    s.source = { :git => 'git@github.com:AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.1'}
     s.frameworks = 'UIKit'
     s.libraries = 'stdc++'
-    s.ios.deployment_target = '10.0'
+    s.ios.deployment_target = '11.0'
     s.source_files = [
         'chat-uikit/EaseChatKit.h',
         'chat-uikit/EasePublicHeaders.h',
@@ -55,18 +54,11 @@ Pod::Spec.new do |s|
     
     s.static_framework = true
     s.resource = 'chat-uikit/Resources/chat-uikit.bundle'
-    #s.resources = ['Images/*.png', 'Sounds/*']
-    
-    #s.ios.resource_bundle = { 'chat-uikit' => 'chat-uikit/Assets/*.png' }
-    #s.resource_bundles = {
-     # 'chat-uikit' => ['chat-uikit/Assets/*.png']
-    #}
     s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
                               'VALID_ARCHS' => 'arm64 armv7 x86_64'
                             }
     s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
 
-    s.dependency 'AgoraChat'
     s.dependency 'EMVoiceConvert', '0.1.0'
 
 end
