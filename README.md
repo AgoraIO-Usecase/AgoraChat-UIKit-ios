@@ -116,7 +116,7 @@ App Transport Security Settings -> Allow Arbitrary Loads //开启网络服务
 
 #### 2. 初始化chat-uikit
 
-在工程的 AppDelegate 中的以下方法中调用 EaseChatKitManager 的初始化方法一并初始化声网 AgoraChat sdk。(注: 此方法无需重复调用)
+在工程的 AppDelegate.m 中的以下方法中调用 EaseChatKitManager 的初始化方法一并初始化声网 AgoraChat sdk。(注: 此方法无需重复调用)
 
 ```objective-c
 (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -155,7 +155,7 @@ EaseChatKitManagerDelegate 主要是会话未读数回调。
 
 ##### 2. 加载会话页面
 
-chat-uikit 提供聊天会话 ViewController，可以通过创建 EaseChatViewController 实例，并嵌入进自己的聊天控制器方式（参考 AgoraChatIM 中 ACDChatViewController）实现对 chat-uikit 聊天会话的集成。
+chat-uikit 提供聊天会话 ViewController，可以通过创建 EaseChatViewController 实例，并嵌入进自己的聊天控制器方式（参考 AgoraChatIM 中 ACDChatViewController.m）实现对 chat-uikit 聊天会话的集成。
 创建聊天会话页面实例，需传递用户‘会话 ID’或‘群 ID’ ，会话类型（AgoraChatConversationType）以及必须传入聊天视图配置数据模型 EaseChatViewModel 实例。
 
 ```objective-c
@@ -331,6 +331,48 @@ typedef NS_ENUM(NSInteger, EaseAlignmentStyle) {
 - (void)resetChatVCWithViewModel:(EaseChatViewModel *)viewModel;
 ```
 
+##### 聊天会话自定义样式示例
+
+chat-uikit 显示的是默认的UI样式，以下是对聊天会话样式进行自定义配置示例：
+
+* 默认样式示例：
+
+只需创建 EaseChatViewModel 实例，并作为参数传入聊天页面 EaseChatViewController 的构造方法。
+
+```objective-c
+EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init]; //默认样式
+EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"会话 ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
+```
+
+默认样式的聊天页面示例图：
+
+// TODO:合并之后确定地址
+
+![]()
+
+* 自定义样式配置示例：
+
+创建 EaseChatViewModel 实例，修改该实例的可配置样式参数，将实例传入聊天页面 EaseChatViewController 的构造方法。
+
+```objective-c
+EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init];
+viewModel.chatViewBgColor = [UIColor systemGrayColor];  //聊天页背景色
+viewModel.inputMenuBgColor = [UIColor systemPinkColor]; //输入区背景色
+viewModel.sentFontColor = [UIColor redColor];           //发送方文本颜色
+viewModel.inputMenuStyle = EaseInputMenuStyleNoAudio;   //输入区菜单样式
+viewModel.msgTimeItemFontColor = [UIColor blackColor];  //消息时间字体颜色
+viewModel.msgTimeItemBgColor = [UIColor greenColor];    //消息时间区域背景色
+EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"会话 ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
+```
+
+部分自定义样式配置示例图：
+
+// TODO:合并之后确定地址
+
+![]()
+
+关于更多 API 介绍请参考 EaseChatViewController 提供的 API，以及 EaseChatViewControllerDelegate 协议中的回调方法 API。
+
 #### 会话列表样式配置
 
 会话列表可配置参数如下：
@@ -451,6 +493,51 @@ typedef NS_ENUM(NSInteger, EaseAlignmentStyle) {
 // UITableViewCell color of the dividing line
 @property (nonatomic, strong) UIColor *cellSeparatorColor;
 ```
+
+##### 会话列表自定义样式示例
+
+chat-uikit 显示的是默认的UI样式，以下是对会话列表样式进行自定义配置示例：
+
+* 默认样式示例：
+
+只需创建 EaseChatViewModel 实例，并作为参数传入聊天页面 EaseChatViewController 的构造方法。
+
+```objective-c
+EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init]; //默认样式
+EaseConversationsViewController *chatsVC = [[EaseConversationsViewController alloc] initWithModel:viewModel];
+```
+
+默认样式的聊天页面示例图：
+
+// TODO:合并之后确定地址
+
+![]()
+
+* 自定义样式配置示例：
+
+创建 EaseChatViewModel 实例，修改该实例的可配置样式参数，将实例传入聊天页面 EaseChatViewController 的构造方法。
+
+```objective-c
+EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init];
+viewModel.canRefresh = YES;                                //是否可刷新
+viewModel.badgeLabelCenterVector = CGVectorMake(-16, 0);   //未读数角标中心偏移量
+viewModel.avatarType = Rectangular;                        //头像类型
+viewModel.nameLabelColor = [UIColor blueColor];            //会话名称颜色
+viewModel.detailLabelColor = [UIColor redColor];           //会话详情颜色
+viewModel.timeLabelColor = [UIColor systemPinkColor];      //会话时间颜色
+viewModel.cellBgColor = [UIColor lightGrayColor];          //会话cell背景色
+viewModel.badgeLabelBgColor = [UIColor purpleColor];       //未读数背景色
+
+EaseConversationsViewController *chatsVC = [[EaseConversationsViewController alloc] initWithModel:viewModel];
+```
+
+部分自定义样式配置示例图：
+
+// TODO:合并之后确定地址
+
+![]()
+
+关于更多 API 介绍请参考 EaseConversationsViewController 提供的 API，以及 EaseConversationsViewControllerDelegate 协议中的回调方法 API。
 
 ### 自定义功能扩展
 

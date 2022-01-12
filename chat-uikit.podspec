@@ -59,6 +59,7 @@ Pod::Spec.new do |s|
                             }
     s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
 
+    s.dependency 'Agora_Chat_iOS'
     s.dependency 'EMVoiceConvert', '0.1.0'
 
 end
