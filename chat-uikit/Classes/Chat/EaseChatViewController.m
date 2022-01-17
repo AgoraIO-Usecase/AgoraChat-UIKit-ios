@@ -343,9 +343,9 @@
         EaseMessageModel *model = (EaseMessageModel *)obj;
         if (model.type == AgoraChatMessageTypeExtRecall) {
             if ([model.message.from isEqualToString:self.currentConversation.conversationId]) {
-                cellString = @"You recall a message";
-            } else {
                 cellString = @"The other party recall a message";
+            } else {
+                cellString = @"You recall a message";
             }
             type = EaseChatWeakRemindSystemHint;
         }
