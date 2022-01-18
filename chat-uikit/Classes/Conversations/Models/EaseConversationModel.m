@@ -9,7 +9,7 @@
 #import "EaseDefines.h"
 #import "UIImage+EaseUI.h"
 #import "AgoraChatConversation+EaseUI.h"
-//#import "EaseEmojiHelper.h"
+#import "EaseEmojiHelper.h"
 
 @interface EaseConversationModel()
 
@@ -74,7 +74,8 @@
         case AgoraChatMessageBodyTypeText:
         {
             AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)msg.body;
-            msgStr = body.text;
+            msgStr = [EaseEmojiHelper convertEmoji:body.text];
+
             AgoraChatMessage *lastMessage = [_conversation latestMessage];
             if ([msgStr isEqualToString:EaseCOMMUNICATE_CALLER_MISSEDCALL]) {
                 msgStr = @"no answer, call back";
