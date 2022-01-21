@@ -150,7 +150,6 @@ static NSString *cellIdentifier = @"EaseConversationCell";
                                                                              handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL))
                                         {
         [weakself _deleteConversation:indexPath];
-        [weakself refreshTabView];
     }];
     deleteAction.backgroundColor = [UIColor colorWithHexString:@"FF14CC"];
     
@@ -314,6 +313,8 @@ static NSString *cellIdentifier = @"EaseConversationCell";
             [weakSelf.dataAry removeObjectAtIndex:row];
             [weakSelf.tableView reloadData];
             [weakSelf _updateBackView];
+//            [weakSelf refreshTabView];
+
         }
     }];
 }
@@ -380,6 +381,7 @@ static NSString *cellIdentifier = @"EaseConversationCell";
         weakSelf.dataAry = (NSMutableArray *)totals;
         
         dispatch_async(dispatch_get_main_queue(), ^{
+            [weakSelf.tableView reloadData];
             [weakSelf endRefresh];
             [weakSelf _updateBackView];
         });

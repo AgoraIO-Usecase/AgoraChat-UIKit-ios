@@ -421,7 +421,7 @@
 
 #pragma mark - EaseInputMenuDelegate
 
-- (BOOL)textView:(UITextView *)textView shouldngeTextInRange:(NSRange)range replacementText:(NSString *)text
+- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     if (self.delegate && [self.delegate respondsToSelector:@selector(textViewShouldChangeTextInRange:replacementText:)]) {
         BOOL isValid = [self.delegate textViewShouldChangeTextInRange:range replacementText:text];
@@ -638,8 +638,8 @@
         }
     }
     self.longPressView.frame = CGRectMake(xOffset, yOffset, longPressViewsize.width, longPressViewsize.height);
-    UIWindow *win = [[[UIApplication sharedApplication] windows] firstObject];
-    [win addSubview:self.longPressView];
+    UIWindow *currentWindow = self.view.window;
+    [currentWindow addSubview:self.longPressView];
     
     UIBezierPath *shadowPath = [UIBezierPath
     bezierPathWithRect:self.longPressView.bounds];
