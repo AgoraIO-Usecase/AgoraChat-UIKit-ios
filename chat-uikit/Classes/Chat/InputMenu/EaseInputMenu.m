@@ -120,16 +120,6 @@
         make.width.height.Ease_equalTo(kIconwidth);
     }];
     
-    self.textView = [[EaseTextView alloc] init];
-    self.textView.delegate = self;
-    [self.textView setTextColor:[UIColor blackColor]];
-    self.textView.font = [UIFont systemFontOfSize:16];
-    self.textView.textAlignment = NSTextAlignmentLeft;
-    
-    self.textView.textContainerInset = UIEdgeInsetsMake(9, 13, 9, 21);
-    self.textView.returnKeyType = UIReturnKeySend;
-    self.textView.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
-    self.textView.layer.cornerRadius = 17.5;
     [self.inputView addSubview:self.textView];
     [self.textView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self).offset(kTopMargin);
@@ -232,15 +222,25 @@
 
 - (void)textViewDidChange:(UITextView *)textView
 {
+
     //防止输入时在中文后输入英文过长直接中文和英文换行
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-    paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
+    paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
     NSDictionary *attributes = @{
                                  NSFontAttributeName:[UIFont systemFontOfSize:16],
                                  NSParagraphStyleAttributeName:paragraphStyle
                                  };
-    textView.attributedText = [[NSAttributedString alloc] initWithString:textView.text attributes:attributes];
     
+    //防止拼音输入时，文本直接获取拼音
+    UITextRange *selectedRange = [textView markedTextRange];
+    NSString * newText = [textView textInRange:selectedRange];//获取高亮部分
+    if(newText.length > 0)
+    {
+        return;
+    }
+    
+    textView.attributedText = [[NSAttributedString alloc] initWithString:textView.text attributes:attributes];
+
     [self _updatetextViewHeight];
     if (self.moreEmoticonView) {
         [self emoticonChangeWithText];
@@ -484,5 +484,23 @@
         self.selectedButton = nil;
     }
 }
+
+#pragma mark getter and setter
+- (EaseTextView *)textView {
+    if (_textView == nil) {
+        _textView = [[EaseTextView alloc] init];
+        _textView.delegate = self;
+        [_textView setTextColor:[UIColor blackColor]];
+        _textView.font = [UIFont systemFontOfSize:16];
+        _textView.textAlignment = NSTextAlignmentLeft;
+        
+        _textView.textContainerInset = UIEdgeInsetsMake(9, 13, 9, 21);
+        _textView.returnKeyType = UIReturnKeySend;
+        _textView.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
+        _textView.layer.cornerRadius = 17.5;
+    }
+    return _textView;
+}
+
 
 @end

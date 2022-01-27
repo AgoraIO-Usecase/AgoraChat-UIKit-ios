@@ -90,6 +90,33 @@
     }
 }
 
+- (void)messagesDidRecall:(NSArray *)aMessages {
+    [aMessages enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        AgoraChatMessage *msg = (AgoraChatMessage *)obj;
+        [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj isKindOfClass:[EaseMessageModel class]]) {
+                EaseMessageModel *model = (EaseMessageModel *)obj;
+                if ([model.message.messageId isEqualToString:msg.messageId]) {
+                    AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"The other party retracted a message"];
+                    NSString *to = [[AgoraChatClient sharedClient] currentUsername];
+                    NSString *from = self.currentConversation.conversationId;
+                    AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:from from:from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
+                    message.chatType = (AgoraChatType)self.currentConversation.type;
+                    message.isRead = YES;
+                    message.messageId = msg.messageId;
+                    message.localTime = msg.localTime;
+                    message.timestamp = msg.timestamp;
+                    [self.currentConversation insertMessage:message error:nil];
+                    EaseMessageModel *replaceModel = [[EaseMessageModel alloc]initWithAgoraChatMessage:message];
+                    [self.dataArray replaceObjectAtIndex:idx withObject:replaceModel];
+                }
+            }
+        }];
+    }];
+    [self.tableView reloadData];
+}
+
+
 #pragma mark - EMGroupManagerDelegate
 
 - (void)userDidJoinGroup:(AgoraChatGroup *)aGroup

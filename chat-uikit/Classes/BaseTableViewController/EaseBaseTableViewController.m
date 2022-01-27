@@ -64,9 +64,11 @@
 
 #pragma mark - actions
 - (void)refreshTable {
-    [self.tableView setContentOffset:CGPointMake(0, self.tableView.contentOffset.y - self.tableView.refreshControl.frame.size.height) animated:NO];
-    [self.tableView.refreshControl beginRefreshing];
-    [self.tableView.refreshControl sendActionsForControlEvents:UIControlEventValueChanged];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.tableView setContentOffset:CGPointMake(0, self.tableView.contentOffset.y - self.tableView.refreshControl.frame.size.height) animated:NO];
+        [self.tableView.refreshControl beginRefreshing];
+        [self.tableView.refreshControl sendActionsForControlEvents:UIControlEventValueChanged];
+    });
 }
 
 -(void)refreshTabView
