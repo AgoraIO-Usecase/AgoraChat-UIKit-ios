@@ -1,45 +1,43 @@
 # AgoraChatUIKit iOS 使用指南
-# Get Started with Agora Chat UIKit iOS
+# Get Started with Agora Chat UIKit for iOS
 
 ## 功能描述   Understand the tech
 
 chat-uikit 是基于声网 IM SDK 的一款 UI 组件库，它提供了一些通用的 UI 组件，“会话列表”和“聊天界面”，开发者可根据实际业务需求通过该组件库快速地搭建自定义 IM 应用。chat-uikit 中的组件在实现 UI 功能的同时，调用 IM SDK 相应的接口实现 IM 相关逻辑和数据的处理，因而开发者在使用 chat-uikit 时只需关注自身业务或个性化扩展即可。
 
-chat-uikit is a UI component library built on top of Agora IM SDK. This library provides a collection of general UI components, a conversation list, and a chat UI, allowing developers to rapidly tailor-make an IM application to suit actual business needs. 
-In addition to providing UI components for UI creation, chat-uikit also calls interfaces in the IM SDk to implement related IM logics and data processing. Therefore, when using this library, developers only need to focus on their own business and personalized extensions.
+Agora Chat UIKit for iOS is a UI component library built on top of Agora IM SDK. It provides a set of general UI components, a conversation list, and a chat UI that allow developers to easily craft an IM app to suit actual business needs. Also, this library calls interfaces in the IM SDk to implement IM-related logics and data processing, allowing developers to only focus on their own business and personalized extensions.
 
 
-chat-uikit 源码地址：   URL of chat-uikit source code:
+chat-uikit 源码地址：   Source code URL of Agora Chat UIKit for iOS:
 
 - https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git chat-uikit source code
 
-使用 chat-uikit 的声网 IM App 地址：  URL of Agora IM App using chat-uikit:
+使用 chat-uikit 的声网 IM App 地址：  URL of Agora IM app using Agora Chat UIKit for iOS:
 
 - https://github.com/AgoraIO-Usecase/AgoraChat-ios.git Agora IM 
 
 ## 前提条件  Prerequisites
 
-支持系统版本要求： Compatible system versions:
+支持系统版本要求： System compatibility:
 
-- chat-uikit 支持 iOS 11.0及以上系统版本    chat-uikit: iOS 11.0 and later
+- chat-uikit 支持 iOS 11.0及以上系统版本    Agora Chat UIKit: iOS 11.0 and later
 - AgoraChatIM 支持 iOS 11.0及以上系统版本   AgoraChatIM: iOS 11.0 and later
 
-## 集成步骤   Integrate AgoraChatUIKit iOS into your project
+## 集成步骤   Integrate Agora Chat UIKit for iOS into your project
 
-### 一、导入  
+### 一、导入  Import chat-uikit
 
 #### 安装 Cocoapods 工具  Install CocoaPods
 
-1. 开始前确保你已安装 Cocoapods。参考 [Getting Started with CocoaPods](https://guides.cocoapods.org/using/getting-started.html#getting-started) 安装说明。  Install CocoaPods. 
-1. For details, see [Getting Started with CocoaPods](https://guides.cocoapods.org/using/getting-started.html#getting-started).
+1. 开始前确保你已安装 Cocoapods。参考 [Getting Started with CocoaPods](https://guides.cocoapods.org/using/getting-started.html#getting-started) 安装说明。  Install CocoaPods. For details, see [Getting Started with CocoaPods](https://guides.cocoapods.org/using/getting-started.html#getting-started).
 
 2. 在终端里进入项目根目录，并运行 `pod init` 命令。项目文件夹下会生成一个 `Podfile` 文本文件。 
-2. On the terminal, access the root directory of the project and run the `pod init` command. Then the text file `Podfile` will be generated in the project folder.
+2. On the terminal, open the root directory of the project and run the `pod init` command. Then the text file `Podfile` will be generated in the project folder.
  
 有两种方式集成，使用 pod 方式集成 chat-uikit 或者源码集成 chat-uikit，具体步骤如下：
 chat-uikit can be integrated using a pod or source code. The detailed procedures are as follows:
 
-#### 使用 pod 方式集成 chat-uikit     Integrate chat-uikit by using a pod 
+#### 使用 pod 方式集成 chat-uikit     Integrate Agora Chat UIKit for iOS by using a pod 
 
 1. 打开 `Podfile` 文件，添加 chat-uikit 依赖。注意将 `ProjectName` 替换为你的 Target 名称。
 1. In the `Podfile` file, add dependencies of chat-uikit. Remember to replace `ProjectName` with your target name.
@@ -56,13 +54,13 @@ end
 
 1. 在终端 Terminal cd 到 podfile 文件所在目录，执行如下命令集成 SDK。
 
-1. Run the `Terminal cd` command on the terminal to switch to the directory where the `Podfile` file is located. Then run the following command to integrate the SDK.
+1. On the terminal, run the `cd` command to switch to the directory where the `Podfile` file is located. Then run the following command to integrate the SDK.
 
 ```
 pod install
 ```
 
-1. 成功安装后，Terminal 中会显示 `Pod installation complete!`，此时项目文件夹下会生成一个 `xcworkspace` 文件，打开新生成的 `xcworkspace` 文件运行项目。
+1. 成功安装后，终端中会显示 `Pod installation complete!`，此时项目文件夹下会生成一个 `xcworkspace` 文件，打开新生成的 `xcworkspace` 文件运行项目。
 
 
 1. After pod installation is complete, the message `Pod installation complete!` will be displayed on the terminal. At this time, the `xcworkspace` file will be generated in the project folder. You can open this new file to run the project.
@@ -70,10 +68,10 @@ pod install
 注意：
 chat-uikit 依赖于 AgoraChat SDK，其中包含了拍照，发语音，发图片，发视频，发附件等功能，需要使用录音，摄像头，相册权限。需要在您项目的 info.plist 中添加对应权限。
 Note:
-As chat-uikit, built upon AgoraChat SDK, allows users to take photos and send voices, images, videos and attachments, it requires permissions to access the recording function, camera, and album. For this purpose, you need to add privileges on info.plist of your project.
+As chat-uikit, built upon AgoraChat SDK, allows users to take photos and send voices, images, videos and attachments, it requires permissions to access the recording function, camera, and album. For this purpose, you need to add privileges in info.plist of your project.
 
 
-##### 源码集成 chat-uikit   Integrate chat-uikit using source code
+##### 源码集成 chat-uikit   Integrate Agora Chat UIKit for iOS using source code
 
 1. github 下载源码   Download source code from github:
 
@@ -86,7 +84,7 @@ Terminal command: git clone https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-i
 
 打开 `Podfile` 文件，在 podfile 文件里添加 chat-uikit 依赖。
 
-In the `Podfile` file, add dependencies of chat-uikit.
+Open the `Podfile` file and add dependencies of chat-uikit.
 
 Podfile 文件示例：     `Podfile` file example: 
 
@@ -105,7 +103,7 @@ end
 
 ```
 
-1. 项目集成本地 chat-uikit 源码          Integrate the local source code of chat-uikit in the project.
+1. 项目集成本地 chat-uikit 源码          Integrate the local source code of Agora Chat UIKit for iOS in the project.
 
 终端 Terminal cd 到 Podfile 文件所在目录，执行 pod install 命令在项目中安装 chat-uikit 本地源码
 
@@ -113,9 +111,9 @@ end
 
 可对源码进行符合自己项目目标的自定义修改
 
-Run the `Terminal cd` command on the terminal to switch to the directory where the `Podfile` file is located. Then run the `pod install` command to install local source code of chat-uikit.
+Run the `cd` command on the terminal to switch to the directory where the `Podfile` file is located. Then run the `pod install` command to install local source code of Agora Chat UIKit for iOS.
 
-After the command execution is complete, you can find the source code of chat-uikit in the Xcode project directory Pods/Development Pods/ and adapt it to align with your project objectives.
+After the command execution is complete, you can find the source code of Agora Chat UIKit for iOS in the Xcode project directory Pods/Development Pods/ and adapt it to align with your project objectives.
 
 
 ### 二、添加权限    II. Add privileges
@@ -191,7 +189,7 @@ You need to register your class in EaseChatKitManagerDelegate to receive the cal
 
 chat-uikit 提供聊天会话 ViewController，可以通过创建 EaseChatViewController 实例，并嵌入进自己的聊天控制器方式（参考 AgoraChatIM 中 ACDChatViewController.m）实现对 chat-uikit 聊天会话的集成。 创建聊天会话页面实例，需传递用户‘会话 ID’或‘群 ID’ ，会话类型（AgoraChatConversationType）以及聊天视图配置数据模型 EaseChatViewModel 实例。
 
-chat-uikit provides ViewController for chat conversations. You can create an EaseChatViewController instance and embed your chat controller in this instance to integrate the chat conversation function of chat-uikit. To create a chat conversation page instance, you need to pass `Conversation ID`, `Group ID`, conversation type (AgoraChatConversationType), and EaseChatViewModel (chat view configuration data model) instance.
+Agora Chat UIKit for iOS provides ViewController for chat conversations. You can create an EaseChatViewController instance and embed your chat controller in this instance to integrate the chat conversation function of this library. To create a chat conversation page instance, you need to pass `Conversation ID`, `Group ID`, conversation type (AgoraChatConversationType), and EaseChatViewModel (chat view configuration data model) instance.
 
 
 ```
@@ -217,7 +215,7 @@ chatController.view.frame = self.view.bounds;
 在自己聊天控制器内可嵌入 chat-uikit 的会话列表 EaseConversationsViewController.
 创建会话列表实例，实例化会话列表必须传入会话列表视图数据配置模型 EaseConversationViewModel 实例。
 
-In your chat controller, you can embed EaseConversationsViewController for the conversation list in the chat-uikit.
+In your chat controller, you can embed EaseConversationsViewController for the conversation list in the Agora Chat UIKit for iOS.
 Create a conversation list instance. During conversation list instantiation, the EaseConversationViewModel (conversation list view data configuration model) instance must be passed in.
 
 ```
@@ -373,7 +371,7 @@ An instantiated chat controller can refresh the chat page by resetting the chat 
 
 
 ```
-//重置聊天控制器。  Reset the chat controller.
+//重置聊天控制器。  Resets the chat controller.
 
 - (void)resetChatVCWithViewModel:(EaseChatViewModel *)viewModel;
 ```
@@ -381,7 +379,7 @@ An instantiated chat controller can refresh the chat page by resetting the chat 
 ##### 聊天会话自定义样式示例    Example of custom chat conversation styles
 
 chat-uikit 显示的是默认的UI样式，以下是对聊天会话样式进行自定义配置示例：
-chat-uikit uses default UI styles. The following is an example of custom chat conversation style configurations.
+Agora Chat UIKit for iOS uses default UI styles. The following is an example of custom chat conversation style configurations.
 
 - 默认样式示例： Example of default styles:
 
@@ -550,7 +548,7 @@ The parent class of the conversation class involves the following configurable p
 ##### 会话列表自定义样式示例  Example of a conversation list with custom styles
 
 chat-uikit 显示的是默认的UI样式，以下是对会话列表样式进行自定义配置示例：
-chat-uikit uses default UI styles. The following is a configuration example of a conversation list with custom styles.
+Agora Chat UIKit for iOS uses default UI styles. The following is a configuration example of a conversation list with custom styles.
 
 - 默认样式示例： Example of a conversation list with default styles:
 
@@ -558,7 +556,7 @@ chat-uikit uses default UI styles. The following is a configuration example of a
 You only need to create an EaseConversationViewModel instance which will be passed as a parameter to the constructor in EaseConversationsViewController for the chat page.
  
 ```
-EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init]; //默认样式   Default styles
+EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init]; //默认样式   Default styles.
 EaseConversationsViewController *chatsVC = [[EaseConversationsViewController alloc] initWithModel:viewModel];
 ```
 
@@ -611,7 +609,7 @@ EaseConversationsViewControllerDelegate
 
 通过实现会话列表回调获取自定义消息 cell。
 如果返回 nil 会显示默认；如果返回 cell 会显示用户自定义cell。
-You can get the custom message cell by implementing chat control callback. 
+You can get the custom message cell by implementing conversation list callback. 
 If nil is returned, the default cell will be used; if cell is returned, a custom cell will be used.
 
 ```
