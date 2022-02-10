@@ -71,6 +71,7 @@
 - (void)setModel:(EaseMessageModel *)model
 {
     AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)model.message.body;
+    
     NSString *text = [EaseEmojiHelper convertEmoji:body.text];
     NSMutableAttributedString *attaStr = [[NSMutableAttributedString alloc] initWithString:text];
     /*
@@ -110,6 +111,15 @@
     NSAttributedString *attachStr = [NSAttributedString attributedStringWithAttachment:imgAttach];
     [attaStr appendAttributedString:attachStr];*/
     
+    //防止输入时在中文后输入英文过长直接中文和英文换行
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+    paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
+    NSDictionary *attributes = @{
+                                 NSFontAttributeName:[UIFont systemFontOfSize:16],
+                                 NSParagraphStyleAttributeName:paragraphStyle
+                                 };
+   
+    [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
     self.textLabel.attributedText = attaStr;
 }
 
