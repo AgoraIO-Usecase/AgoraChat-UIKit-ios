@@ -1,11 +1,9 @@
 # AgoraChatUIKit iOS 使用指南
 # Get Started with Agora Chat UIKit for iOS
 
-## 功能描述   Understand the tech
-
 chat-uikit 是基于声网 IM SDK 的一款 UI 组件库，它提供了一些通用的 UI 组件，“会话列表”和“聊天界面”，开发者可根据实际业务需求通过该组件库快速地搭建自定义 IM 应用。chat-uikit 中的组件在实现 UI 功能的同时，调用 IM SDK 相应的接口实现 IM 相关逻辑和数据的处理，因而开发者在使用 chat-uikit 时只需关注自身业务或个性化扩展即可。
 
-Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SDK. It provides a set of general UI components, a conversation list, and a chat UI that allow developers to easily craft an IM app to suit actual business needs. Also, this library calls methods in the Agora Chat SDK to implement IM-related logics and data processing, allowing developers to only focus on their own business and personalized extensions.
+Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SDK. It provides a set of general UI components, such as a conversation list and chat UI, which allow developers to easily craft an IM app to suit actual business needs. Also, this library calls methods in the Agora Chat SDK to implement IM-related logics and data processing, allowing developers to only focus on their own business and personalized extensions.
 
 为方便你参考如何使用 Agora Chat UIKit，Agora 也提供了一个示例 app，你可以前往 AgoraChat-ios，克隆并运行该 app，或参考其中的实现逻辑。
 - [Source code URL of Agora Chat UIKit for iOS](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git chat-uikit source code) 
@@ -16,10 +14,11 @@ Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SD
 支持系统版本要求： System compatibility:
 
 - chat-uikit 支持 iOS 11.0及以上系统版本    Agora Chat UIKit: iOS 11.0 and later
-- AgoraChatIM 支持 iOS 11.0及以上系统版本   AgoraChatIM: iOS 11.0 and later
+- AgoraChatIM 支持 iOS 11.0及以上系统版本   Agora Chat: iOS 11.0 and later
 
 ## 项目设置 Project Setup
-## 集成步骤   Integrate Agora Chat UIKit for iOS into your project
+
+要将 Agora Chat UIKit 集成到您的应用程序所需的环境，请执行以下操作：
 
 ### 一、导入  Import chat-uikit
 
@@ -124,13 +123,6 @@ Privacy - Microphone Usage Description //麦克风权限     Microphone privileg
 Privacy - Camera Usage Description //相机权限    Camera privileges.
 App Transport Security Settings -> Allow Arbitrary Loads //开启网络服务  Enable the network service.
 ```
-
-### 参考   Reference
-
-如果在源码自定义过程中有任何通用自定义都可以给我们仓库 https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git 提交代码，成为社区贡献者。
-
-If you have made any general customizations during source code customization, please submit them to our repository https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git to become a contributor of our community.
-
 
 ### 三、初始化 III. Initialization
 
@@ -593,14 +585,14 @@ EaseConversationsViewControllerDelegate
 
 #### 自定义会话 cell 回调  Callback of a custom conversation cell
 
-通过实现会话列表回调获取自定义消息 cell。
+通过设置会话列表监听实现自定义会话 cell。
 如果返回 nil 会显示默认；如果返回 cell 会显示用户自定义cell。
-You can get the custom message cell by implementing conversation list callback. 
+You can implement a custom message cell by setting the conversation list listener. 
 If nil is returned, the default cell will be used; if cell is returned, a custom cell will be used.
 
 ```
 /**
- * Occurs when a custom conversation cell is used.
+ * Occurs when the conversation list is refreshed.
  *
  * @param tableView        tableView of the message view. 
  * @param messageModel     The message data model.
@@ -871,3 +863,8 @@ If nil is returned, the default conversation cell will be used; if cell is retur
 
 - (void)easeTableView:(UITableView *)tableView didEndEditingRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
+## 更多操作  Next step
+
+如果在源码自定义过程中有任何通用自定义都可以给我们仓库 https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git 提交代码，成为社区贡献者。
+
+If you have made any general customizations during source code customization, please submit them to our repository https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git to become a contributor of our community.
