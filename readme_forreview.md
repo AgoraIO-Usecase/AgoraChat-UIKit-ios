@@ -18,7 +18,8 @@ Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SD
 
 ## 项目设置 Project Setup
 
-要将 Agora Chat UIKit 集成到您的应用程序所需的环境，请执行以下操作：
+本节介绍如何将 Agora Chat UIKit 集成到你的应用程序中。
+This section shows how to integrate the Agora Chat UIKit into your app.
 
 ### 一、导入  Import chat-uikit
 
