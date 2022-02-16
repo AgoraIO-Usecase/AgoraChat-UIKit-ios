@@ -13,8 +13,8 @@ Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SD
 
 支持系统版本要求： System compatibility:
 
-- chat-uikit 支持 iOS 11.0及以上系统版本    Agora Chat UIKit: iOS 11.0 and later
-- AgoraChatIM 支持 iOS 11.0及以上系统版本   Agora Chat: iOS 11.0 and later
+- iOS: 11.0 and later
+- Xcode: 12 and later
 
 ## 项目设置 Project Setup
 
