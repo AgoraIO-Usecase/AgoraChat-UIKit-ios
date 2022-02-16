@@ -5,9 +5,15 @@ chat-uikit 是基于声网 IM SDK 的一款 UI 组件库，它提供了一些通
 
 Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SDK. It provides a set of general UI components, such as a conversation list and chat UI, which allow developers to easily craft an IM app to suit actual business needs. Also, this library calls methods in the Agora Chat SDK to implement IM-related logics and data processing, allowing developers to only focus on their own business and personalized extensions.
 
-为方便你参考如何使用 Agora Chat UIKit，Agora 也提供了一个示例 app，你可以前往 AgoraChat-ios，克隆并运行该 app，或参考其中的实现逻辑。
+Agora 在 GitHub 上提供一个开源的 AgoraChat-ios 项目，你可以克隆和运行该项目或参考其中的逻辑创建项目集成 Agora Chat UIKit。
+
+- [AgoraChatUIKit iOS 源代码 URL](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git chat-uikit source code) 
+- [利用 Agora Chat UIKit iOS 的声网 IM 应用的 URL](https://github.com/AgoraIO-Usecase/AgoraChat-ios.git)
+- 
+Agora provides an open-source AgoraChat-ios project on GitHub. You can copy and run this project or create your own project to integrate the Agora Chat UIKit.
+
 - [Source code URL of Agora Chat UIKit for iOS](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git chat-uikit source code) 
-- [URL of Agora IM app using Agora Chat UIKit for iOS](https://github.com/AgoraIO-Usecase/AgoraChat-ios.git)
+- [URL of Agora Chat app using Agora Chat UIKit for iOS](https://github.com/AgoraIO-Usecase/AgoraChat-ios.git)
 
 ## 前提条件  Prerequisites
 
@@ -58,16 +64,9 @@ pod install
 
 1. 成功安装后，终端中会显示 `Pod installation complete!`，此时项目文件夹下会生成一个 `xcworkspace` 文件，打开新生成的 `xcworkspace` 文件运行项目。
 
+1. After pod installation is complete, the message `Pod installation complete!` will be displayed on the Terminal. At this time, the `xcworkspace` file will be generated in the project folder. You can open this new file to run the project.
 
-1. After pod installation is complete, the message `Pod installation complete!` will be displayed on the terminal. At this time, the `xcworkspace` file will be generated in the project folder. You can open this new file to run the project.
-
-注意：
-chat-uikit 依赖于 AgoraChat SDK，其中包含了拍照，发语音，发图片，发视频，发附件等功能，需要使用录音，摄像头，相册权限。需要在您项目的 info.plist 中添加对应权限。
-Note:
-As chat-uikit, built upon Agora Chat SDK, allows users to take photos and send voices, images, videos and attachments, it requires permissions to access the recording function, camera, and album. For this purpose, you need to add privileges in info.plist of your project.
-
-
-##### 源码集成 chat-uikit   Integrate Agora Chat UIKit for iOS using source code
+##### 源码集成 chat-uikit   Integrate the Agora Chat UIKit for iOS using source code
 
 1. github 下载源码   Download source code from github:
 
@@ -76,7 +75,7 @@ Download URL: https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
 Terminal command: git clone https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
-1. 项目添加 chat-uikit 源码依赖       Add source code dependencies of chat-uikit in the project.
+2. 项目添加 chat-uikit 源码依赖       Add source code dependencies of chat-uikit in the project.
 
 打开 `Podfile` 文件，在 podfile 文件里添加 chat-uikit 依赖。
 
@@ -99,7 +98,7 @@ end
 
 ```
 
-1. 项目集成本地 chat-uikit 源码          Integrate the local source code of Agora Chat UIKit for iOS in the project.
+3. 项目集成本地 chat-uikit 源码          Integrate the local source code of Agora Chat UIKit for iOS in the project.
 
 终端 Terminal cd 到 Podfile 文件所在目录，执行 pod install 命令在项目中安装 chat-uikit 本地源码
 
@@ -114,9 +113,11 @@ After the command execution is complete, you can find the source code of Agora C
 
 ### 二、添加权限    II. Add privileges
 
-在项目 `info.plist` 中添加相关权限：
+chat-uikit 依赖于 AgoraChat SDK，其中包含了拍照，发语音，发图片，发视频，发附件等功能，需要使用录音，摄像头，相册权限。需要在您项目的 info.plist 中添加对应权限。
+As chat-uikit, built upon the Agora Chat SDK, allows users to take photos and send voices, images, videos and attachments, it requires permissions to access the recording function, camera, and album. For this purpose, you need to add privileges in info.plist of your project.
 
-Add related privileges in the `info.plist` project:
+具体操作如下：
+The detailed procedure is as follows:
 
 ```
 Privacy - Photo Library Usage Description //相册权限    Album privileges.
@@ -180,7 +181,6 @@ chat-uikit 提供聊天会话 `ViewController`，可以通过创建 `EaseChatVie
 
 Agora Chat UIKit for iOS provides `ViewController` for chat conversations. You can create an `EaseChatViewController` instance and embed your chat controller (see `ACDChatViewController.m` in Agora Chat) in this instance to integrate the chat conversation function of this library. To create a chat conversation page instance, you need to pass the conversation ID, group ID, conversation type (`AgoraChatConversationType`), and `EaseChatViewModel` (chat view configuration data model) instance.
 
-
 ```
 EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init];
 EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"custom"
@@ -193,13 +193,13 @@ chatController.view.frame = self.view.bounds;
 
 #### 会话列表快速搭建 Rapidly set up the conversation list
 
-##### 1. 导入头文件  Import the header file
+1. 导入头文件  Import the header file.
 
 ```
 #import <chat-uikit/EaseChatKit.h>
 ```
 
-##### 2.加载会话列表 Load the conversation list
+2.加载会话列表 Load the conversation list.
 
 在自己聊天控制器内可嵌入 chat-uikit 的会话列表 EaseConversationsViewController.
 创建会话列表实例，实例化会话列表必须传入会话列表视图数据配置模型 EaseConversationViewModel 实例。
@@ -219,7 +219,7 @@ easeConvsVC.delegate = self;
 }];
 ```
 
-### 设置样式  Set styles
+### 五、设置样式  Set styles
 
 #### 配置聊天会话样式  Set chat conversation styles
 
@@ -365,12 +365,13 @@ An instantiated chat controller can refresh the chat page by resetting the chat 
 chat-uikit 显示的是默认的UI样式，你可以参考下文示例对相应的界面进行自定义设置。
 Agora Chat UIKit for iOS uses default UI styles. You can customize your user interface by reference to sections below.
 
-##### 自定义会话页面    Customize the chat UI
+##### 自定义聊天会话页面    Customize the chat UI
 
-Agora Chat UIKit 通过 EaseChatViewModel 控制聊天界面的设置。默认设置为：
-Agora Chat UIKit uses EaseChatViewModel to control chat UI settings. Following are default chat UI styles.
+Agora Chat UIKit 通过 EaseChatViewModel 控制聊天界面的设置。
+The Agora Chat UIKit uses EaseChatViewModel to control chat UI settings. 
+- 默认样式：Example of default styles:
 ```
-EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init]; //默认样式   Default styles
+EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init]; //默认样式。   Default styles.
 EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"Conversation ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
 ```
 自定义该界面只需要修改 EaseChatViewModel 实例中的样式参数，再将其传入 EaseChatViewController 中。
@@ -530,8 +531,11 @@ The parent class of the conversation class involves the following configurable p
 
 ##### 自定义会话列表界面  Customize the conversation list UI
 
-Agora Chat UIKit 通过 EaseConversationViewModel 控制会话界面的设置。默认设置为：
-Agora Chat UIKit uses EaseConversationViewModel to control conversation UI settings. Following are default conversation list styles.
+Agora Chat UIKit 通过 EaseConversationViewModel 控制会话界面的设置。
+Agora Chat UIKit uses EaseConversationViewModel to control conversation UI settings.
+
+- 默认样式示例：Example of default styles:
+
 ```
 EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init]; //默认样式   Default styles.
 EaseConversationsViewController *chatsVC = [[EaseConversationsViewController alloc] initWithModel:viewModel];
@@ -573,7 +577,7 @@ EaseConversationsViewController *chatsVC = [[EaseConversationsViewController all
 关于更多 API 介绍请参考 EaseConversationsViewController 提供的 API，以及 EaseConversationsViewControllerDelegate 协议中的回调方法 API。
 For details on more APIs, see APIs provided by EaseConversationsViewController and callback APIs in the EaseConversationsViewControllerDelegate protocol.
 
-### 自定义功能扩展  Custom function extensions
+### 六、自定义功能扩展  Custom function extensions
 
 #### 会话自定义功能扩展 Custom conversation function extensions
 
@@ -583,25 +587,6 @@ After EaseConversationsViewController is instantiated, you can implement the Eas
 ```
 EaseConversationsViewControllerDelegate
 ```
-
-#### 自定义会话 cell 回调  Callback of a custom conversation cell
-
-通过设置会话列表监听实现自定义会话 cell。
-如果返回 nil 会显示默认；如果返回 cell 会显示用户自定义cell。
-You can implement a custom message cell by setting the conversation list listener. 
-If nil is returned, the default cell will be used; if cell is returned, a custom cell will be used.
-
-```
-/**
- * Occurs when the conversation list is refreshed.
- *
- * @param tableView        tableView of the message view. 
- * @param messageModel     The message data model.
- *
- */
-- (UITableViewCell *)cellForItem:(UITableView *)tableView messageModel:(EaseMessageModel *)messageModel;
-```
-
 ##### 选中消息的回调  Callback of a selected message
 
 选中消息的回调（chat-uikit 没有对于自定义 cell 的选中事件回调，需用户自定义实现选中响应）。
@@ -758,16 +743,23 @@ Callback for holding down a custom message cell.
 - (NSMutableArray<EaseExtendMenuModel *> *)customCellLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems customCell:(UITableViewCell*)customCell;
 ```
 
-#### 会话列表自定义功能扩展 Custom function extension of the conversation list
+#### 自定义会话消息 cell 回调  Callback of a custom message cell
 
-实例化 EaseConversationsViewController 之后，可选择实现 EaseConversationsViewControllerDelegate 协议（会话列表回调代理），接收 EaseConversationsViewController 的回调并做进一步的自定义实现。
-After EaseConversationsViewController is instantiated, you can implement the EaseConversationsViewControllerDelegate protocol (conversation list callback delegate) to receive the callback of EaseConversationsViewController and further implement custom extensions.
-
+通过设置会话列表监听实现自定义会话 cell。
+如果返回 nil 会显示默认；如果返回 cell 会显示用户自定义cell。
+You can implement a custom message cell by setting the conversation list listener. 
+If nil is returned, the default cell will be used; if cell is returned, a custom cell will be used.
 
 ```
-EaseConversationsViewControllerDelegate
+/**
+ * Occurs when the conversation list is refreshed.
+ *
+ * @param tableView        tableView of the message view. 
+ * @param messageModel     The message data model.
+ *
+ */
+- (UITableViewCell *)cellForItem:(UITableView *)tableView messageModel:(EaseMessageModel *)messageModel;
 ```
-
 #### 自定义会话 cell 回调 Callback for a custom conversation cell
 
 通过实现会话列表回调协议获取自定义会话 cell。
@@ -775,7 +767,6 @@ You can obtain the custom conversation cell by implementing the conversation lis
 
 如果返回 nil 会显示默认；如果返回 cell 则会显示用户自定义会话 cell。
 If nil is returned, the default conversation cell will be used; if cell is returned, a custom conversation cell will be used.
-
 
 ```
 /*
@@ -788,6 +779,16 @@ If nil is returned, the default conversation cell will be used; if cell is retur
  */
 - (EaseConversationCell *)easeTableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
+
+#### 会话列表自定义功能扩展 Custom function extension of the conversation list
+
+实例化 EaseConversationsViewController 之后，可选择实现 EaseConversationsViewControllerDelegate 协议（会话列表回调代理），接收 EaseConversationsViewController 的回调并做进一步的自定义实现。
+After EaseConversationsViewController is instantiated, you can implement the EaseConversationsViewControllerDelegate protocol (conversation list callback delegate) to receive the callback of EaseConversationsViewController and further implement custom extensions.
+
+```
+EaseConversationsViewControllerDelegate
+```
+
 
 ##### 会话列表 cell 选中回调   Callback for cell selection on the the conversation list
 
@@ -864,6 +865,7 @@ If nil is returned, the default conversation cell will be used; if cell is retur
 
 - (void)easeTableView:(UITableView *)tableView didEndEditingRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
+
 ## 更多操作  Next step
 
 如果在源码自定义过程中有任何通用自定义都可以给我们仓库 https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git 提交代码，成为社区贡献者。
