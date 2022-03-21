@@ -36,7 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setupInputMenu:(EaseInputMenu *)inputbar;
 
 // Set whether to display typing indicator
-- (void)setTypingIndicator:(BOOL)typingIndicator;
+- (void)setEditingStatusVisible:(BOOL)typingIndicator;
 
 // Sending text messages
 - (void)sendTextAction:(NSString *)aText ext:(NSDictionary * __nullable)aExt;

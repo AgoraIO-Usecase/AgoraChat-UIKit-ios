@@ -1064,7 +1064,7 @@
 }
 
 //Send input state
-- (void)setTypingIndicator:(BOOL)typingIndicator{}
+- (void)setEditingStatusVisible:(BOOL)typingIndicator{}
 
 //Read receipt
 - (void)sendReadReceipt:(AgoraChatMessage *)msg{}
