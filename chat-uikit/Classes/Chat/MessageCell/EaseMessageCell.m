@@ -19,8 +19,10 @@
 #import "EMMsgExtGifBubbleView.h"
 #import "UIImageView+EaseWebCache.h"
 #import "EaseMessageCell+Category.h"
+#import "EMMaskHighlightViewDelegate.h"
+#import "EMMessageReactionView.h"
 
-@interface EaseMessageCell()
+@interface EaseMessageCell() <EMMaskHighlightViewDelegate>
 
 @property (nonatomic, strong) UIImageView *avatarView;
 
@@ -31,6 +33,8 @@
 @property (nonatomic, strong) UIButton *readReceiptBtn;
 
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
+
+@property (nonatomic, strong) EMMessageReactionView *reactionView;
 
 @end
 
@@ -146,6 +150,16 @@
     
     self.bubbleView.maxBubbleWidth = bubbleViewWidth * 0.8;
     
+    __weak typeof(self)weakSelf = self;
+    _reactionView = [[EMMessageReactionView alloc] init];
+    _reactionView.direction = _direction;
+    _reactionView.onClick = ^{
+        if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(messageCellDidClickReactionView:)]) {
+            [weakSelf.delegate messageCellDidClickReactionView:weakSelf.model];
+        }
+    };
+    [self.contentView addSubview:_reactionView];
+    
     if (self.direction == AgoraChatMessageDirectionReceive) {
         if (_viewModel.displayReceivedAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -186,6 +200,13 @@
                 make.right.equalTo(self.contentView).offset(-componentSpacing);
             }];
         }
+        
+        [_reactionView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.left.equalTo(self.bubbleView);
+            make.width.Ease_equalTo(200);
+            make.top.equalTo(self.bubbleView).offset(-18);
+            make.height.Ease_equalTo(28);
+        }];
     } else {
         if (_viewModel.displaySentAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -226,6 +247,13 @@
                 make.left.equalTo(self.contentView).offset(componentSpacing);
             }];
         }
+        
+        [_reactionView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.right.equalTo(self.bubbleView);
+            make.width.Ease_equalTo(200);
+            make.top.equalTo(self.bubbleView).offset(-18);
+            make.height.Ease_equalTo(28);
+        }];
     }
 
     _statusView = [[EaseMessageStatusView alloc] init];
@@ -365,6 +393,8 @@
     } else {
         self.readReceiptBtn.hidden = YES;
     }
+    
+    _reactionView.reactionList = model.message.reactionList;
 }
 
 #pragma mark - Action
@@ -418,6 +448,10 @@
         }
     }
     //[aLongPress release];
+}
+
+- (NSArray<UIView *> *)maskHighlight {
+    return @[_bubbleView, _reactionView, _avatarView];
 }
 
 @end
