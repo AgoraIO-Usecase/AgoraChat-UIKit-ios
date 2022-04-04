@@ -8,15 +8,15 @@
 
 #import "EMMsgTextBubbleView.h"
 #import "EaseEmojiHelper.h"
-
+#import "EMMsgThreadPreviewBubble.h"
 #define kHorizontalPadding 12
 #define kVerticalPadding 8
-
+#define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
 @interface EMMsgTextBubbleView ()
 {
     EaseChatViewModel *_viewModel;
 }
-
+@property (nonatomic, strong) EMMsgThreadPreviewBubble *threadBubble;
 @end
 @implementation EMMsgTextBubbleView
 
@@ -28,6 +28,11 @@
     if (self) {
         _viewModel = viewModel;
         [self _setupSubviews];
+        self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
+        self.threadBubble.tag = 666;
+        [self addSubview:self.threadBubble];
+        self.threadBubble.layer.cornerRadius = 8;
+        self.threadBubble.clipsToBounds = YES;
     }
     
     return self;
@@ -44,25 +49,54 @@
     self.textLabel.numberOfLines = 0;
     self.textLabel.lineBreakMode = NSLineBreakByWordWrapping;
     [self addSubview:self.textLabel];
-    [self.textLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.ease_top).offset(kVerticalPadding);
-        make.bottom.equalTo(self.ease_bottom).offset(-kVerticalPadding);
-    }];
+
     if (self.direction == AgoraChatMessageDirectionSend) {
         self.textLabel.textColor = _viewModel.sentFontColor;
     } else {
         self.textLabel.textColor = _viewModel.reveivedFontColor;
     }
-    if (self.direction == AgoraChatMessageDirectionSend) {
-        [self.textLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.left.equalTo(self.ease_left).offset(kHorizontalPadding);
-            make.right.equalTo(self.ease_right).offset(-kHorizontalPadding);
+
+}
+
+- (void)remakeLayout:(EaseMessageModel *)model {
+    if (model.message.msgOverView != nil) {
+        [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self.ease_top).offset(kHorizontalPadding);
+            make.bottom.equalTo(self.ease_bottom).offset(-(KEMThreadBubbleWidth*0.4+12));
+            make.left.equalTo(self).offset(kHorizontalPadding);
+            make.right.equalTo(self).offset(-kHorizontalPadding);
+        }];
+        [self.threadBubble Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.left.Ease_equalTo(kHorizontalPadding);
+            make.right.Ease_equalTo(-kHorizontalPadding);
+            make.width.Ease_equalTo(KEMThreadBubbleWidth);
+            make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4);
+            make.bottom.equalTo(self).offset(-kHorizontalPadding);
         }];
     } else {
-        [self.textLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.left.equalTo(self.ease_left).offset(kHorizontalPadding);
-            make.right.equalTo(self.ease_right).offset(-kHorizontalPadding);
-        }];
+        CGSize size = [self.textLabel systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
+//        [self Ease_updateConstraints:^(EaseConstraintMaker *make) {
+//            make.width.Ease_equalTo(size.width+kHorizontalPadding*2);
+//            make.height.Ease_equalTo(size.height+kHorizontalPadding*2);
+//        }];
+//        if (self.direction == AgoraChatMessageDirectionReceive) {
+            [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(self).offset(kHorizontalPadding);
+                make.bottom.equalTo(self).offset(-kHorizontalPadding);
+                make.left.equalTo(self).offset(kHorizontalPadding);
+                make.right.equalTo(self).offset(-kHorizontalPadding);
+                make.width.Ease_equalTo(ceilf(size.width));
+                make.height.Ease_equalTo(ceilf(size.height));
+            }];
+//        } else {
+//            [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+//                make.top.equalTo(self).offset(kHorizontalPadding);
+//                make.bottom.equalTo(self).offset(-kHorizontalPadding);
+//                make.right.equalTo(self).offset(-kHorizontalPadding);
+//                make.width.Ease_equalTo(size.width);
+//                make.height.Ease_equalTo(size.height);
+//            }];
+//        }
     }
 }
 
@@ -70,6 +104,11 @@
 
 - (void)setModel:(EaseMessageModel *)model
 {
+    [super setModel:model];
+    self.threadBubble.hidden = !model.message.msgOverView;
+    if (model.thread && model.thread.threadId.length) {
+        self.threadBubble.hidden = YES;
+    }
     AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)model.message.body;
     
     NSString *text = [EaseEmojiHelper convertEmoji:body.text];
@@ -117,10 +156,14 @@
     NSDictionary *attributes = @{
                                  NSFontAttributeName:[UIFont systemFontOfSize:16],
                                  NSParagraphStyleAttributeName:paragraphStyle
-                                 };
+                                 ,NSForegroundColorAttributeName:model.direction == AgoraChatMessageDirectionReceive ? _viewModel.reveivedFontColor:_viewModel.sentFontColor };
    
     [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
     self.textLabel.attributedText = attaStr;
+    if (model.thread == nil && model.message.msgOverView) {
+        self.threadBubble.model = model;
+    } else self.threadBubble.model = nil;
+    [self remakeLayout:self.threadBubble.model];
 }
 
 @end

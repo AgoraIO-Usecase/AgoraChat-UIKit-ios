@@ -7,12 +7,13 @@
 //
 
 #import "EMMsgFileBubbleView.h"
-
+#import "EMMsgThreadPreviewBubble.h"
+#define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
 @interface EMMsgFileBubbleView ()
 {
     EaseChatViewModel *_viewModel;
 }
-
+@property (nonatomic, strong) EMMsgThreadPreviewBubble *threadBubble;
 @end
 @implementation EMMsgFileBubbleView
 
@@ -24,6 +25,9 @@
     if (self) {
         _viewModel = viewModel;
         [self _setupSubviews];
+        self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
+        self.threadBubble.tag = 666;
+        [self addSubview:self.threadBubble];
     }
     
     return self;
@@ -34,7 +38,6 @@
 - (void)_setupSubviews
 {
     [self setupBubbleBackgroundImage];
-    
     self.iconView = [[UIImageView alloc] init];
     self.iconView.contentMode = UIViewContentModeScaleAspectFill;
     self.iconView.clipsToBounds = YES;
@@ -46,20 +49,20 @@
     self.textLabel.textAlignment = NSTextAlignmentLeft;
     self.textLabel.numberOfLines = 1;
     [self addSubview:self.textLabel];
-    [self.textLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self).offset(10);
-    }];
+//    [self.textLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//        make.top.equalTo(self).offset(10);
+//    }];
     
     self.detailLabel = [[UILabel alloc] init];
     self.detailLabel.font = [UIFont fontWithName:@"PingFang SC" size:14.0];
     self.detailLabel.numberOfLines = 1;
     self.detailLabel.textAlignment = NSTextAlignmentLeft;
     [self addSubview:self.detailLabel];
-    [self.detailLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.textLabel.ease_bottom);
-        make.bottom.equalTo(self).offset(-10);
-        make.left.right.equalTo(self.textLabel);
-    }];
+//    [self.detailLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//        make.top.equalTo(self.textLabel.ease_bottom);
+//        make.bottom.equalTo(self).offset(-10);
+//        make.left.right.equalTo(self.textLabel);
+//    }];
     
     self.downloadStatusLabel = [[UILabel alloc] init];
     self.downloadStatusLabel.font = [UIFont systemFontOfSize:10];
@@ -67,52 +70,134 @@
     self.downloadStatusLabel.textAlignment = NSTextAlignmentRight;
     self.downloadStatusLabel.textColor = [UIColor colorWithRed:173/255.0 green:173/255.0 blue:173/255.0 alpha:1.0];
     [self addSubview:self.downloadStatusLabel];
-    [self.downloadStatusLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.textLabel.ease_bottom).offset(16);
-        make.bottom.equalTo(self).offset(-10);
-        make.left.equalTo(self.ease_centerX);
-        make.right.equalTo(self.textLabel);
+    self.iconView.image = [UIImage easeUIImageNamed:@"doc"];
+//    if (self.direction == AgoraChatMessageDirectionSend) {
+//        [self.textLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
+//            make.left.equalTo(self).offset(8);
+//            make.right.equalTo(self).offset(-65);
+//        }];
+//        [self.iconView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//            make.top.left.equalTo(self).offset(10);
+//            make.bottom.equalTo(self).offset(-10);
+//            make.centerY.equalTo(self);
+//            make.width.height.equalTo(@50);
+//        }];
+//        self.detailLabel.textColor = [UIColor colorWithWhite:0.8 alpha:1.0];
+//    } else {
+//        [self.iconView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//            make.top.equalTo(self).offset(10);
+//            make.left.equalTo(self).offset(12);
+//            make.centerY.equalTo(self);
+//            make.width.height.equalTo(@50);
+//        }];
+//        [self.textLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
+//            make.left.equalTo(self.iconView.ease_right).offset(12);
+//            make.right.equalTo(self).offset(-12);
+//        }];
+//        self.detailLabel.textColor = [UIColor grayColor];
+//    }
+//    [self.downloadStatusLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//        make.top.equalTo(self.textLabel.ease_bottom).offset(16);
+//        make.bottom.equalTo(self).offset(-10);
+//        make.left.equalTo(self.ease_centerX);
+//        make.right.equalTo(self.textLabel);
+//    }];
+}
+
+- (void)updateThreadLayout:(CGRect)rect {
+    [self Ease_updateConstraints:^(EaseConstraintMaker *make) {
+        make.width.Ease_equalTo(rect.size.width);
+        make.height.Ease_equalTo(rect.size.height);
+    }];
+    [_threadBubble Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.bottom.equalTo(self).offset(-12);
+        make.left.equalTo(self).offset(12);
+        make.right.equalTo(self).offset(-12);
+        make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4);
+        make.width.Ease_equalTo(KEMThreadBubbleWidth);
     }];
     if (self.direction == AgoraChatMessageDirectionSend) {
-        self.iconView.image = [UIImage easeUIImageNamed:@"doc"];
-        [self.iconView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.left.equalTo(self).offset(10);
-            make.bottom.equalTo(self).offset(-10);
-            make.centerY.equalTo(self);
+        [self.iconView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            if (self.threadBubble.hidden == NO) {
+                make.bottom.equalTo(self.threadBubble.ease_top).offset(-5);
+            } else {
+                make.centerY.equalTo(self);
+            }
+            make.right.equalTo(self).offset(-12);
             make.width.height.equalTo(@50);
         }];
-        [self.textLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
-            make.left.equalTo(self.iconView.ease_right).offset(8);
-            make.right.equalTo(self).offset(-10);
+        [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self).offset(10);
+            make.right.equalTo(self).offset(-68);
+            make.left.equalTo(self).offset(12);
         }];
         self.detailLabel.textColor = [UIColor colorWithWhite:0.8 alpha:1.0];
     } else {
-        self.iconView.image = [UIImage easeUIImageNamed:@"doc"];
-        [self.iconView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self).offset(10);
-            make.right.equalTo(self).offset(-12);
-            make.centerY.equalTo(self);
+        [self.iconView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            if (self.threadBubble.hidden == NO) {
+                make.bottom.equalTo(self.threadBubble.ease_top).offset(-5);
+            } else {
+                make.centerY.equalTo(self);
+            }
+            make.left.equalTo(self).offset(12);
             make.width.height.equalTo(@50);
         }];
-        [self.textLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
-            make.left.equalTo(self).offset(12);
-            make.right.equalTo(self.iconView.ease_left).offset(-12);
+        [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self).offset(10);
+            make.left.equalTo(self.iconView.ease_right).offset(10);
+            make.right.equalTo(self.ease_right).offset(-12);
         }];
-        
+
         self.detailLabel.textColor = [UIColor grayColor];
     }
+
+    [self.detailLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+//        make.bottom.equalTo(self).offset(-10);
+        make.left.right.equalTo(self.textLabel);
+        make.height.Ease_equalTo(15);
+        if (self.threadBubble.hidden == YES) {
+            make.top.equalTo(self.textLabel.ease_bottom).offset(5);
+        } else {
+            make.bottom.equalTo(self.threadBubble.ease_top).offset(-5);
+        }
+    }];
+    [self.downloadStatusLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+        if (self.threadBubble.hidden == YES) {
+            make.top.equalTo(self.textLabel.ease_bottom).offset(16);
+        } else {
+            make.bottom.equalTo(self.threadBubble.ease_top).offset(-5);
+        }
+//        make.bottom.equalTo(self.threadBubble.ease_top).offset(-10);
+        make.left.right.equalTo(self.textLabel);
+    }];
 }
 
 #pragma mark - Setter
 
 - (void)setModel:(EaseMessageModel *)model
 {
-    AgoraChatMessageType type = model.type;
-    if (type == AgoraChatMessageTypeFile) {
-        [self setImage:nil];
-        CGRect rect = CGRectMake(0, 0, self.maxBubbleWidth, 70);
+    [super setModel:model];
+    self.threadBubble.hidden = !model.message.msgOverView;
+    if (model.thread && model.thread.threadId.length) {
         self.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
+        self.threadBubble.hidden = YES;
+    }
+    AgoraChatMessageType type = model.type;
+    
+    if (type == AgoraChatMessageTypeFile) {
+        CGFloat height = 70;
+        if (!model.thread) {
+            if (model.message.msgOverView) {
+                self.maxBubbleWidth = KEMThreadBubbleWidth+24;
+            }
+            if (model.message.msgOverView) {
+                height = 65+4+12+KEMThreadBubbleWidth*0.4;
+            }
+        }
+        CGRect rect = CGRectMake(0, 0, self.maxBubbleWidth, height);
         [self setCornerRadius:rect];
+        [self setupBubbleBackgroundImage];
+        [self updateThreadLayout:rect];
         AgoraChatFileMessageBody *body = (AgoraChatFileMessageBody *)model.message.body;
         NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc] initWithString:body.displayName];
         NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
@@ -130,6 +215,10 @@
         } else {
             self.downloadStatusLabel.text = @"";
         }
+        if (model.message.msgOverView && model.thread == nil) {
+            self.threadBubble.model = model;
+        } else self.threadBubble.model = nil;
+        
     }
 }
 

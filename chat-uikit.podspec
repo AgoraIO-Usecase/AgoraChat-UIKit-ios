@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
     s.source_files = [
         'chat-uikit/EaseChatKit.h',
         'chat-uikit/EasePublicHeaders.h',
-        'chat-uikit/**/*.{h,m,mm}'
+        'chat-uikit/**/*.{h,m,mm,xib}'
     ]
     s.public_header_files = [
         'chat-uikit/EaseChatKit.h',
@@ -53,7 +53,8 @@ Pod::Spec.new do |s|
     ]
     
     s.static_framework = true
-    s.resource = 'chat-uikit/Resources/chat-uikit.bundle'
+    s.resources = ['chat-uikit/**/*.bundle','chat-uikit/**/*.xib']
+    
     s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
                               'VALID_ARCHS' => 'arm64 armv7 x86_64'
                             }

@@ -29,9 +29,11 @@ typedef NS_ENUM(NSInteger, AgoraChatMessageType) {
 
 NS_ASSUME_NONNULL_BEGIN
 @class EaseMessageCell;
-@interface EaseMessageModel : NSObject
+@interface EaseMessageModel : NSObject<NSCopying,NSMutableCopying>
 
 @property (nonatomic) id<EaseUserProfile> userDataProfile;
+
+@property (nonatomic) id<EaseUserProfile> threadUserProfile;
 
 @property (nonatomic, weak) EaseMessageCell *weakMessageCell;
 
@@ -40,6 +42,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) AgoraChatMessageDirection direction;
 
 @property (nonatomic) AgoraChatMessageType type;
+
+@property (nonatomic) AgoraChatThread *thread;
 
 @property (nonatomic) BOOL isPlaying;
 

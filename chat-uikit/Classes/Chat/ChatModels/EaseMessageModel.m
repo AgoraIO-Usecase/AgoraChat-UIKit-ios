@@ -10,6 +10,7 @@
 #import "EaseHeaders.h"
 #import "EaseMessageCell.h"
 #import "EaseMessageCell+Category.h"
+#import <AgoraChat/NSObject+Coding.h>
 
 @implementation EaseMessageModel
 
@@ -51,6 +52,14 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioStateChange:) name:AUDIOMSGSTATECHANGE object:nil];
     }
     return self;
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    return [self ease_copyWithZone:zone];
+}
+
+- (id)mutableCopyWithZone:(NSZone *)zone {
+    return [self ease_mutableCopyWithZone:zone];
 }
 
 - (void)audioStateChange:(NSNotification *)aNotif

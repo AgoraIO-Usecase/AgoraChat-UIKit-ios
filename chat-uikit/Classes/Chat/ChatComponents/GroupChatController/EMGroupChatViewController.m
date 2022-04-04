@@ -14,8 +14,9 @@
 #import "EaseTextView.h"
 #import "EaseMessageCell.h"
 #import "EaseChatViewController+EaseUI.h"
+#import "EaseThreadListViewController.h"
 
-@interface EMGroupChatViewController () <AgoraChatGroupManagerDelegate>
+@interface EMGroupChatViewController () <AgoraChatGroupManagerDelegate,AgoraChatThreadNotifyDelegate>
 
 @property (nonatomic, strong) AgoraChatGroup *group;
 
@@ -26,6 +27,7 @@
 - (instancetype)initGroupChatViewControllerWithCoversationid:(NSString *)conversationId
                                                chatViewModel:(EaseChatViewModel *)viewModel
 {
+    self.group = [AgoraChatGroup groupWithId:conversationId];
     return [super initChatViewControllerWithCoversationid:conversationId
                        conversationType:AgoraChatConversationTypeGroupChat
                           chatViewModel:(EaseChatViewModel *)viewModel];
@@ -33,14 +35,22 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    [[AgoraChatClient sharedClient].threadManager addNotifyDelegate:self delegateQueue:nil];
     [[AgoraChatClient sharedClient].groupManager addDelegate:self delegateQueue:nil];
+    
 }
 
 - (void)dealloc
 {
     [[AgoraChatClient sharedClient].groupManager removeDelegate:self];
+    [[AgoraChatClient sharedClient].threadManager removeNotifyDelegate:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)threadsList {
+//    [super threadsList];
+    EaseThreadListViewController *VC = [[EaseThreadListViewController alloc] initWithGroup:self.group chatViewModel:self.viewModel];
+    [self.navigationController pushViewController:VC animated:YES];
 }
 
 #pragma mark - EaseMessageCellDelegate
@@ -122,6 +132,32 @@
 - (void)userDidJoinGroup:(AgoraChatGroup *)aGroup
                     user:(NSString *)aUsername
 {
+}
+
+
+- (void)threadNotifyChange:(AgoraChatThreadEvent *)evnet {
+    if (evnet) {
+        if (evnet.threadName && evnet.from) {
+            if ([evnet.threadOperation isEqualToString:@"create"]) {
+                id<EaseUserProfile> userThreadData = [self.delegate userProfile:evnet.from];
+                NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nSee all threads",userThreadData.showName ? userThreadData.showName:evnet.from,evnet.threadName];
+                [self.dataArray addObject:threadNotify];
+                [self refreshTableView:YES];
+            } else if ([evnet.threadOperation isEqualToString:@"update"]) {
+                AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:evnet.messageId];
+                message.msgOverView.threadName = evnet.threadName;
+                NSInteger index = [self.dataArray indexOfObject:message];
+                [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+            } else if ([evnet.threadOperation isEqualToString:@"update_msg"] || [evnet.threadOperation isEqualToString:@"recall_msg"]) {
+                AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:evnet.messageId];
+                message.msgOverView = evnet;
+                NSInteger index = [self.dataArray indexOfObject:message];
+                [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+            } else if ([evnet.threadOperation isEqualToString:@"delete"]) {
+                [self.tableView reloadData];
+            }
+        }
+    }
 }
 
 @end

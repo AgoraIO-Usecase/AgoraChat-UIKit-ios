@@ -21,6 +21,8 @@
 
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
 
+@property (nonatomic, assign) BOOL unDrawCorner;
+
 @property (nonatomic) CGFloat maxBubbleWidth;
 
 - (instancetype)initWithDirection:(AgoraChatMessageDirection)aDirection
@@ -28,6 +30,8 @@
                         viewModel:(EaseChatViewModel *)viewModel;
 
 - (void)setupBubbleBackgroundImage;
+
+- (void)setupThreadBubbleBackgroundImage;
 
 - (void)setCornerRadius:(CGRect)bounds;
 

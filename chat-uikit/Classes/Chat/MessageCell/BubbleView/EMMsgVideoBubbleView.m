@@ -16,6 +16,13 @@
 {
     self = [super initWithDirection:aDirection type:aType viewModel:viewModel];
     if (self) {
+        self.shadowView = [[UIView alloc] init];
+        self.shadowView.backgroundColor = [UIColor colorWithWhite:0.7 alpha:0.5];
+        [self addSubview:self.shadowView];
+        self.playImgView = [[UIImageView alloc] init];
+        self.playImgView.image = [UIImage easeUIImageNamed:@"msg_video_white"];
+        self.playImgView.contentMode = UIViewContentModeScaleAspectFill;
+        [self addSubview:self.playImgView];
         [self _setupSubviews];
     }
     
@@ -26,6 +33,13 @@
 {
     self = [super init];
     if (self) {
+        self.shadowView = [[UIView alloc] init];
+        self.shadowView.backgroundColor = [UIColor colorWithWhite:0.7 alpha:0.5];
+        [self addSubview:self.shadowView];
+        self.playImgView = [[UIImageView alloc] init];
+        self.playImgView.image = [UIImage easeUIImageNamed:@"msg_video_white"];
+        self.playImgView.contentMode = UIViewContentModeScaleAspectFill;
+        [self addSubview:self.playImgView];
         [self _setupSubviews];
     }
     return self;
@@ -35,27 +49,42 @@
 
 - (void)_setupSubviews
 {
-    self.shadowView = [[UIView alloc] init];
-    self.shadowView.backgroundColor = [UIColor colorWithWhite:0.7 alpha:0.5];
-    [self addSubview:self.shadowView];
-    [self.shadowView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.edges.equalTo(self);
-    }];
-    
-    self.playImgView = [[UIImageView alloc] init];
-    self.playImgView.image = [UIImage easeUIImageNamed:@"msg_video_white"];
-    self.playImgView.contentMode = UIViewContentModeScaleAspectFill;
-    [self addSubview:self.playImgView];
-    [self.playImgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.center.equalTo(self);
-        make.width.height.equalTo(@50);
-    }];
+    if (!self.model.thread) {
+        if (self.model.message.msgOverView) {
+            [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.edges.equalTo(self.photo);
+            }];
+            [self.playImgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.center.equalTo(self.photo);
+                make.width.height.equalTo(@50);
+            }];
+        } else {
+            [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.edges.equalTo(self);
+            }];
+            
+            [self.playImgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.center.equalTo(self);
+                make.width.height.equalTo(@50);
+            }];
+        }
+    } else {
+        [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.edges.equalTo(self);
+        }];
+        
+        [self.playImgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.center.equalTo(self);
+            make.width.height.equalTo(@50);
+        }];
+    }
 }
 
 #pragma mark - Setter
 
 - (void)setModel:(EaseMessageModel *)model
 {
+    [super setModel:model];
     AgoraChatMessageType type = model.type;
     if (type == AgoraChatMessageTypeVideo) {
         AgoraChatVideoMessageBody *body = (AgoraChatVideoMessageBody *)model.message.body;
@@ -69,6 +98,7 @@
             imgPath = [bundlePath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.png",@"video_default_thumbnail"]];
         }
         [self setThumbnailImageWithLocalPath:imgPath remotePath:body.thumbnailRemotePath thumbImgSize:body.thumbnailSize imgSize:body.thumbnailSize];
+        [self _setupSubviews];
     }
 }
 

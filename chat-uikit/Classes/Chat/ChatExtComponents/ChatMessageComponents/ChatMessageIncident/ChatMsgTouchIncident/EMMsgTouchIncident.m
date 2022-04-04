@@ -310,32 +310,33 @@
         [EaseAlertController showInfoAlert:@"Downloading file, click later"];
         return;
     }
-    __weak typeof(self.chatController) weakself = self.chatController;
-    void (^checkFileBlock)(NSString *aPath) = ^(NSString *aPathe) {
-        NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:aPathe];
-        NSLog(@"\nfile  --    :%@",[fileHandle readDataToEndOfFile]);
-        [fileHandle closeFile];
-        UIDocumentInteractionController *docVc = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:aPathe]];
-        docVc.delegate = weakself;
-        [docVc presentPreviewAnimated:YES];
-    };
     
     if (body.downloadStatus == AgoraChatDownloadStatusSuccessed && [fileManager fileExistsAtPath:body.localPath]) {
-        checkFileBlock(body.localPath);
+        [self openFile:body.localPath];
         return;
-    }
-    
-    [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
-        [weakself hideHud];
-        if (error) {
-            [EaseAlertController showErrorAlert:@"Download file failed !"];
-        } else {
-            if (!message.isReadAcked) {
-                [[AgoraChatClient sharedClient].chatManager sendMessageReadAck:message.messageId toUser:message.conversationId completion:nil];
+    } else {
+        [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+            [self.chatController hideHud];
+            if (error) {
+                [EaseAlertController showErrorAlert:@"Download file failed !"];
+            } else {
+                if (!message.isReadAcked) {
+                    [[AgoraChatClient sharedClient].chatManager sendMessageReadAck:message.messageId toUser:message.conversationId completion:nil];
+                }
+                [self openFile:[(AgoraChatFileMessageBody*)message.body localPath]];
             }
-            checkFileBlock([(AgoraChatFileMessageBody*)message.body localPath]);
-        }
-    }];
+        }];
+        
+    }
+}
+
+- (void)openFile:(NSString *)aPath {
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:aPath];
+    NSLog(@"\nfile  --    :%@",[fileHandle readDataToEndOfFile]);
+    [fileHandle closeFile];
+    UIDocumentInteractionController *docVc = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:aPath]];
+    docVc.delegate = self.chatController;
+    [docVc presentPreviewAnimated:YES];
 }
 
 @end

@@ -21,6 +21,8 @@ typedef void(^menuItemDidSelectedHandle)(NSString* itemDesc, BOOL isExecuted);
 // Function description
 @property (nonatomic, strong) NSString *funcDesc;
 
+@property (nonatomic, strong) UIColor *funcDescColor;
+
 // Handle
 @property (nonatomic, strong) menuItemDidSelectedHandle itemDidSelectedHandle;
 

@@ -19,7 +19,7 @@
 #import "EMMsgExtGifBubbleView.h"
 #import "UIImageView+EaseWebCache.h"
 #import "EaseMessageCell+Category.h"
-
+#define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
 @interface EaseMessageCell()
 
 @property (nonatomic, strong) UIImageView *avatarView;
@@ -66,6 +66,7 @@
 
     // Configure the view for the selected state
 }
+
 
 #pragma mark - Class Methods
 
@@ -130,22 +131,10 @@
     _bubbleView = [self _getBubbleViewWithType:aType];
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
-    
     [self.contentView addSubview:_avatarView];
     [self.contentView addSubview:_bubbleView];
     [self.contentView addSubview:_nameLabel];
-    
-    CGFloat width = self.bounds.size.width;
-    CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
-    if (_viewModel.displayReceivedAvatar) {
-        bubbleViewWidth -= (avatarLonger + componentSpacing);
-    }
-    if (_viewModel.displaySentAvatar) {
-        bubbleViewWidth -= (avatarLonger + componentSpacing);
-    };
-    
-    self.bubbleView.maxBubbleWidth = bubbleViewWidth * 0.8;
-    
+    [self getBubbleWidth:[EaseMessageModel new]];
     if (self.direction == AgoraChatMessageDirectionReceive) {
         if (_viewModel.displayReceivedAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -260,6 +249,28 @@
     [self setCellIsReadReceipt];
 }
 
+- (void)getBubbleWidth:(EaseMessageModel *)model {
+    if (model.message.msgOverView) {
+        self.bubbleView.maxBubbleWidth = KEMThreadBubbleWidth + 24;
+    } else {
+        CGFloat width = self.bounds.size.width;
+        CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
+        if (_viewModel.displayReceivedAvatar) {
+            bubbleViewWidth -= (avatarLonger + componentSpacing);
+        }
+        if (_viewModel.displaySentAvatar) {
+            bubbleViewWidth -= (avatarLonger + componentSpacing);
+        };
+        self.bubbleView.maxBubbleWidth = bubbleViewWidth;
+    }
+}
+
+- (void)threadBubbleAction {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(toThreadChat:channelId:)]) {
+        [self.delegate toThreadChat:self.model];
+    }
+}
+
 - (void)setCellIsReadReceipt{
     _readReceiptBtn = [[UIButton alloc]init];
     _readReceiptBtn.layer.cornerRadius = 5;
@@ -281,6 +292,7 @@
 
 - (EaseChatMessageBubbleView *)_getBubbleViewWithType:(AgoraChatMessageType)aType
 {
+    __weak typeof(self) weakSelf = self;
     EaseChatMessageBubbleView *bubbleView = nil;
     switch (aType) {
         case AgoraChatMessageTypeText:
@@ -323,11 +335,16 @@
     return bubbleView;
 }
 
+
 #pragma mark - Setter
 
 - (void)setModel:(EaseMessageModel *)model
 {
     _model = model;
+    model.thread = nil;
+    if ([model.message.body isKindOfClass:[AgoraChatTextMessageBody class]]) {
+        NSLog([NSString stringWithFormat:@"%@:",[(AgoraChatTextMessageBody *)model.message.body text]]);
+    }
     self.bubbleView.model = model;
     if (model.direction == AgoraChatMessageDirectionSend) {
         [self.statusView setSenderStatus:model.message.status isReadAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isReadAcked : NO isDeliverAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isDeliverAcked : NO ];
@@ -398,9 +415,26 @@
 //Bubble view click
 - (void)bubbleViewTapAction:(UITapGestureRecognizer *)aTap
 {
-    if (aTap.state == UIGestureRecognizerStateEnded) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
-            [self.delegate messageCellDidSelected:self];
+    UIView *view = [self.bubbleView viewWithTag:666];
+    if (view != nil) {
+        if (CGRectContainsPoint(view.frame, [aTap locationInView:self.bubbleView])) {
+            if (aTap.state == UIGestureRecognizerStateEnded) {
+                if (self.delegate && [self.delegate respondsToSelector:@selector(toThreadChat:)]) {
+                    [self.delegate toThreadChat:self.model];
+                }
+            }
+        } else {
+            if (aTap.state == UIGestureRecognizerStateEnded) {
+                if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
+                    [self.delegate messageCellDidSelected:self];
+                }
+            }
+        }
+    } else {
+        if (aTap.state == UIGestureRecognizerStateEnded) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
+                [self.delegate messageCellDidSelected:self];
+            }
         }
     }
 }

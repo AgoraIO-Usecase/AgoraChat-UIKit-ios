@@ -58,11 +58,17 @@ NS_ASSUME_NONNULL_BEGIN
 // Bubble background image of sent message
 @property (nonatomic, strong) UIImage *senderBubbleBgImage;
 
+// Bubble background image of message contain thread
+@property (nonatomic, strong) UIImage *threadBubbleBgImage;
+
 // Right align image/video/attachment message bubble cornerRadius
 @property (nonatomic) BubbleCornerRadius rightAlignmentCornerRadius;
 
 // Left align image/video/attachment message bubble cornerRadius
 @property (nonatomic) BubbleCornerRadius leftAlignmentCornerRadius;
+
+// thread bubble cornerRadius
+@property (nonatomic) BubbleCornerRadius threadCornerRadius;
 
 // Message bubble background protected area
 @property (nonatomic) UIEdgeInsets bubbleBgEdgeInsets;

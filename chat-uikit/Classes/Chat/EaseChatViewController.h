@@ -21,10 +21,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSMutableArray *dataArray;
 @property (nonatomic, strong) NSString *moreMsgId;  //Message ID of the first message
 @property (nonatomic) NSTimeInterval msgTimelTag;   //Message time formatting
+@property (nonatomic, assign, readonly) AgoraChatConversationType conversationType;
+@property (nonatomic, assign, readonly) BOOL isThread;
+
+@property (nonatomic, strong, readonly) EaseChatViewModel *viewModel;
 
 + (EaseChatViewController *)initWithConversationId:(NSString *)aConversationId
                                   conversationType:(AgoraChatConversationType)aType
                                      chatViewModel:(EaseChatViewModel *)aModel;
+
++ (EaseChatViewController *)chatWithConversationId:(NSString *)aConversationId
+                                  conversationType:(AgoraChatConversationType)aType
+                                     chatViewModel:(EaseChatViewModel *)aModel parentMessageId:(NSString * )parentMessageId isThread:(BOOL)isThread;
 
 // Set user profiles
 - (void)setUserProfiles:(NSArray<id<EaseUserProfile>> *)userProfileAry;
@@ -36,6 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setupInputMenu:(EaseInputMenu *)inputbar;
 
 // Set whether to display typing indicator
+
 - (void)setTypingIndicator:(BOOL)typingIndicator;
 
 // Sending text messages
@@ -56,6 +65,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Stop playing audio
 - (void)stopAudioPlayer;
+
+- (void)refreshTableViewWithData:(NSArray<AgoraChatMessage *> *)messages isInsertBottom:(BOOL)isInsertBottom isScrollBottom:(BOOL)isScrollBottom;
+
+- (void)threadsList;
 
 @end
 

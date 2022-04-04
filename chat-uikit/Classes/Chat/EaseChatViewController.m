@@ -32,28 +32,69 @@
 #import "EaseChatEnums.h"
 #import "UIAlertAction+Custom.h"
 #import "EaseInputMenu+Private.h"
+#import "EMBottomMoreFunctionView.h"
+#import "EaseThreadCreateViewController.h"
+#import "EaseThreadChatViewController.h"
 
 @interface EaseChatViewController ()<EaseMoreFunctionViewDelegate>
 {
-    EaseChatViewModel *_viewModel;
     EaseMessageCell *_currentLongPressCell;
     UITableViewCell *_currentLongPressCustomCell;
     BOOL _isReloadViewWithModel; //Refresh the session page
 }
-@property (nonatomic, strong) EaseExtendMenuView *longPressView;
+@property (nonatomic, strong) EMBottomMoreFunctionView *longPressView;
 @property (nonatomic, strong) EaseInputMenu *inputBar;
 @property (nonatomic, strong) dispatch_queue_t msgQueue;
 @property (nonatomic, strong) NSMutableArray<AgoraChatMessage *> *messageList;
 
 @property (nonatomic, strong) id<EaseUserProfile> sentProfile;
 @property (nonatomic, strong) id<EaseUserProfile> otherProfile;
+@property (nonatomic, assign, readwrite) AgoraChatConversationType conversationType;
+@property (nonatomic, assign, readwrite) BOOL isThread;
+@property (nonatomic, strong, readwrite) EaseChatViewModel *viewModel;
+@property (nonatomic, strong) NSMutableDictionary *messageIdsMap;
+@property (nonatomic) NSString *parentMessageId;
 @end
 
 @implementation EaseChatViewController
 
++ (EaseChatViewController *)chatWithConversationId:(NSString *)aConversationId
+                                  conversationType:(AgoraChatConversationType)aType
+                                     chatViewModel:(EaseChatViewModel *)aModel parentMessageId:(NSString *)parentMessageId isThread:(BOOL)isThread
+{
+    if (isThread == YES) {
+        EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:aConversationId chatViewModel:aModel parentMessageId:parentMessageId model:nil];
+        return VC;
+    }
+    switch (aType) {
+        case AgoraChatConversationTypeChat:
+        {
+            return [[EMSingleChatViewController alloc] initSingleChatViewControllerWithCoversationid:aConversationId
+                                                                                           chatViewModel:aModel];
+        }
+            break;
+        case AgoraChatConversationTypeGroupChat:
+        {
+            return [[EMGroupChatViewController alloc] initGroupChatViewControllerWithCoversationid:aConversationId
+                                                                                           chatViewModel:aModel];
+        }
+            break;
+        case AgoraChatConversationTypeChatRoom:
+        {
+            return [[EMChatroomViewController alloc] initChatRoomViewControllerWithCoversationid:aConversationId
+                                                                                   chatViewModel:aModel];
+        }
+            break;
+
+        default:
+            break;
+    }
+    return nil;
+}
+
 + (EaseChatViewController *)initWithConversationId:(NSString *)aConversationId
-                      conversationType:(AgoraChatConversationType)aType
-                         chatViewModel:(EaseChatViewModel *)aModel
+                                  conversationType:(AgoraChatConversationType)aType
+                                     chatViewModel:(EaseChatViewModel *)aModel
 {
     
     switch (aType) {
@@ -88,7 +129,38 @@
 {
     self = [super init];
     if (self) {
-        _currentConversation = [AgoraChatClient.sharedClient.chatManager getConversation:conversationId type:conType createIfNotExist:YES];
+        self.messageIdsMap = [NSMutableDictionary dictionary];
+        _currentConversation = [AgoraChatClient.sharedClient.chatManager getConversation:conversationId type:conType createIfNotExist:YES isThread:conType == AgoraChatConversationTypeThreadChat];
+        self.conversationType = conType;
+        _msgQueue = dispatch_queue_create("emmessage.com", NULL);
+        _viewModel = viewModel;
+        _isReloadViewWithModel = NO;
+        _sentProfile = nil;
+        _otherProfile = nil;
+        [EaseChatKitManager.shared setConversationId:_currentConversation.conversationId];
+        if (!_viewModel) {
+            _viewModel = [[EaseChatViewModel alloc] init];
+        }
+        
+        _inputBar = [[EaseInputMenu alloc] initWithViewModel:_viewModel];
+        _inputBar.delegate = self;
+        //Session toolbar
+        [self _setupChatBarMoreViews];
+    }
+    return self;
+}
+
+- (instancetype)initChatViewControllerWithCoversationid:(NSString *)conversationId
+                                       conversationType:(AgoraChatConversationType)conType
+                                          chatViewModel:(EaseChatViewModel *)viewModel isThread:(BOOL)isThread parentMessageId:(NSString *)parentMessageId
+{
+    self = [super init];
+    if (self) {
+        self.parentMessageId = parentMessageId;
+        self.messageIdsMap = [NSMutableDictionary dictionary];
+        self.isThread = isThread;
+        _currentConversation = [AgoraChatClient.sharedClient.chatManager getConversation:conversationId type:conType createIfNotExist:YES isThread:conType == AgoraChatConversationTypeThreadChat];
+        self.conversationType = conType;
         _msgQueue = dispatch_queue_create("emmessage.com", NULL);
         _viewModel = viewModel;
         _isReloadViewWithModel = NO;
@@ -173,6 +245,7 @@
     });
 }
 
+
 - (void)setChatVCWithViewModel:(EaseChatViewModel *)viewModel
 {
     _viewModel = viewModel;
@@ -213,8 +286,8 @@
     }*/
     [[AgoraChatClient sharedClient].chatManager addDelegate:self delegateQueue:nil];
  
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapTableViewAction:)];
-    [self.tableView addGestureRecognizer:tap];
+//    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapTableViewAction:)];
+//    [self.tableView addGestureRecognizer:tap];
     
     [self loadData:YES];
 }
@@ -364,7 +437,12 @@
         if (cell == nil) {
             cell = [[EaseMessageTimeCell alloc] initWithViewModel:_viewModel remindType:type];
         }
-        cell.timeLabel.text = cellString;
+        if ([cellString containsString:@"thread"] || [cellString containsString:@"See all threads"]) {
+            cell.timeLabel.text = @"";
+            cell.timeLabel.attributedText = [cell cellAttributeText:cellString];
+        } else {
+            cell.timeLabel.text = cellString;
+        }
         return cell;
     }
     
@@ -396,6 +474,20 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     //NSLog(@"indexpath.row : %ld ", (long)indexPath.row);
+    id obj = [self.dataArray objectAtIndex:indexPath.row];
+    NSString *cellString = nil;
+    EaseChatWeakRemind type = EaseChatWeakRemindMsgTime;
+    if ([obj isKindOfClass:[NSString class]]) {
+        cellString = (NSString *)obj;
+    }
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    if ([cell isKindOfClass:[EaseMessageTimeCell class]] && [cellString containsString:@"See all threads"]) {
+        [self threadsList];
+    }
+}
+
+- (void)threadsList {
+    
 }
 
 - (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -556,7 +648,10 @@
         [weakself recallLongPressAction];
     }];
     
+    
     NSMutableArray<EaseExtendMenuModel*> *extMenuArray = [[NSMutableArray<EaseExtendMenuModel*> alloc]init];
+    
+    
     BOOL isCustomCell = NO;
     if (![aCell isKindOfClass:[EaseMessageCell class]]) {
         [extMenuArray addObject:recallExtModel];
@@ -567,6 +662,16 @@
         long long currentTimestamp = [[NSDate new] timeIntervalSince1970] * 1000;
         if (_currentLongPressCell.model.message.direction == AgoraChatMessageDirectionSend && (currentTimestamp - _currentLongPressCell.model.message.timestamp <= 120000)) {
             [extMenuArray addObject:recallExtModel];
+        }
+        if (_currentLongPressCell.model.type == AgoraChatMessageTypeText || _currentLongPressCell.model.type == AgoraChatMessageTypeImage || _currentLongPressCell.model.type == AgoraChatMessageTypeVideo || _currentLongPressCell.model.type == AgoraChatMessageTypeFile || _currentLongPressCell.model.type == AgoraChatMessageTypeVoice) {
+            if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isThread) {
+                EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Replay" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+                    if ([aCell isKindOfClass:[EaseMessageCell class]]) {
+                        [weakself createThread:((EaseMessageCell*)aCell).model];
+                    }
+                }];
+                [extMenuArray addObject:creatThread];
+            }
         }
     }
     if (_currentLongPressCell && _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
@@ -586,69 +691,22 @@
     if ([extMenuArray count] <= 0) {
         return;
     }
+    
+    [EMBottomMoreFunctionView showMenuItems:extMenuArray contentType:EMBottomMoreFunctionTypeChat animation:YES didSelectedMenuItem:^(EaseExtendMenuModel * _Nonnull menuItem) {
+        menuItem.itemDidSelectedHandle(menuItem.funcDesc, YES);
+        [EMBottomMoreFunctionView hideWithAnimation:YES needClear:NO];
+    } didSelectedEmoji:^(NSString * _Nonnull emoji) {
+        
+    }];
+}
 
-    self.longPressView = [[EaseExtendMenuView alloc]initWithextMenuModelArray:extMenuArray menuViewModel:[[EaseExtMenuViewModel alloc]initWithType:isCustomCell ? ExtTypeCustomCellLongPress : ExtTypeLongPress itemCount:[extMenuArray count] extendMenuModel:_viewModel.extendMenuViewModel]];
-    self.longPressView.delegate = self;
-    
-    CGSize longPressViewsize = [self.longPressView getExtViewSize];
-    self.longPressView.layer.cornerRadius = 8;
-    CGRect viewRect = [self.view convertRect:self.view.bounds toView:nil];
-    CGRect rect = [aCell convertRect:aCell.bounds toView:nil];
-    CGFloat maxWidth = self.view.frame.size.width;
-    CGFloat maxHeight = self.tableView.frame.size.height;
-    CGFloat xOffset = 0;
-    CGFloat yOffset = 0;
-    if (!isCustomCell) {
-        if (_currentLongPressCell.model.direction == AgoraChatMessageDirectionReceive || (_viewModel.msgAlignmentStyle == EaseAlignmentlAll_Left && _currentLongPressCell.model.message.chatType == AgoraChatTypeGroupChat)) {
-            xOffset = (avatarLonger + 3*componentSpacing + _currentLongPressCell.bubbleView.frame.size.width/2) - (longPressViewsize.width/2);
-            if (xOffset < 2*componentSpacing) {
-                xOffset = 2*componentSpacing;
-            }
-        } else {
-            xOffset = (maxWidth - avatarLonger - 3*componentSpacing - _currentLongPressCell.bubbleView.frame.size.width/2) - (longPressViewsize.width/2);
-            if ((xOffset + longPressViewsize.width) > (maxWidth - componentSpacing)) {
-                xOffset = maxWidth - componentSpacing - longPressViewsize.width;
-            }
-        }
-        yOffset = rect.origin.y - longPressViewsize.height + 2 * componentSpacing;
-    } else {
-        xOffset = point.x - longPressViewsize.width/2;
-        if ((xOffset + longPressViewsize.width) > (maxWidth - 2*componentSpacing)) {
-            xOffset = maxWidth - 2*componentSpacing - longPressViewsize.width;
-        }
-        if (xOffset < 2*componentSpacing) {
-            xOffset = 2*componentSpacing;
-        }
-        yOffset = point.y - longPressViewsize.height - componentSpacing;
-    }
-    CGFloat topBoundary = viewRect.origin.y < [self bangScreenSize] ? [self bangScreenSize] : viewRect.origin.y;
-    if (yOffset <= topBoundary) {
-        yOffset = topBoundary;
-        if ((yOffset + longPressViewsize.height) > isCustomCell ? (point.y + componentSpacing) : (rect.origin.y + componentSpacing)) {
-            yOffset = isCustomCell ? (point.y + 1.5 * componentSpacing) : (rect.origin.y + rect.size.height - componentSpacing / 2);
-        }
-        if (!isCustomCell) {
-            if (_currentLongPressCell.bubbleView.frame.size.height > (maxHeight - longPressViewsize.height - 2 * componentSpacing)) {
-                yOffset = maxHeight / 2;
-            }
-        } else {
-            if (aCell.frame.size.height > (maxHeight - longPressViewsize.height - 4)) {
-                yOffset = maxHeight / 2;
-            }
-        }
-    }
-    self.longPressView.frame = CGRectMake(xOffset, yOffset, longPressViewsize.width, longPressViewsize.height);
-    UIWindow *currentWindow = self.view.window;
-    [currentWindow addSubview:self.longPressView];
-    
-    UIBezierPath *shadowPath = [UIBezierPath
-    bezierPathWithRect:self.longPressView.bounds];
-    self.longPressView.layer.masksToBounds = NO;
-    self.longPressView.layer.shadowColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.12].CGColor;
-    self.longPressView.layer.shadowOffset = CGSizeMake(8.0f, 24.0f);
-    self.longPressView.layer.shadowOpacity = 1;
-    self.longPressView.layer.shadowPath = shadowPath.CGPath;
-    self.longPressView.layer.shadowRadius = 8;
+
+
+- (void)createThread:(EaseMessageModel *)model {
+    EaseThreadCreateViewController *vc = [[EaseThreadCreateViewController alloc] initWithType:EMThreadHeaderTypeCreate viewModel:_viewModel message:model];
+    vc.navigationItem.leftBarButtonItem.title = @"New Thread";
+    [vc.dataArray addObjectsFromArray:@[model]];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)messageCellDidResend:(EaseMessageModel *)aModel
@@ -692,6 +750,24 @@
     if (extType != ExtTypeChatBar) {
         [self hideLongPressView];
     }
+}
+
+- (void)toThreadChat:(EaseMessageModel *)model {
+    [self pushThreadChat:model];
+}
+
+- (void)pushThreadChat:(EaseMessageModel *)model {
+    if (!model.message.msgOverView.threadId.length) {
+        [self showHint:@"conversationId is empty!"];
+        return;
+    }
+    [AgoraChatClient.sharedClient.threadManager asyncJoinThread:model.message.msgOverView.threadId completion:^(AgoraChatError *aError) {
+        if (!aError) {
+            EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:model.message.msgOverView.threadId chatViewModel:self.viewModel parentMessageId:model.message.messageId model:model];
+            self.title = model.message.msgOverView.threadName;
+            [self.navigationController pushViewController:VC animated:YES];
+        }
+    }];
 }
 
 #pragma mark -- UIDocumentInteractionControllerDelegate
@@ -870,36 +946,46 @@
             [weakself refreshTableViewWithData:aMessages isInsertBottom:NO isScrollBottom:isScrollBottom];
         });
     };
-    
-    [self.currentConversation loadMessagesStartFromId:self.moreMsgId count:50 searchDirection:AgoraChatMessageSearchDirectionUp completion:block];
+    if (self.isThread == YES) {
+        [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:EMMessageFetchHidtoryDirectionUp pageSize:20 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
+            if (!aError) {
+                [self refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:NO];
+            }
+        }];
+    } else {
+        [self.currentConversation loadMessagesStartFromId:self.moreMsgId count:50 searchDirection:EMMessageSearchDirectionUp completion:block];
+    }
 }
 
 - (NSArray *)formatMessages:(NSArray<AgoraChatMessage *> *)aMessages
 {
     NSMutableArray *formated = [[NSMutableArray alloc] init];
-
+    
     for (int i = 0; i < [aMessages count]; i++) {
         AgoraChatMessage *msg = aMessages[i];
-        if (msg.chatType == AgoraChatTypeChat && msg.isReadAcked && (msg.body.type == AgoraChatMessageBodyTypeText || msg.body.type == AgoraChatMessageBodyTypeLocation)) {
-            [[AgoraChatClient sharedClient].chatManager sendMessageReadAck:msg.messageId toUser:msg.conversationId completion:nil];
-        }
-        
-        if (msg.chatType == AgoraChatTypeGroupChat && msg.isNeedGroupAck && !msg.isReadAcked) {
-            [[AgoraChatClient sharedClient].chatManager sendGroupMessageReadAck:msg.messageId toGroup:msg.conversationId content:@"123" completion:nil];
+        if (self.isThread == YES) {
+            if (msg.chatType == AgoraChatTypeChat && msg.isReadAcked && (msg.body.type == AgoraChatMessageBodyTypeText || msg.body.type == AgoraChatMessageBodyTypeLocation)) {
+                [[AgoraChatClient sharedClient].chatManager sendMessageReadAck:msg.messageId toUser:msg.conversationId completion:nil];
+            }
+            
+            if (msg.chatType == AgoraChatTypeGroupChat && msg.isNeedGroupAck && !msg.isReadAcked) {
+                [[AgoraChatClient sharedClient].chatManager sendGroupMessageReadAck:msg.messageId toGroup:msg.conversationId content:@"123" completion:nil];
+            }
         }
         
         CGFloat interval = (self.msgTimelTag - msg.timestamp) / 1000;
+        NSString *timeStr;
         if (self.msgTimelTag < 0 || interval > 60 || interval < -60) {
-            NSString *timeStr = [EaseDateHelper formattedTimeFromTimeInterval:msg.timestamp];
+            timeStr = [EaseDateHelper formattedTimeFromTimeInterval:msg.timestamp];
             [formated addObject:timeStr];
             self.msgTimelTag = msg.timestamp;
         }
+       
         EaseMessageModel *model = nil;
         model = [[EaseMessageModel alloc] initWithAgoraChatMessage:msg];
         if (!model) {
             model = [[EaseMessageModel alloc]init];
         }
-        
         if (model.type <= AgoraChatMessageTypeExtCall) {
             if (self.currentConversation.type == AgoraChatTypeChat) {
                 if ([model.message.from isEqualToString:self.currentConversation.conversationId]) {
@@ -912,13 +998,17 @@
                 if (self.delegate && [self.delegate respondsToSelector:@selector(userProfile:)]) {
                     id<EaseUserProfile> userData = [self.delegate userProfile:msg.from];
                     model.userDataProfile = userData;
+                    if (msg.msgOverView) {
+                        if (msg.msgOverView.from != nil && msg.msgOverView.from.length > 0) {
+                            id<EaseUserProfile> userThreadData = [self.delegate userProfile:msg.msgOverView.lastMessage.from];
+                            model.threadUserProfile = userThreadData;
+                        }
+                    }
                 }
             }
         }
-        
         [formated addObject:model];
     }
-    
     return formated;
 }
 
@@ -928,16 +1018,19 @@
     if (messages && [messages count]) {
         NSMutableArray<AgoraChatMessage *> *tempMsgs = [[NSMutableArray<AgoraChatMessage *> alloc]init];
         for (AgoraChatMessage *message in messages) {
-            if (message.body.type != AgoraChatMessageTypeCmd) {
+            if (message.body.type != AgoraChatMessageTypeCmd && [[self.messageIdsMap valueForKey:message.messageId] boolValue] == NO) {
                 [tempMsgs addObject:message];
+                [self.messageIdsMap setValue:@(YES) forKey:message.messageId];
             }
         }
         if (isInsertBottom) {
             [weakself.messageList addObjectsFromArray:tempMsgs];
         } else {
             [weakself.messageList insertObjects:tempMsgs atIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [tempMsgs count])]];
-            AgoraChatMessage *msg = tempMsgs[0];
-            weakself.moreMsgId = msg.messageId;
+            if (tempMsgs.count > 0) {
+                AgoraChatMessage *msg = tempMsgs[0];
+                weakself.moreMsgId = msg.messageId;
+            }
         }
         
         dispatch_async(self.msgQueue, ^{
@@ -958,6 +1051,7 @@
         if (weakself.tableView.isRefreshing) {
             [weakself.tableView endRefreshing];
         }
+        [self.tableView reloadData];
     }
 }
 
@@ -994,8 +1088,9 @@
 //Hide long click function area
 - (void)hideLongPressView
 {
-    [self.longPressView removeFromSuperview];
-    [self resetCellLongPressStatus:_currentLongPressCell];
+    [EMBottomMoreFunctionView hideWithAnimation:YES needClear:YES];
+//    [self.longPressView removeFromSuperview];
+//    [self resetCellLongPressStatus:_currentLongPressCell];
 }
 
 //Hold down the custom cell
@@ -1022,7 +1117,7 @@
         message.isNeedGroupAck = YES;
     }
     message.chatType = (AgoraChatType)self.currentConversation.type;
-    
+    message.isThread = self.isThread;
     __weak typeof(self) weakself = self;
     if (self.delegate && [self.delegate respondsToSelector:@selector(willSendMessage:)]) {
         AgoraChatMessage *callbackMsg = [self.delegate willSendMessage:message];
@@ -1044,8 +1139,7 @@
         //The first message of a new session
         self.moreMsgId = message.messageId;
     
-    [weakself refreshTableView:YES];
-
+    [self refreshTableView:YES];
     [[AgoraChatClient sharedClient].chatManager sendMessage:message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
         [weakself msgStatusDidChange:message error:error];
         if (weakself.delegate && [weakself.delegate respondsToSelector:@selector(didSendMessage:error:)]) {
@@ -1074,8 +1168,8 @@
     __weak typeof(self) weakself = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         [weakself.tableView reloadData];
-        [weakself.tableView setNeedsLayout];
-        [weakself.tableView layoutIfNeeded];
+//        [weakself.tableView setNeedsLayout];
+//        [weakself.tableView layoutIfNeeded];
         if (isScrollBottom) {
             [weakself scrollToBottomRow];
         }
