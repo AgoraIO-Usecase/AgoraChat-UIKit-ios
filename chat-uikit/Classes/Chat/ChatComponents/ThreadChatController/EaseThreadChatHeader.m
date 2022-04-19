@@ -6,6 +6,7 @@
 //
 
 #import "EaseThreadChatHeader.h"
+#import "View+EaseAdditions.h"
 @interface EaseThreadChatHeader ()<EaseThreadCreateCellDelegate>
 
 @property (nonatomic, strong) NSMutableArray *dataArray;
@@ -13,6 +14,8 @@
 @property (nonatomic, assign) EMThreadHeaderType type;
 
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
+
+@property (nonatomic) EaseThreadCreateCell *header;
 
 @end
 
@@ -22,24 +25,26 @@
 {
     self = [super initWithFrame:CGRectZero];
     if (self) {
-        self.backgroundColor = [UIColor redColor];
         self.type = type;
-        EaseThreadCreateCell *cell = [[EaseThreadCreateCell alloc] initWithMessageType:model.type displayType:self.type viewModel:viewModel];
-        cell.model = model;
-        CGSize size = [cell systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
+        model.isHeader = YES;
+        EaseThreadCreateCell *cell = [[EaseThreadCreateCell alloc] initWithMessageType:model.type displayType:self.type viewModel:viewModel model:model];
+        CGSize size = [cell systemLayoutSizeFittingSize:UILayoutFittingExpandedSize];
         cell.frame = CGRectMake(0, 0, EMScreenWidth, size.height);
-        cell.model = model;
         cell.delegate = self;
-        if (model.message) {
+        if (type != EMThreadHeaderTypeDisplayNoMessage) {
             self.frame = CGRectMake(0, 0, EMScreenWidth, size.height);
         } else {
             self.frame = CGRectMake(0, 0, EMScreenWidth, 134);
         }
         [self addSubview:cell];
+        self.header = cell;
     }
     return self;
 }
 
+- (void)setThreadName:(NSString *)threadName {
+    [self.header changeThreadName:threadName];
+}
 
 #pragma mark - EaseThreadCreateCellDelegate
 

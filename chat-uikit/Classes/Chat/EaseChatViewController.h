@@ -22,8 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *moreMsgId;  //Message ID of the first message
 @property (nonatomic) NSTimeInterval msgTimelTag;   //Message time formatting
 @property (nonatomic, assign, readonly) AgoraChatConversationType conversationType;
-@property (nonatomic, assign, readonly) BOOL isThread;
-
+@property (nonatomic, assign, readonly) BOOL isChatThread;
+@property (atomic) BOOL loadFinished;
 @property (nonatomic, strong, readonly) EaseChatViewModel *viewModel;
 
 + (EaseChatViewController *)initWithConversationId:(NSString *)aConversationId
@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (EaseChatViewController *)chatWithConversationId:(NSString *)aConversationId
                                   conversationType:(AgoraChatConversationType)aType
-                                     chatViewModel:(EaseChatViewModel *)aModel parentMessageId:(NSString * )parentMessageId isThread:(BOOL)isThread;
+                                     chatViewModel:(EaseChatViewModel *)aModel parentMessageId:(NSString * )parentMessageId isChatThread:(BOOL)isChatThread;
 
 // Set user profiles
 - (void)setUserProfiles:(NSArray<id<EaseUserProfile>> *)userProfileAry;
@@ -69,6 +69,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)refreshTableViewWithData:(NSArray<AgoraChatMessage *> *)messages isInsertBottom:(BOOL)isInsertBottom isScrollBottom:(BOOL)isScrollBottom;
 
 - (void)threadsList;
+
+- (void)loadData:(BOOL)isScrollBottom;
 
 @end
 

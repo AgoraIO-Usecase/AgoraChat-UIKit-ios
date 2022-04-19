@@ -110,23 +110,23 @@
     if (years >= 1) {
         return [NSString stringWithFormat:@"%luy ago",years];
     }
-    if (months >= 1 && years < 1) {
+    if (months >= 1 && months < 12) {
         return [NSString stringWithFormat:@"%lumo ago",months];
     }
     if (weeks >= 1 && months < 1) {
         return [NSString stringWithFormat:@"%luw ago",weeks];
     }
-    if (weeks < 1 && days >= 1) {
+    if (days < 7 && days >= 1) {
         return [NSString stringWithFormat:@"%lud ago",days];
     }
-    if (minutes >= 60 && hours <= 24) {
+    if (hours >= 1 && hours < 24) {
         return [NSString stringWithFormat:@"%luh ago",hours];
     }
-    if (minutes < 60) {
+    if (minutes >= 1 && minutes < 60) {
         return [NSString stringWithFormat:@"%lum ago",minutes];
     }
-    if (seconds < 60) {
-        return @"1M ago";
+    if (seconds < 60 && minutes < 1) {
+        return @"1m ago";
     }
     return @"recently";
 }

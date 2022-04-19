@@ -47,6 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic) BOOL isPlaying;
 
+@property (nonatomic) BOOL isHeader;
+
 - (instancetype)initWithAgoraChatMessage:(AgoraChatMessage *)aMsg;
 
 @end

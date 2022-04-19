@@ -10,12 +10,15 @@
 #import "EaseMessageModel.h"
 #import "EaseChatViewModel.h"
 @protocol EaseThreadListProtocol <NSObject>
-
+@optional
 - (EaseThreadCell *)agoraChatThreadList:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 - (void)agoraChatThreadList:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
 - (CGFloat)agoraChatThreadList:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)popThreadChat;
+@required
+- (void)threadListCount:(int)count;
 
 @end
 
@@ -25,6 +28,10 @@
 @property (nonatomic, strong) UITableView *threadList;
 
 @property (nonatomic, strong) NSMutableArray *dataArray;
+
+@property (nonatomic, strong) EaseChatViewModel *viewModel;
+
+@property (nonatomic, strong) AgoraChatGroup *group;
 
 @property (nonatomic, weak) id <EaseThreadListProtocol> delegate;
 

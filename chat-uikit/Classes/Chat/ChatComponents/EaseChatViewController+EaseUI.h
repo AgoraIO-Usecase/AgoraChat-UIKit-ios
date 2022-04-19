@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initChatViewControllerWithCoversationid:(NSString *)conversationId
                                         conversationType:(AgoraChatConversationType)conType
-                                            chatViewModel:(EaseChatViewModel *)viewModel isThread:(BOOL)isThread parentMessageId:(NSString *)parentMessageId;
+                                            chatViewModel:(EaseChatViewModel *)viewModel isChatThread:(BOOL)isChatThread parentMessageId:(NSString *)parentMessageId;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -10,7 +10,6 @@
 #import "EaseMessageModel.h"
 #import "EaseThreadCreateCell.h"
 
-#import "View+EaseAdditions.h"
 @protocol EaseThreadChatHeaderDelegate <NSObject>
 
 - (void)headerMessageDidSelected:(EaseThreadCreateCell *)aCell;
@@ -22,6 +21,8 @@
 @interface EaseThreadChatHeader : UIView
 
 @property (nonatomic, strong) UITableView *tableView;
+
+@property (nonatomic, strong) NSString *threadName;
 
 @property (nonatomic, weak) id <EaseThreadChatHeaderDelegate>delegate;
 

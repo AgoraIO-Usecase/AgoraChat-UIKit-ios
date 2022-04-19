@@ -61,7 +61,6 @@
     if (!_ownerAvatar) {
         _ownerAvatar = [[UIImageView alloc]initWithFrame:CGRectMake(16, CGRectGetMaxY(self.threadName.frame)+6, 16, 16)];
         _ownerAvatar.image = [UIImage imageNamed:@""];
-        _ownerAvatar.backgroundColor = [UIColor redColor];
     }
     return _ownerAvatar;
 }
@@ -69,8 +68,8 @@
 - (UILabel *)ownerName {
     if (!_ownerName) {
         _ownerName = [[UILabel alloc]initWithFrame:CGRectMake(CGRectGetMaxX(self.ownerAvatar.frame)+8, CGRectGetMaxY(self.threadName.frame)+4, EMScreenWidth-125, 15)];
-        _ownerName.font = [UIFont systemFontOfSize:14 weight:UIFontWeightRegular];
-        _ownerName.textColor = [UIColor colorWithHexString:@"#666666"];
+//        _ownerName.font = [UIFont systemFontOfSize:14 weight:UIFontWeightRegular];
+//        _ownerName.textColor = [UIColor colorWithHexString:@"#666666"];
     }
     return _ownerName;
 }
@@ -99,9 +98,9 @@
         }
         if (model.lastMessage.body.type == 1) {
             AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)model.lastMessage.body;
-            self.ownerName.text = [NSString stringWithFormat:@"%@,%@",showName,[EaseEmojiHelper convertEmoji:body.text]];
+            self.ownerName.attributedText = [self attributeText:[NSString stringWithFormat:@"%@,%@",showName,[EaseEmojiHelper convertEmoji:body.text]] colorText:showName];
         } else {
-            self.ownerName.text = [NSString stringWithFormat:@"%@,%@",showName,[self convertType:model.lastMessage.body.type]];
+            self.ownerName.attributedText = [self attributeText:[NSString stringWithFormat:@"%@,%@",showName,[self convertType:model.lastMessage.body.type]] colorText:showName];
         }
     } else {
         NSString *from = @"";
@@ -110,9 +109,9 @@
             if (from || from.length > 0) {
                 from = model.lastMessage.from;
             }
-            self.ownerName.text = [NSString stringWithFormat:@"%@,%@",from,[EaseEmojiHelper convertEmoji:body.text]];
+            self.ownerName.attributedText = [self attributeText:[NSString stringWithFormat:@"%@,%@",from,[EaseEmojiHelper convertEmoji:body.text]] colorText:from];
         } else {
-            self.ownerName.text = [NSString stringWithFormat:@"%@,%@",from,[self convertType:model.lastMessage.body.type]];
+            self.ownerName.attributedText = [self attributeText:[NSString stringWithFormat:@"%@,%@",from,[self convertType:model.lastMessage.body.type]] colorText:from];
         }
     }
     
@@ -133,6 +132,13 @@
     if (!isCustomAvatar) {
         _ownerAvatar.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
     }
+}
+
+- (NSAttributedString *)attributeText:(NSString *)text colorText:(NSString *)colorText {
+    NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:text];
+    [string addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:14 weight:UIFontWeightRegular],NSForegroundColorAttributeName:[UIColor colorWithHexString:@"#999999"]} range:NSMakeRange(0, text.length)];
+    [string addAttribute:NSForegroundColorAttributeName value:[UIColor blackColor] range:NSMakeRange(0, colorText.length)];
+    return string;
 }
 
 - (NSString *)convertType:(int)contentType {

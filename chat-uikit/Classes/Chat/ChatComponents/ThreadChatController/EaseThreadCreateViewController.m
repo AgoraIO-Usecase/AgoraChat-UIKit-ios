@@ -8,7 +8,6 @@
 #import "EaseThreadCreateViewController.h"
 #import "UIViewController+ComponentSize.h"
 #import "EaseHeaders.h"
-#import "AgoraChatThreadListNavgation.h"
 #import "EMMsgTouchIncident.h"
 #import "EaseInputMenu+Private.h"
 #import "UIAlertAction+Custom.h"
@@ -16,10 +15,7 @@
 #import "EMAudioPlayerUtil.h"
 #import "EaseThreadChatViewController.h"
 @interface EaseThreadCreateViewController ()<EaseInputMenuDelegate>
-{
-    EaseChatViewModel *_viewModel;
-    EMThreadHeaderType _displayType;
-}
+
 @property (nonatomic, strong) EaseInputMenu *inputBar;
 
 @property (nonatomic, strong) EaseMessageModel *message;
@@ -36,6 +32,7 @@
         _displayType = type;
         self.message = message;
         _dataArray = [[NSMutableArray alloc] init];
+        [_dataArray addObject:message];
         [self _setupChatBarMoreViews];
     }
     return self;
@@ -152,8 +149,10 @@
         return;
     }
     __weak typeof(self) weakself = self;
-    [[AgoraChatClient sharedClient].threadManager asyncCreateThread:self.threadName messageId:self.message.message.messageId groupId:self.message.message.to completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
-        [weakself sendMsgimpl:thread body:aBody ext:aExt];
+    [[AgoraChatClient sharedClient].threadManager createChatThread:self.threadName messageId:self.message.message.messageId parentId:self.message.message.to completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
+        if (!aError) {
+            [weakself sendMsgimpl:thread body:aBody ext:aExt];
+        }
     }];
     
 }
@@ -167,7 +166,7 @@
     NSString *to = thread.threadId;
     AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:to from:from to:to body:aBody ext:aExt];
     message.chatType = AgoraChatTypeGroupChat;
-    message.isThread = YES;
+    message.isChatThread = YES;
     __weak typeof(self) weakself = self;
     if (self.delegate && [self.delegate respondsToSelector:@selector(willSendMessage:)]) {
         AgoraChatMessage *callbackMsg = [self.delegate willSendMessage:message];
@@ -177,8 +176,9 @@
     }
     [[AgoraChatClient sharedClient].chatManager sendMessage:message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
         [weakself showHint:error.description];
-        if (weakself.delegate && [weakself.delegate respondsToSelector:@selector(didSendMessage:error:)]) {
-            [weakself.delegate didSendMessage:message error:error];
+        if (weakself.delegate && [weakself.delegate respondsToSelector:@selector(didSendMessage:thread:error:)]) {
+            [weakself.delegate didSendMessage:message thread:thread error:error];
+            return;
         }
         if (!error) {
             [weakself pushThreadChat:thread];
@@ -374,6 +374,7 @@
         cell = [[EaseThreadCreateCell alloc] initWithMessageType:model.type displayType:_displayType viewModel:_viewModel];
     }
     cell.delegate = self;
+    model.isHeader = YES;
     cell.model = model;
     cell.model.weakMessageCell = cell;
     return cell;
@@ -438,21 +439,6 @@
     return _tableView;
 }
 
-- (UIView *)navBar {
-    if (!_navBar) {
-        _navBar = [[AgoraChatThreadListNavgation alloc]initWithFrame:CGRectMake(0, 0, EMScreenWidth, EMNavgationHeight)];
-        __weak typeof(self) weakSelf = self;
-        [(AgoraChatThreadListNavgation*)_navBar setBackBlock:^{
-            [weakSelf.navigationController popViewControllerAnimated:YES];
-        }];
-        ((AgoraChatThreadListNavgation*)_navBar).title = @"New Thread";
-    }
-    return _navBar;
-}
-
-- (void)setNavgation:(UIView *)view {
-    _navBar = view;
-}
 
 - (void)setUserProfiles:(NSArray<id<EaseUserProfile>> *)userProfileAry
 {

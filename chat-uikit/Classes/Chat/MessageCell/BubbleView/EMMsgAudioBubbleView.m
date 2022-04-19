@@ -145,12 +145,14 @@
 - (void)setModel:(EaseMessageModel *)model
 {
     [super setModel:model];
-    self.threadBubble.hidden = !model.message.msgOverView;
-    if (model.thread && model.thread.threadId.length) {
-        self.threadBubble.hidden = YES;
+    if (model.isHeader == NO) {
+        if (model.message.threadOverView) {
+            self.threadBubble.model = model;
+        }
     }
+    self.threadBubble.hidden = model.isHeader;
     _maxWidth= [UIScreen mainScreen].bounds.size.width / 2 - 100;
-    if (model.message.msgOverView && model.thread == nil) {
+    if (model.message.threadOverView && model.thread == nil) {
         _maxWidth = KEMThreadBubbleWidth + 24;
     }
     AgoraChatMessageType type = model.type;
@@ -170,7 +172,7 @@
         } else if (width < kEMMsgAudioMinWidth) {
             width = kEMMsgAudioMinWidth;
         }
-        if (model.message.msgOverView && model.thread == nil) {
+        if (model.message.threadOverView && model.thread == nil) {
             width = KEMThreadBubbleWidth+24;
             [self threadLayout];
             self.threadBubble.model = model;
@@ -179,7 +181,7 @@
             make.width.Ease_equalTo(width);
         }];
     }
-    if (model.thread == nil && model.message.msgOverView && model.message.msgOverView.lastMessage.messageId.length) {
+    if (model.thread == nil && model.message.threadOverView && model.message.threadOverView.lastMessage.messageId.length) {
         self.threadBubble.model = model;
     } else self.threadBubble.model = nil;
 }

@@ -16,7 +16,7 @@
 #import "EaseChatViewController+EaseUI.h"
 #import "EaseThreadListViewController.h"
 
-@interface EMGroupChatViewController () <AgoraChatGroupManagerDelegate,AgoraChatThreadNotifyDelegate>
+@interface EMGroupChatViewController () <AgoraChatGroupManagerDelegate,AgoraChatThreadManagerDelegate>
 
 @property (nonatomic, strong) AgoraChatGroup *group;
 
@@ -35,7 +35,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [[AgoraChatClient sharedClient].threadManager addNotifyDelegate:self delegateQueue:nil];
+    [[AgoraChatClient sharedClient].threadManager addDelegate:self delegateQueue:nil];
+    [[AgoraChatClient sharedClient] addMultiDevicesDelegate:self delegateQueue:nil];
     [[AgoraChatClient sharedClient].groupManager addDelegate:self delegateQueue:nil];
     
 }
@@ -43,14 +44,14 @@
 - (void)dealloc
 {
     [[AgoraChatClient sharedClient].groupManager removeDelegate:self];
-    [[AgoraChatClient sharedClient].threadManager removeNotifyDelegate:self];
+    [[AgoraChatClient sharedClient].threadManager removeDelegate:self];
+    [[AgoraChatClient sharedClient] removeMultiDevicesDelegate:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)threadsList {
 //    [super threadsList];
-    EaseThreadListViewController *VC = [[EaseThreadListViewController alloc] initWithGroup:self.group chatViewModel:self.viewModel];
-    [self.navigationController pushViewController:VC animated:YES];
+    
 }
 
 #pragma mark - EaseMessageCellDelegate
@@ -135,27 +136,40 @@
 }
 
 
-- (void)threadNotifyChange:(AgoraChatThreadEvent *)evnet {
-    if (evnet) {
-        if (evnet.threadName && evnet.from) {
-            if ([evnet.threadOperation isEqualToString:@"create"]) {
-                id<EaseUserProfile> userThreadData = [self.delegate userProfile:evnet.from];
-                NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nSee all threads",userThreadData.showName ? userThreadData.showName:evnet.from,evnet.threadName];
-                [self.dataArray addObject:threadNotify];
-                [self refreshTableView:YES];
-            } else if ([evnet.threadOperation isEqualToString:@"update"]) {
-                AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:evnet.messageId];
-                message.msgOverView.threadName = evnet.threadName;
-                NSInteger index = [self.dataArray indexOfObject:message];
-                [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-            } else if ([evnet.threadOperation isEqualToString:@"update_msg"] || [evnet.threadOperation isEqualToString:@"recall_msg"]) {
-                AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:evnet.messageId];
-                message.msgOverView = evnet;
-                NSInteger index = [self.dataArray indexOfObject:message];
-                [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-            } else if ([evnet.threadOperation isEqualToString:@"delete"]) {
-                [self.tableView reloadData];
-            }
+
+- (void)onChatThreadCreate:(AgoraChatThreadEvent *)event {
+    if (event.threadName && event.from && [event.channelId isEqualToString:self.currentConversation.conversationId]) {
+        id<EaseUserProfile> userThreadData = [self.delegate userProfile:event.from];
+        NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nSee all threads",userThreadData.showName ? userThreadData.showName:event.from,event.threadName];
+        [self.dataArray addObject:threadNotify];
+        [self refreshTableView:YES];
+    }
+}
+
+- (void)onChatThreadDestroy:(AgoraChatThreadEvent *)event {
+    if (![event.channelId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:event.messageId];
+    for (EaseMessageModel *model in self.dataArray) {
+        if ([model isKindOfClass:[EaseMessageModel class]] && [message.messageId isEqualToString:model.message.messageId]) {
+            NSInteger index = [self.dataArray indexOfObject:message];
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+            return;
+        }
+    }
+}
+
+- (void)onChatThreadUpdate:(AgoraChatThreadEvent *)event {
+    if (![event.channelId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:event.messageId];
+    for (EaseMessageModel *model in self.dataArray) {
+        if ([model isKindOfClass:[EaseMessageModel class]] && [model.message.messageId isEqualToString:message.messageId]) {
+            NSInteger index = [self.dataArray indexOfObject:model];
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+            return;
         }
     }
 }

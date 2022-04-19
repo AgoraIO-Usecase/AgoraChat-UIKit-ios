@@ -49,7 +49,7 @@ Pod::Spec.new do |s|
         
         'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewModel.h',
         'chat-uikit/Classes/BaseTableviewController/EaseUserProfile.h',
-        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h'
+        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadCreateViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadListViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatHeader.h','chat-uikit/Classes/Chat/ChatModels/EaseThreadConversation.h','chat-uikit/Classes/Chat/InputMenu/MoreView/MoreFunction/EMBottomMoreFunctionView.h','chat-uikit/Classes/Chat/MessageCell/EaseThreadCell.h','chat-uikit/Classes/Chat/MessageCell/EaseThreadCreateCell.h'
     ]
     
     s.static_framework = true

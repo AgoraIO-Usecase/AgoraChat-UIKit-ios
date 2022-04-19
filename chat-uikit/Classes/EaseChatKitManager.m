@@ -252,7 +252,7 @@ static NSString *g_ChatKitVersion = @"3.8.7";
 {
     __weak typeof(self) weakself = self;
     if (aEvent == AgoraChatMultiDevicesEventContactAccept || aEvent == AgoraChatMultiDevicesEventContactDecline) {
-        AgoraChatConversation *systemConversation = [AgoraChatClient.sharedClient.chatManager getConversation:EaseSYSTEMNOTIFICATIONID type:-1 createIfNotExist:NO isThread:NO];
+        AgoraChatConversation *systemConversation = [AgoraChatClient.sharedClient.chatManager getConversation:EaseSYSTEMNOTIFICATIONID type:-1 createIfNotExist:NO];
         [systemConversation loadMessagesStartFromId:nil count:systemConversation.unreadMessagesCount searchDirection:EMMessageSearchDirectionUp completion:^(NSArray *aMessages, AgoraChatError *aError) {
             BOOL hasUnreadMsg = NO;
             for (AgoraChatMessage *message in aMessages) {
@@ -274,7 +274,7 @@ static NSString *g_ChatKitVersion = @"3.8.7";
 {
     __weak typeof(self) weakself = self;
     if (aEvent == AgoraChatMultiDevicesEventGroupInviteDecline || aEvent == AgoraChatMultiDevicesEventGroupInviteAccept || aEvent == AgoraChatMultiDevicesEventGroupApplyAccept || aEvent == AgoraChatMultiDevicesEventGroupApplyDecline) {
-        AgoraChatConversation *systemConversation = [AgoraChatClient.sharedClient.chatManager getConversation:EaseSYSTEMNOTIFICATIONID type:-1 createIfNotExist:NO isThread:NO];
+        AgoraChatConversation *systemConversation = [AgoraChatClient.sharedClient.chatManager getConversation:EaseSYSTEMNOTIFICATIONID type:-1 createIfNotExist:NO];
         [systemConversation loadMessagesStartFromId:nil count:systemConversation.unreadMessagesCount searchDirection:EMMessageSearchDirectionUp completion:^(NSArray *aMessages, AgoraChatError *aError) {
             BOOL hasUnreadMsg = NO;
             for (AgoraChatMessage *message in aMessages) {

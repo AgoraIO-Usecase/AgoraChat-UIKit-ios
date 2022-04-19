@@ -59,10 +59,10 @@
 }
 
 - (void)remakeLayout:(EaseMessageModel *)model {
-    if (model.message.msgOverView != nil) {
+    if (model.message.threadOverView != nil && model.isHeader == NO) {
         [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.ease_top).offset(kHorizontalPadding);
-            make.bottom.equalTo(self.ease_bottom).offset(-(KEMThreadBubbleWidth*0.4+12));
+            make.bottom.equalTo(self.ease_bottom).offset(-(KEMThreadBubbleWidth*0.4+12+5));
             make.left.equalTo(self).offset(kHorizontalPadding);
             make.right.equalTo(self).offset(-kHorizontalPadding);
         }];
@@ -74,29 +74,16 @@
             make.bottom.equalTo(self).offset(-kHorizontalPadding);
         }];
     } else {
-        CGSize size = [self.textLabel systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
-//        [self Ease_updateConstraints:^(EaseConstraintMaker *make) {
-//            make.width.Ease_equalTo(size.width+kHorizontalPadding*2);
-//            make.height.Ease_equalTo(size.height+kHorizontalPadding*2);
-//        }];
-//        if (self.direction == AgoraChatMessageDirectionReceive) {
-            [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-                make.top.equalTo(self).offset(kHorizontalPadding);
-                make.bottom.equalTo(self).offset(-kHorizontalPadding);
-                make.left.equalTo(self).offset(kHorizontalPadding);
-                make.right.equalTo(self).offset(-kHorizontalPadding);
-                make.width.Ease_equalTo(ceilf(size.width));
-                make.height.Ease_equalTo(ceilf(size.height));
-            }];
-//        } else {
-//            [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-//                make.top.equalTo(self).offset(kHorizontalPadding);
-//                make.bottom.equalTo(self).offset(-kHorizontalPadding);
-//                make.right.equalTo(self).offset(-kHorizontalPadding);
-//                make.width.Ease_equalTo(size.width);
-//                make.height.Ease_equalTo(size.height);
-//            }];
-//        }
+        [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self).offset(kVerticalPadding);
+            make.bottom.equalTo(self).offset(-kVerticalPadding);
+            make.left.equalTo(self).offset(kHorizontalPadding);
+            make.right.equalTo(self).offset(-kHorizontalPadding);
+        }];
+        self.threadBubble.hidden = YES;
+        [self.threadBubble Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            
+        }];
     }
 }
 
@@ -105,10 +92,12 @@
 - (void)setModel:(EaseMessageModel *)model
 {
     [super setModel:model];
-    self.threadBubble.hidden = !model.message.msgOverView;
-    if (model.thread && model.thread.threadId.length) {
-        self.threadBubble.hidden = YES;
+    if (model.isHeader == NO) {
+        if (model.message.threadOverView) {
+            self.threadBubble.model = model;
+        }
     }
+    self.threadBubble.hidden = model.isHeader;
     AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)model.message.body;
     
     NSString *text = [EaseEmojiHelper convertEmoji:body.text];
@@ -151,18 +140,26 @@
     [attaStr appendAttributedString:attachStr];*/
     
     //防止输入时在中文后输入英文过长直接中文和英文换行
+    UIColor *color;
+    if (model.isHeader == YES) {
+        color = _viewModel.reveivedFontColor;
+    } else {
+        color = (model.direction == AgoraChatMessageDirectionReceive ? _viewModel.reveivedFontColor:_viewModel.sentFontColor);
+    }
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
     NSDictionary *attributes = @{
                                  NSFontAttributeName:[UIFont systemFontOfSize:16],
                                  NSParagraphStyleAttributeName:paragraphStyle
-                                 ,NSForegroundColorAttributeName:model.direction == AgoraChatMessageDirectionReceive ? _viewModel.reveivedFontColor:_viewModel.sentFontColor };
+                                 ,NSForegroundColorAttributeName: color};
+   
+    [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
    
     [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
     self.textLabel.attributedText = attaStr;
-    if (model.thread == nil && model.message.msgOverView) {
+    if (model.isHeader == NO && model.message.threadOverView) {
         self.threadBubble.model = model;
-    } else self.threadBubble.model = nil;
+    }
     [self remakeLayout:self.threadBubble.model];
 }
 

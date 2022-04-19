@@ -250,7 +250,7 @@
 }
 
 - (void)getBubbleWidth:(EaseMessageModel *)model {
-    if (model.message.msgOverView) {
+    if (model.message.threadOverView) {
         self.bubbleView.maxBubbleWidth = KEMThreadBubbleWidth + 24;
     } else {
         CGFloat width = self.bounds.size.width;
@@ -342,9 +342,6 @@
 {
     _model = model;
     model.thread = nil;
-    if ([model.message.body isKindOfClass:[AgoraChatTextMessageBody class]]) {
-        NSLog([NSString stringWithFormat:@"%@:",[(AgoraChatTextMessageBody *)model.message.body text]]);
-    }
     self.bubbleView.model = model;
     if (model.direction == AgoraChatMessageDirectionSend) {
         [self.statusView setSenderStatus:model.message.status isReadAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isReadAcked : NO isDeliverAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isDeliverAcked : NO ];

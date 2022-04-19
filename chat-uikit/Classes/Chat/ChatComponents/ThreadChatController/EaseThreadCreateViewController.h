@@ -10,14 +10,17 @@
 #import "EaseChatViewControllerDelegate.h"
 @class EaseInputMenu;
 @interface EaseThreadCreateViewController : UIViewController<UIScrollViewDelegate, UITableViewDelegate, UITableViewDataSource, UIDocumentInteractionControllerDelegate,EaseThreadCreateCellDelegate>
-
+{
+    EMThreadHeaderType _displayType;
+}
 @property (nonatomic, weak) id<EaseChatViewControllerDelegate> delegate;
 
 @property (nonatomic, strong) UITableView *tableView;
 
 @property (nonatomic, strong) NSMutableArray *dataArray;
 
-@property (nonatomic, strong) UIView *navBar;
+@property (nonatomic) EaseChatViewModel *viewModel;
+
 
 - (instancetype)initWithType:(EMThreadHeaderType)type viewModel:(EaseChatViewModel *)viewModel message:(EaseMessageModel *)message;
 

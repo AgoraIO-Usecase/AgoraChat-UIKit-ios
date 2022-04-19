@@ -22,6 +22,8 @@ typedef NS_ENUM(NSUInteger, EMThreadHeaderType) {
 
 @interface EaseThreadCreateCell : UITableViewCell
 
+@property (nonatomic, strong) UITextField *threadNameField;
+
 @property (nonatomic, weak) id<EaseThreadCreateCellDelegate> delegate;
 
 @property (nonatomic, strong, readonly) EaseChatMessageBubbleView *bubbleView;
@@ -39,6 +41,8 @@ typedef NS_ENUM(NSUInteger, EMThreadHeaderType) {
 - (instancetype)initWithMessageType:(AgoraChatMessageType)aMessageType
                         displayType:(EMThreadHeaderType)type
                     viewModel:(EaseChatViewModel*)viewModel model:(EaseMessageModel *)model;
+
+- (void)changeThreadName:(NSString *)text;
 
 @end
 

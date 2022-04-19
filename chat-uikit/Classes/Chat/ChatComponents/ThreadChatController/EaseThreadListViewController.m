@@ -9,18 +9,11 @@
 #import "EaseDefines.h"
 #import "UITableView+Refresh.h"
 
-#import "AgoraChatThreadListNavgation.h"
 #import "UIColor+EaseUI.h"
 #import "EaseThreadChatViewController.h"
 #import "UIViewController+HUD.h"
 
-@interface EaseThreadListViewController ()<UITableViewDelegate,UITableViewDataSource,AgoraChatThreadNotifyDelegate>
-
-@property (nonatomic, strong) AgoraChatThreadListNavgation *navBar;
-
-@property (nonatomic, strong) AgoraChatGroup *group;
-
-@property (nonatomic, strong) EaseChatViewModel *viewModel;
+@interface EaseThreadListViewController ()<UITableViewDelegate,UITableViewDataSource,AgoraChatThreadManagerDelegate,AgoraChatMultiDevicesDelegate>
 
 @property (nonatomic, strong) NSMutableDictionary *threadMessageMap;
 
@@ -30,12 +23,17 @@
 
 @property (nonatomic) NSLock *lock;
 
+@property (nonatomic) int dataCount;
+
+@property (nonatomic) BOOL isAdmin;
+
 @end
 
 @implementation EaseThreadListViewController
 
 - (instancetype)initWithGroup:(AgoraChatGroup *)group chatViewModel:(EaseChatViewModel *)viewModel{
     if ([super init]) {
+        self.dataCount = 0;
         self.group = group;
         __weak typeof(self) weakSelf = self;
         self.viewModel = viewModel;
@@ -45,14 +43,51 @@
     return self;
 }
 
+- (BOOL)isAdmin {
+    BOOL contain = NO;
+    NSMutableArray *admins = [NSMutableArray arrayWithArray:self.group.adminList];
+    [admins addObject:self.group.owner];
+    for (NSString *admin in admins) {
+        if ([[[AgoraChatClient.sharedClient currentUsername] lowercaseString] isEqualToString:[admin lowercaseString]]) {
+            contain = YES;
+        }
+    }
+    return contain;
+}
+
 - (void)requestList {
+    if (self.cursor == nil) {
+        self.dataCount = 0;
+        [self.dataArray removeAllObjects];
+    }
     self.loadMoreFinished = NO;
-    __weak typeof(self) weakSelf = self;
-    [[AgoraChatClient sharedClient].threadManager getThreadsOfGroupFromServerWithGroupId:self.group.groupId joined:NO cursor:self.cursor ? self.cursor.cursor:@"" pageSize:20 completion:^(AgoraChatCursorResult *result, AgoraChatError *aError) {
-        weakSelf.loadMoreFinished = YES;
-        weakSelf.cursor = result;
-        [weakSelf loadDataArray:result.list];
-    }];
+    if (self.isAdmin) {
+        [[AgoraChatClient sharedClient].threadManager getChatThreadsFromServerWithParentId:self.group.groupId cursor:self.cursor ? self.cursor.cursor:@"" pageSize:20 completion:^(AgoraChatCursorResult *result, AgoraChatError *aError) {
+            if (!aError) {
+                self.loadMoreFinished = YES;
+                self.cursor = result;
+                self.dataCount += result.list.count;
+                if (self.delegate && [self.delegate respondsToSelector:@selector(threadListCount:)]) {
+                    [self.delegate threadListCount:self.dataCount];
+                }
+                [self.threadList endRefreshing];
+                [self loadDataArray:result.list];
+            }
+        }];
+    } else {
+        [[AgoraChatClient sharedClient].threadManager getJoinedChatThreadsFromServerWithCursor:self.cursor ? self.cursor.cursor:@"" pageSize:20 completion:^(AgoraChatCursorResult * _Nonnull result, AgoraChatError * _Nonnull aError) {
+            if (!aError) {
+                self.loadMoreFinished = YES;
+                self.cursor = result;
+                self.dataCount += result.list.count;
+                if (self.delegate && [self.delegate respondsToSelector:@selector(threadListCount:)]) {
+                    [self.delegate threadListCount:self.dataCount];
+                }
+                [self.threadList endRefreshing];
+                [self loadDataArray:result.list];
+            }
+        }];
+    }
 }
 
 - (void)loadDataArray:(NSArray *)array {
@@ -67,9 +102,11 @@
         [self.dataArray addObject:model];
     }
     [self.threadList reloadData];
-    [[AgoraChatClient sharedClient].threadManager getMesssageFromSeverWithThreads:ids completion:^(NSDictionary<NSString *,AgoraChatMessage *> *messageMap, AgoraChatError *aError) {
-        [self.threadMessageMap addEntriesFromDictionary:messageMap];
-        [self mapMessage];
+    [[AgoraChatClient sharedClient].threadManager getLastMesssageFromSeverWithChatThreads:ids completion:^(NSDictionary<NSString *,AgoraChatMessage *> * _Nonnull messageMap, AgoraChatError * _Nonnull aError) {
+        if (!aError) {
+            [self.threadMessageMap addEntriesFromDictionary:messageMap];
+            [self mapMessage];
+        }
     }];
 }
 
@@ -118,26 +155,13 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     [self.view addSubview:self.threadList];
-    [[AgoraChatClient sharedClient].threadManager addNotifyDelegate:self delegateQueue:nil];
+    [[AgoraChatClient sharedClient].threadManager addDelegate:self delegateQueue:nil];
 }
 
 - (void)dealloc {
     _dataArray = nil;
     _group = nil;
-    _navBar = nil;
-    [[AgoraChatClient sharedClient].threadManager removeNotifyDelegate:self];
-}
-
-- (AgoraChatThreadListNavgation *)navBar {
-    if (!_navBar) {
-        _navBar = [[AgoraChatThreadListNavgation alloc]initWithFrame:CGRectMake(0, 0, EMScreenWidth, EMNavgationHeight)];
-        _navBar.backgroundColor = [UIColor colorWithHexString:@"#FFFFFF"];
-        __weak typeof(self) weakSelf = self;
-        [_navBar setBackBlock:^{
-            [weakSelf.navigationController popViewControllerAnimated:YES];
-        }];
-    }
-    return _navBar;
+    [[AgoraChatClient sharedClient].threadManager removeDelegate:self];
 }
 
 - (UITableView *)threadList {
@@ -201,7 +225,7 @@
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (self.dataArray.count - 2 == indexPath.row && self.loadMoreFinished && self.cursor.list.count == 20) {
+    if (self.dataArray.count - 1 == indexPath.row && self.loadMoreFinished == YES && self.cursor.list.count == 20) {
         [self requestList];
     }
 }
@@ -211,37 +235,31 @@
         [self showHint:@"conversationId is empty!"];
         return;
     }
-    [AgoraChatClient.sharedClient.threadManager asyncJoinThread:conv.threadInfo.threadId completion:^( AgoraChatError *aError) {
-        if (!aError) {
+    [AgoraChatClient.sharedClient.threadManager joinChatThread:conv.threadInfo.threadId completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
+        if (!aError || aError.code == 40004) {
             EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:conv.threadInfo.threadId chatViewModel:self.viewModel parentMessageId:@"" model:nil];
-            VC.title = conv.threadInfo.threadName;
+            VC.title = thread ? thread.threadName:conv.threadInfo.threadName;
             [self.navigationController pushViewController:VC animated:YES];
         }
     }];
 }
 
 
-- (void)threadNotifyChange:(AgoraChatThreadEvent *)evnet {
-    if (evnet) {
-        if (evnet.threadName && evnet.from) {
-            if ([evnet.threadOperation isEqualToString:@"create"] || [evnet.threadOperation isEqualToString:@"delete"]) {
-                [self dropdownRefreshTableViewWithData];
-            } else if ([evnet.threadOperation isEqualToString:@"update"]) {
-                NSUInteger index;
-                for (id obj in self.dataArray) {
-                    if ([obj isKindOfClass:[EaseThreadConversation class]]) {
-                        EaseThreadConversation *model = (EaseThreadConversation *)obj;
-                        if ([model.lastMessage.messageId isEqualToString:evnet.messageId]) {
-                            index = [self.dataArray indexOfObject:obj];
-                            model.threadInfo.threadName = evnet.threadName;
-                            break;
-                        }
-                    }
-                }
-                [self.threadList reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-            }
-        }
+- (void)onChatThreadCreate:(AgoraChatThreadEvent *)event {
+    if (event.threadName && event.from && [self.group.groupId isEqualToString:event.channelId]) {
+        [self dropdownRefreshTableViewWithData];
     }
+}
+
+- (void)onChatThreadDestroy:(AgoraChatThreadEvent *)event {
+    if (event.threadName && event.from && [self.group.groupId isEqualToString:event.channelId]) {
+        [self dropdownRefreshTableViewWithData];
+    }
+}
+
+#pragma mark - AgoraChatMultiDevicesDelegate
+- (void)multiDevicesThreadEventDidReceive:(AgoraChatMultiDevicesEvent)aEvent threadId:(NSString *)aThreadId ext:(id)aExt {
+    //MARK: - 由于上面的代理已经通知处理过了，避免重复处理固此处没处理
 }
 
 @end

@@ -12,15 +12,12 @@
 #import "EMBottomMoreFunctionView.h"
 #import "EaseThreadChatHeader.h"
 #import "EMMsgTouchIncident.h"
-@interface EaseThreadChatViewController ()<AgoraChatThreadManagerDelegate,EaseThreadChatHeaderDelegate>
+#import "UIViewController+HUD.h"
+@interface EaseThreadChatViewController ()<AgoraChatThreadManagerDelegate,EaseThreadChatHeaderDelegate,AgoraChatMultiDevicesDelegate>
 
 @property (nonatomic, copy) NSString *messageId;
 
 @property (nonatomic, strong) AgoraChatMessage *message;
-
-@property (nonatomic, strong) AgoraChatGroup *group;
-
-@property (nonatomic, strong) NSString *isAdmin;//admin 1 unadmin 0
 
 @end
 
@@ -30,40 +27,43 @@
     _messageId = parentMessageId;
     self = [super initChatViewControllerWithCoversationid:conversationId
                        conversationType:AgoraChatConversationTypeGroupChat
-                                            chatViewModel:(EaseChatViewModel *)viewModel isThread:YES parentMessageId:parentMessageId];
+                                            chatViewModel:(EaseChatViewModel *)viewModel isChatThread:YES parentMessageId:parentMessageId];
     if (self) {
         if (model) {
-            void (^requestBlock)(AgoraChatThread *thread, AgoraChatError *aError) = ^(AgoraChatThread *thread, AgoraChatError *aError){
-                if (!aError) {
-                    model.thread = thread;
-                    EaseThreadChatHeader *header = [[EaseThreadChatHeader alloc] initWithMessageType:model.type displayType:EMThreadHeaderTypeDisplay viewModel:self.viewModel model:model];
-                    header.delegate = self;
-                    self.tableView.tableHeaderView = header;
-                }
-            };
-            [self getThread:requestBlock];
-        } else {
-            [self getThread:nil];
+            self.model = model;
         }
+        [self getThread];
     }
     return self;
 }
 
-- (void)getThread:(void (^)(AgoraChatThread *thread, AgoraChatError *aError))block {
-    if (_messageId.length) {
-        [AgoraChatClient.sharedClient.threadManager getThreadDetail:self.currentConversation.conversationId completion:block];
-    } else {
-        [AgoraChatClient.sharedClient.threadManager getThreadDetail:self.currentConversation.conversationId completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
-            if (!aError) {
-                EaseMessageModel *model = [EaseMessageModel new];
-                model.thread = thread;
-                model.direction = AgoraChatMessageDirectionReceive;
-                EaseThreadChatHeader *header = [[EaseThreadChatHeader alloc] initWithMessageType:AgoraChatMessageTypeCmd displayType:EMThreadHeaderTypeDisplayNoMessage viewModel:self.viewModel model:model];
-                header.delegate = self;
-                self.tableView.tableHeaderView = header;
-            }
-        }];
+- (void)getThread {
+    [AgoraChatClient.sharedClient.threadManager getChatThreadDetail:self.currentConversation.conversationId completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
+        if (!aError) {
+            [self createHeaderWithThread:thread];
+        } else {
+            [self showHint:aError.errorDescription];
+        }
+    }];
+}
+
+- (void)createHeaderWithThread:(AgoraChatThread *)thread {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(threadChatHeader)]) {
+        self.tableView.tableHeaderView = [self.delegate threadChatHeader];
+        return;
     }
+    EaseMessageModel *model;
+    if (self.messageId.length) {
+        self.model.thread = thread;
+        model = self.model;
+    } else {
+        model = [EaseMessageModel new];
+        model.thread = thread;
+        model.direction = AgoraChatMessageDirectionReceive;
+    }
+    EaseThreadChatHeader *header = [[EaseThreadChatHeader alloc] initWithMessageType:self.model.type displayType:self.messageId.length ?EMThreadHeaderTypeDisplay:EMThreadHeaderTypeDisplayNoMessage viewModel:self.viewModel model:model];
+    header.delegate = self;
+    self.tableView.tableHeaderView = header;
 }
 
 - (void)headerAvatarClick:(EaseMessageModel *)model {
@@ -87,7 +87,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [[AgoraChatClient sharedClient].threadManager addListenerDelegate:self delegateQueue:nil];
+    [[AgoraChatClient sharedClient].threadManager addDelegate:self delegateQueue:nil];
+    [AgoraChatClient.sharedClient addMultiDevicesDelegate:self delegateQueue:nil];
 }
 
 - (AgoraChatMessage *)message {
@@ -106,15 +107,21 @@
 
 - (void)dealloc
 {
-    [[AgoraChatClient sharedClient].threadManager removeListenerDelegate:self];
+    [[AgoraChatClient sharedClient].threadManager removeDelegate:self];
+    [AgoraChatClient.sharedClient removeMultiDevicesDelegate:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (NSString *)isAdmin {
     if (!_isAdmin) {
         _isAdmin = @"0";
-        for (NSString *admin in self.group.adminList) {
-            if ([[AgoraChatClient.sharedClient currentUsername] isEqualToString:admin]) {
+        if (!self.group) {
+            return _isAdmin;
+        }
+        NSMutableArray *admins = [NSMutableArray arrayWithArray:self.group.adminList];
+        [admins addObject:self.group.owner];
+        for (NSString *admin in admins) {
+            if ([[[AgoraChatClient.sharedClient currentUsername] lowercaseString] isEqualToString:[admin lowercaseString]]) {
                 _isAdmin = @"1";
                 break;
             }
@@ -206,19 +213,62 @@
 
 #pragma mark - EMThreadManagerDelegate
 
-- (void)onMemberJoined:(NSString *)parentId threadId:(NSString *)threadId userName:(NSString *)userName {
-    
+- (void)onChatThreadUpdate:(AgoraChatThreadEvent *)event {
+    if (![event.threadId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    if (event.lastMessage == nil) {
+        NSString *threadName = event.threadName;
+        if (!threadName) {
+            return;
+        }
+        if (self.delegate && [self.delegate respondsToSelector:@selector(threadNameChange:)]) {
+            [self.delegate threadNameChange:threadName];
+        }
+        [((EaseThreadChatHeader *)self.tableView.tableHeaderView) setThreadName:threadName];
+    }
 }
 
-- (void)onMemberLeaved:(NSString *)parentId threadId:(NSString *)threadId userName:(NSString *)userName {
-    
+- (void)onChatThreadDestroy:(AgoraChatThreadEvent *)event {
+    if (![event.threadId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    if (self.delegate && [self.delegate respondsToSelector:@selector(popThreadChat)]) {
+        [self.delegate popThreadChat];
+        return;
+    }
+    [self.parentViewController.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)onThreadNameChanged:(NSString *)threadName threadId:(NSString *)threadId {
-    
+- (void)onUserKickOutOfThread:(AgoraChatThreadEvent *)event {
+    if (![event.threadId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    if (self.delegate && [self.delegate respondsToSelector:@selector(popThreadChat)]) {
+        [self.delegate popThreadChat];
+        return;
+    }
+    [self.parentViewController.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)onThreadDestoryed:(NSString *)parentId threadId:(NSString *)threadId from:(NSString *)from operation:(NSString *)operation {
+- (void)multiDevicesThreadEventDidReceive:(AgoraChatMultiDevicesEvent)aEvent threadId:(NSString *)aThreadId ext:(id)aExt {
+    if (![aThreadId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    switch (aEvent) {
+        case AgoraChatMultiDevicesEventThreadLeave:
+            if (self.delegate && [self.delegate respondsToSelector:@selector(popThreadChat)]) {
+                [self.delegate popThreadChat];
+                return;
+            }
+            [self.parentViewController.navigationController popViewControllerAnimated:YES];
+            break;
+        case AgoraChatMultiDevicesEventThreadUpdate:
+            //MARK: - threadNotify 已经刷新过了。这里刷新会重复刷新
+            break;
+        default:
+            break;
+    }
     
 }
 

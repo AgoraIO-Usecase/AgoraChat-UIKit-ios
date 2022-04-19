@@ -177,20 +177,23 @@
 - (void)setModel:(EaseMessageModel *)model
 {
     [super setModel:model];
-    self.threadBubble.hidden = !model.message.msgOverView;
-    if (model.thread && model.thread.threadId.length) {
+    if (model.isHeader == NO) {
+        if (model.message.threadOverView) {
+            self.threadBubble.model = model;
+        }
+    } else {
         self.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
-        self.threadBubble.hidden = YES;
     }
+    self.threadBubble.hidden = model.isHeader;
     AgoraChatMessageType type = model.type;
     
     if (type == AgoraChatMessageTypeFile) {
         CGFloat height = 70;
         if (!model.thread) {
-            if (model.message.msgOverView) {
+            if (model.message.threadOverView) {
                 self.maxBubbleWidth = KEMThreadBubbleWidth+24;
             }
-            if (model.message.msgOverView) {
+            if (model.message.threadOverView) {
                 height = 65+4+12+KEMThreadBubbleWidth*0.4;
             }
         }
@@ -215,7 +218,7 @@
         } else {
             self.downloadStatusLabel.text = @"";
         }
-        if (model.message.msgOverView && model.thread == nil) {
+        if (model.message.threadOverView && model.thread == nil) {
             self.threadBubble.model = model;
         } else self.threadBubble.model = nil;
         

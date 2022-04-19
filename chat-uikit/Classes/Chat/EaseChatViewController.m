@@ -50,19 +50,20 @@
 @property (nonatomic, strong) id<EaseUserProfile> sentProfile;
 @property (nonatomic, strong) id<EaseUserProfile> otherProfile;
 @property (nonatomic, assign, readwrite) AgoraChatConversationType conversationType;
-@property (nonatomic, assign, readwrite) BOOL isThread;
+@property (nonatomic, assign, readwrite) BOOL isChatThread;
 @property (nonatomic, strong, readwrite) EaseChatViewModel *viewModel;
 @property (nonatomic, strong) NSMutableDictionary *messageIdsMap;
 @property (nonatomic) NSString *parentMessageId;
+@property (nonatomic) AgoraChatCursorResult *cursor;
 @end
 
 @implementation EaseChatViewController
 
 + (EaseChatViewController *)chatWithConversationId:(NSString *)aConversationId
                                   conversationType:(AgoraChatConversationType)aType
-                                     chatViewModel:(EaseChatViewModel *)aModel parentMessageId:(NSString *)parentMessageId isThread:(BOOL)isThread
+                                     chatViewModel:(EaseChatViewModel *)aModel parentMessageId:(NSString *)parentMessageId isChatThread:(BOOL)isChatThread
 {
-    if (isThread == YES) {
+    if (isChatThread == YES) {
         EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:aConversationId chatViewModel:aModel parentMessageId:parentMessageId model:nil];
         return VC;
     }
@@ -130,7 +131,7 @@
     self = [super init];
     if (self) {
         self.messageIdsMap = [NSMutableDictionary dictionary];
-        _currentConversation = [AgoraChatClient.sharedClient.chatManager getConversation:conversationId type:conType createIfNotExist:YES isThread:conType == AgoraChatConversationTypeThreadChat];
+        _currentConversation = [AgoraChatClient.sharedClient.chatManager getConversation:conversationId type:conType createIfNotExist:YES];
         self.conversationType = conType;
         _msgQueue = dispatch_queue_create("emmessage.com", NULL);
         _viewModel = viewModel;
@@ -150,16 +151,16 @@
     return self;
 }
 
-- (instancetype)initChatViewControllerWithCoversationid:(NSString *)conversationId
+- (instancetype) initChatViewControllerWithCoversationid:(NSString *)conversationId
                                        conversationType:(AgoraChatConversationType)conType
-                                          chatViewModel:(EaseChatViewModel *)viewModel isThread:(BOOL)isThread parentMessageId:(NSString *)parentMessageId
+                                          chatViewModel:(EaseChatViewModel *)viewModel isChatThread:(BOOL)isChatThread parentMessageId:(NSString *)parentMessageId
 {
     self = [super init];
     if (self) {
         self.parentMessageId = parentMessageId;
         self.messageIdsMap = [NSMutableDictionary dictionary];
-        self.isThread = isThread;
-        _currentConversation = [AgoraChatClient.sharedClient.chatManager getConversation:conversationId type:conType createIfNotExist:YES isThread:conType == AgoraChatConversationTypeThreadChat];
+        self.isChatThread = isChatThread;
+        _currentConversation = [AgoraChatClient.sharedClient.chatManager getConversation:conversationId type:conType createIfNotExist:YES isThread:isChatThread];
         self.conversationType = conType;
         _msgQueue = dispatch_queue_create("emmessage.com", NULL);
         _viewModel = viewModel;
@@ -289,7 +290,7 @@
 //    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapTableViewAction:)];
 //    [self.tableView addGestureRecognizer:tap];
     
-    [self loadData:YES];
+    [self loadData:self.isChatThread == YES ? NO:YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -463,7 +464,9 @@
         cell = [[EaseMessageCell alloc] initWithDirection:model.direction chatType:model.message.chatType messageType:model.type viewModel:_viewModel];
         cell.delegate = self;
     }
+    model.isHeader = NO;
     cell.model = model;
+    
     if (cell.model.message.body.type == AgoraChatMessageTypeVoice) {
         cell.model.weakMessageCell = cell;
     }
@@ -482,7 +485,9 @@
     }
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     if ([cell isKindOfClass:[EaseMessageTimeCell class]] && [cellString containsString:@"See all threads"]) {
-        [self threadsList];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(pushThreadList)]) {
+            [self.delegate pushThreadList];
+        }
     }
 }
 
@@ -498,6 +503,15 @@
         EaseMessageModel *model = (EaseMessageModel *)obj;
         if (model.message.body.type == AgoraChatMessageTypeVoice) {
             model.weakMessageCell = nil;
+        }
+    }
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (self.isChatThread == YES) {
+        if (self.dataArray.count - 1 == indexPath.row && self.cursor.list.count == 20 && self.loadFinished == YES) {
+            self.loadFinished = NO;
+            [self loadData:YES];
         }
     }
 }
@@ -664,10 +678,14 @@
             [extMenuArray addObject:recallExtModel];
         }
         if (_currentLongPressCell.model.type == AgoraChatMessageTypeText || _currentLongPressCell.model.type == AgoraChatMessageTypeImage || _currentLongPressCell.model.type == AgoraChatMessageTypeVideo || _currentLongPressCell.model.type == AgoraChatMessageTypeFile || _currentLongPressCell.model.type == AgoraChatMessageTypeVoice) {
-            if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isThread) {
+            if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isChatThread && _currentLongPressCell.model.message.threadOverView == nil) {
                 EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Replay" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
                     if ([aCell isKindOfClass:[EaseMessageCell class]]) {
-                        [weakself createThread:((EaseMessageCell*)aCell).model];
+                        if (self.delegate && [self.delegate respondsToSelector:@selector(createThread:)]) {
+                            [self.delegate createThread:((EaseMessageCell*)aCell).model];
+                        } else {
+                            [weakself createThread:((EaseMessageCell*)aCell).model];
+                        }
                     }
                 }];
                 [extMenuArray addObject:creatThread];
@@ -692,7 +710,7 @@
         return;
     }
     
-    [EMBottomMoreFunctionView showMenuItems:extMenuArray contentType:EMBottomMoreFunctionTypeChat animation:YES didSelectedMenuItem:^(EaseExtendMenuModel * _Nonnull menuItem) {
+    [EMBottomMoreFunctionView showMenuItems:extMenuArray contentType:EMBottomMoreFunctionTypeMessage animation:YES didSelectedMenuItem:^(EaseExtendMenuModel * _Nonnull menuItem) {
         menuItem.itemDidSelectedHandle(menuItem.funcDesc, YES);
         [EMBottomMoreFunctionView hideWithAnimation:YES needClear:NO];
     } didSelectedEmoji:^(NSString * _Nonnull emoji) {
@@ -753,18 +771,25 @@
 }
 
 - (void)toThreadChat:(EaseMessageModel *)model {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectThreadBubble:)]) {
+        [self.delegate didSelectThreadBubble:model];
+        return;
+    }
     [self pushThreadChat:model];
 }
 
 - (void)pushThreadChat:(EaseMessageModel *)model {
-    if (!model.message.msgOverView.threadId.length) {
+    if (!model.message.threadOverView.threadId.length) {
         [self showHint:@"conversationId is empty!"];
         return;
     }
-    [AgoraChatClient.sharedClient.threadManager asyncJoinThread:model.message.msgOverView.threadId completion:^(AgoraChatError *aError) {
-        if (!aError) {
-            EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:model.message.msgOverView.threadId chatViewModel:self.viewModel parentMessageId:model.message.messageId model:model];
-            self.title = model.message.msgOverView.threadName;
+    [AgoraChatClient.sharedClient.threadManager joinChatThread:model.message.threadOverView.threadId completion:^(AgoraChatThread *thread,AgoraChatError *aError) {
+        if (!aError || aError.code == 40004) {
+            if (thread) {
+                model.thread = thread;
+            }
+            EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:model.message.threadOverView.threadId chatViewModel:self.viewModel parentMessageId:model.message.messageId model:model];
+            self.title = model.thread ? model.thread.threadName:model.message.threadOverView.threadName;;
             [self.navigationController pushViewController:VC animated:YES];
         }
     }];
@@ -920,6 +945,15 @@
     }
 }
 
+- (void)scrollToTopRow
+{
+    [self hideLongPressView];
+    if ([self.dataArray count] > 0) {
+        NSIndexPath *toIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+        [self.tableView scrollToRowAtIndexPath:toIndexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    }
+}
+
 #pragma mark - Send Message
 
 - (void)sendTextAction:(NSString *)aText
@@ -946,10 +980,27 @@
             [weakself refreshTableViewWithData:aMessages isInsertBottom:NO isScrollBottom:isScrollBottom];
         });
     };
-    if (self.isThread == YES) {
-        [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:EMMessageFetchHidtoryDirectionUp pageSize:20 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
+    if (self.isChatThread == YES) {
+        if (self.dataArray.count > 0) {
+            if (self.cursor.list.count < 20) {
+                return;
+            }
+            for (EaseMessageModel *model in [[[self.dataArray mutableCopy] reverseObjectEnumerator] allObjects]) {
+                if ([model isKindOfClass:[EaseMessageModel class]]) {
+                    if (model.message.messageId.length) {
+                        self.moreMsgId = model.message.messageId;
+                    }
+                    break;
+                }
+            }
+        } else {
+            self.moreMsgId = @"";
+        }
+        [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:EMMessageFetchHidtoryDirectionDown pageSize:20 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
+            self.loadFinished = YES;
             if (!aError) {
-                [self refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:NO];
+                self.cursor = aResult;
+                [self refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
             }
         }];
     } else {
@@ -963,7 +1014,7 @@
     
     for (int i = 0; i < [aMessages count]; i++) {
         AgoraChatMessage *msg = aMessages[i];
-        if (self.isThread == YES) {
+        if (self.isChatThread == YES) {
             if (msg.chatType == AgoraChatTypeChat && msg.isReadAcked && (msg.body.type == AgoraChatMessageBodyTypeText || msg.body.type == AgoraChatMessageBodyTypeLocation)) {
                 [[AgoraChatClient sharedClient].chatManager sendMessageReadAck:msg.messageId toUser:msg.conversationId completion:nil];
             }
@@ -998,9 +1049,9 @@
                 if (self.delegate && [self.delegate respondsToSelector:@selector(userProfile:)]) {
                     id<EaseUserProfile> userData = [self.delegate userProfile:msg.from];
                     model.userDataProfile = userData;
-                    if (msg.msgOverView) {
-                        if (msg.msgOverView.from != nil && msg.msgOverView.from.length > 0) {
-                            id<EaseUserProfile> userThreadData = [self.delegate userProfile:msg.msgOverView.lastMessage.from];
+                    if (msg.threadOverView) {
+                        if (msg.threadOverView.from != nil && msg.threadOverView.from.length > 0) {
+                            id<EaseUserProfile> userThreadData = [self.delegate userProfile:msg.threadOverView.lastMessage.from];
                             model.threadUserProfile = userThreadData;
                         }
                     }
@@ -1117,7 +1168,7 @@
         message.isNeedGroupAck = YES;
     }
     message.chatType = (AgoraChatType)self.currentConversation.type;
-    message.isThread = self.isThread;
+    message.isChatThread = self.isChatThread;
     __weak typeof(self) weakself = self;
     if (self.delegate && [self.delegate respondsToSelector:@selector(willSendMessage:)]) {
         AgoraChatMessage *callbackMsg = [self.delegate willSendMessage:message];
@@ -1171,7 +1222,15 @@
 //        [weakself.tableView setNeedsLayout];
 //        [weakself.tableView layoutIfNeeded];
         if (isScrollBottom) {
-            [weakself scrollToBottomRow];
+            if (self.isChatThread == YES) {
+                if ( self.cursor.list.count < 20) {
+                    [weakself scrollToBottomRow];
+                }
+            } else [weakself scrollToBottomRow];
+        } else {
+            if (self.isChatThread == YES && self.dataArray.count < 20) {
+                [weakself scrollToTopRow];
+            }
         }
     });
 }
@@ -1187,8 +1246,10 @@
         _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         _tableView.estimatedRowHeight = 130;
         _tableView.scrollsToTop = NO;
-        [_tableView enableRefresh:@"drop down refresh" color:UIColor.systemGrayColor];
-        [_tableView.refreshControl addTarget:self action:@selector(dropdownRefreshTableViewWithData) forControlEvents:UIControlEventValueChanged];
+        if (self.isChatThread != YES) {
+            [_tableView enableRefresh:@"drop down refresh" color:UIColor.systemGrayColor];
+            [_tableView.refreshControl addTarget:self action:@selector(dropdownRefreshTableViewWithData) forControlEvents:UIControlEventValueChanged];
+        }
     }
     
     return _tableView;

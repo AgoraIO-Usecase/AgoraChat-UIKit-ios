@@ -18,7 +18,9 @@
 #import "EMTimeConvertUtils.h"
 @interface EaseThreadCreateCell ()<UITextFieldDelegate>
 
-@property (nonatomic, strong) UITextField *threadNameField;
+@property (nonatomic, strong) UIImageView *threadIcon;
+
+@property (nonatomic, strong) UILabel *threadName;
 
 @property (nonatomic, strong) UILabel *alertMessage;
 
@@ -52,7 +54,7 @@
 
 {
     NSString *identifier = [EaseThreadCreateCell cellIdentifierType:aMessageType];
-    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"EaseThreadCreateCell"];
+    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     if (self) {
         self.displayType = type;
         self.viewModel = viewModel;
@@ -85,27 +87,49 @@
 
 - (instancetype)initWithMessageType:(AgoraChatMessageType)aMessageType displayType:(EMThreadHeaderType)type viewModel:(EaseChatViewModel *)viewModel model:(EaseMessageModel *)model {
     NSString *identifier = [EaseThreadCreateCell cellIdentifierType:aMessageType];
-    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"EaseThreadCreateCell"];
+    self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     if (self) {
         self.displayType = type;
         self.viewModel = viewModel;
         self.messageType = aMessageType;
-        self.model = model;
         _direction = AgoraChatMessageDirectionReceive;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
-        [self.contentView addSubview:self.threadNameField];
-        [self.contentView addSubview:self.divideLine];
-        [self.contentView addSubview:self.alertMessage];
-        if (type == EMThreadHeaderTypeDisplay || type == EMThreadHeaderTypeCreate) {
+        if (type == EMThreadHeaderTypeCreate) {
+            [self.contentView addSubview:self.threadNameField];
+            [self.contentView addSubview:self.divideLine];
+            [self.contentView addSubview:self.alertMessage];
             [self.contentView addSubview:self.avatarView];
             [self.contentView addSubview:self.nameLabel];
             [self.contentView addSubview:self.timeLabel];
             [self.contentView addSubview:self.bubbleView];
             [self.contentView addSubview:self.fromMessage];
-            [self _setupViews];
+            self.threadNameField.hidden = NO;
+        } else if (type == EMThreadHeaderTypeDisplay) {
+            self.threadNameField.hidden = YES;
+            [self.contentView addSubview:self.threadIcon];
+            [self.contentView addSubview:self.threadName];
+            [self.contentView addSubview:self.divideLine];
+            [self.contentView addSubview:self.alertMessage];
+            [self.contentView addSubview:self.avatarView];
+            [self.contentView addSubview:self.nameLabel];
+            [self.contentView addSubview:self.timeLabel];
+            [self.contentView addSubview:self.bubbleView];
+            [self.contentView addSubview:self.fromMessage];
         } else if (type == EMThreadHeaderTypeDisplayNoMessage) {
+            self.threadNameField.hidden = YES;
+            [self.contentView addSubview:self.threadIcon];
+            [self.contentView addSubview:self.threadName];
+            [self.contentView addSubview:self.alertMessage];
             [self.contentView addSubview:self.noMessage];
+            [self.contentView addSubview:self.divideLine];
+        }
+        if (model) {
+            self.model = model;
+        }
+        if (type == EMThreadHeaderTypeDisplayNoMessage) {
             [self noMessageUpdateLayout];
+        } else {
+            [self _setupViews];
         }
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(avatarClick:)];
         [self.avatarView addGestureRecognizer:tap];
@@ -149,13 +173,11 @@
         _threadNameField = [[UITextField alloc] initWithFrame:CGRectZero];
         _threadNameField.font = [UIFont boldSystemFontOfSize:18];
         _threadNameField.leftView = [self leftView];
+        _threadNameField.tag = 678;
         _threadNameField.placeholder = @"Thread Name";
         _threadNameField.leftViewMode = UITextFieldViewModeAlways;
         _threadNameField.enabled = (self.displayType != EMThreadHeaderTypeDisplay);
-        if (self.displayType == EMThreadHeaderTypeDisplay) {
-            _threadNameField.rightView = [self rightView];
-            _threadNameField.rightViewMode = UITextFieldViewModeAlways;
-        } else {
+        if (self.displayType != EMThreadHeaderTypeDisplay) {
             _threadNameField.delegate = self;
         }
     }
@@ -170,11 +192,23 @@
     return view;
 }
 
-- (UIButton *)rightView {
-    UIButton *view = [UIButton buttonWithType:UIButtonTypeCustom];
-    view.frame = CGRectMake(0, 0, 30, 30);
-    [view setBackgroundImage:[UIImage easeUIImageNamed:@"edit_gray"] forState:UIControlStateNormal];
-    return view;
+- (UIImageView *)threadIcon {
+    if (!_threadIcon) {
+        _threadIcon = [[UIImageView alloc]init];
+        _threadIcon.image = [UIImage easeUIImageNamed:@"groupThread"];
+    }
+    return _threadIcon;
+}
+
+- (UILabel *)threadName {
+    if (!_threadName) {
+        _threadName = [[UILabel alloc] init];
+        _threadName.font = [UIFont boldSystemFontOfSize:18];
+        _threadName.tag = 678;
+        _threadName.numberOfLines = 0;
+        _threadName.lineBreakMode = NSLineBreakByCharWrapping;
+    }
+    return _threadName;
 }
 
 - (UIView *)divideLine {
@@ -189,7 +223,7 @@
     if (!_alertMessage) {
         _alertMessage = [[UILabel alloc] init];
         _alertMessage.font = [UIFont systemFontOfSize:14 weight:UIFontWeightRegular];
-        _alertMessage.text = (self.displayType == EMThreadHeaderTypeCreate ? @"Send a message to start a thread in this Group Chat.":@"Straded by Allen");
+        _alertMessage.text = (self.displayType == EMThreadHeaderTypeCreate ? @"Send a message to start a thread in this Group Chat.":@"Straded by ");
         _alertMessage.textColor = [UIColor colorWithHexString:@"#CCCCCC"];
     }
     return _alertMessage;
@@ -258,7 +292,12 @@
 
 - (void)_setupViews {
     [self setMaxBubbleWidth];
-    [self nameFieldLayout];
+    if (self.displayType == EMThreadHeaderTypeCreate) {
+        [self nameFieldLayout];
+    } else {
+        [self threadIconLayout];
+        [self threadNameLayout];
+    }
     [self sparaLayout];
     [self alertLayout];
     [self avatarLayout];
@@ -269,23 +308,24 @@
 }
 
 - (void)noMessageUpdateLayout {
-    [self Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.height.Ease_equalTo(134);
-        make.width.Ease_equalTo(EMScreenWidth);
-    }];
-    [self nameFieldLayout];
+//    [self Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//        make.height.Ease_equalTo(134);
+//        make.width.Ease_equalTo(EMScreenWidth);
+//    }];
+    [self threadIconLayout];
+    [self threadNameLayout];
     [self alertLayout];
-    [_noMessage Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.alertMessage.ease_bottom).offset(15);
-        make.left.equalTo(self).offset(11);
-        make.right.equalTo(self).offset(-17);
+    [self.noMessage Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.top.equalTo(self.alertMessage.ease_bottom).offset(12);
+        make.left.equalTo(self.contentView).offset(11);
+        make.right.equalTo(self.contentView).offset(-17);
         make.height.Ease_equalTo(28);
-        make.bottom.equalTo(self).offset(-10);
+        make.bottom.equalTo(self.contentView).offset(-38);
     }];
-    [_divideLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-        make.bottom.equalTo(self).offset(-5);
-        make.left.equalTo(self).offset(12);
-        make.right.equalTo(self).offset(-12);
+    [self.divideLine Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.top.equalTo(self.noMessage.ease_bottom).offset(5);
+        make.left.equalTo(self.contentView).offset(12);
+        make.right.equalTo(self.contentView).offset(-12);
         make.height.Ease_equalTo(1);
     }];
 }
@@ -302,7 +342,7 @@
 }
 
 - (void)nameFieldLayout {
-    [_threadNameField Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+    [self.threadNameField Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.contentView).offset(16);
         make.left.equalTo(self.contentView).offset(16);
         make.right.equalTo(self.contentView).offset(-16);
@@ -312,9 +352,28 @@
     }];
 }
 
+- (void)threadIconLayout {
+    [self.threadIcon Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.top.equalTo(self.contentView).offset(16);
+        make.left.equalTo(self.contentView).offset(16);
+        make.width.height.Ease_equalTo(32);
+    }];
+}
+
+- (void)threadNameLayout {
+    [self.threadName Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.top.equalTo(self.contentView).offset(16);
+        make.left.equalTo(self.contentView).offset(54);
+        make.right.equalTo(self.contentView).offset(-16);
+        if (self.bubbleView.ease_top) {
+            make.bottom.equalTo(self.bubbleView.ease_top).offset(-68);
+        }
+    }];
+}
+
 - (void)sparaLayout {
-    [_divideLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-        if (self.displayType == EMThreadHeaderTypeCreate || self.displayType == EMThreadHeaderTypeEdit) {
+    [self.divideLine Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        if (self.displayType == EMThreadHeaderTypeCreate) {
             make.top.equalTo(self.threadNameField.ease_bottom).offset(2);
             make.left.equalTo(self).offset(53);
             make.right.equalTo(self).offset(-16);
@@ -328,8 +387,14 @@
 }
 
 - (void)alertLayout {
-    [_alertMessage Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.contentView).offset(66);
+    [self.alertMessage Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        if (self.displayType == EMThreadHeaderTypeCreate) {
+            make.top.equalTo(self.contentView).offset(66);
+        } else {
+            if (self.bubbleView.ease_top) {
+                make.bottom.equalTo(self.bubbleView.ease_top).offset(-36);
+            } else make.top.equalTo(self.threadName.ease_bottom).offset(12);
+        }
         make.left.equalTo(self.contentView).offset(16);
         make.right.equalTo(self.contentView).offset(-16);
         make.height.Ease_equalTo(20);
@@ -337,7 +402,7 @@
 }
 
 - (void)avatarLayout {
-    [_avatarView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+    [self.avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.alertMessage.ease_bottom).offset(15);
         make.left.equalTo(self.contentView).offset(11);
         make.width.height.equalTo(@(avatarLonger));
@@ -345,7 +410,7 @@
 }
 
 - (void)nameLayout {
-    [_nameLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+    [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.alertMessage.ease_bottom).offset(17);
         make.left.equalTo(self.avatarView.ease_right).offset(8);
         make.right.equalTo(self.contentView).offset(-((self.contentView.frame.size.width-73)/2.0+20));
@@ -354,7 +419,7 @@
 }
 
 - (void)timeLayout {
-    [_timeLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+    [self.timeLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.alertMessage.ease_bottom).offset(17);
         make.right.equalTo(self.contentView).offset(-16);
         make.height.equalTo(@(15));
@@ -366,21 +431,23 @@
     if (self.messageType == AgoraChatMessageTypeFile) {
         self.bubbleView.maxBubbleWidth = self.bubbleView.maxBubbleWidth+50;
     }
-    [_bubbleView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+    [self.bubbleView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.nameLabel.ease_bottom).offset(4);
         make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
+        make.bottom.equalTo(self.contentView).offset(-28);
         if (self.messageType == AgoraChatMessageTypeFile) {
-            make.width.equalTo(@(self.bubbleView.maxBubbleWidth));
+            make.right.equalTo(@(self.bubbleView.maxBubbleWidth));
         } else {
+            self.bubbleView.maxBubbleWidth = EMScreenWidth - 48 - 16;
             make.width.lessThanOrEqualTo(@(self.bubbleView.maxBubbleWidth));
         }
     }];
 }
 
 - (void)fromLayout {
-    [_fromMessage Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+    [self.fromMessage Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
-        make.left.equalTo(self.bubbleView);
+        make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
         make.right.equalTo(self.contentView).offset(-16);
         make.height.Ease_equalTo(15);
         make.bottom.equalTo(self.contentView).offset(-componentSpacing);
@@ -424,19 +491,47 @@
     return bubbleView;
 }
 
+- (void)changeThreadName:(NSString *)text {
+    CGSize size = CGSizeMake(EMScreenWidth - 70 ,CGFLOAT_MAX);
+    CGFloat height = [text boundingRectWithSize:size options:(NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading) attributes:[NSDictionary dictionaryWithObject:self.threadName.font forKey:NSFontAttributeName] context:nil].size.height;
+    CGFloat oldHeight = [self.threadName.text boundingRectWithSize:size options:(NSStringDrawingUsesLineFragmentOrigin|NSStringDrawingUsesFontLeading) attributes:[NSDictionary dictionaryWithObject:self.threadName.font forKey:NSFontAttributeName] context:nil].size.height;
+    self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height-oldHeight+height);
+    [self.threadName Ease_updateConstraints:^(EaseConstraintMaker *make) {
+        make.height.Ease_equalTo(height);
+    }];
+    self.threadName.text = text;
+}
+
 - (void)setModel:(EaseMessageModel *)model
 {
     _model = model;
-    self.noMessage.hidden = model.message;
-    self.threadNameField.text = model.thread.threadName;
-    _alertMessage.text = [NSString stringWithFormat:@"Straded by %@",model.thread.owner];
+    self.noMessage.hidden = self.displayType != EMThreadHeaderTypeDisplayNoMessage;
+    if (self.threadNameField.isHidden == YES) {
+        CGSize size = CGSizeMake(EMScreenWidth - 70 ,CGFLOAT_MAX);
+        CGFloat height = [model.thread.threadName boundingRectWithSize:size options:NSStringDrawingUsesLineFragmentOrigin attributes:[NSDictionary dictionaryWithObject:[UIFont boldSystemFontOfSize:18] forKey:NSFontAttributeName] context:nil].size.height;
+        [self.threadName Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            make.height.Ease_equalTo(height);
+        }];
+        self.threadName.text = model.thread.threadName;
+    } else {
+        self.threadNameField.text = model.thread.threadName;
+    }
+    if (self.displayType == EMThreadHeaderTypeDisplay || self.displayType == EMThreadHeaderTypeDisplayNoMessage) {
+        _alertMessage.text = [@"Start by" stringByAppendingString:model.thread.owner ? model.thread.owner:[AgoraChatClient.sharedClient currentUsername]];
+    } else {
+        _alertMessage.text = @"Send a message to start a thread in this Group Chat.";
+    }
     if (model.message == nil) {
         return;
     }
     self.bubbleView.model = model;
     if (model.userDataProfile && [model.userDataProfile respondsToSelector:@selector(showName)] && model.userDataProfile.showName) {
         self.nameLabel.text = model.userDataProfile.showName;
-        _alertMessage.text = [NSString stringWithFormat:@"Straded by %@",model.userDataProfile.showName];
+        if (self.displayType == EMThreadHeaderTypeDisplay || self.displayType == EMThreadHeaderTypeDisplayNoMessage) {
+            _alertMessage.text = [_alertMessage.text stringByAppendingString:model.userDataProfile.showName];
+        } else {
+            _alertMessage.text = @"Send a message to start a thread in this Group Chat.";
+        }
     } else {
         self.nameLabel.text = model.message.from;
     }
@@ -459,19 +554,6 @@
         _avatarView.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
     }
 }
-
-//- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-//    if (CGRectContainsPoint(self.avatarView.frame, point)) {
-//        return self.avatarView;
-//    }
-//    if (CGRectContainsPoint(self.bubbleView.frame, point)) {
-//        return self.bubbleView;
-//    }
-//    if (CGRectContainsPoint(self.threadNameField.frame, point)) {
-//        return self.threadNameField;
-//    }
-//    return self;
-//}
 
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
     if (self.delegate && [self.delegate respondsToSelector:@selector(textFieldEndText:)]) {

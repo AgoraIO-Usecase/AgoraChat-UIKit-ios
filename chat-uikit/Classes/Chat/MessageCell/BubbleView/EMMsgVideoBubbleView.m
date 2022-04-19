@@ -49,25 +49,14 @@
 
 - (void)_setupSubviews
 {
-    if (!self.model.thread) {
-        if (self.model.message.msgOverView) {
-            [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-                make.edges.equalTo(self.photo);
-            }];
-            [self.playImgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-                make.center.equalTo(self.photo);
-                make.width.height.equalTo(@50);
-            }];
-        } else {
-            [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-                make.edges.equalTo(self);
-            }];
-            
-            [self.playImgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-                make.center.equalTo(self);
-                make.width.height.equalTo(@50);
-            }];
-        }
+    if (self.model.message.threadOverView && self.model.isHeader == NO) {
+        [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.edges.equalTo(self.photo);
+        }];
+        [self.playImgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.center.equalTo(self.photo);
+            make.width.height.equalTo(@50);
+        }];
     } else {
         [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.edges.equalTo(self);

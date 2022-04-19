@@ -159,7 +159,7 @@ static NSString *cellIdentifier = @"EaseConversationCell";
                                      {
         AgoraChatConversation *conversation = [AgoraChatClient.sharedClient.chatManager getConversation:model.easeId
                                                                                      type:model.type
-                                                                         createIfNotExist:YES isThread:model.type == AgoraChatConversationTypeThreadChat];
+                                                                         createIfNotExist:YES];
         [conversation setTop:!model.isTop];
         [weakself refreshTabView];
     }];
@@ -277,11 +277,11 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 {
     if (aMessages && [aMessages count]) {
         AgoraChatMessage *msg = aMessages[0];
-        if(msg.body.type == AgoraChatMessageBodyTypeText) {
-            AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO isThread:msg.isThread];
+        if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThread != YES) {
+            AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO isThread:NO];
             //群聊@“我”提醒
             NSString *content = [NSString stringWithFormat:@"@%@",AgoraChatClient.sharedClient.currentUsername];
-            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isThread != YES) {
+            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThread != YES) {
                 [conversation setRemindMe:msg.messageId];
             };
         }

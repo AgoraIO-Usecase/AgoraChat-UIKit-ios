@@ -83,6 +83,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(void)didSendMessage:(AgoraChatMessage *)message error:(AgoraChatError *)error;
 
+-(void)didSendMessage:(AgoraChatMessage *)message thread:(AgoraChatThread *)thread error:(AgoraChatError *)error;
+
 /**
  * The current session enters the extended area data model group
  *
@@ -130,6 +132,18 @@ NS_ASSUME_NONNULL_BEGIN
  *
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems message:(AgoraChatMessage*)message;
+
+- (void)didSelectThreadBubble:(EaseMessageModel *)model;
+
+- (void)createThread:(EaseMessageModel *)model;
+
+- (void)pushThreadList;
+
+- (void)popThreadChat;
+
+- (void)threadNameChange:(NSString *)threadName;
+
+- (UIView *)threadChatHeader;
 
 @end
 

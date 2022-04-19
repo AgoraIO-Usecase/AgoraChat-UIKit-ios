@@ -107,7 +107,7 @@
 }
 
 - (void)avatarLayout {
-    [_avatar Ease_makeConstraints:^(EaseConstraintMaker *make) {
+    [self.avatar Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.left.equalTo(self).offset(10);
         make.top.equalTo(self.icon.ease_bottom).offset(8);
         make.width.height.Ease_equalTo(14);
@@ -123,8 +123,8 @@
 }
 
 - (void)userNameLayout {
-    [_userName Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.left.equalTo(self.avatar.ease_right).offset(7);
+    [self.userName Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.left.equalTo(self).offset(30);
         make.right.equalTo(self).offset(-77);
         make.top.equalTo(self.avatar);
         make.height.Ease_equalTo(15);
@@ -141,7 +141,7 @@
 }
 
 - (void)messageContentLayout {
-    [_messageContent Ease_makeConstraints:^(EaseConstraintMaker *make) {
+    [self.messageContent Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.left.equalTo(self.userName);
         make.top.equalTo(self.userName.ease_bottom).offset(8);
         make.right.equalTo(self).offset(-58);
@@ -160,7 +160,7 @@
 }
 
 - (void)updateTimeLayout {
-    [_updateTime Ease_makeConstraints:^(EaseConstraintMaker *make) {
+    [self.updateTime Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.avatar);
         make.right.equalTo(self).offset(-8);
         make.height.Ease_equalTo(16);
@@ -195,8 +195,8 @@
 //        return;
 //    }
     [super setModel:model];
-    self.threadName.text = model.message.msgOverView.threadName;
-    self.updateTime.text = [EMTimeConvertUtils durationString:model.message.msgOverView.lastMessage.timeStamp];
+    self.threadName.text = model.message.threadOverView.threadName;
+    self.updateTime.text = [EMTimeConvertUtils durationString:model.message.threadOverView.lastMessage.timestamp];
     BOOL isCustomAvatar = NO;
     if (model.userDataProfile && [model.userDataProfile respondsToSelector:@selector(defaultAvatar)]) {
         if (model.userDataProfile.defaultAvatar) {
@@ -211,23 +211,43 @@
             isCustomAvatar = YES;
         }
     }
-    [self.messageBadge setTitle:[self convertMessageCount:model.message.msgOverView.messageCount] forState:UIControlStateNormal];
+    [self.messageBadge setTitle:[self convertMessageCount:model.message.threadOverView.messageCount] forState:UIControlStateNormal];
     if (!isCustomAvatar) {
         _avatar.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
     }
-    if (model.message.msgOverView.lastMessage.contentType == 0) {
-        self.messageContent.text = model.message.msgOverView.lastMessage.text ? [EaseEmojiHelper convertEmoji:model.message.msgOverView.lastMessage.text]:@"";
+    if (model.message.threadOverView.lastMessage.body.type == AgoraChatMessageBodyTypeText) {
+        NSString *text = [((AgoraChatTextMessageBody *)model.message.threadOverView.lastMessage.body) text];
+        if (!text) {
+            text = @"";
+        }
+        self.messageContent.text = text;
     } else {
-        self.messageContent.text = [self convertType:model.message.msgOverView.lastMessage.contentType];
+        self.messageContent.text = [self convertType:model.message.threadOverView.lastMessage.body.type];
     }
     if (model.threadUserProfile && [model.threadUserProfile respondsToSelector:@selector(showName)] && model.threadUserProfile.showName) {
         self.userName.text = model.threadUserProfile.showName;
     } else {
-        self.userName.text = model.message.msgOverView.lastMessage.from;
+        self.userName.text = model.message.threadOverView.lastMessage.from;
     }
     
-    if (model.message.msgOverView.lastMessage.messageId == nil || [model.message.msgOverView.lastMessage.messageId isEqualToString:@""]) {
-        self.userName.text = @"No Message";
+    if (model.message.threadOverView.lastMessage.messageId == nil || [model.message.threadOverView.lastMessage.messageId isEqualToString:@""]) {
+        self.messageContent.text = @"No Message";
+        self.avatar.hidden = YES;
+        _messageContent.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
+        _messageContent.textColor = [UIColor colorWithHexString:@"#999999"];
+        [self.messageContent Ease_updateConstraints:^(EaseConstraintMaker *make) { make.left.equalTo(self).offset(10);
+            make.top.equalTo(self.userName).offset(10);
+        }];
+    } else {
+        self.avatar.hidden = NO;
+        [self.messageContent Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.left.equalTo(self.avatar);
+            make.top.equalTo(self.userName.ease_bottom).offset(8);
+            make.right.equalTo(self).offset(-58);
+            make.height.Ease_equalTo(20);
+        }];
+        _messageContent.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
+        _messageContent.textColor = [UIColor colorWithHexString:@"#4D4D4D"];
     }
 }
 
@@ -242,22 +262,22 @@
 - (NSString *)convertType:(int)contentType {
     NSString *type = @"[unknown type]";
     switch (contentType) {
-        case 1:
+        case 2:
         {
             type = @"[Image]";
         }
             break;
-        case 2:
+        case 3:
         {
             type = @"[Video]";
         }
             break;
-        case 4:
+        case 5:
         {
             type = @"[Voice]";
         }
             break;
-        case 5:
+        case 6:
         {
             type = @"[File]";
         }
