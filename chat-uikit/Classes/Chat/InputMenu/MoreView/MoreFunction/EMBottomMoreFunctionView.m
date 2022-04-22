@@ -27,6 +27,7 @@ typedef struct PanData {
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *emojiCollectionViewHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *itemTableViewHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *bottomContainerHeightConstraint;
+@property (unsafe_unretained, nonatomic) IBOutlet NSLayoutConstraint *collectionViewTopConstraint;
 
 @property (nonatomic, strong) CAShapeLayer *shapeLayer;
 @property (nonatomic, strong) CAShapeLayer *bgMaskLayer;
@@ -75,12 +76,25 @@ static EMBottomMoreFunctionView *shareView;
     shareView.bgView.alpha = 1;
     shareView.isShowEmojiList = NO;
     [shareView.itemTableView reloadData];
-    [shareView.emojiCollectionView reloadData];
     shareView.itemTableView.scrollEnabled = NO;
-    shareView.emojiCollectionViewHeightConstraint.constant = 40;
-    shareView.itemTableViewHeightConstraint.constant = 54 * menuItems.count;
     shareView.bgView.alpha = 0;
     shareView.maskHighlightViews = views;
+    shareView.itemTableViewHeightConstraint.constant = 54 * menuItems.count;
+    shareView.emojiCollectionViewHeightConstraint.constant = 40;
+
+    BOOL showReaction = YES;
+    if (delegate && [delegate respondsToSelector:@selector(bottomMoreFunctionViewShowReaction)]) {
+        showReaction = [delegate bottomMoreFunctionViewShowReaction:shareView];
+    }
+    
+    if (showReaction) {
+        [shareView.emojiCollectionView reloadData];
+        shareView.emojiCollectionView.hidden = NO;
+        shareView.collectionViewTopConstraint.constant = 12;
+    } else {
+        shareView.emojiCollectionView.hidden = YES;
+        shareView.collectionViewTopConstraint.constant = -54;
+    }
     
     CGFloat spacing = (UIScreen.mainScreen.bounds.size.width - 30 - shareView.emojiDataList.count * 40) / (shareView.emojiDataList.count - 1);
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)shareView.emojiCollectionView.collectionViewLayout;
@@ -183,7 +197,7 @@ static EMBottomMoreFunctionView *shareView;
     [_emojiCollectionView registerNib:[UINib nibWithNibName:@"EMBottomMoreFunctionViewEmojiCell" bundle:nil] forCellWithReuseIdentifier:@"cell"];
     [_itemTableView registerNib:[UINib nibWithNibName:@"EMBottomMoreFunctionViewMenuItemCell" bundle:nil] forCellReuseIdentifier:@"cell"];
     
-    _shapeLayer = [[CAShapeLayer alloc] init];
+    _shapeLayer = [CAShapeLayer layer];
     _mainView.layer.mask = _shapeLayer;
 }
 
@@ -194,7 +208,7 @@ static EMBottomMoreFunctionView *shareView;
     
     CGFloat radius = 24;
     UIRectCorner corner = UIRectCornerTopLeft | UIRectCornerTopRight;
-    UIBezierPath * path = [UIBezierPath bezierPathWithRoundedRect:_mainView.bounds byRoundingCorners:corner cornerRadii:CGSizeMake(radius, radius)];
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:_mainView.bounds byRoundingCorners:corner cornerRadii:CGSizeMake(radius, radius)];
     
     _shapeLayer.frame = _mainView.bounds;
     _shapeLayer.path = path.CGPath;

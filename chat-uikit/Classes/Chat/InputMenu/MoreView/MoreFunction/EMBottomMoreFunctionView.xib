@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -26,8 +25,16 @@
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3Iv-vb-vli">
                             <rect key="frame" x="0.0" y="0.0" width="414" height="499"/>
-                            <color key="backgroundColor" white="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <color key="backgroundColor" white="1" alpha="0.69999999999999996" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
+                        <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="V3z-Ce-RVd">
+                            <rect key="frame" x="0.0" y="0.0" width="414" height="499"/>
+                            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="lmm-5m-2Fa">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="499"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            </view>
+                            <blurEffect style="regular"/>
+                        </visualEffectView>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QtH-Ee-kyJ">
                             <rect key="frame" x="189.5" y="10" width="35" height="5"/>
                             <color key="backgroundColor" red="0.84705882352941175" green="0.84705882352941175" blue="0.84705882352941175" alpha="1" colorSpace="calibratedRGB"/>
@@ -75,15 +82,19 @@
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <gestureRecognizers/>
                     <constraints>
+                        <constraint firstItem="V3z-Ce-RVd" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" id="1gR-X5-aI1"/>
                         <constraint firstItem="9yG-X1-tZu" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="2aY-jZ-Z0H"/>
                         <constraint firstItem="QtH-Ee-kyJ" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" constant="10" id="38I-Vy-P0y"/>
                         <constraint firstItem="Y0I-2H-Iqz" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" constant="31" id="A8M-8G-0Cb"/>
                         <constraint firstAttribute="trailing" secondItem="3Iv-vb-vli" secondAttribute="trailing" id="B65-SJ-I5f"/>
                         <constraint firstItem="QtH-Ee-kyJ" firstAttribute="centerX" secondItem="4Lg-lM-kyj" secondAttribute="centerX" id="Fqq-y2-2Tv"/>
                         <constraint firstItem="Y0I-2H-Iqz" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="HHC-od-jeh"/>
+                        <constraint firstItem="V3z-Ce-RVd" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="Hgh-1e-5cQ"/>
                         <constraint firstItem="9yG-X1-tZu" firstAttribute="top" secondItem="ANJ-iM-O97" secondAttribute="bottom" id="Hgi-II-8eb"/>
                         <constraint firstAttribute="trailing" secondItem="Y0I-2H-Iqz" secondAttribute="trailing" id="Hs2-PC-8bJ"/>
                         <constraint firstItem="ANJ-iM-O97" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="M12-Ax-BSG"/>
+                        <constraint firstAttribute="bottom" secondItem="V3z-Ce-RVd" secondAttribute="bottom" id="XkU-uO-rfb"/>
+                        <constraint firstAttribute="trailing" secondItem="V3z-Ce-RVd" secondAttribute="trailing" id="YTv-fF-Ivg"/>
                         <constraint firstItem="ANJ-iM-O97" firstAttribute="top" secondItem="Y0I-2H-Iqz" secondAttribute="bottom" constant="12" id="bKq-bd-U2w"/>
                         <constraint firstItem="3Iv-vb-vli" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" id="ilI-gb-S86"/>
                         <constraint firstAttribute="trailing" secondItem="ANJ-iM-O97" secondAttribute="trailing" id="ipl-f7-9DA"/>
@@ -111,6 +122,7 @@
             <connections>
                 <outlet property="bgView" destination="Vk2-L8-AXT" id="Z8B-xn-GZd"/>
                 <outlet property="bottomContainerHeightConstraint" destination="S7j-P5-47B" id="ZtP-Sd-BVI"/>
+                <outlet property="collectionViewTopConstraint" destination="bKq-bd-U2w" id="uBe-NE-mg8"/>
                 <outlet property="contentViewBottomConstraint" destination="ZJa-W2-PGI" id="tSh-i5-Gsu"/>
                 <outlet property="emojiCollectionView" destination="Y0I-2H-Iqz" id="XFe-3u-cuj"/>
                 <outlet property="emojiCollectionViewHeightConstraint" destination="SPB-Ho-Wnb" id="xq8-Ik-oLn"/>

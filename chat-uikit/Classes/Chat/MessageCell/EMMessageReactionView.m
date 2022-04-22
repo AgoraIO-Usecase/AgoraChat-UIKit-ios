@@ -110,7 +110,12 @@
     for (AgoraChatMessageReaction *reaction in _reactionList) {
         allCount += reaction.count;
     }
-    NSString *countLabelText = [NSString stringWithFormat:@"%llu", allCount];
+    NSString *countLabelText;
+    if (allCount > 99) {
+        countLabelText = @"99+";
+    } else {
+        countLabelText = [NSString stringWithFormat:@"%llu", allCount];
+    }
     _countLabelWidth = [countLabelText boundingRectWithSize:CGSizeMake(10000, 1000) options:0 attributes:@{
         NSFontAttributeName: _countLabel.font
     } context:nil].size.width;

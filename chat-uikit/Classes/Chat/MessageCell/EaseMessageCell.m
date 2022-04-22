@@ -170,7 +170,9 @@
         }
         
         [_bubbleView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            if (!_viewModel.displayReceiverName) {
+            if (_viewModel.displayReceiverName) {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(componentSpacing / 2);
+            } else {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
             }
             make.bottom.equalTo(self.contentView).offset(-componentSpacing);
@@ -188,10 +190,9 @@
         }];
 
         _nameLabel.textAlignment = NSTextAlignmentLeft;
-        if (_viewModel.displayReceiverName) {
+        if (_viewModel.displayReceiverName || _viewModel.displaySentName) {
             [_nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
-                make.bottom.equalTo(self.bubbleView.ease_top).offset(-componentSpacing / 2);
                 if (_viewModel.displayReceivedAvatar) {
                     make.left.equalTo(self.avatarView.ease_right).offset(2 * componentSpacing);
                 } else {
@@ -217,7 +218,9 @@
         }
         
         [_bubbleView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            if (!_viewModel.displaySentName) {
+            if (_viewModel.displayReceiverName) {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(componentSpacing / 2);
+            } else {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
             }
             make.bottom.equalTo(self.contentView).offset(-componentSpacing);
@@ -235,10 +238,9 @@
         }];
         
         _nameLabel.textAlignment = NSTextAlignmentRight;
-        if (_viewModel.displaySentName) {
+        if (_viewModel.displaySentName || _viewModel.displaySentName) {
             [_nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
-                make.bottom.equalTo(self.bubbleView.ease_top).offset(-componentSpacing / 2);
                 if (_viewModel.displaySentAvatar) {
                     make.right.equalTo(self.avatarView.ease_left).offset(-2 * componentSpacing);
                 } else {
@@ -395,6 +397,22 @@
     }
     
     _reactionView.reactionList = model.message.reactionList;
+    
+    [_bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+        if (_viewModel.displayReceiverName || _viewModel.displaySentName) {
+            if (model.message.reactionList.count > 0) {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(22);
+            } else {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(6);
+            }
+        } else {
+            if (model.message.reactionList.count > 0) {
+                make.top.equalTo(self.contentView).offset(componentSpacing + 10);
+            } else {
+                make.top.equalTo(self.contentView).offset(componentSpacing);
+            }
+        }
+    }];
 }
 
 #pragma mark - Action

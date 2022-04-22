@@ -13,7 +13,8 @@
 #import "PageWithId.h"
 
 @import AgoraChat;
-#import "MJRefresh.h"
+#import "MJRefresh/MJRefresh.h"
+//@import MJRefresh;
 
 typedef struct PanData {
     CGFloat beiginBottom;
@@ -33,7 +34,6 @@ typedef struct PanData {
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *bottomContainerHeightConstraint;
 
 @property (nonatomic, strong) CAShapeLayer *maskLayer;
-
 
 @property (nonatomic, strong) AgoraChatMessage *message;
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, NSNumber *>*widthCache;
@@ -100,6 +100,7 @@ static EMBottomReactionDetailView *shareView;
 }
 
 + (void)hideWithAnimation:(BOOL)animation needClear:(BOOL)needClear {
+    [shareView.reactionUserListMap removeAllObjects];
     void(^clearFunc)(void) = ^{
         [shareView.itemTableView.mj_header endRefreshing];
         [shareView.itemTableView.mj_footer endRefreshing];
@@ -141,12 +142,7 @@ static EMBottomReactionDetailView *shareView;
     [_emojiCollectionView registerNib:[UINib nibWithNibName:@"EMBottomReactionDetailReactionCell" bundle:nil] forCellWithReuseIdentifier:@"cell"];
     [_itemTableView registerNib:[UINib nibWithNibName:@"EMBottomReactionDetailUserCell" bundle:nil] forCellReuseIdentifier:@"cell"];
     
-    CGFloat radius = 24;
-    UIRectCorner corner = UIRectCornerTopLeft | UIRectCornerTopRight;
-    UIBezierPath * path = [UIBezierPath bezierPathWithRoundedRect:_mainView.bounds byRoundingCorners:corner cornerRadii:CGSizeMake(radius, radius)];
     _maskLayer = [[CAShapeLayer alloc] init];
-    _maskLayer.frame = _mainView.bounds;
-    _maskLayer.path = path.CGPath;
     _mainView.layer.mask = _maskLayer;
     
     _itemTableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
@@ -160,7 +156,12 @@ static EMBottomReactionDetailView *shareView;
 
 - (void)layoutSubviews {
     [super layoutSubviews];
+
+    CGFloat radius = 24;
+    UIRectCorner corner = UIRectCornerTopLeft | UIRectCornerTopRight;
+    UIBezierPath * path = [UIBezierPath bezierPathWithRoundedRect:_mainView.bounds byRoundingCorners:corner cornerRadii:CGSizeMake(radius, radius)];
     _maskLayer.frame = _mainView.bounds;
+    _maskLayer.path = path.CGPath;
 }
 
 - (void)loadUserListData:(BOOL)refresh {
@@ -174,25 +175,27 @@ static EMBottomReactionDetailView *shareView;
         _reactionUserListMap[reaction] = page;
     }
     NSString *lastId = @"";
-    if (refresh) {
-        [page clear];
-    } else if (page.lastId.length > 0) {
+    if (!refresh && page.lastId.length > 0) {
         lastId = page.lastId;
     }
     
     __weak typeof(self)weakSelf = self;
-    [AgoraChatClient.sharedClient.reactionManager getReactionDetail:_message.messageId reaction:reaction begin:lastId pageSize:30 completion:^(AgoraChatMessageReaction *reaction, NSString *cursor, AgoraChatError *error) {
-        if (error) {
-            return;
-        }
-        if (page.dataList.count <= 0 && reaction.state) {
-            [page appendData:@[AgoraChatClient.sharedClient.currentUsername] lastId:cursor];
-        }
-        
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    [AgoraChatClient.sharedClient.chatManager getReactionDetail:_message.messageId reaction:reaction cursor:lastId pageSize:30 completion:^(AgoraChatMessageReaction *reaction, NSString *cursor, AgoraChatError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error) {
+                [weakSelf.itemTableView.mj_header endRefreshing];
+                [weakSelf.itemTableView.mj_footer endRefreshing];
+                return;
+            }
+            if (refresh) {
+                [page clear];
+            }
+            if (page.dataList.count <= 0 && reaction.isAddedBySelf) {
+                [page appendData:@[AgoraChatClient.sharedClient.currentUsername] lastId:cursor];
+            }
             // 自己的操作置顶
             NSArray <NSString *>*userList = reaction.userList;
-            if (page.userInfo[@"index"] || !reaction.state) {
+            if (page.userInfo[@"index"] || !reaction.isAddedBySelf) {
                 [page appendData:userList lastId:cursor];
             } else {
                 NSUInteger index = [userList indexOfObject:AgoraChatClient.sharedClient.currentUsername];
@@ -208,15 +211,13 @@ static EMBottomReactionDetailView *shareView;
                     page.userInfo[@"index"] = @(index);
                 }
             }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf.itemTableView reloadData];
-                [weakSelf.itemTableView.mj_header endRefreshing];
-                if (userList.count < 30) {
-                    [weakSelf.itemTableView.mj_footer endRefreshingWithNoMoreData];
-                } else {
-                    [weakSelf.itemTableView.mj_footer endRefreshing];
-                }
-            });
+            [weakSelf.itemTableView reloadData];
+            [weakSelf.itemTableView.mj_header endRefreshing];
+            if (cursor.length <= 0) {
+                [weakSelf.itemTableView.mj_footer endRefreshingWithNoMoreData];
+            } else {
+                [weakSelf.itemTableView.mj_footer endRefreshing];
+            }
         });
     }];
 }
@@ -307,17 +308,29 @@ static EMBottomReactionDetailView *shareView;
     EMBottomReactionDetailUserCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell" forIndexPath:indexPath];
     __weak typeof(self)weakSelf = self;
     cell.didClickRemove = ^{
-        [AgoraChatClient.sharedClient.reactionManager removeReaction:reaction fromMessage:weakSelf.message.messageId completion:^(AgoraChatError * _Nullable error) {
+        [AgoraChatClient.sharedClient.chatManager removeReaction:reaction fromMessage:weakSelf.message.messageId completion:^(AgoraChatError * _Nullable error) {
             if (!error && weakSelf.didRemoveSelfReaction) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [weakSelf.itemTableView reloadData];
+                    NSInteger reactionCount = weakSelf.message.reactionList.count;
+                    if (reactionCount <= 0) {
+                        [EMBottomReactionDetailView hideWithAnimation:YES needClear:NO];
+                        return;
+                    }
+                    NSInteger selectedIndex = weakSelf.reactionSelectedIndex;
+                    if (selectedIndex >= reactionCount) {
+                        selectedIndex = reactionCount - 1;
+                    }
                     [weakSelf.emojiCollectionView reloadData];
+                    [weakSelf collectionView:weakSelf.emojiCollectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForItem:selectedIndex inSection:0]];
                     weakSelf.didRemoveSelfReaction(reaction);
                 });
             }
         }];
     };
-    cell.userId = _reactionUserListMap[reaction].dataList[indexPath.row];
+    PageWithId *page = _reactionUserListMap[reaction];
+    if (page.dataList.count > indexPath.row) {
+        cell.userId = page.dataList[indexPath.row];
+    }
     return cell;
 }
 
@@ -327,24 +340,7 @@ static EMBottomReactionDetailView *shareView;
     for (EMBottomReactionDetailReactionCell *cell in [collectionView visibleCells]) {
         cell.reactionSelected = [collectionView indexPathForCell:cell].item == indexPath.item;
     }
-    NSString *reaction = self.message.reactionList[indexPath.item].reaction;
-    PageWithId <NSString *>*pageData = _reactionUserListMap[reaction];
-    if (pageData) {
-        [_itemTableView reloadData];
-        return;
-    }
-    pageData = [[PageWithId alloc] init];
-    _reactionUserListMap[reaction] = pageData;
-    __weak typeof(self)weakSelf = self;
-    [AgoraChatClient.sharedClient.reactionManager getReactionDetail:_message.messageId reaction:reaction begin:pageData.lastId pageSize:30 completion:^(AgoraChatMessageReaction * _Nonnull reaction, NSString * _Nullable cursor, AgoraChatError * _Nullable error) {
-        if (error) {
-            return;
-        }
-        [pageData appendData:reaction.userList lastId:cursor];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.itemTableView reloadData];
-        });
-    }];
+    [self loadUserListData:YES];
 }
 
 @end

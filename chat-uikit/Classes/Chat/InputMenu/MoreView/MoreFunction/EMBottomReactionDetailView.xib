@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -24,9 +23,17 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Lg-lM-kyj">
                     <rect key="frame" x="0.0" y="179" width="414" height="717"/>
                     <subviews>
-                        <view alpha="0.80000000000000004" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3Iv-vb-vli">
+                        <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Esf-HM-h6u">
                             <rect key="frame" x="0.0" y="0.0" width="414" height="717"/>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="Fck-vT-DPz">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="717"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            </view>
+                            <blurEffect style="light"/>
+                        </visualEffectView>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3Iv-vb-vli">
+                            <rect key="frame" x="0.0" y="0.0" width="414" height="717"/>
+                            <color key="backgroundColor" white="1" alpha="0.69999999999999996" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QtH-Ee-kyJ">
                             <rect key="frame" x="189.5" y="10" width="35" height="5"/>
@@ -82,12 +89,16 @@
                         <constraint firstItem="9yG-X1-tZu" firstAttribute="top" secondItem="ANJ-iM-O97" secondAttribute="bottom" id="Hgi-II-8eb"/>
                         <constraint firstAttribute="trailing" secondItem="Y0I-2H-Iqz" secondAttribute="trailing" id="Hs2-PC-8bJ"/>
                         <constraint firstItem="ANJ-iM-O97" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="M12-Ax-BSG"/>
+                        <constraint firstAttribute="bottom" secondItem="Esf-HM-h6u" secondAttribute="bottom" id="YgX-iy-V6d"/>
                         <constraint firstItem="ANJ-iM-O97" firstAttribute="top" secondItem="Y0I-2H-Iqz" secondAttribute="bottom" constant="8" id="bKq-bd-U2w"/>
+                        <constraint firstItem="Esf-HM-h6u" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="dFu-we-pbH"/>
                         <constraint firstItem="Y0I-2H-Iqz" firstAttribute="top" secondItem="POe-Ee-fuS" secondAttribute="bottom" constant="12" id="dex-fa-0nI"/>
                         <constraint firstItem="3Iv-vb-vli" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" id="ilI-gb-S86"/>
                         <constraint firstAttribute="trailing" secondItem="ANJ-iM-O97" secondAttribute="trailing" id="ipl-f7-9DA"/>
                         <constraint firstItem="3Iv-vb-vli" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="jOH-tZ-pVp"/>
                         <constraint firstAttribute="bottom" secondItem="3Iv-vb-vli" secondAttribute="bottom" id="khn-tl-fa1"/>
+                        <constraint firstAttribute="trailing" secondItem="Esf-HM-h6u" secondAttribute="trailing" id="nWr-BC-Fu5"/>
+                        <constraint firstItem="Esf-HM-h6u" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" id="oiy-96-Hf5"/>
                         <constraint firstAttribute="trailing" secondItem="9yG-X1-tZu" secondAttribute="trailing" id="sO4-af-zwf"/>
                         <constraint firstAttribute="bottom" secondItem="9yG-X1-tZu" secondAttribute="bottom" id="zcj-H5-4Cx"/>
                     </constraints>
