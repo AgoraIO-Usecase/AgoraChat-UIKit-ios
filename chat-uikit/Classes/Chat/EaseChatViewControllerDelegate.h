@@ -131,6 +131,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems message:(AgoraChatMessage*)message;
 
+- (BOOL)messageLongPressExtShowReaction:(AgoraChatMessage *)message;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -15,7 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol EMBottomMoreFunctionViewDelegate <NSObject>
 
 @optional
-- (BOOL)bottomMoreFunctionViewShowReaction:(EMBottomMoreFunctionView *)view;
 - (void)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view didSelectedMenuItem:(EaseExtendMenuModel *)model;
 - (void)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view didSelectedEmoji:(NSString *)emoji changeSelectedStateHandle:(void(^)(void))changeSelectedStateHandle;
 - (BOOL)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view getEmojiIsSelected:(NSString *)emoji userInfo:(NSDictionary *)userInfo;
@@ -34,6 +33,13 @@ NS_ASSUME_NONNULL_BEGIN
              userInfo:(NSDictionary *)userInfo;
 
 + (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
+             delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate
+           ligheViews:(nullable NSArray <UIView *>*)views
+            animation:(BOOL)animation
+             userInfo:(nullable NSDictionary *)userInfo;
+
++ (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
+         showReaction:(BOOL)showReaction
              delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate
            ligheViews:(nullable NSArray <UIView *>*)views
             animation:(BOOL)animation
