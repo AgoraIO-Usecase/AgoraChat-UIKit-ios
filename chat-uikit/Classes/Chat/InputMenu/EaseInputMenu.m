@@ -14,6 +14,7 @@
 #import "UIView+AgoraChatGradient.h"
 #import "EaseInputMenu+Private.h"
 
+
 #define kTextViewMinHeight 36
 #define kTextViewMaxHeight 80
 #define kIconwidth 36
@@ -242,7 +243,7 @@
     textView.attributedText = [[NSAttributedString alloc] initWithString:textView.text attributes:attributes];
 
     [self _updatetextViewHeight];
-    if (self.moreEmoticonView) {
+    if (self.faceContainerView) {
         [self emoticonChangeWithText];
     }
     if (self.delegate && [self.delegate respondsToSelector:@selector(inputViewDidChange:)]) {
@@ -313,9 +314,9 @@
 - (void)emoticonChangeWithText
 {
     if (self.textView.text.length > 0) {
-        [self.moreEmoticonView textDidChange:YES];
+        [self.faceContainerView.moreEmoticonView textDidChange:YES];
     } else {
-        [self.moreEmoticonView textDidChange:NO];
+        [self.faceContainerView.moreEmoticonView textDidChange:NO];
     }
 }
 
@@ -376,21 +377,46 @@
 }
 
 //emotion
+//- (void)emoticonButtonAction:(UIButton *)aButton
+//{
+//    if([self _buttonAction:aButton]) {
+//        return;
+//    }
+//    if (aButton.selected) {
+//        if (self.moreEmoticonView) {
+//            self.currentMoreView = self.moreEmoticonView;
+//            [self emoticonChangeWithText];
+//            [self addSubview:self.moreEmoticonView];
+//            [self.moreEmoticonView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//                make.left.equalTo(self);
+//                make.right.equalTo(self);
+//                make.bottom.equalTo(self).offset(-EaseVIEWBOTTOMMARGIN);
+//                make.height.Ease_equalTo(self.moreEmoticonView.viewHeight);
+//            }];
+//            [self _remakeButtonsViewConstraints];
+//
+//            if (self.delegate && [self.delegate respondsToSelector:@selector(inputBarDidShowToolbarAction)]) {
+//                [self.delegate inputBarDidShowToolbarAction];
+//            }
+//        }
+//    }
+//}
+
 - (void)emoticonButtonAction:(UIButton *)aButton
 {
     if([self _buttonAction:aButton]) {
         return;
     }
     if (aButton.selected) {
-        if (self.moreEmoticonView) {
-            self.currentMoreView = self.moreEmoticonView;
+        if (self.faceContainerView) {
+            self.currentMoreView = self.faceContainerView;
             [self emoticonChangeWithText];
-            [self addSubview:self.moreEmoticonView];
-            [self.moreEmoticonView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            [self addSubview:self.faceContainerView];
+            [self.faceContainerView Ease_makeConstraints:^(EaseConstraintMaker *make) {
                 make.left.equalTo(self);
                 make.right.equalTo(self);
                 make.bottom.equalTo(self).offset(-EaseVIEWBOTTOMMARGIN);
-                make.height.Ease_equalTo(self.moreEmoticonView.viewHeight);
+                make.height.Ease_equalTo(self.faceContainerView.viewHeight);
             }];
             [self _remakeButtonsViewConstraints];
             
@@ -441,7 +467,7 @@
 - (void)clearInputViewText
 {
     self.textView.text = @"";
-    if (self.moreEmoticonView) {
+    if (self.faceContainerView) {
         [self emoticonChangeWithText];
     }
     [self _updatetextViewHeight];
@@ -453,7 +479,7 @@
         self.textView.text = [NSString stringWithFormat:@"%@%@", self.textView.text, aText];
         [self _updatetextViewHeight];
     }
-    if (self.moreEmoticonView) {
+    if (self.faceContainerView) {
         [self emoticonChangeWithText];
     }
 }

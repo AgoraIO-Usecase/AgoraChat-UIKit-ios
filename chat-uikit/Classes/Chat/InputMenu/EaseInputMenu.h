@@ -12,6 +12,8 @@
 #import "EaseInputMenuRecordAudioView.h"
 #import "EaseExtendMenuView.h"
 #import "EaseChatViewModel.h"
+#import "EaseInputMenuFaceContainerView.h"
+
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,7 +24,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak) id<EaseInputMenuDelegate> delegate;
 @property (nonatomic, strong) EaseInputMenuRecordAudioView *recordAudioView;
-@property (nonatomic, strong) EaseInputMenuEmoticonView *moreEmoticonView;
+//@property (nonatomic, strong) EaseInputMenuEmoticonView *moreEmoticonView;
+@property (nonatomic, strong) EaseInputMenuFaceContainerView *faceContainerView;
+
+
 @property (nonatomic, strong) EaseExtendMenuView *extendMenuView;
 
 - (instancetype)initWithViewModel:(EaseChatViewModel *)viewModel;

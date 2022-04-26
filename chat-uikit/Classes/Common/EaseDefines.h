@@ -19,6 +19,11 @@
     isBangsScreen; \
 })
 
+
+#define EaseKitScreenHeight [[UIScreen mainScreen] bounds].size.height
+#define EaseKitScreenWidth  [[UIScreen mainScreen] bounds].size.width
+
+
 #define EaseVIEWBOTTOMMARGIN (kIsBangsScreen ? 34.f : 0.f)
 
 #define EaseSYSTEMNOTIFICATIONID @"Easesystemnotificationid"

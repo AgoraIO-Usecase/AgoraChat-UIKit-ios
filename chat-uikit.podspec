@@ -44,6 +44,8 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/Chat/MessageCell/BubbleView/EaseChatMessageBubbleView.h',
         'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/EaseInputMenuEmoticonView.h',
         'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/EaseEmoticon.h',
+        'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/EaseInputMenuFaceContainerView.h',
+
         'chat-uikit/Classes/Chat/InputMenu/MoreView/AudioRecord/EaseInputMenuRecordAudioView.h',
         'chat-uikit/Classes/Chat/InputMenu/MoreView/MoreFunction/EaseExtendMenuView.h',
         
@@ -61,5 +63,6 @@ Pod::Spec.new do |s|
 
     s.dependency 'Agora_Chat_iOS'
     s.dependency 'EMVoiceConvert', '0.1.0'
-
+    s.dependency 'Stipop'
+    
 end

@@ -297,10 +297,14 @@
     self.inputBar.recordAudioView = recordView;
     
     //Emoticon
-    EaseInputMenuEmoticonView *moreEmoticonView = [[EaseInputMenuEmoticonView alloc] initWithViewHeight:255];
-    moreEmoticonView.delegate = self;
-    self.inputBar.moreEmoticonView = moreEmoticonView;
-    
+//    EaseInputMenuEmoticonView *moreEmoticonView = [[EaseInputMenuEmoticonView alloc] initWithViewHeight:255];
+//    moreEmoticonView.delegate = self;
+//    self.inputBar.moreEmoticonView = moreEmoticonView;
+    EaseInputMenuFaceContainerView *faceContainerView = [[EaseInputMenuFaceContainerView alloc] initWithViewHeight:255];
+    faceContainerView.moreEmoticonView.delegate = self;
+    self.inputBar.faceContainerView = faceContainerView;
+
+        
     //Extend the functionality
     __weak typeof(self) weakself = self;
     EaseExtendMenuModel *photoAlbumExtModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"photo-album"] funcDesc:@"Photo & Video Library" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
