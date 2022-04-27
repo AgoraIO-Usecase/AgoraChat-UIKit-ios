@@ -300,7 +300,7 @@
 //    EaseInputMenuEmoticonView *moreEmoticonView = [[EaseInputMenuEmoticonView alloc] initWithViewHeight:255];
 //    moreEmoticonView.delegate = self;
 //    self.inputBar.moreEmoticonView = moreEmoticonView;
-    EaseInputMenuFaceContainerView *faceContainerView = [[EaseInputMenuFaceContainerView alloc] initWithViewHeight:255];
+    EaseInputMenuFaceContainerView *faceContainerView = [[EaseInputMenuFaceContainerView alloc] initWithViewHeight:300];
     faceContainerView.moreEmoticonView.delegate = self;
     self.inputBar.faceContainerView = faceContainerView;
 

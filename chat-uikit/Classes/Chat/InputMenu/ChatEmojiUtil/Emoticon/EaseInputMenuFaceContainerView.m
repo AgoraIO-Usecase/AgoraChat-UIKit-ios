@@ -9,6 +9,7 @@
 #import "UIImage+EaseUI.h"
 #import "EaseHeaders.h"
 #import "EaseInputMenuEmoticonView.h"
+//#import "chat-uikit-Swift.h"
 
 
 #define kCoverViewWidth 100.0
@@ -27,6 +28,8 @@
 @property (nonatomic, strong) UIScrollView *contentView;
 
 @property (nonatomic, strong) UIView *strikerView;
+//@property (nonatomic, strong) EaseInputMenuStripopView *menuStripopView;
+
 @property (nonatomic, strong) UIView *tenorView;
 
 @property (nonatomic, assign) CGFloat viewHeight;
@@ -221,6 +224,7 @@
     if (_strikerView == nil) {
         _strikerView = [[UIView alloc] init];
         _strikerView.backgroundColor = UIColor.blueColor;
+        
     }
     return _strikerView;
 }
@@ -253,6 +257,7 @@
             make.top.equalTo(_contentView);
             make.left.equalTo(_contentView);
             make.width.equalTo(@(EaseKitScreenWidth));
+            make.height.equalTo(@(KContentViewHeight));
             make.bottom.equalTo(_contentView);
         }];
         

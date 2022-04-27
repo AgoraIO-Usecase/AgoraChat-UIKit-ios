@@ -376,6 +376,8 @@
 		9EC88474272BD9E400FFE0A8 /* EMPickFileViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EC88422272BD9E400FFE0A8 /* EMPickFileViewController.h */; };
 		9EC88475272BD9E400FFE0A8 /* EaseChatViewControllerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 9EC88423272BD9E400FFE0A8 /* EaseChatViewControllerDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9ED2B239271EACE400CB1CCA /* EaseChatKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 9ED2B236271EACE400CB1CCA /* EaseChatKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C076C5E62819276C0069C038 /* chat-uikit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = C076C5E52819276C0069C038 /* chat-uikit-Bridging-Header.h */; };
+		C076C5E8281927830069C038 /* EaseInputMenuStripopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C076C5E7281927830069C038 /* EaseInputMenuStripopView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -763,6 +765,8 @@
 		9EC88423272BD9E400FFE0A8 /* EaseChatViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EaseChatViewControllerDelegate.h; sourceTree = "<group>"; };
 		9ED2B233271EACE400CB1CCA /* chat_uikit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = chat_uikit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9ED2B236271EACE400CB1CCA /* EaseChatKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EaseChatKit.h; sourceTree = "<group>"; };
+		C076C5E52819276C0069C038 /* chat-uikit-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "chat-uikit-Bridging-Header.h"; path = "ChatEmojiUtil/Emoticon/chat-uikit-Bridging-Header.h"; sourceTree = "<group>"; };
+		C076C5E7281927830069C038 /* EaseInputMenuStripopView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = EaseInputMenuStripopView.swift; path = ChatEmojiUtil/Emoticon/EaseInputMenuStripopView.swift; sourceTree = "<group>"; };
 		D243868BDE2C6759C6958DAD /* Pods-EaseChatKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EaseChatKit.debug.xcconfig"; path = "../../sdk3.x_new/Pods/Target Support Files/Pods-EaseChatKit/Pods-EaseChatKit.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1295,6 +1299,8 @@
 		9EB81527277C49B8008FEF1D /* InputMenu */ = {
 			isa = PBXGroup;
 			children = (
+				C076C5E7281927830069C038 /* EaseInputMenuStripopView.swift */,
+				C076C5E52819276C0069C038 /* chat-uikit-Bridging-Header.h */,
 				9EB81528277C49B8008FEF1D /* MoreView */,
 				9EB81538277C49B8008FEF1D /* EaseInputMenu+Private.h */,
 				9EB81539277C49B8008FEF1D /* ChatEmojiUtil */,
@@ -1735,6 +1741,7 @@
 				9EB8154E277C49B8008FEF1D /* EMAudioRecordUtil.h in Headers */,
 				9E69E4C227202C73008DDEF5 /* EaseDiskCache.h in Headers */,
 				9EC88462272BD9E400FFE0A8 /* EaseChatViewController+EMMsgLongPressIncident.h in Headers */,
+				C076C5E62819276C0069C038 /* chat-uikit-Bridging-Header.h in Headers */,
 				9E69E51927202C74008DDEF5 /* EaseImageCodersManager.h in Headers */,
 				9E69E44D27202C73008DDEF5 /* wav.h in Headers */,
 				9E69E52C27202C74008DDEF5 /* NSBezierPath+EaseRoundedCorners.h in Headers */,
@@ -1836,6 +1843,7 @@
 				TargetAttributes = {
 					9ED2B232271EACE400CB1CCA = {
 						CreatedOnToolsVersion = 13.0;
+						LastSwiftMigration = 1310;
 					};
 				};
 			};
@@ -1981,6 +1989,7 @@
 				9EC8844C272BD9E400FFE0A8 /* EMMsgImageBubbleView.m in Sources */,
 				9EB8156B277C49EA008FEF1D /* EaseExtendMenuViewModel.m in Sources */,
 				9EC88440272BD9E400FFE0A8 /* EMMsgRecordCell.m in Sources */,
+				C076C5E8281927830069C038 /* EaseInputMenuStripopView.swift in Sources */,
 				9EC88463272BD9E400FFE0A8 /* EaseChatViewController+EMMsgLongPressIncident.m in Sources */,
 				9E69E49527202C73008DDEF5 /* EaseCollectionViewFlowLayout.m in Sources */,
 				9EC8844E272BD9E400FFE0A8 /* EMMsgTextBubbleView.m in Sources */,
@@ -2198,6 +2207,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D243868BDE2C6759C6958DAD /* Pods-EaseChatKit.debug.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -2224,6 +2234,8 @@
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -2232,6 +2244,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 262A5942AEF1AC859D6ECC2A /* Pods-EaseChatKit.release.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -2258,6 +2271,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
