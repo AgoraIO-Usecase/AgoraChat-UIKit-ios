@@ -9,10 +9,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol EaseInputMenuFaceContainerViewDelegate <NSObject>
+- (void)showGiphyViewController;
+
+@end
+
 @class EaseInputMenuEmoticonView;
 @interface EaseInputMenuFaceContainerView : UIView
 @property (nonatomic, strong) EaseInputMenuEmoticonView *moreEmoticonView;
 @property (nonatomic, assign, readonly) CGFloat viewHeight;
+@property (nonatomic, assign) id<EaseInputMenuFaceContainerViewDelegate> delegate;
 
 - (instancetype)initWithViewHeight:(CGFloat)viewHeight;
 

@@ -2142,6 +2142,8 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/liu001/Desktop/huanxin/AgoraChat_emoji/AgoraChat-UIKit-ios/chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/chat-uikit-Bridging-Header.h";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "chat-uikit-Swift.h";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -2197,6 +2199,8 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "/Users/liu001/Desktop/huanxin/AgoraChat_emoji/AgoraChat-UIKit-ios/chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/chat-uikit-Bridging-Header.h";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "chat-uikit-Swift.h";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -2234,6 +2238,8 @@
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INCLUDE_PATHS = "";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "chat_uikit-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2271,6 +2277,8 @@
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INCLUDE_PATHS = "";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "chat_uikit-Swift.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

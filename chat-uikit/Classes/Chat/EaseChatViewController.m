@@ -32,8 +32,9 @@
 #import "EaseChatEnums.h"
 #import "UIAlertAction+Custom.h"
 #import "EaseInputMenu+Private.h"
+#import "EaseInputGiphyViewController.h"
 
-@interface EaseChatViewController ()<EaseMoreFunctionViewDelegate>
+@interface EaseChatViewController ()<EaseMoreFunctionViewDelegate,EaseInputMenuFaceContainerViewDelegate>
 {
     EaseChatViewModel *_viewModel;
     EaseMessageCell *_currentLongPressCell;
@@ -302,6 +303,7 @@
 //    self.inputBar.moreEmoticonView = moreEmoticonView;
     EaseInputMenuFaceContainerView *faceContainerView = [[EaseInputMenuFaceContainerView alloc] initWithViewHeight:300];
     faceContainerView.moreEmoticonView.delegate = self;
+    faceContainerView.delegate = self;
     self.inputBar.faceContainerView = faceContainerView;
 
         
@@ -783,6 +785,12 @@
         }
         [self refreshTableView:NO];
     }
+}
+
+#pragma mark EaseInputMenuFaceContainerViewDelegate
+- (void)showGiphyViewController {
+    EaseInputGiphyViewController *vc = [[EaseInputGiphyViewController alloc] init];
+    [self.navigationController presentViewController:vc animated:YES completion:nil];
 }
 
 #pragma mark - KeyBoard
