@@ -21,7 +21,7 @@
 #define kEmojiButtonSize 20.0
 #define KContentViewHeight 255.0
 
-@interface EaseInputMenuFaceContainerView ()
+@interface EaseInputMenuFaceContainerView ()<EaseInputMenuStripopViewDelegate>
 
 @property (nonatomic, strong) UIButton *emojiButton;
 @property (nonatomic, strong) UIButton *strikerButton;
@@ -30,12 +30,7 @@
 @property (nonatomic, strong) UIView *segmentView;
 
 @property (nonatomic, strong) UIScrollView *contentView;
-
 @property (nonatomic, strong) UIView *strikerView;
-//@property (nonatomic, strong) SPUIPickerView *spickerView;
-@property (nonatomic, strong) EaseInputMenuStripopView *stripopView;
-
-
 @property (nonatomic, strong) UIView *giphyView;
 
 @property (nonatomic, assign) CGFloat viewHeight;
@@ -60,6 +55,7 @@
     return self;
 }
 
+
 - (void)placeAndLayoutSubviews {
 
     [self addSubview:self.segmentView];
@@ -74,42 +70,56 @@
     [self.contentView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.segmentView.ease_bottom).offset(2.0);
         make.left.right.equalTo(self);
+        make.height.equalTo(@(KContentViewHeight));
         make.bottom.equalTo(self);
     }];
         
 }
 
+#pragma mark EaseInputMenuStripopViewDelegate
+- (void)selectedEmojiWithUrlStringWithUrlString:(NSString *)urlString urlType:(NSString *)urlType {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(selectedStikerWithUrlString:fileType:)]) {
+        [self.delegate selectedStikerWithUrlString:urlString fileType:urlType];
+    }
+}
+
 #pragma mark action
 - (void)emojiButtonAction {
-    NSLog(@"%s",__func__);
     [UIView animateWithDuration:0.2 animations:^{
         [self.contentView setContentOffset:CGPointMake(0, 0)];
-    //    [self.selectedBgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-    //        make.centerX.equalTo(self.emojiButton);
-    //    }];
-
+        [self.selectedBgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.width.equalTo(@(kCoverViewWidth));
+            make.height.equalTo(@(kCoverViewHeight));
+            make.centerX.equalTo(self.emojiButton);
+            make.centerY.equalTo(_segmentView);
+        }];
     }];
 }
 
 - (void)strikerButtonAction {
-    NSLog(@"%s",__func__);
     [UIView animateWithDuration:0.2 animations:^{
         [self.contentView setContentOffset:CGPointMake(EaseKitScreenWidth, 0)];
-    //    [self.selectedBgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-    //        make.centerX.equalTo(self.strikerButton);
-    //    }];
 
+        [self.selectedBgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.width.equalTo(@(kCoverViewWidth));
+            make.height.equalTo(@(kCoverViewHeight));
+            make.centerX.equalTo(self.strikerButton);
+            make.centerY.equalTo(_segmentView);
+        }];
+        
     }];
-    
 }
 
-- (void)tenorButtonAction {
-    NSLog(@"%s",__func__);
+- (void)giphyButtonAction {
     [UIView animateWithDuration:0.2 animations:^{
         [self.contentView setContentOffset:CGPointMake(EaseKitScreenWidth * 2, 0)];
-    //    [self.selectedBgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-    //        make.centerX.equalTo(self.tenorButton);
-    //    }];
+        [self.selectedBgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.width.equalTo(@(kCoverViewWidth));
+            make.height.equalTo(@(kCoverViewHeight));
+            make.centerX.equalTo(self.giphyButton);
+            make.centerY.equalTo(_segmentView);
+        }];
+
     }];
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(showGiphyViewController)]) {
@@ -146,18 +156,16 @@
         _giphyButton = [[UIButton alloc]init];
         [_giphyButton setImage:[UIImage easeUIImageNamed:@"face_tenor"] forState:UIControlStateNormal];
         [_giphyButton setImage:[UIImage easeUIImageNamed:@"face_tenor_selected"] forState:UIControlStateSelected];
-        [_giphyButton addTarget:self action:@selector(tenorButtonAction) forControlEvents:UIControlEventTouchUpInside];
+        [_giphyButton addTarget:self action:@selector(giphyButtonAction) forControlEvents:UIControlEventTouchUpInside];
     }
     return _giphyButton;
 }
 
 
-//#D8D8D866
-
 - (UIView *)selectedBgView {
     if (_selectedBgView == nil) {
         _selectedBgView = [[UIView alloc] init];
-        _selectedBgView.backgroundColor = UIColor.grayColor;
+        _selectedBgView.backgroundColor = [UIColor lightGrayColor];
         _selectedBgView.layer.cornerRadius = kCoverViewHeight * 0.5;
     }
     return _selectedBgView;
@@ -167,13 +175,13 @@
 - (UIView *)segmentView {
     if (_segmentView == nil) {
         _segmentView = [[UIView alloc] init];
-        
+        _segmentView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.02];
+//#00000005
         [_segmentView addSubview:self.selectedBgView];
         [_segmentView addSubview:self.emojiButton];
         [_segmentView addSubview:self.strikerButton];
         [_segmentView addSubview:self.giphyButton];
         
-            
         [self.selectedBgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.width.equalTo(@(kCoverViewWidth));
             make.height.equalTo(@(kCoverViewHeight));
@@ -182,7 +190,6 @@
         }];
         
         CGFloat emojiWidth = EaseKitScreenWidth / 3.0;
-        NSLog(@"%s width:%@",__func__,@(emojiWidth));
         
         [self.emojiButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(_segmentView);
@@ -211,14 +218,13 @@
 - (EaseInputMenuEmoticonView *)moreEmoticonView {
     if (_moreEmoticonView == nil) {
         _moreEmoticonView = [[EaseInputMenuEmoticonView alloc] initWithViewHeight:255];
-        _moreEmoticonView.backgroundColor = UIColor.redColor;
     }
     return _moreEmoticonView;
 }
 
 - (UIView *)strikerView {
     if (_strikerView == nil) {
-        _strikerView = [[UIView alloc] init];
+        _strikerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, EaseKitScreenWidth, 200)];
         _strikerView.backgroundColor = UIColor.blueColor;
         [_strikerView addSubview:self.stripopView];
         [self.stripopView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -232,8 +238,6 @@
 - (UIView *)giphyView {
     if (_giphyView == nil) {
         _giphyView = [[UIView alloc] init];
-        _giphyView.backgroundColor = UIColor.redColor;
-        
     }
     return _giphyView;
 }
@@ -242,43 +246,15 @@
     if (_contentView == nil) {
         
         _contentView = [[UIScrollView alloc] init];
-        _contentView.scrollEnabled = YES;
-        _contentView.bounces = YES;
+        _contentView.scrollEnabled = NO;
+        _contentView.bounces = NO;
         _contentView.alwaysBounceHorizontal = YES;
         _contentView.backgroundColor = UIColor.purpleColor;
         _contentView.contentSize = CGSizeMake(EaseKitScreenWidth, KContentViewHeight);
         _contentView.contentOffset = CGPointMake(0, 0);
-    
-        
-//        [_contentView addSubview:self.moreEmoticonView];
-//        [_contentView addSubview:self.strikerView];
-//        [_contentView addSubview:self.spickerView];
-//
-//        [self.moreEmoticonView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-//            make.top.equalTo(_contentView);
-//            make.left.equalTo(_contentView);
-//            make.width.equalTo(@(EaseKitScreenWidth));
-//            make.height.equalTo(@(KContentViewHeight));
-//            make.bottom.equalTo(_contentView);
-//        }];
-//
-//        [self.strikerView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-//            make.top.equalTo(_contentView);
-//            make.left.equalTo(self.moreEmoticonView.ease_right);
-//            make.width.equalTo(@(EaseKitScreenWidth));
-//            make.bottom.equalTo(_contentView);
-//        }];
-//
-//        [self.spickerView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-//            make.top.equalTo(_contentView);
-//            make.left.equalTo(self.strikerView.ease_right);
-//            make.width.equalTo(@(EaseKitScreenWidth));
-//            make.right.equalTo(_contentView);
-//            make.bottom.equalTo(_contentView);
-//        }];
-        
+            
         [_contentView addSubview:self.moreEmoticonView];
-        [_contentView addSubview:self.strikerView];
+        [_contentView addSubview:self.stripopView];
         [_contentView addSubview:self.giphyView];
 
         [self.moreEmoticonView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -288,19 +264,19 @@
             make.height.equalTo(@(KContentViewHeight));
             make.bottom.equalTo(_contentView);
         }];
-        
-        [self.strikerView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+
+        [self.stripopView Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(_contentView);
             make.left.equalTo(self.moreEmoticonView.ease_right);
-            make.width.equalTo(@(EaseKitScreenWidth));
+            make.size.equalTo(self.moreEmoticonView);
             make.bottom.equalTo(_contentView);
         }];
-        
+
         [self.giphyView Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(_contentView);
-            make.left.equalTo(self.strikerView.ease_right);
-            make.width.equalTo(@(EaseKitScreenWidth));
+            make.left.equalTo(self.stripopView.ease_right);
             make.right.equalTo(_contentView);
+            make.size.equalTo(self.moreEmoticonView);
             make.bottom.equalTo(_contentView);
         }];
     }
@@ -311,10 +287,12 @@
 
 - (EaseInputMenuStripopView *)stripopView {
     if (_stripopView == nil) {
-        _stripopView = [[EaseInputMenuStripopView alloc] init];
+        _stripopView = [[EaseInputMenuStripopView alloc] initWithFrame:CGRectMake(0, 100, [UIScreen mainScreen].bounds.size.width, KContentViewHeight)];
+        _stripopView.delegate = self;
     }
     return _stripopView;
 }
+
 
 @end
 

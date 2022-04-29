@@ -18,7 +18,8 @@ Pod::Spec.new do |s|
     s.source_files = [
         'chat-uikit/EaseChatKit.h',
         'chat-uikit/EasePublicHeaders.h',
-        'chat-uikit/**/*.{h,m,mm}'
+        'chat-uikit/**/*.{h,m,mm}',
+        'chat-uikit/**/*.{swift}'
     ]
     s.public_header_files = [
         'chat-uikit/EaseChatKit.h',
@@ -44,9 +45,7 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/Chat/MessageCell/BubbleView/EaseChatMessageBubbleView.h',
         'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/EaseInputMenuEmoticonView.h',
         'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/EaseEmoticon.h',
-        'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/EaseInputMenuFaceContainerView.h',
-        'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/EaseInputMenuStripopView.swift',
-
+        'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/EaseInputMenuFaceContainerView.h',        
         'chat-uikit/Classes/Chat/InputMenu/MoreView/AudioRecord/EaseInputMenuRecordAudioView.h',
         'chat-uikit/Classes/Chat/InputMenu/MoreView/MoreFunction/EaseExtendMenuView.h',
         
@@ -61,6 +60,8 @@ Pod::Spec.new do |s|
                               'VALID_ARCHS' => 'arm64 armv7 x86_64'
                             }
     s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+
+    s.swift_version = '4.0'
 
     s.dependency 'Agora_Chat_iOS'
     s.dependency 'EMVoiceConvert', '0.1.0'

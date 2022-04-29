@@ -112,7 +112,18 @@
         if ([imgPath length] == 0 && model.direction == AgoraChatMessageDirectionSend) {
             imgPath = body.localPath;
         }
-        [self setThumbnailImageWithLocalPath:imgPath remotePath:body.thumbnailRemotePath thumbImgSize:body.thumbnailSize imgSize:body.size];
+        //handle stipop && giphy message
+        NSDictionary *dic = model.message.ext;
+        NSString *emojiUrlString = dic[EaseEmojiUrlKey];
+        NSString *emojiTypeString = dic[EaseEmojiTypeKey];
+        
+        if (emojiUrlString) {
+            [self setThumbnailImageWithLocalPath:@"" remotePath:emojiUrlString thumbImgSize:CGSizeZero imgSize:CGSizeZero];
+        }else {
+            
+            [self setThumbnailImageWithLocalPath:imgPath remotePath:body.thumbnailRemotePath thumbImgSize:body.thumbnailSize imgSize:body.size];
+        }
+       
     }
 }
 

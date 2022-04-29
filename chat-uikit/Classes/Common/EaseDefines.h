@@ -124,4 +124,12 @@
 #define CHATROOM_INFO_UPDATED @"EaseChatroomInfoUpdated"
 #define CHATROOM_INFO_PUSHVIEWCONTROLLER @"EasePushChatroomInfoViewController"
 
+#define EaseEmojiUrlKey @"emoji_url"
+#define EaseEmojiTypeKey @"emoji_type"
+
+#define EaseEmojiTypeValueImage   @"img"
+#define EaseEmojiTypeValueGif     @"gif"
+#define EaseEmojiTypeValueVideo   @"video"
+
+
 #endif /* EaseDefines_h */

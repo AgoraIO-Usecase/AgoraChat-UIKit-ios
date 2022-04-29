@@ -32,9 +32,10 @@
 #import "EaseChatEnums.h"
 #import "UIAlertAction+Custom.h"
 #import "EaseInputMenu+Private.h"
-#import "EaseInputGiphyViewController.h"
 
-@interface EaseChatViewController ()<EaseMoreFunctionViewDelegate,EaseInputMenuFaceContainerViewDelegate>
+@import GiphyUISDK;
+
+@interface EaseChatViewController ()<EaseMoreFunctionViewDelegate,EaseInputMenuFaceContainerViewDelegate,GiphyDelegate>
 {
     EaseChatViewModel *_viewModel;
     EaseMessageCell *_currentLongPressCell;
@@ -104,9 +105,16 @@
         _inputBar.delegate = self;
         //Session toolbar
         [self _setupChatBarMoreViews];
+        
+        [self configureGiphySDK];
     }
     return self;
 }
+
+- (void)configureGiphySDK {
+    [Giphy configureWithApiKey:@"vEQuLHcYSYZHNyEa4BF1Ja7EKwR4qW5e" verificationMode:false metadata:@{}];
+}
+
 
 - (void)setUserProfiles:(NSArray<id<EaseUserProfile>> *)userProfileAry
 {
@@ -789,9 +797,76 @@
 
 #pragma mark EaseInputMenuFaceContainerViewDelegate
 - (void)showGiphyViewController {
-    EaseInputGiphyViewController *vc = [[EaseInputGiphyViewController alloc] init];
-    [self.navigationController presentViewController:vc animated:YES completion:nil];
+       
+    GiphyViewController *giphy = [[GiphyViewController alloc]init ] ;
+    giphy.theme = [[GPHTheme alloc] init];
+    giphy.theme.type = GPHThemeTypeDark;
+    giphy.rating = GPHRatingTypeRatedPG13;
+    giphy.delegate = self;
+    giphy.showConfirmationScreen = true ;
+    [giphy setMediaConfigWithTypes: [ [NSMutableArray alloc] initWithObjects:
+                                     @(GPHContentTypeRecents),@(GPHContentTypeGifs),@(GPHContentTypeStickers), @(GPHContentTypeText),@(GPHContentTypeEmoji), nil] ];
+    [[GPHCache shared] clear];
+    
+    [self presentViewController:giphy animated:true completion:nil];
+
 }
+
+- (void)selectedStikerWithUrlString:(NSString *)urlString fileType:(NSString *)fileType {
+    if (urlString != nil && fileType != nil) {
+        NSLog(@"%s urlString:%@ fileType:%@",__func__,urlString,fileType);
+        
+        NSString *fileName = [urlString lastPathComponent];
+        
+        AgoraChatImageMessageBody *imgBody = [[AgoraChatImageMessageBody alloc] initWithLocalPath:@"" displayName:fileName];
+        
+        NSDictionary *dic = @{EaseEmojiUrlKey:urlString,EaseEmojiTypeKey:fileType};
+        [self sendMessageWithBody:imgBody ext:dic];
+    }
+}
+
+
+#pragma mark GiphyDelegate
+- (void) didSelectMediaWithGiphyViewController:(GiphyViewController *)giphyViewController media:(GPHMedia *)media {
+     
+    /* grab url:
+    NSString *url = media.images.fixedWidth.gifUrl ;
+    NSString *url = media.images.fixedWidth.webPUrl ;
+    */
+    
+//    GPHMediaTypeGif = 0,
+//  /// Sticker Media Type
+//    GPHMediaTypeSticker = 1,
+//  /// Text Media Type
+//    GPHMediaTypeText = 2,
+//  /// Video Media Type
+//    GPHMediaTypeVideo = 3,
+    
+    
+    NSString *url = media.images.fixedWidth.gifUrl;
+    NSString *orignalUrl = media.url;
+    NSString *title = media.title;
+    GPHMediaType type = media.type;
+     
+    NSLog(@"%s url:%@",__func__,url);
+    NSLog(@"%s orignalUrl:%@",__func__,orignalUrl);
+    NSLog(@"%s title:%@",__func__,title);
+    NSLog(@"%s type:%@",__func__,@(type));
+
+    NSLog(@"media:%@",media);
+    
+    NSString *fileName = [url lastPathComponent];
+    AgoraChatImageMessageBody *imgBody = [[AgoraChatImageMessageBody alloc] initWithLocalPath:@"" displayName:fileName];
+    NSDictionary *dic = @{EaseEmojiUrlKey:url,EaseEmojiTypeKey:@(type)};
+    [self sendMessageWithBody:imgBody ext:dic];
+    
+}
+
+
+- (void) didDismissWithController:(GiphyViewController *)controller {
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 
 #pragma mark - KeyBoard
 
