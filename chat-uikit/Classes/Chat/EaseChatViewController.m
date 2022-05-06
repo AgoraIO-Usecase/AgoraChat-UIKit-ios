@@ -32,8 +32,13 @@
 #import "EaseChatEnums.h"
 #import "UIAlertAction+Custom.h"
 #import "EaseInputMenu+Private.h"
+#import "EMBottomMoreFunctionView.h"
+@import AgoraChat;
+#import "EMMaskHighlightViewDelegate.h"
+#import "EMBottomReactionDetailView.h"
+#import "ChatUIOptions.h"
 
-@interface EaseChatViewController ()<EaseMoreFunctionViewDelegate>
+@interface EaseChatViewController ()<EaseMoreFunctionViewDelegate, EMBottomMoreFunctionViewDelegate>
 {
     EaseChatViewModel *_viewModel;
     EaseMessageCell *_currentLongPressCell;
@@ -211,8 +216,8 @@
         self.inputBar.textView.text = [self.currentConversation draft];
         [self.currentConversation setDraft:@""];
     }*/
-    [[AgoraChatClient sharedClient].chatManager addDelegate:self delegateQueue:nil];
- 
+    [AgoraChatClient.sharedClient.chatManager addDelegate:self delegateQueue:nil];
+    
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapTableViewAction:)];
     [self.tableView addGestureRecognizer:tap];
     
@@ -264,6 +269,7 @@
     //Refreshing the session list
     [[NSNotificationCenter defaultCenter] postNotificationName:CONVERSATIONLIST_UPDATE object:nil];
     [[AgoraChatClient sharedClient].chatManager removeDelegate:self];
+    [AgoraChatClient.sharedClient.chatManager removeDelegate:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -357,7 +363,7 @@
         }
     }
     
-    if ([cellString length] > 0) {
+    if (cellString.length > 0) {
         NSString *identifier = (type == EaseChatWeakRemindMsgTime) ? @"EaseMessageTimeCell" : @"AgoraChatMessageSystemHint";
         EaseMessageTimeCell *cell = (EaseMessageTimeCell *)[tableView dequeueReusableCellWithIdentifier:identifier];
         // Configure the cell...
@@ -531,6 +537,9 @@
         [self hideLongPressView];
     }
     self.longPressIndexPath = [self.tableView indexPathForCell:aCell];
+    if (!self.longPressIndexPath) {
+        return;
+    }
     __weak typeof(self) weakself = self;
     EaseExtendMenuModel *copyExtModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"copy"] funcDesc:@"Copy" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
         [weakself copyLongPressAction];
@@ -539,7 +548,7 @@
         [weakself deleteLongPressAction:^(AgoraChatMessage *deleteMsg) {
             if (deleteMsg) {
                 NSUInteger index = [weakself.messageList indexOfObject:deleteMsg];
-                if (index != -1) {
+                if (index != NSNotFound) {
                     [weakself.messageList removeObject:deleteMsg];
                     if ([deleteMsg.messageId isEqualToString:weakself.moreMsgId]) {
                         if ([weakself.messageList count] > 0) {
@@ -587,68 +596,23 @@
         return;
     }
 
-    self.longPressView = [[EaseExtendMenuView alloc]initWithextMenuModelArray:extMenuArray menuViewModel:[[EaseExtMenuViewModel alloc]initWithType:isCustomCell ? ExtTypeCustomCellLongPress : ExtTypeLongPress itemCount:[extMenuArray count] extendMenuModel:_viewModel.extendMenuViewModel]];
-    self.longPressView.delegate = self;
-    
-    CGSize longPressViewsize = [self.longPressView getExtViewSize];
-    self.longPressView.layer.cornerRadius = 8;
-    CGRect viewRect = [self.view convertRect:self.view.bounds toView:nil];
-    CGRect rect = [aCell convertRect:aCell.bounds toView:nil];
-    CGFloat maxWidth = self.view.frame.size.width;
-    CGFloat maxHeight = self.tableView.frame.size.height;
-    CGFloat xOffset = 0;
-    CGFloat yOffset = 0;
-    if (!isCustomCell) {
-        if (_currentLongPressCell.model.direction == AgoraChatMessageDirectionReceive || (_viewModel.msgAlignmentStyle == EaseAlignmentlAll_Left && _currentLongPressCell.model.message.chatType == AgoraChatTypeGroupChat)) {
-            xOffset = (avatarLonger + 3*componentSpacing + _currentLongPressCell.bubbleView.frame.size.width/2) - (longPressViewsize.width/2);
-            if (xOffset < 2*componentSpacing) {
-                xOffset = 2*componentSpacing;
-            }
-        } else {
-            xOffset = (maxWidth - avatarLonger - 3*componentSpacing - _currentLongPressCell.bubbleView.frame.size.width/2) - (longPressViewsize.width/2);
-            if ((xOffset + longPressViewsize.width) > (maxWidth - componentSpacing)) {
-                xOffset = maxWidth - componentSpacing - longPressViewsize.width;
-            }
-        }
-        yOffset = rect.origin.y - longPressViewsize.height + 2 * componentSpacing;
-    } else {
-        xOffset = point.x - longPressViewsize.width/2;
-        if ((xOffset + longPressViewsize.width) > (maxWidth - 2*componentSpacing)) {
-            xOffset = maxWidth - 2*componentSpacing - longPressViewsize.width;
-        }
-        if (xOffset < 2*componentSpacing) {
-            xOffset = 2*componentSpacing;
-        }
-        yOffset = point.y - longPressViewsize.height - componentSpacing;
+    NSDictionary *userInfo;
+    if (_currentLongPressCell.model.message) {
+        userInfo = @{
+            @"message": _currentLongPressCell.model.message
+        };
     }
-    CGFloat topBoundary = viewRect.origin.y < [self bangScreenSize] ? [self bangScreenSize] : viewRect.origin.y;
-    if (yOffset <= topBoundary) {
-        yOffset = topBoundary;
-        if ((yOffset + longPressViewsize.height) > isCustomCell ? (point.y + componentSpacing) : (rect.origin.y + componentSpacing)) {
-            yOffset = isCustomCell ? (point.y + 1.5 * componentSpacing) : (rect.origin.y + rect.size.height - componentSpacing / 2);
-        }
-        if (!isCustomCell) {
-            if (_currentLongPressCell.bubbleView.frame.size.height > (maxHeight - longPressViewsize.height - 2 * componentSpacing)) {
-                yOffset = maxHeight / 2;
-            }
-        } else {
-            if (aCell.frame.size.height > (maxHeight - longPressViewsize.height - 4)) {
-                yOffset = maxHeight / 2;
-            }
-        }
+//
+    NSArray *hightlightViews;
+//    if ([aCell conformsToProtocol:@protocol(EMMaskHighlightViewDelegate)] && [aCell respondsToSelector:@selector(maskHighlight)]) {
+//        hightlightViews = [((id<EMMaskHighlightViewDelegate>)aCell) maskHighlight];
+//    }
+    [self.inputBar resignFirstResponder];
+    BOOL showReaction = YES;
+    if (_delegate && [_delegate respondsToSelector:@selector(messageLongPressExtShowReaction:)]) {
+        showReaction = [_delegate messageLongPressExtShowReaction:_currentLongPressCell.model.message];
     }
-    self.longPressView.frame = CGRectMake(xOffset, yOffset, longPressViewsize.width, longPressViewsize.height);
-    UIWindow *currentWindow = self.view.window;
-    [currentWindow addSubview:self.longPressView];
-    
-    UIBezierPath *shadowPath = [UIBezierPath
-    bezierPathWithRect:self.longPressView.bounds];
-    self.longPressView.layer.masksToBounds = NO;
-    self.longPressView.layer.shadowColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.12].CGColor;
-    self.longPressView.layer.shadowOffset = CGSizeMake(8.0f, 24.0f);
-    self.longPressView.layer.shadowOpacity = 1;
-    self.longPressView.layer.shadowPath = shadowPath.CGPath;
-    self.longPressView.layer.shadowRadius = 8;
+    [EMBottomMoreFunctionView showMenuItems:extMenuArray showReaction:showReaction delegate:self ligheViews:hightlightViews animation:YES userInfo:userInfo];
 }
 
 - (void)messageCellDidResend:(EaseMessageModel *)aModel
@@ -684,6 +648,34 @@
     if (self.delegate && [self.delegate respondsToSelector:@selector(avatarDidLongPress:)]) {
         [self.delegate avatarDidLongPress:model.userDataProfile];
     }
+}
+
+- (void)messageCellDidClickReactionView:(EaseMessageModel *)model {
+    [self.inputBar resignFirstResponder];
+    
+    [EMBottomReactionDetailView showMenuItems:model.message animation:YES didRemoveSelfReaction:^(NSString * _Nonnull reaction) {
+        __weak typeof(self)weakSelf = self;
+        [AgoraChatClient.sharedClient.chatManager removeReaction:reaction fromMessage:model.message.messageId completion:^(AgoraChatError * _Nullable error) {
+            if (error) {
+                return;
+            }
+            [self reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
+//            __strong typeof(weakSelf)strongSelf = self;
+//            if (strongSelf) {
+//                NSArray *hightlightViews;
+//                id<EMMaskHighlightViewDelegate> aCell = strongSelf->_currentLongPressCell;
+//                if (!aCell) {
+//                    aCell = strongSelf->_currentLongPressCustomCell;
+//                }
+//                if ([aCell conformsToProtocol:@protocol(EMMaskHighlightViewDelegate)] && [aCell respondsToSelector:@selector(maskHighlight)]) {
+//                    hightlightViews = [((id<EMMaskHighlightViewDelegate>)aCell) maskHighlight];
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        [EMBottomMoreFunctionView updateHighlightViews:hightlightViews];
+//                    });
+//                }
+//            }
+        }];
+    }];
 }
 
 #pragma mark -- EaseMoreFunctionViewDelegate
@@ -779,6 +771,115 @@
         }
         [self refreshTableView:NO];
     }
+}
+
+#pragma mark - EMReaction
+- (void)messageReactionDidChange:(NSArray<AgoraChatMessageReactionChange *> *)changes
+{
+    NSMutableSet *refreshMessageIds = [NSMutableSet set];
+    for (AgoraChatMessageReactionChange *change in changes) {
+        [refreshMessageIds addObject:change.messageId];
+    }
+    [self reloadVisibleRowsWithMessageIds:refreshMessageIds];
+    
+//    NSArray *hightlightViews;
+//    id<EMMaskHighlightViewDelegate> aCell = _currentLongPressCell;
+//    if (!aCell) {
+//        aCell = _currentLongPressCustomCell;
+//    }
+//
+//    if ([aCell conformsToProtocol:@protocol(EMMaskHighlightViewDelegate)] && [aCell respondsToSelector:@selector(maskHighlight)]) {
+//        hightlightViews = [((id<EMMaskHighlightViewDelegate>)aCell) maskHighlight];
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            [EMBottomMoreFunctionView updateHighlightViews:hightlightViews];
+//        });
+//    }
+}
+
+- (void)reloadVisibleRowsWithMessageIds:(NSSet <NSString *>*)messageIds {
+    NSArray *visibleRows = [_tableView indexPathsForVisibleRows];
+    NSMutableArray <NSIndexPath *>*refreshRows = [NSMutableArray array];
+    for (NSIndexPath *row in visibleRows) {
+        id obj = self.dataArray[row.row];
+        if ([obj isKindOfClass:[EaseMessageModel class]]) {
+            EaseMessageModel *model = (EaseMessageModel *)obj;
+            if ([messageIds containsObject:model.message.messageId]) {
+                [refreshRows addObject:row];
+            }
+        }
+    }
+    [_tableView beginUpdates];
+    [_tableView reloadRowsAtIndexPaths:refreshRows withRowAnimation:UITableViewRowAnimationNone];
+    [_tableView endUpdates];
+}
+
+#pragma mark - EMBottomMoreFunctionView
+- (BOOL)bottomMoreFunctionViewShowReaction:(EMBottomMoreFunctionView *)view
+{
+    return ChatUIOptions.shareOptions.reactionOptions.isOpen;
+}
+
+- (void)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view didSelectedMenuItem:(EaseExtendMenuModel *)model {
+    if (model.itemDidSelectedHandle) {
+        model.itemDidSelectedHandle(model.funcDesc, YES);
+    }
+    
+    [EMBottomMoreFunctionView hideWithAnimation:YES needClear:NO];
+}
+
+- (void)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view didSelectedEmoji:(NSString *)emoji changeSelectedStateHandle:(void (^)(void))changeSelectedStateHandle {
+    EaseMessageModel *model = [self.dataArray objectAtIndex:self.longPressIndexPath.row];
+    if (!model || ![model isKindOfClass:EaseMessageModel.class]) {
+        return;
+    }
+    __weak typeof(self)weakSelf = self;
+    void(^refreshBlock)(AgoraChatError *, void(^changeSelectedStateHandle)(void)) = ^(AgoraChatError *error, void(^changeSelectedStateHandle)(void) ) {
+        if (error) {
+            return;
+        }
+        [weakSelf reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
+//        __strong typeof(weakSelf)strongSelf = self;
+//        if (strongSelf) {
+//            NSArray *hightlightViews;
+//            UITableViewCell *aCell = strongSelf->_currentLongPressCell;
+//            if (!aCell) {
+//                aCell = strongSelf->_currentLongPressCustomCell;
+//            }
+//            if ([aCell conformsToProtocol:@protocol(EMMaskHighlightViewDelegate)] && [aCell respondsToSelector:@selector(maskHighlight)]) {
+//                hightlightViews = [((id<EMMaskHighlightViewDelegate>)aCell) maskHighlight];
+//                dispatch_async(dispatch_get_main_queue(), ^{
+//                    [EMBottomMoreFunctionView updateHighlightViews:hightlightViews];
+//                });
+//            }
+//        }
+        if (changeSelectedStateHandle) {
+            changeSelectedStateHandle();
+        }
+    };
+    
+    if (![model.message getReaction:emoji].isAddedBySelf) {
+        [AgoraChatClient.sharedClient.chatManager addReaction:emoji toMessage:model.message.messageId completion:^(AgoraChatError * _Nullable error) {
+            refreshBlock(error, changeSelectedStateHandle);
+        }];
+    } else {
+        [AgoraChatClient.sharedClient.chatManager removeReaction:emoji fromMessage:model.message.messageId completion:^(AgoraChatError * _Nullable error) {
+            refreshBlock(error, changeSelectedStateHandle);
+        }];
+    }
+    [EMBottomMoreFunctionView hideWithAnimation:YES needClear:NO];
+}
+
+- (BOOL)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view getEmojiIsSelected:(NSString *)emoji userInfo:(nonnull NSDictionary *)userInfo {
+    AgoraChatMessage *msg = userInfo[@"message"];
+    if (!msg) {
+        return NO;
+    }
+    
+    AgoraChatMessageReaction *reactionObj = [msg getReaction:emoji];
+    if (!reactionObj) {
+        return NO;
+    }
+    return reactionObj.isAddedBySelf;
 }
 
 #pragma mark - KeyBoard

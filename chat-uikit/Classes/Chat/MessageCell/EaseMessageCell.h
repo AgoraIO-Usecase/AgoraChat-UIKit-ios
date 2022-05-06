@@ -50,6 +50,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)avatarDidSelected:(EaseMessageModel *)model;
 - (void)avatarDidLongPress:(EaseMessageModel *)model;
 
+- (void)messageCellDidClickReactionView:(EaseMessageModel *)model;
+
 @end
 
 NS_ASSUME_NONNULL_END

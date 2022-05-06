@@ -38,7 +38,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval forDateFormatter:(NSDateFormatter *)formatter;
 
-
 @end
 
 NS_ASSUME_NONNULL_END
