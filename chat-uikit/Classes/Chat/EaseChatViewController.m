@@ -363,7 +363,7 @@
         }
     }
     
-    if ([cellString length] > 0) {
+    if (cellString.length > 0) {
         NSString *identifier = (type == EaseChatWeakRemindMsgTime) ? @"EaseMessageTimeCell" : @"AgoraChatMessageSystemHint";
         EaseMessageTimeCell *cell = (EaseMessageTimeCell *)[tableView dequeueReusableCellWithIdentifier:identifier];
         // Configure the cell...
