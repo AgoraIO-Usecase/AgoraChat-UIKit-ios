@@ -9,7 +9,7 @@
 #import "EMMsgAudioBubbleView.h"
 #import "EMMsgThreadPreviewBubble.h"
 #define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
-#define kEMMsgAudioMinWidth 30
+#define kEMMsgAudioMinWidth 45
 #define kEMMsgAudioMaxWidth 120
 
 @interface EMMsgAudioBubbleView()
@@ -36,6 +36,7 @@
         [self addSubview:self.threadBubble];
         self.threadBubble.layer.cornerRadius = 8;
         self.threadBubble.clipsToBounds = YES;
+        self.threadBubble.hidden = YES;
     }
     
     return self;
@@ -148,11 +149,19 @@
     if (model.isHeader == NO) {
         if (model.message.threadOverView) {
             self.threadBubble.model = model;
+            self.threadBubble.hidden = !model.message.threadOverView;
+        } else {
+            self.threadBubble.hidden = YES;
+            [self.threadBubble Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            }];
         }
+    } else {
+        self.threadBubble.hidden = YES;
+        [self.threadBubble Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+        }];
     }
-    self.threadBubble.hidden = model.isHeader;
     _maxWidth= [UIScreen mainScreen].bounds.size.width / 2 - 100;
-    if (model.message.threadOverView && model.thread == nil) {
+    if (model.message.threadOverView && model.isHeader == NO) {
         _maxWidth = KEMThreadBubbleWidth + 24;
     }
     AgoraChatMessageType type = model.type;
@@ -172,18 +181,24 @@
         } else if (width < kEMMsgAudioMinWidth) {
             width = kEMMsgAudioMinWidth;
         }
-        if (model.message.threadOverView && model.thread == nil) {
+        if (model.message.threadOverView && model.isHeader == NO) {
             width = KEMThreadBubbleWidth+24;
             [self threadLayout];
-            self.threadBubble.model = model;
+        } else {
+            [self Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                make.width.Ease_equalTo(width+24);
+                make.height.Ease_equalTo(46);
+            }];
+            [self.imgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(self).offset(8);
+                make.width.height.equalTo(@30);
+                make.left.equalTo(self).offset(5);
+            }];
         }
         [self.textLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
             make.width.Ease_equalTo(width);
         }];
     }
-    if (model.thread == nil && model.message.threadOverView && model.message.threadOverView.lastMessage.messageId.length) {
-        self.threadBubble.model = model;
-    } else self.threadBubble.model = nil;
 }
 
 @end

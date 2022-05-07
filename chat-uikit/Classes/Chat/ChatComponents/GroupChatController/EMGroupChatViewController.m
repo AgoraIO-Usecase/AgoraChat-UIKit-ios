@@ -140,8 +140,8 @@
 - (void)onChatThreadCreate:(AgoraChatThreadEvent *)event {
     if (event.threadName && event.from && [event.channelId isEqualToString:self.currentConversation.conversationId]) {
         id<EaseUserProfile> userThreadData = [self.delegate userProfile:event.from];
-        NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nSee all threads",userThreadData.showName ? userThreadData.showName:event.from,event.threadName];
-        [self.dataArray addObject:threadNotify];
+        NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nJoin the thread",userThreadData.showName ? userThreadData.showName:event.from,event.threadName];
+        [self.dataArray addObject:@{threadNotify:event.messageId}];
         [self refreshTableView:YES];
     }
 }
@@ -150,28 +150,14 @@
     if (![event.channelId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }
-    AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:event.messageId];
-    for (EaseMessageModel *model in self.dataArray) {
-        if ([model isKindOfClass:[EaseMessageModel class]] && [message.messageId isEqualToString:model.message.messageId]) {
-            NSInteger index = [self.dataArray indexOfObject:message];
-            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-            return;
-        }
-    }
+    [self refreshTableView:YES];
 }
 
 - (void)onChatThreadUpdate:(AgoraChatThreadEvent *)event {
     if (![event.channelId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }
-    AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:event.messageId];
-    for (EaseMessageModel *model in self.dataArray) {
-        if ([model isKindOfClass:[EaseMessageModel class]] && [model.message.messageId isEqualToString:message.messageId]) {
-            NSInteger index = [self.dataArray indexOfObject:model];
-            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-            return;
-        }
-    }
+    [self refreshTableView:YES];
 }
 
 @end

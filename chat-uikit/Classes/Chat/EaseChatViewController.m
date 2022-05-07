@@ -409,9 +409,13 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     id obj = [self.dataArray objectAtIndex:indexPath.row];
     NSString *cellString = nil;
+    NSDictionary *cellNotifyMap;
     EaseChatWeakRemind type = EaseChatWeakRemindMsgTime;
     if ([obj isKindOfClass:[NSString class]]) {
         cellString = (NSString *)obj;
+    }
+    if ([obj isKindOfClass:[NSDictionary class]]) {
+        cellNotifyMap = (NSDictionary *)obj;
     }
     if ([obj isKindOfClass:[EaseMessageModel class]]) {
         EaseMessageModel *model = (EaseMessageModel *)obj;
@@ -447,6 +451,23 @@
         return cell;
     }
     
+    if (cellNotifyMap.count > 0) {
+        NSString *identifier = (type == EaseChatWeakRemindMsgTime) ? @"EaseMessageTimeCell" : @"AgoraChatMessageSystemHint";
+        EaseMessageTimeCell *cell = (EaseMessageTimeCell *)[tableView dequeueReusableCellWithIdentifier:identifier];
+        // Configure the cell...
+        if (cell == nil) {
+            cell = [[EaseMessageTimeCell alloc] initWithViewModel:_viewModel remindType:type];
+        }
+        NSString *text = cellNotifyMap.allKeys.firstObject;
+        if ([text containsString:@"thread"]) {
+            cell.timeLabel.text = @"";
+            cell.timeLabel.attributedText = [cell cellAttributeText:text];
+        } else {
+            cell.timeLabel.text = cellString;
+        }
+        return cell;
+    }
+    
     EaseMessageModel *model = (EaseMessageModel *)obj;
     if (self.delegate && [self.delegate respondsToSelector:@selector(cellForItem:messageModel:)]) {
         UITableViewCell *customCell = [self.delegate cellForItem:tableView messageModel:model];
@@ -465,11 +486,11 @@
         cell.delegate = self;
     }
     model.isHeader = NO;
-    cell.model = model;
-    
     if (cell.model.message.body.type == AgoraChatMessageTypeVoice) {
         cell.model.weakMessageCell = cell;
     }
+    model.isPlaying = NO;
+    cell.model = model;
 
     return cell;
 }
@@ -483,10 +504,15 @@
     if ([obj isKindOfClass:[NSString class]]) {
         cellString = (NSString *)obj;
     }
+    NSDictionary *cellNotifyMap;
+    if ([obj isKindOfClass:[NSDictionary class]]) {
+        cellNotifyMap = (NSDictionary *)obj;
+    }
+    cellString = cellNotifyMap.allKeys.firstObject;
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-    if ([cell isKindOfClass:[EaseMessageTimeCell class]] && [cellString containsString:@"See all threads"]) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(pushThreadList)]) {
-            [self.delegate pushThreadList];
+    if ([cell isKindOfClass:[EaseMessageTimeCell class]] && [cellString containsString:@"thread"]) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(joinChatThreadFromNotifyMessage:)]) {
+            [self.delegate joinChatThreadFromNotifyMessage:cellNotifyMap.allValues.firstObject];
         }
     }
 }
@@ -627,12 +653,14 @@
     //Message event policy classification
     AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell];
     eventStrategy.chatController = self;
+    aCell.model.isPlaying = !aCell.model.isPlaying;
     [eventStrategy messageCellEventOperation:aCell];
 }
 
 //Message long press event
 - (void)messageCellDidLongPress:(UITableViewCell *)aCell cgPoint:(CGPoint)point
 {
+    [self.view endEditing:YES];
     if (aCell != _currentLongPressCell) {
         [self hideLongPressView];
     }
@@ -784,7 +812,7 @@
         return;
     }
     [AgoraChatClient.sharedClient.threadManager joinChatThread:model.message.threadOverView.threadId completion:^(AgoraChatThread *thread,AgoraChatError *aError) {
-        if (!aError || aError.code == 40004) {
+        if (!aError || aError.code == AgoraChatErrorUserAlreadyExist) {
             if (thread) {
                 model.thread = thread;
             }
@@ -1183,14 +1211,23 @@
 - (void)sendMsgimpl:(AgoraChatMessage *)message
 {
     __weak typeof(self) weakself = self;
-    NSArray *formated = [self formatMessages:@[message]];
-    [self.dataArray addObjectsFromArray:formated];
-    [self.messageList addObject:message];
-    if (!self.moreMsgId)
+    BOOL sendRefresh = NO;
+    if (self.isChatThread == NO) {
+        sendRefresh = YES;
+    } else if (self.isChatThread == YES && self.cursor.list.count < 20) {
+        sendRefresh = YES;
+    }
+    if (!self.moreMsgId) {
         //The first message of a new session
         self.moreMsgId = message.messageId;
+    }
+    if (sendRefresh == YES) {
+        NSArray *formated = [self formatMessages:@[message]];
+        [self.dataArray addObjectsFromArray:formated];
+        [self.messageList addObject:message];
+        [self refreshTableView:YES];
+    }
     
-    [self refreshTableView:YES];
     [[AgoraChatClient sharedClient].chatManager sendMessage:message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
         [weakself msgStatusDidChange:message error:error];
         if (weakself.delegate && [weakself.delegate respondsToSelector:@selector(didSendMessage:error:)]) {
@@ -1239,7 +1276,6 @@
 - (UITableView *)tableView {
     if (!_tableView) {
         _tableView = [[UITableView alloc] init];
-        _tableView.tableFooterView = [UIView new];
         _tableView.delegate = self;
         _tableView.dataSource = self;
         _tableView.rowHeight = UITableViewAutomaticDimension;
@@ -1250,6 +1286,7 @@
             [_tableView enableRefresh:@"drop down refresh" color:UIColor.systemGrayColor];
             [_tableView.refreshControl addTarget:self action:@selector(dropdownRefreshTableViewWithData) forControlEvents:UIControlEventValueChanged];
         }
+        _tableView.tableFooterView = [[UIView alloc] init];
     }
     
     return _tableView;

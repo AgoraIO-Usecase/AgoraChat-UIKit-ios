@@ -11,14 +11,12 @@
 #import "EaseChatViewModel.h"
 @protocol EaseThreadListProtocol <NSObject>
 @optional
-- (EaseThreadCell *)agoraChatThreadList:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (UITableViewCell *)agoraChatThreadList:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 - (void)agoraChatThreadList:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
 - (CGFloat)agoraChatThreadList:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
-- (void)popThreadChat;
-@required
-- (void)threadListCount:(int)count;
+
 
 @end
 

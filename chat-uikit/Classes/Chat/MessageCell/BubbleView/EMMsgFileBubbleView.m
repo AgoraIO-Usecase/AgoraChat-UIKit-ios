@@ -28,6 +28,9 @@
         self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
         self.threadBubble.tag = 666;
         [self addSubview:self.threadBubble];
+        self.threadBubble.layer.cornerRadius = 8;
+        self.threadBubble.clipsToBounds = YES;
+        self.threadBubble.hidden = YES;
     }
     
     return self;
@@ -104,18 +107,24 @@
 //    }];
 }
 
-- (void)updateThreadLayout:(CGRect)rect {
+- (void)updateThreadLayout:(CGRect)rect model:(EaseMessageModel *)model{
     [self Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.width.Ease_equalTo(rect.size.width);
         make.height.Ease_equalTo(rect.size.height);
     }];
-    [_threadBubble Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.bottom.equalTo(self).offset(-12);
-        make.left.equalTo(self).offset(12);
-        make.right.equalTo(self).offset(-12);
-        make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4);
-        make.width.Ease_equalTo(KEMThreadBubbleWidth);
-    }];
+    if (model.isHeader == NO && model.message.threadOverView) {
+        [_threadBubble Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.bottom.equalTo(self).offset(-12);
+            make.left.equalTo(self).offset(12);
+            make.right.equalTo(self).offset(-12);
+            make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4);
+            make.width.Ease_equalTo(KEMThreadBubbleWidth);
+        }];
+    } else {
+        [_threadBubble Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+           
+        }];
+    }
     if (self.direction == AgoraChatMessageDirectionSend) {
         [self.iconView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             if (self.threadBubble.hidden == NO) {
@@ -180,16 +189,20 @@
     if (model.isHeader == NO) {
         if (model.message.threadOverView) {
             self.threadBubble.model = model;
+            self.threadBubble.hidden = !model.message.threadOverView;
+        }else {
+            self.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
+            self.threadBubble.hidden = YES;
         }
     } else {
         self.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
+        self.threadBubble.hidden = YES;
     }
-    self.threadBubble.hidden = model.isHeader;
     AgoraChatMessageType type = model.type;
     
     if (type == AgoraChatMessageTypeFile) {
         CGFloat height = 70;
-        if (!model.thread) {
+        if (!model.isHeader) {
             if (model.message.threadOverView) {
                 self.maxBubbleWidth = KEMThreadBubbleWidth+24;
             }
@@ -200,7 +213,7 @@
         CGRect rect = CGRectMake(0, 0, self.maxBubbleWidth, height);
         [self setCornerRadius:rect];
         [self setupBubbleBackgroundImage];
-        [self updateThreadLayout:rect];
+        [self updateThreadLayout:rect model:model];
         AgoraChatFileMessageBody *body = (AgoraChatFileMessageBody *)model.message.body;
         NSMutableAttributedString *attributedStr = [[NSMutableAttributedString alloc] initWithString:body.displayName];
         NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
@@ -218,7 +231,7 @@
         } else {
             self.downloadStatusLabel.text = @"";
         }
-        if (model.message.threadOverView && model.thread == nil) {
+        if (model.message.threadOverView && model.isHeader == NO) {
             self.threadBubble.model = model;
         } else self.threadBubble.model = nil;
         

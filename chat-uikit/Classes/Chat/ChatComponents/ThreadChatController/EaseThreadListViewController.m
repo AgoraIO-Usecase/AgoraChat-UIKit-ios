@@ -23,7 +23,6 @@
 
 @property (nonatomic) NSLock *lock;
 
-@property (nonatomic) int dataCount;
 
 @property (nonatomic) BOOL isAdmin;
 
@@ -33,7 +32,6 @@
 
 - (instancetype)initWithGroup:(AgoraChatGroup *)group chatViewModel:(EaseChatViewModel *)viewModel{
     if ([super init]) {
-        self.dataCount = 0;
         self.group = group;
         __weak typeof(self) weakSelf = self;
         self.viewModel = viewModel;
@@ -57,7 +55,6 @@
 
 - (void)requestList {
     if (self.cursor == nil) {
-        self.dataCount = 0;
         [self.dataArray removeAllObjects];
     }
     self.loadMoreFinished = NO;
@@ -66,23 +63,15 @@
             if (!aError) {
                 self.loadMoreFinished = YES;
                 self.cursor = result;
-                self.dataCount += result.list.count;
-                if (self.delegate && [self.delegate respondsToSelector:@selector(threadListCount:)]) {
-                    [self.delegate threadListCount:self.dataCount];
-                }
                 [self.threadList endRefreshing];
                 [self loadDataArray:result.list];
             }
         }];
     } else {
-        [[AgoraChatClient sharedClient].threadManager getJoinedChatThreadsFromServerWithCursor:self.cursor ? self.cursor.cursor:@"" pageSize:20 completion:^(AgoraChatCursorResult * _Nonnull result, AgoraChatError * _Nonnull aError) {
+        [AgoraChatClient.sharedClient.threadManager getMineChatThreadsFromServerWithParentId:self.group.groupId cursor:self.cursor ? self.cursor.cursor:@"" pageSize:20 completion:^(AgoraChatCursorResult * _Nonnull result, AgoraChatError * _Nonnull aError) {
             if (!aError) {
                 self.loadMoreFinished = YES;
                 self.cursor = result;
-                self.dataCount += result.list.count;
-                if (self.delegate && [self.delegate respondsToSelector:@selector(threadListCount:)]) {
-                    [self.delegate threadListCount:self.dataCount];
-                }
                 [self.threadList endRefreshing];
                 [self loadDataArray:result.list];
             }
@@ -235,9 +224,17 @@
         [self showHint:@"conversationId is empty!"];
         return;
     }
+    EaseMessageModel *model;
+    AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:conv.threadInfo.messageId];
+    if (message.messageId.length) {
+        model = [[EaseMessageModel alloc]initWithAgoraChatMessage:message];
+        model.direction = message.direction;
+        model.type = message.body.type;
+        model.thread = conv.threadInfo;
+    }
     [AgoraChatClient.sharedClient.threadManager joinChatThread:conv.threadInfo.threadId completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
-        if (!aError || aError.code == 40004) {
-            EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:conv.threadInfo.threadId chatViewModel:self.viewModel parentMessageId:@"" model:nil];
+        if (!aError || aError.code == AgoraChatErrorUserAlreadyExist) {
+            EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:conv.threadInfo.threadId chatViewModel:self.viewModel parentMessageId:message.messageId.length ? message.messageId:@"" model:message.messageId.length ? model:nil];
             VC.title = thread ? thread.threadName:conv.threadInfo.threadName;
             [self.navigationController pushViewController:VC animated:YES];
         }

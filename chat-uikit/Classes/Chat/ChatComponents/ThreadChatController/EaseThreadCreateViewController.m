@@ -152,6 +152,8 @@
     [[AgoraChatClient sharedClient].threadManager createChatThread:self.threadName messageId:self.message.message.messageId parentId:self.message.message.to completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
         if (!aError) {
             [weakself sendMsgimpl:thread body:aBody ext:aExt];
+        } else {
+            [weakself showHint:aError.errorDescription];
         }
     }];
     
@@ -375,15 +377,26 @@
     }
     cell.delegate = self;
     model.isHeader = YES;
+    model.isPlaying = NO;
     cell.model = model;
-    cell.model.weakMessageCell = cell;
+    if (cell.model.message.body.type == AgoraChatMessageTypeVoice) {
+        cell.model.weakMessageCell = cell;
+    }
     return cell;
 }
 
 
-//- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-//    //NSLog(@"indexpath.row : %ld ", (long)indexPath.row);
-//}
+- (void)tableView:(UITableView *)tableView didEndDisplayingCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (!self.dataArray || [self.dataArray count] == 0 || ([self.dataArray count] - 1) < indexPath.row) return;
+    id obj = [self.dataArray objectAtIndex:indexPath.row];
+    if ([obj isKindOfClass:[EaseMessageModel class]]) {
+        EaseMessageModel *model = (EaseMessageModel *)obj;
+        if (model.message.body.type == AgoraChatMessageTypeVoice) {
+            model.weakMessageCell = nil;
+        }
+    }
+}
 
 
 - (void)textFieldEndText:(NSString *)text {

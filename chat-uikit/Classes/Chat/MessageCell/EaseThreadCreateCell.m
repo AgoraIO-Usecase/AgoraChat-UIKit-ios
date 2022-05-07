@@ -242,8 +242,9 @@
 - (UILabel *)nameLabel {
     if (!_nameLabel) {
         _nameLabel = [[UILabel alloc] init];
+//        _nameLabel.backgroundColor = [UIColor orangeColor];
         _nameLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
-        _nameLabel.textColor = [UIColor colorWithHexString:@"#999999"];
+        _nameLabel.textColor = [UIColor blackColor];
     }
     return _nameLabel;
 }
@@ -517,7 +518,7 @@
         self.threadNameField.text = model.thread.threadName;
     }
     if (self.displayType == EMThreadHeaderTypeDisplay || self.displayType == EMThreadHeaderTypeDisplayNoMessage) {
-        _alertMessage.text = [@"Start by" stringByAppendingString:model.thread.owner ? model.thread.owner:[AgoraChatClient.sharedClient currentUsername]];
+        _alertMessage.text = [@"Start by " stringByAppendingString:model.thread.owner ? model.thread.owner:[AgoraChatClient.sharedClient currentUsername]];
     } else {
         _alertMessage.text = @"Send a message to start a thread in this Group Chat.";
     }
@@ -546,12 +547,12 @@
     if (_model.userDataProfile && [_model.userDataProfile respondsToSelector:@selector(avatarURL)]) {
         if ([_model.userDataProfile.avatarURL length] > 0) {
             [_avatarView Ease_setImageWithURL:[NSURL URLWithString:_model.userDataProfile.avatarURL]
-                               placeholderImage:[UIImage easeUIImageNamed:@"defaultAvatar"]];
+                               placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             isCustomAvatar = YES;
         }
     }
     if (!isCustomAvatar) {
-        _avatarView.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
+        _avatarView.image = [UIImage easeUIImageNamed:@"default_avatar"];
     }
 }
 

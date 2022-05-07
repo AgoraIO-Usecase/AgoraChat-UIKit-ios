@@ -19,6 +19,8 @@
 
 @property (nonatomic, strong) AgoraChatMessage *message;
 
+@property (nonatomic, strong) NSString *channelId;
+
 @end
 
 @implementation EaseThreadChatViewController
@@ -48,10 +50,12 @@
 }
 
 - (void)createHeaderWithThread:(AgoraChatThread *)thread {
+    self.owner = thread.owner;
     if (self.delegate && [self.delegate respondsToSelector:@selector(threadChatHeader)]) {
         self.tableView.tableHeaderView = [self.delegate threadChatHeader];
         return;
     }
+    self.channelId = thread.channelId;
     EaseMessageModel *model;
     if (self.messageId.length) {
         self.model.thread = thread;
@@ -61,6 +65,7 @@
         model.thread = thread;
         model.direction = AgoraChatMessageDirectionReceive;
     }
+    model.isPlaying = NO;
     EaseThreadChatHeader *header = [[EaseThreadChatHeader alloc] initWithMessageType:self.model.type displayType:self.messageId.length ?EMThreadHeaderTypeDisplay:EMThreadHeaderTypeDisplayNoMessage viewModel:self.viewModel model:model];
     header.delegate = self;
     self.tableView.tableHeaderView = header;
@@ -100,7 +105,9 @@
 
 - (AgoraChatGroup *)group {
     if (!_group) {
-        _group = [AgoraChatGroup groupWithId:self.message.to];
+        if (self.channelId) {
+            _group = [AgoraChatGroup groupWithId:self.channelId];
+        }
     }
     return _group;
 }

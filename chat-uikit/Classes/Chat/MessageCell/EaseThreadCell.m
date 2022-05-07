@@ -125,18 +125,18 @@
     if (_model.userDataProfile && [_model.userDataProfile respondsToSelector:@selector(avatarURL)]) {
         if ([_model.userDataProfile.avatarURL length] > 0) {
             [_ownerAvatar Ease_setImageWithURL:[NSURL URLWithString:_model.userDataProfile.avatarURL]
-                               placeholderImage:[UIImage easeUIImageNamed:@"defaultAvatar"]];
+                               placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             isCustomAvatar = YES;
         }
     }
     if (!isCustomAvatar) {
-        _ownerAvatar.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
+        _ownerAvatar.image = [UIImage easeUIImageNamed:@"default_avatar"];
     }
 }
 
 - (NSAttributedString *)attributeText:(NSString *)text colorText:(NSString *)colorText {
     NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:text];
-    [string addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:14 weight:UIFontWeightRegular],NSForegroundColorAttributeName:[UIColor colorWithHexString:@"#999999"]} range:NSMakeRange(0, text.length)];
+    [string addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:14 weight:UIFontWeightRegular],NSForegroundColorAttributeName:[UIColor blackColor]} range:NSMakeRange(0, text.length)];
     [string addAttribute:NSForegroundColorAttributeName value:[UIColor blackColor] range:NSMakeRange(0, colorText.length)];
     return string;
 }

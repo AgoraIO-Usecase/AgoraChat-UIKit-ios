@@ -35,6 +35,9 @@
         self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
         self.threadBubble.tag = 666;
         [self addSubview:self.threadBubble];
+        self.threadBubble.layer.cornerRadius = 8;
+        self.threadBubble.clipsToBounds = YES;
+        self.threadBubble.hidden = YES;
     }
     
     return self;
@@ -117,6 +120,9 @@
                 make.width.Ease_equalTo(layoutSize.width);
                 make.height.Ease_equalTo(layoutSize.height);
             }];
+            [weakself.threadBubble Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+
+            }];
         }
         CGRect rect;
         if (!weakself.model.thread) {
@@ -165,9 +171,12 @@
     if (model.isHeader == NO) {
         if (model.message.threadOverView) {
             self.threadBubble.model = model;
+            self.threadBubble.hidden = !model.message.threadOverView;
         }
+        
+    } else {
+        self.threadBubble.hidden = YES;
     }
-    self.threadBubble.hidden = model.isHeader;
     AgoraChatMessageType type = model.type;
     self.threadBubble.hidden = !model.message.threadOverView;
     if (model.thread && model.thread.threadId.length) {

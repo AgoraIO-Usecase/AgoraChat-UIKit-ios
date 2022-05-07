@@ -366,12 +366,12 @@
     if (_model.userDataProfile && [_model.userDataProfile respondsToSelector:@selector(avatarURL)]) {
         if ([_model.userDataProfile.avatarURL length] > 0) {
             [_avatarView Ease_setImageWithURL:[NSURL URLWithString:_model.userDataProfile.avatarURL]
-                               placeholderImage:[UIImage easeUIImageNamed:@"defaultAvatar"]];
+                               placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             isCustomAvatar = YES;
         }
     }
     if (!isCustomAvatar) {
-        _avatarView.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
+        _avatarView.image = [UIImage easeUIImageNamed:@"default_avatar"];
     }
     if (model.message.isNeedGroupAck) {
         self.readReceiptBtn.hidden = NO;
@@ -413,8 +413,9 @@
 - (void)bubbleViewTapAction:(UITapGestureRecognizer *)aTap
 {
     UIView *view = [self.bubbleView viewWithTag:666];
-    if (view != nil) {
-        if (CGRectContainsPoint(view.frame, [aTap locationInView:self.bubbleView])) {
+    CGPoint point = [aTap locationInView:self.contentView];
+    if (view != nil && view.hidden == NO) {
+        if (point.y > view.frame.origin.y) {
             if (aTap.state == UIGestureRecognizerStateEnded) {
                 if (self.delegate && [self.delegate respondsToSelector:@selector(toThreadChat:)]) {
                     [self.delegate toThreadChat:self.model];

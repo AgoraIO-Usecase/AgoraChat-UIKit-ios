@@ -275,10 +275,13 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 
 - (void)messagesDidReceive:(NSArray *)aMessages
 {
+    for (AgoraChatMessage *msg in aMessages) {
+        NSLog(@"");
+    }
     if (aMessages && [aMessages count]) {
         AgoraChatMessage *msg = aMessages[0];
         if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThread != YES) {
-            AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO isThread:NO];
+            AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO];
             //群聊@“我”提醒
             NSString *content = [NSString stringWithFormat:@"@%@",AgoraChatClient.sharedClient.currentUsername];
             if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThread != YES) {
@@ -310,9 +313,11 @@ static NSString *cellIdentifier = @"EaseConversationCell";
                                            isDeleteMessages:YES
                                                  completion:^(NSString *aConversationId, AgoraChatError *aError) {
         if (!aError) {
-            [weakSelf.dataAry removeObjectAtIndex:row];
-            [weakSelf.tableView reloadData];
-            [weakSelf _updateBackView];
+            if (row >= 0 && row <= self.dataAry.count - 1 && self.dataAry.count > 0) {
+                [weakSelf.dataAry removeObjectAtIndex:row];
+                [weakSelf.tableView reloadData];
+                [weakSelf _updateBackView];
+            }
 //            [weakSelf refreshTabView];
 
         }

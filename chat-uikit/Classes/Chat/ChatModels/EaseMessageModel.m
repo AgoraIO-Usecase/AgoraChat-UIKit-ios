@@ -67,13 +67,16 @@
     id object = aNotif.object;
     if ([object isKindOfClass:[EaseMessageModel class]]) {
         EaseMessageModel *model = (EaseMessageModel *)object;
+        if (![self.message.messageId isEqualToString:model.message.messageId]) {
+            return;
+        }
         if (model == self && self.isPlaying == NO) {
             self.isPlaying = YES;
         } else {
             self.isPlaying = NO;
         }
         
-        [self.weakMessageCell.bubbleView setModel:self];
+        [self.weakMessageCell.bubbleView setModel:model];
         if (model == self && model.direction == AgoraChatMessageDirectionReceive) {
             [self.weakMessageCell setStatusHidden:model.message.isListened];
         }

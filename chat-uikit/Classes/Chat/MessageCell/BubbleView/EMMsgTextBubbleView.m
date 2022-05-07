@@ -33,6 +33,7 @@
         [self addSubview:self.threadBubble];
         self.threadBubble.layer.cornerRadius = 8;
         self.threadBubble.clipsToBounds = YES;
+        self.threadBubble.hidden = YES;
     }
     
     return self;
@@ -95,9 +96,13 @@
     if (model.isHeader == NO) {
         if (model.message.threadOverView) {
             self.threadBubble.model = model;
+            self.threadBubble.hidden = !model.message.threadOverView;
+        }else {
+            self.threadBubble.hidden = YES;
         }
+    } else {
+        self.threadBubble.hidden = YES;
     }
-    self.threadBubble.hidden = model.isHeader;
     AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)model.message.body;
     
     NSString *text = [EaseEmojiHelper convertEmoji:body.text];
@@ -160,7 +165,7 @@
     if (model.isHeader == NO && model.message.threadOverView) {
         self.threadBubble.model = model;
     }
-    [self remakeLayout:self.threadBubble.model];
+    [self remakeLayout:model];
 }
 
 @end

@@ -132,17 +132,17 @@ NS_ASSUME_NONNULL_BEGIN
  *
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems message:(AgoraChatMessage*)message;
-
+//MARK: - chatThreadFunction
 - (void)didSelectThreadBubble:(EaseMessageModel *)model;
 
 - (void)createThread:(EaseMessageModel *)model;
-
-- (void)pushThreadList;
+//MARK: - joined thread
+- (void)joinChatThreadFromNotifyMessage:(NSString *)threadId;
 
 - (void)popThreadChat;
 
 - (void)threadNameChange:(NSString *)threadName;
-
+//TODO: - 增加thread对象回调
 - (UIView *)threadChatHeader;
 
 @end

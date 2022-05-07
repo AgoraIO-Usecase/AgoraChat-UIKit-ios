@@ -13,6 +13,8 @@
 
 @property (nonatomic, strong) AgoraChatGroup *group;
 
+@property (nonatomic) NSString *owner;
+
 @property (nonatomic, strong) NSString *isAdmin;//admin 1 unadmin 0
 
 - (instancetype)initThreadChatViewControllerWithCoversationid:(NSString *)conversationId chatViewModel:(EaseChatViewModel *)viewModel parentMessageId:(NSString *)parentMessageId model:(EaseMessageModel *)model;

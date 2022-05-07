@@ -207,13 +207,13 @@
     if (model.userDataProfile && [model.userDataProfile respondsToSelector:@selector(avatarURL)]) {
         if ([model.userDataProfile.avatarURL length] > 0) {
             [_avatar Ease_setImageWithURL:[NSURL URLWithString:model.userDataProfile.avatarURL]
-                               placeholderImage:[UIImage easeUIImageNamed:@"defaultAvatar"]];
+                               placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             isCustomAvatar = YES;
         }
     }
     [self.messageBadge setTitle:[self convertMessageCount:model.message.threadOverView.messageCount] forState:UIControlStateNormal];
     if (!isCustomAvatar) {
-        _avatar.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
+        _avatar.image = [UIImage easeUIImageNamed:@"default_avatar"];
     }
     if (model.message.threadOverView.lastMessage.body.type == AgoraChatMessageBodyTypeText) {
         NSString *text = [((AgoraChatTextMessageBody *)model.message.threadOverView.lastMessage.body) text];
