@@ -800,7 +800,7 @@
        
     GiphyViewController *giphy = [[GiphyViewController alloc]init ] ;
     giphy.theme = [[GPHTheme alloc] init];
-    giphy.theme.type = GPHThemeTypeDark;
+    giphy.theme.type = GPHThemeTypeLight;
     giphy.rating = GPHRatingTypeRatedPG13;
     giphy.delegate = self;
     giphy.showConfirmationScreen = true ;
@@ -828,12 +828,7 @@
 
 #pragma mark GiphyDelegate
 - (void) didSelectMediaWithGiphyViewController:(GiphyViewController *)giphyViewController media:(GPHMedia *)media {
-     
-    /* grab url:
-    NSString *url = media.images.fixedWidth.gifUrl ;
-    NSString *url = media.images.fixedWidth.webPUrl ;
-    */
-    
+         
 //    GPHMediaTypeGif = 0,
 //  /// Sticker Media Type
 //    GPHMediaTypeSticker = 1,
@@ -844,15 +839,7 @@
     
     
     NSString *url = media.images.fixedWidth.gifUrl;
-    NSString *orignalUrl = media.url;
-    NSString *title = media.title;
     GPHMediaType type = media.type;
-     
-    NSLog(@"%s url:%@",__func__,url);
-    NSLog(@"%s orignalUrl:%@",__func__,orignalUrl);
-    NSLog(@"%s title:%@",__func__,title);
-    NSLog(@"%s type:%@",__func__,@(type));
-
     NSLog(@"media:%@",media);
     
     NSString *fileName = [url lastPathComponent];

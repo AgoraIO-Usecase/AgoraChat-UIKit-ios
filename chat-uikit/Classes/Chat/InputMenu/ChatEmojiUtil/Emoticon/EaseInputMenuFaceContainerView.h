@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) id<EaseInputMenuFaceContainerViewDelegate> delegate;
 
 - (instancetype)initWithViewHeight:(CGFloat)viewHeight;
+- (void)resetContainerView;
 
 @end
 

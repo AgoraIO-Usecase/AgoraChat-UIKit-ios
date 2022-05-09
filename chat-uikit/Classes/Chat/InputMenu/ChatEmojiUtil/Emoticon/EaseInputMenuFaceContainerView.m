@@ -34,6 +34,7 @@
 @property (nonatomic, strong) UIView *giphyView;
 
 @property (nonatomic, assign) CGFloat viewHeight;
+@property (nonatomic, assign) NSInteger selectedIndex;
 
 @end
 
@@ -42,7 +43,10 @@
     self = [super init];
     if (self) {
         self.viewHeight = viewHeight;
+        self.selectedIndex = 0;
         [self placeAndLayoutSubviews];
+        [self updateUI];
+
     }
     return self;
 }
@@ -84,47 +88,70 @@
 }
 
 #pragma mark action
+- (void)resetContainerView {
+    self.selectedIndex = 0;
+    [self updateUI];
+}
+
 - (void)emojiButtonAction {
-    [UIView animateWithDuration:0.2 animations:^{
-        [self.contentView setContentOffset:CGPointMake(0, 0)];
-        [self.selectedBgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-            make.width.equalTo(@(kCoverViewWidth));
-            make.height.equalTo(@(kCoverViewHeight));
-            make.centerX.equalTo(self.emojiButton);
-            make.centerY.equalTo(_segmentView);
-        }];
-    }];
+    self.selectedIndex = 0;
+    [self updateUI];
 }
 
 - (void)strikerButtonAction {
-    [UIView animateWithDuration:0.2 animations:^{
-        [self.contentView setContentOffset:CGPointMake(EaseKitScreenWidth, 0)];
-
-        [self.selectedBgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-            make.width.equalTo(@(kCoverViewWidth));
-            make.height.equalTo(@(kCoverViewHeight));
-            make.centerX.equalTo(self.strikerButton);
-            make.centerY.equalTo(_segmentView);
-        }];
-        
-    }];
+    self.selectedIndex = 1;
+    [self updateUI];
 }
 
 - (void)giphyButtonAction {
+
+    self.selectedIndex = 2;
+    [self updateUI];
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(showGiphyViewController)]) {
+        [self.delegate showGiphyViewController];
+    }
+    
+}
+
+- (void)updateUI {
+    
     [UIView animateWithDuration:0.2 animations:^{
-        [self.contentView setContentOffset:CGPointMake(EaseKitScreenWidth * 2, 0)];
+        [self.contentView setContentOffset:CGPointMake(EaseKitScreenWidth * self.selectedIndex, 0)];
         [self.selectedBgView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.width.equalTo(@(kCoverViewWidth));
             make.height.equalTo(@(kCoverViewHeight));
-            make.centerX.equalTo(self.giphyButton);
+            if (self.selectedIndex == 0) {
+                make.centerX.equalTo(self.emojiButton);
+            }else if(self.selectedIndex == 1) {
+                make.centerX.equalTo(self.strikerButton);
+            }else {
+                make.centerX.equalTo(self.giphyButton);
+            }
             make.centerY.equalTo(_segmentView);
         }];
 
     }];
     
-    if (self.delegate && [self.delegate respondsToSelector:@selector(showGiphyViewController)]) {
-        [self.delegate showGiphyViewController];
+    NSString *suffixName = @"_selected";
+    
+    NSMutableString *emojiName =  [NSMutableString stringWithString:@"face_emoji"];
+    NSMutableString *stikerName = [NSMutableString stringWithString:@"face_sticker"];
+    NSMutableString *giphyName =  [NSMutableString stringWithString:@"face_giphy"];
+
+    if (self.selectedIndex == 0) {
+        [emojiName appendString:suffixName];
+    }else if(self.selectedIndex == 1){
+        [stikerName appendString:suffixName];
+    }else {
+        [giphyName appendString:suffixName];
     }
+    
+
+    [_emojiButton setImage:[UIImage easeUIImageNamed:emojiName] forState:UIControlStateNormal];
+    [_strikerButton setImage:[UIImage easeUIImageNamed:stikerName] forState:UIControlStateNormal];
+    [_giphyButton setImage:[UIImage easeUIImageNamed:giphyName] forState:UIControlStateNormal];
+
     
 }
 
@@ -133,7 +160,6 @@
     if (_emojiButton == nil) {
         _emojiButton = [[UIButton alloc]init];
         [_emojiButton setImage:[UIImage easeUIImageNamed:@"face_emoji"] forState:UIControlStateNormal];
-        [_emojiButton setImage:[UIImage easeUIImageNamed:@"face_emoji_selected"] forState:UIControlStateSelected];
         [_emojiButton addTarget:self action:@selector(emojiButtonAction) forControlEvents:UIControlEventTouchUpInside];
         }
     return _emojiButton;
@@ -144,7 +170,6 @@
     if (_strikerButton == nil) {
         _strikerButton = [[UIButton alloc]init];
         [_strikerButton setImage:[UIImage easeUIImageNamed:@"face_sticker"] forState:UIControlStateNormal];
-        [_strikerButton setImage:[UIImage easeUIImageNamed:@"face_sticker_selected"] forState:UIControlStateSelected];
         [_strikerButton addTarget:self action:@selector(strikerButtonAction) forControlEvents:UIControlEventTouchUpInside];
 
     }
@@ -154,8 +179,7 @@
 - (UIButton *)giphyButton {
     if (_giphyButton == nil) {
         _giphyButton = [[UIButton alloc]init];
-        [_giphyButton setImage:[UIImage easeUIImageNamed:@"face_tenor"] forState:UIControlStateNormal];
-        [_giphyButton setImage:[UIImage easeUIImageNamed:@"face_tenor_selected"] forState:UIControlStateSelected];
+        [_giphyButton setImage:[UIImage easeUIImageNamed:@"face_giphy"] forState:UIControlStateNormal];
         [_giphyButton addTarget:self action:@selector(giphyButtonAction) forControlEvents:UIControlEventTouchUpInside];
     }
     return _giphyButton;
@@ -165,7 +189,8 @@
 - (UIView *)selectedBgView {
     if (_selectedBgView == nil) {
         _selectedBgView = [[UIView alloc] init];
-        _selectedBgView.backgroundColor = [UIColor lightGrayColor];
+        _selectedBgView.backgroundColor = [UIColor colorWithDisplayP3Red:216.0/255.0 green:216.0/255.0 blue:216.0/255.0 alpha:0.4];
+
         _selectedBgView.layer.cornerRadius = kCoverViewHeight * 0.5;
     }
     return _selectedBgView;
@@ -176,7 +201,6 @@
     if (_segmentView == nil) {
         _segmentView = [[UIView alloc] init];
         _segmentView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.02];
-//#00000005
         [_segmentView addSubview:self.selectedBgView];
         [_segmentView addSubview:self.emojiButton];
         [_segmentView addSubview:self.strikerButton];
@@ -249,7 +273,6 @@
         _contentView.scrollEnabled = NO;
         _contentView.bounces = NO;
         _contentView.alwaysBounceHorizontal = YES;
-        _contentView.backgroundColor = UIColor.purpleColor;
         _contentView.contentSize = CGSizeMake(EaseKitScreenWidth, KContentViewHeight);
         _contentView.contentOffset = CGPointMake(0, 0);
             
