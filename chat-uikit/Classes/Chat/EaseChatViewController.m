@@ -797,7 +797,8 @@
 
 #pragma mark EaseInputMenuFaceContainerViewDelegate
 - (void)showGiphyViewController {
-       
+    [self resetInputBarView];
+    
     GiphyViewController *giphy = [[GiphyViewController alloc]init ] ;
     giphy.theme = [[GPHTheme alloc] init];
     giphy.theme.type = GPHThemeTypeLight;
@@ -810,6 +811,13 @@
     
     [self presentViewController:giphy animated:true completion:nil];
 
+}
+
+- (void)resetInputBarView {
+    [self.view endEditing:YES];
+    [self.inputBar.faceContainerView resetContainerView];
+    [self.inputBar clearMoreViewAndSelectedButton];
+    [self hideLongPressView];
 }
 
 - (void)selectedStikerWithUrlString:(NSString *)urlString fileType:(NSString *)fileType {
@@ -827,7 +835,7 @@
 
 
 #pragma mark GiphyDelegate
-- (void) didSelectMediaWithGiphyViewController:(GiphyViewController *)giphyViewController media:(GPHMedia *)media {
+- (void)didSelectMediaWithGiphyViewController:(GiphyViewController *)giphyViewController media:(GPHMedia *)media {
          
 //    GPHMediaTypeGif = 0,
 //  /// Sticker Media Type
@@ -850,8 +858,8 @@
 }
 
 
-- (void) didDismissWithController:(GiphyViewController *)controller {
-    [self dismissViewControllerAnimated:YES completion:nil];
+- (void)didDismissWithController:(GiphyViewController *)controller {
+
 }
 
 
