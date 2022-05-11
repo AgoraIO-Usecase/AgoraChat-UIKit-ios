@@ -11,7 +11,7 @@
 #import "EaseExtendMenuModel.h"
 
 typedef struct PanData {
-    CGFloat beiginY;
+
     CGFloat beiginBottom;
     CGFloat step[3];
     uint8_t currentStep;
@@ -28,7 +28,8 @@ typedef struct PanData {
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *emojiCollectionViewHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *itemTableViewHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *bottomContainerHeightConstraint;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *emojiCollectionBottomSpaceConstraint;
+
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *tableViewTopContraint;
 
 @property (nonatomic, strong) CAShapeLayer *shapeLayer;
 @property (nonatomic, strong) CAShapeLayer *bgMaskLayer;
@@ -38,14 +39,15 @@ typedef struct PanData {
 @property (nonatomic, strong) NSArray <UIBezierPath *>*bgMaskPaths;
 
 
-@property (nonatomic, strong) void(^didSelectedMenuItem)(EaseExtendMenuModel *);
-@property (nonatomic, strong) void(^didSelectedEmoji)(NSString *);
-
-@property (nonatomic, assign) EMBottomMoreFunctionType contentType;
+@property (nonatomic, weak) id<EMBottomMoreFunctionViewDelegate> delegate;
+@property (nonatomic, strong) NSDictionary *userInfo;
 
 @property (nonatomic, assign) BOOL isShowEmojiList;
 
 @property (nonatomic, assign) PanData panData;
+
+
+@property (nonatomic, strong) NSMutableArray <UIImageView *>*maskHighlightImageViews;
 
 @end
 
@@ -53,70 +55,80 @@ typedef struct PanData {
 
 static EMBottomMoreFunctionView *shareView;
 
-+ (instancetype)share {
+
++ (instancetype)share
+{
     if (!shareView) {
         shareView = [NSBundle.mainBundle loadNibNamed:NSStringFromClass(self.class) owner:nil options:nil].firstObject;
     }
     return shareView;
 }
 
-+ (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
-          contentType:(EMBottomMoreFunctionType)type
-            animation:(BOOL)animation
-  didSelectedMenuItem:(nonnull void (^)(EaseExtendMenuModel * _Nonnull))didSelectedMenuItem
-     didSelectedEmoji:(nonnull void (^)(NSString * _Nonnull))didSelectedEmoji {
-    [self showMenuItems:menuItems contentType:type animation:animation maskPaths:nil didSelectedMenuItem:didSelectedMenuItem didSelectedEmoji:didSelectedEmoji];
+
++ (void)showMenuItems:(NSArray<EaseExtendMenuModel *> *)menuItems delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate animation:(BOOL)animation
+{
+    [self showMenuItems:menuItems delegate:delegate ligheViews:nil animation:animation userInfo:nil];
+}
+
++ (void)showMenuItems:(NSArray<EaseExtendMenuModel *> *)menuItems delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate animation:(BOOL)animation userInfo:(NSDictionary *)userInfo
+{
+    [self showMenuItems:menuItems delegate:delegate ligheViews:nil animation:animation userInfo:userInfo];
+}
+
++ (void)showMenuItems:(NSArray<EaseExtendMenuModel *> *)menuItems delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate ligheViews:(NSArray <UIView *>*)views animation:(BOOL)animation userInfo:(NSDictionary *)userInfo
+{
+    [self showMenuItems:menuItems showReaction:NO delegate:delegate ligheViews:views animation:animation userInfo:userInfo];
 }
 
 + (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
-          contentType:(EMBottomMoreFunctionType)type
+         showReaction:(BOOL)showReaction
+             delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate
+           ligheViews:(nullable NSArray <UIView *>*)views
             animation:(BOOL)animation
-            maskPaths:(NSArray<UIBezierPath *> *)maskPaths
-  didSelectedMenuItem:(void(^)(EaseExtendMenuModel *menuItem))didSelectedMenuItem
-     didSelectedEmoji:(void(^)(NSString *emoji))didSelectedEmoji {
-
+             userInfo:(nullable NSDictionary *)userInfo
+{
     EMBottomMoreFunctionView *shareView = EMBottomMoreFunctionView.share;
-    shareView.contentType = type;
     [UIApplication.sharedApplication.keyWindow addSubview:shareView];
     shareView.frame = UIApplication.sharedApplication.keyWindow.bounds;
     shareView.menuItems = menuItems;
-    shareView.didSelectedEmoji = didSelectedEmoji;
-    shareView.didSelectedMenuItem = didSelectedMenuItem;
+    shareView.delegate = delegate;
+    shareView.userInfo = userInfo;
     shareView.bgView.alpha = 1;
     shareView.isShowEmojiList = NO;
     [shareView.itemTableView reloadData];
-    shareView.emojiCollectionView.hidden = (type == EMBottomMoreFunctionTypeChat);
-    if (type != EMBottomMoreFunctionTypeChat) {
-        [shareView.emojiCollectionView reloadData];
-    }
-    
+    [shareView.emojiCollectionView reloadData];
     shareView.itemTableView.scrollEnabled = NO;
-    shareView.itemTableView.allowsMultipleSelection = NO;
-    shareView.emojiCollectionViewHeightConstraint.constant = (type == EMBottomMoreFunctionTypeChat ? 0:30);
-    shareView.emojiCollectionBottomSpaceConstraint.constant = (type == EMBottomMoreFunctionTypeChat ? -15:12);
+    shareView.emojiCollectionViewHeightConstraint.constant = 40;
     shareView.itemTableViewHeightConstraint.constant = 54 * menuItems.count;
     shareView.bgView.alpha = 0;
+    shareView.maskHighlightViews = views;
+    shareView.emojiCollectionView.hidden = !showReaction;
+    shareView.tableViewTopContraint.constant = showReaction ? 83 : 31;
     
-    shareView.bgMaskPaths = maskPaths;
-    if (maskPaths.count > 0) {
-        if (!shareView.bgMaskLayer) {
-            shareView.bgMaskLayer = [CAShapeLayer layer];
-        }
-        UIBezierPath *path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, 1000, 1000)];
-        for (UIBezierPath *item in maskPaths) {
-            [path appendPath:[item bezierPathByReversingPath]];
-        }
-        shareView.bgMaskLayer.path = path.CGPath;
-        shareView.bgView.layer.mask = shareView.bgMaskLayer;
-    } else {
-        shareView.bgView.layer.mask = nil;
+    if (showReaction) {
+        CGFloat spacing = (UIScreen.mainScreen.bounds.size.width - 30 - shareView.emojiDataList.count * 40) / (shareView.emojiDataList.count - 1);
+        UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)shareView.emojiCollectionView.collectionViewLayout;
+        layout.itemSize = CGSizeMake(40, 40);
+        layout.minimumLineSpacing = 10;
+        layout.minimumInteritemSpacing = floor(spacing);
+        layout.sectionInset = UIEdgeInsetsMake(0, 15, 0, 15);
+        layout.scrollDirection = UICollectionViewScrollDirectionVertical;
     }
+    
+    CGFloat spacing = (UIScreen.mainScreen.bounds.size.width - 30 - shareView.emojiDataList.count * 40) / (shareView.emojiDataList.count - 1);
+    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)shareView.emojiCollectionView.collectionViewLayout;
+    layout.itemSize = CGSizeMake(40, 40);
+    layout.minimumLineSpacing = 10;
+    layout.minimumInteritemSpacing = floor(spacing);
+    layout.sectionInset = UIEdgeInsetsMake(0, 15, 0, 15);
+    layout.scrollDirection = UICollectionViewScrollDirectionVertical;
     
     if (animation) {
         [shareView layoutIfNeeded];
         shareView.contentViewBottomConstraint.constant = -shareView.mainView.bounds.size.height;
         [shareView layoutIfNeeded];
-        if (type == EMBottomMoreFunctionTypeMessage && menuItems.count > 3) {
+
+        if (menuItems.count > 3) {
             shareView.contentViewBottomConstraint.constant = -54 * (CGFloat)(menuItems.count - 3) - EMBottomMoreFunctionView.share.bottomContainerHeightConstraint.constant;
         } else {
             shareView.contentViewBottomConstraint.constant = 0;
@@ -133,6 +145,12 @@ static EMBottomMoreFunctionView *shareView;
         [shareView layoutIfNeeded];
         [shareView resetPanData];
     }
+}
+
+
+
++ (void)updateHighlightViews:(nullable NSArray <UIView *>*)views {
+    shareView.maskHighlightViews = views;
 }
 
 + (void)hideWithAnimation:(BOOL)animation needClear:(BOOL)needClear {
@@ -155,6 +173,41 @@ static EMBottomMoreFunctionView *shareView;
     }
 }
 
+
+- (UIImage *)convertViewToImage:(UIView *)view {
+    UIGraphicsBeginImageContextWithOptions(view.frame.size, NO, [UIScreen mainScreen].scale);
+    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *imageRet = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return imageRet;
+}
+
+- (void)setMaskHighlightViews:(NSArray<UIView *> *)maskHighlightViews {
+    if (!_maskHighlightImageViews) {
+        _maskHighlightImageViews = [NSMutableArray array];
+    }
+    if (maskHighlightViews.count > _maskHighlightImageViews.count) {
+        NSUInteger loopCount = maskHighlightViews.count - _maskHighlightImageViews.count;
+        for (int i = 0; i < loopCount; i ++) {
+            UIImageView *imageView = [[UIImageView alloc] init];
+            [_bgView addSubview:imageView];
+            [_maskHighlightImageViews addObject:imageView];
+        }
+    }
+    
+    for (int i = 0; i < _maskHighlightImageViews.count; i ++) {
+        if (i >= maskHighlightViews.count) {
+            _maskHighlightImageViews[i].hidden = YES;
+        } else {
+            UIView *highlightView = maskHighlightViews[i];
+            UIImageView *imageView = _maskHighlightImageViews[i];
+            imageView.hidden = NO;
+            imageView.image = [self convertViewToImage:highlightView];
+            imageView.frame = [highlightView.superview convertRect:highlightView.frame toView:UIApplication.sharedApplication.keyWindow];
+        }
+    }
+}
+
 - (void)awakeFromNib {
     [super awakeFromNib];
     
@@ -162,24 +215,11 @@ static EMBottomMoreFunctionView *shareView;
         _bottomContainerHeightConstraint.constant = UIApplication.sharedApplication.keyWindow.safeAreaInsets.bottom;
     }
     
-    _emojiDataList = @[@"ee_40", @"ee_43", @"ee_37", @"ee_36", @"ee_15", @"ee_10", @"add_reaction"];
-    CGFloat spacing = (UIScreen.mainScreen.bounds.size.width - 40 - _emojiDataList.count * 30) / (_emojiDataList.count - 1);
-    
-    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)_emojiCollectionView.collectionViewLayout;
-    layout.itemSize = CGSizeMake(30, 30);
-    layout.minimumLineSpacing = 20;
-    layout.minimumInteritemSpacing = spacing;
-    layout.sectionInset = UIEdgeInsetsMake(0, 20, 0, 20);
-    layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+    _emojiDataList = @[@"emoji_40", @"emoji_43", @"emoji_37", @"emoji_36", @"emoji_15", @"emoji_10", @"add_reaction"];
     [_emojiCollectionView registerNib:[UINib nibWithNibName:@"EMBottomMoreFunctionViewEmojiCell" bundle:nil] forCellWithReuseIdentifier:@"cell"];
     [_itemTableView registerNib:[UINib nibWithNibName:@"EMBottomMoreFunctionViewMenuItemCell" bundle:nil] forCellReuseIdentifier:@"cell"];
     
-    CGFloat radius = 24;
-    UIRectCorner corner = UIRectCornerTopLeft | UIRectCornerTopRight;
-    UIBezierPath * path = [UIBezierPath bezierPathWithRoundedRect:_mainView.bounds byRoundingCorners:corner cornerRadii:CGSizeMake(radius, radius)];
-    _shapeLayer = [[CAShapeLayer alloc] init];
-    _shapeLayer.frame = _mainView.bounds;
-    _shapeLayer.path = path.CGPath;
+    _shapeLayer = [CAShapeLayer layer];
     _mainView.layer.mask = _shapeLayer;
 }
 
@@ -187,6 +227,13 @@ static EMBottomMoreFunctionView *shareView;
     [super layoutSubviews];
     _shapeLayer.frame = _mainView.bounds;
     _bgMaskLayer.frame = self.bounds;
+    
+    CGFloat radius = 24;
+    UIRectCorner corner = UIRectCornerTopLeft | UIRectCornerTopRight;
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:_mainView.bounds byRoundingCorners:corner cornerRadii:CGSizeMake(radius, radius)];
+    
+    _shapeLayer.frame = _mainView.bounds;
+    _shapeLayer.path = path.CGPath;
 }
 
 - (void)resetPanData {
@@ -200,13 +247,13 @@ static EMBottomMoreFunctionView *shareView;
 }
 
 - (void)switchEmojiListView {
-    CGFloat spacing = (UIScreen.mainScreen.bounds.size.width - 24 - _emojiDataList.count * 30) / (_emojiDataList.count - 1);
+
+    CGFloat spacing = (UIScreen.mainScreen.bounds.size.width - 14 - _emojiDataList.count * 40) / (_emojiDataList.count - 1);
 
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)_emojiCollectionView.collectionViewLayout;
-    layout.itemSize = CGSizeMake(30, 30);
-    layout.minimumLineSpacing = 20;
-    layout.minimumInteritemSpacing = spacing;
-    layout.sectionInset = UIEdgeInsetsMake(0, 12, 0, 12);
+    layout.itemSize = CGSizeMake(40, 40);
+    layout.minimumInteritemSpacing = floor(spacing);
+    layout.sectionInset = UIEdgeInsetsMake(0, 7, 0, 7);
     layout.scrollDirection = UICollectionViewScrollDirectionVertical;
     
     [_emojiCollectionView setCollectionViewLayout:layout animated:YES];
@@ -220,7 +267,8 @@ static EMBottomMoreFunctionView *shareView;
     [UIView animateWithDuration:0.35 animations:^{
         [self layoutIfNeeded];
     } completion:^(BOOL finished) {
-        self.panData.step[2] = self.mainView.bounds.size.height;
+        self->_panData.step[1] = self.mainView.bounds.size.height - self->_panData.step[2] + self->_panData.step[1];
+        self->_panData.step[2] = self.mainView.bounds.size.height;
     }];
 }
 
@@ -230,16 +278,14 @@ static EMBottomMoreFunctionView *shareView;
 
 - (IBAction)onContentViewPan:(UIPanGestureRecognizer *)sender {
     if (sender.state == UIGestureRecognizerStateBegan) {
-        _panData.beiginY = [sender locationInView:self].y;
+
         _panData.beiginBottom = _contentViewBottomConstraint.constant;
     } else if (sender.state == UIGestureRecognizerStateEnded || sender.state == UIGestureRecognizerStateCancelled) {
-        CGFloat currentY = [sender locationInView:self].y;
-        CGFloat offset = currentY - _panData.beiginY;
+        CGFloat offset = [sender translationInView:self].y;
         CGFloat newBottom = _panData.beiginBottom - offset;
         if (newBottom > 0) {
             newBottom = 0;
         }
-
         CGFloat minDistance = 0;
         int index = -1;
         for (int i = 0; i < 3; i ++) {
@@ -265,8 +311,8 @@ static EMBottomMoreFunctionView *shareView;
             self.itemTableView.scrollEnabled = index == 0 && self.panData.step[1] != 0;
         }];
     } else {
-        CGFloat currentY = [sender locationInView:self].y;
-        CGFloat offset = currentY - _panData.beiginY;
+
+        CGFloat offset = [sender translationInView:self].y;
         CGFloat newBottom = _panData.beiginBottom - offset;
         if (newBottom > -_panData.step[0]) {
             newBottom = -_panData.step[0];
@@ -295,23 +341,41 @@ static EMBottomMoreFunctionView *shareView;
     EMBottomMoreFunctionViewEmojiCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
     
     if (_isShowEmojiList) {
-        cell.imageName = [NSString stringWithFormat:@"ee_%ld", (long)indexPath.item + 1];
+        cell.imageName = [NSString stringWithFormat:@"emoji_%ld", (long)indexPath.item + 1];
     } else {
         cell.imageName = _emojiDataList[indexPath.item];
+    }
+    
+    if (!_isShowEmojiList && indexPath.item >= _emojiDataList.count - 1) {
+        cell.added = NO;
+    } else {
+        if (_delegate && [_delegate conformsToProtocol:@protocol(EMBottomMoreFunctionViewDelegate)] && [_delegate respondsToSelector:@selector(bottomMoreFunctionView:getEmojiIsSelected:userInfo:)]) {
+            cell.added = [_delegate bottomMoreFunctionView:self getEmojiIsSelected:cell.imageName userInfo:_userInfo];
+        } else {
+            cell.added = NO;
+        }
     }
     return cell;
 }
 
 #pragma mark - UICollectionViewDelegate
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    if (_didSelectedEmoji) {
-        if (_isShowEmojiList) {
-            _didSelectedEmoji([NSString stringWithFormat:@"ee_%ld", (long)indexPath.item + 1]);
-        } else {
-            if (indexPath.item < _emojiDataList.count - 1) {
-                _didSelectedEmoji(_emojiDataList[indexPath.item]);
+    if (!_isShowEmojiList && indexPath.item >= _emojiDataList.count - 1) {
+        [self switchEmojiListView];
+        return;
+    }
+    
+    if (_delegate && [_delegate conformsToProtocol:@protocol(EMBottomMoreFunctionViewDelegate)]) {
+        if ([_delegate respondsToSelector:@selector(bottomMoreFunctionView:didSelectedEmoji:changeSelectedStateHandle:)]) {
+            __weak typeof(self)weakSelf = self;
+            if (_isShowEmojiList) {
+                [_delegate bottomMoreFunctionView:self didSelectedEmoji:[NSString stringWithFormat:@"emoji_%ld", (long)indexPath.item + 1] changeSelectedStateHandle:^{
+                    [weakSelf.emojiCollectionView reloadData];
+                }];
             } else {
-                [self switchEmojiListView];
+                [_delegate bottomMoreFunctionView:self didSelectedEmoji:_emojiDataList[indexPath.item] changeSelectedStateHandle:^{
+                    [weakSelf.emojiCollectionView reloadData];
+                }];
             }
         }
     }
@@ -324,17 +388,15 @@ static EMBottomMoreFunctionView *shareView;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     EMBottomMoreFunctionViewMenuItemCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell" forIndexPath:indexPath];
-    cell.backgroundColor = [UIColor clearColor];
-    cell.contentView.backgroundColor = [UIColor clearColor];
     cell.menuItem = _menuItems[indexPath.row];
     return cell;
 }
 
 #pragma mark - UITableViewDelegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    if (_didSelectedMenuItem) {
-        _didSelectedMenuItem(_menuItems[indexPath.row]);
+
+    if (_delegate && [_delegate conformsToProtocol:@protocol(EMBottomMoreFunctionViewDelegate)] && [_delegate respondsToSelector:@selector(bottomMoreFunctionView:didSelectedMenuItem:)]) {
+        [_delegate bottomMoreFunctionView:self didSelectedMenuItem:_menuItems[indexPath.row]];
     }
 }
 

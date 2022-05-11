@@ -28,6 +28,7 @@
     _iconImageView.image = menuItem.icon;
     _descLabel.text = menuItem.funcDesc;
     _descLabel.textColor = menuItem.funcDescColor;
+
 }
 
 @end

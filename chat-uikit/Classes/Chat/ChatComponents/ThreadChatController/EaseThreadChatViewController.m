@@ -137,34 +137,6 @@
     return _isAdmin;
 }
 
-- (void)showThreadOperationList {
-   
-    __weak typeof(self) weakself = self;
-    NSMutableArray<EaseExtendMenuModel*> *extMenuArray = [[NSMutableArray<EaseExtendMenuModel*> alloc]init];
-    EaseExtendMenuModel *threadMember = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"disbandThread"] funcDesc:@"Thread Members" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
-    }];
-    EaseExtendMenuModel *muteThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"disbandThread"] funcDesc:@"Thread Notifications" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
-    }];
-    EaseExtendMenuModel *editThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"disbandThread"] funcDesc:@"Edit Notifications" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
-    }];
-    EaseExtendMenuModel *leaveThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"disbandThread"] funcDesc:@"Leave Thread" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
-    }];
-    [extMenuArray addObjectsFromArray:@[threadMember,muteThread,editThread,leaveThread]];
-    if ([_isAdmin isEqualToString:@"1"]) {
-        EaseExtendMenuModel *disbandThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"disbandThread"] funcDesc:@"Disband Thread" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
-        }];
-        disbandThread.funcDescColor = [UIColor colorWithHexString:@"#FF14CC"];
-        [extMenuArray addObject:disbandThread];
-    }
-    
-    [EMBottomMoreFunctionView showMenuItems:extMenuArray contentType:EMBottomMoreFunctionTypeChat animation:YES didSelectedMenuItem:^(EaseExtendMenuModel * _Nonnull menuItem) {
-        menuItem.itemDidSelectedHandle(menuItem.funcDesc, YES);
-        [EMBottomMoreFunctionView hideWithAnimation:YES needClear:NO];
-    } didSelectedEmoji:^(NSString * _Nonnull emoji) {
-        
-    }];
-}
-
 #pragma mark - EaseMessageCellDelegate
 
 //Read the receipt details

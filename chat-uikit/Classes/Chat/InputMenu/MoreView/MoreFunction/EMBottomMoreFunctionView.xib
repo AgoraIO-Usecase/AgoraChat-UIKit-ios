@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -22,10 +22,10 @@
                     </connections>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Lg-lM-kyj">
-                    <rect key="frame" x="0.0" y="396" width="414" height="500"/>
+                    <rect key="frame" x="0.0" y="397" width="414" height="499"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3Iv-vb-vli">
-                            <rect key="frame" x="0.0" y="0.0" width="414" height="500"/>
+                            <rect key="frame" x="0.0" y="0.0" width="414" height="499"/>
                             <color key="backgroundColor" white="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QtH-Ee-kyJ">
@@ -37,13 +37,13 @@
                             </constraints>
                         </view>
                         <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="Y0I-2H-Iqz">
-                            <rect key="frame" x="0.0" y="36" width="414" height="36"/>
+                            <rect key="frame" x="0.0" y="31" width="414" height="40"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
-                                <constraint firstAttribute="height" constant="36" id="SPB-Ho-Wnb"/>
+                                <constraint firstAttribute="height" constant="40" id="SPB-Ho-Wnb"/>
                             </constraints>
                             <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="z2Y-BI-Uhe">
-                                <size key="itemSize" width="128" height="128"/>
+                                <size key="itemSize" width="40" height="40"/>
                                 <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                 <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                 <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
@@ -54,7 +54,7 @@
                             </connections>
                         </collectionView>
                         <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" style="plain" separatorStyle="none" rowHeight="54" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ANJ-iM-O97">
-                            <rect key="frame" x="0.0" y="84" width="414" height="416"/>
+                            <rect key="frame" x="0.0" y="83" width="414" height="416"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="416" id="wQ0-KS-xOm"/>
@@ -65,7 +65,7 @@
                             </connections>
                         </tableView>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9yG-X1-tZu">
-                            <rect key="frame" x="0.0" y="500" width="414" height="0.0"/>
+                            <rect key="frame" x="0.0" y="499" width="414" height="0.0"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="height" id="S7j-P5-47B"/>
@@ -77,14 +77,14 @@
                     <constraints>
                         <constraint firstItem="9yG-X1-tZu" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="2aY-jZ-Z0H"/>
                         <constraint firstItem="QtH-Ee-kyJ" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" constant="10" id="38I-Vy-P0y"/>
-                        <constraint firstItem="Y0I-2H-Iqz" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" constant="36" id="A8M-8G-0Cb"/>
+                        <constraint firstItem="Y0I-2H-Iqz" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" constant="31" id="A8M-8G-0Cb"/>
                         <constraint firstAttribute="trailing" secondItem="3Iv-vb-vli" secondAttribute="trailing" id="B65-SJ-I5f"/>
                         <constraint firstItem="QtH-Ee-kyJ" firstAttribute="centerX" secondItem="4Lg-lM-kyj" secondAttribute="centerX" id="Fqq-y2-2Tv"/>
                         <constraint firstItem="Y0I-2H-Iqz" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="HHC-od-jeh"/>
                         <constraint firstItem="9yG-X1-tZu" firstAttribute="top" secondItem="ANJ-iM-O97" secondAttribute="bottom" id="Hgi-II-8eb"/>
                         <constraint firstAttribute="trailing" secondItem="Y0I-2H-Iqz" secondAttribute="trailing" id="Hs2-PC-8bJ"/>
                         <constraint firstItem="ANJ-iM-O97" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="M12-Ax-BSG"/>
-                        <constraint firstItem="ANJ-iM-O97" firstAttribute="top" secondItem="Y0I-2H-Iqz" secondAttribute="bottom" constant="12" id="bKq-bd-U2w"/>
+                        <constraint firstItem="ANJ-iM-O97" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" constant="83" id="REJ-f0-HEh"/>
                         <constraint firstItem="3Iv-vb-vli" firstAttribute="top" secondItem="4Lg-lM-kyj" secondAttribute="top" id="ilI-gb-S86"/>
                         <constraint firstAttribute="trailing" secondItem="ANJ-iM-O97" secondAttribute="trailing" id="ipl-f7-9DA"/>
                         <constraint firstItem="3Iv-vb-vli" firstAttribute="leading" secondItem="4Lg-lM-kyj" secondAttribute="leading" id="jOH-tZ-pVp"/>
@@ -112,12 +112,12 @@
                 <outlet property="bgView" destination="Vk2-L8-AXT" id="Z8B-xn-GZd"/>
                 <outlet property="bottomContainerHeightConstraint" destination="S7j-P5-47B" id="ZtP-Sd-BVI"/>
                 <outlet property="contentViewBottomConstraint" destination="ZJa-W2-PGI" id="tSh-i5-Gsu"/>
-                <outlet property="emojiCollectionBottomSpaceConstraint" destination="bKq-bd-U2w" id="1X1-zq-aqf"/>
                 <outlet property="emojiCollectionView" destination="Y0I-2H-Iqz" id="XFe-3u-cuj"/>
                 <outlet property="emojiCollectionViewHeightConstraint" destination="SPB-Ho-Wnb" id="xq8-Ik-oLn"/>
                 <outlet property="itemTableView" destination="ANJ-iM-O97" id="kph-QQ-6kj"/>
                 <outlet property="itemTableViewHeightConstraint" destination="wQ0-KS-xOm" id="t2b-DW-iz1"/>
                 <outlet property="mainView" destination="4Lg-lM-kyj" id="aLr-ot-WD0"/>
+                <outlet property="tableViewTopContraint" destination="REJ-f0-HEh" id="N7l-VS-MWM"/>
             </connections>
             <point key="canvasLocation" x="139" y="77"/>
         </view>

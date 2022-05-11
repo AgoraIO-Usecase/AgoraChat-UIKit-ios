@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) NSString *imageName;
 
+@property (nonatomic, assign, getter=isAdded) BOOL added;
 
 @end
 

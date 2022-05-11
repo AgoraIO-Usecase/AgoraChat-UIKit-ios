@@ -54,7 +54,6 @@ Pod::Spec.new do |s|
     
     s.static_framework = true
     s.resources = ['chat-uikit/**/*.bundle','chat-uikit/**/*.xib']
-    
     s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
                               'VALID_ARCHS' => 'arm64 armv7 x86_64'
                             }
@@ -62,5 +61,6 @@ Pod::Spec.new do |s|
 
     s.dependency 'Agora_Chat_iOS'
     s.dependency 'EMVoiceConvert', '0.1.0'
+    s.dependency 'MJRefresh'
 
 end

@@ -9,27 +9,44 @@
 
 @class EaseExtendMenuModel;
 
-typedef NS_ENUM(NSUInteger, EMBottomMoreFunctionType) {
-    EMBottomMoreFunctionTypeMessage,
-    EMBottomMoreFunctionTypeChat,
-};
+@class EMBottomMoreFunctionView;
 
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol EMBottomMoreFunctionViewDelegate <NSObject>
+
+@optional
+- (void)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view didSelectedMenuItem:(EaseExtendMenuModel *)model;
+- (void)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view didSelectedEmoji:(NSString *)emoji changeSelectedStateHandle:(void(^)(void))changeSelectedStateHandle;
+- (BOOL)bottomMoreFunctionView:(EMBottomMoreFunctionView *)view getEmojiIsSelected:(NSString *)emoji userInfo:(NSDictionary *)userInfo;
+
+@end
 
 @interface EMBottomMoreFunctionView : UIView
 
 + (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
-          contentType:(EMBottomMoreFunctionType)type
-            animation:(BOOL)animation
-  didSelectedMenuItem:(void(^)(EaseExtendMenuModel *menuItem))didSelectedMenuItem
-     didSelectedEmoji:(void(^)(NSString *emoji))didSelectedEmoji;
+             delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate
+            animation:(BOOL)animation;
 
 + (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
-          contentType:(EMBottomMoreFunctionType)type
+             delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate
             animation:(BOOL)animation
-            maskPaths:(nullable NSArray<UIBezierPath *> *)maskPaths
-  didSelectedMenuItem:(void(^)(EaseExtendMenuModel *menuItem))didSelectedMenuItem
-     didSelectedEmoji:(void(^)(NSString *emoji))didSelectedEmoji;
+             userInfo:(NSDictionary *)userInfo;
+
++ (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
+             delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate
+           ligheViews:(nullable NSArray <UIView *>*)views
+            animation:(BOOL)animation
+             userInfo:(nullable NSDictionary *)userInfo;
+
++ (void)showMenuItems:(NSArray <EaseExtendMenuModel *>*)menuItems
+         showReaction:(BOOL)showReaction
+             delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate
+           ligheViews:(nullable NSArray <UIView *>*)views
+            animation:(BOOL)animation
+             userInfo:(nullable NSDictionary *)userInfo;
+
++ (void)updateHighlightViews:(nullable NSArray <UIView *>*)views;
 
 + (void)hideWithAnimation:(BOOL)animation needClear:(BOOL)needClear;
 

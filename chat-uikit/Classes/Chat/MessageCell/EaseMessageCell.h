@@ -51,6 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)avatarDidLongPress:(EaseMessageModel *)model;
 
 - (void)toThreadChat:(EaseMessageModel *)model;
+- (void)messageCellDidClickReactionView:(EaseMessageModel *)model;
 
 @end
 

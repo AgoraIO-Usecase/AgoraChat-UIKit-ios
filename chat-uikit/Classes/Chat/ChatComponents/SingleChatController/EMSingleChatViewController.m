@@ -20,7 +20,6 @@
 @property (nonatomic, strong) NSTimer *receiveTypingTimer;
 @property (nonatomic, assign) NSInteger receiveTypingCountDownNum;
 @property (nonatomic, strong) dispatch_queue_t msgQueue;
-@property (nonatomic, strong) NSDate *currentData;
 @property (nonatomic) BOOL editingStatusVisible;
 @end
 
@@ -182,9 +181,7 @@
 
 - (long long)getCurrentTimestamp
 {
-    self.currentData = [NSDate new];
-    NSTimeInterval timeInterval = [self.currentData timeIntervalSince1970];
-    return [[NSNumber numberWithDouble:timeInterval] longLongValue];
+    return (long long)[[NSDate date] timeIntervalSince1970];
 }
 
 //Typing

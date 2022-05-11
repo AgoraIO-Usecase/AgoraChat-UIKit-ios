@@ -244,7 +244,7 @@
         _nameLabel = [[UILabel alloc] init];
 //        _nameLabel.backgroundColor = [UIColor orangeColor];
         _nameLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
-        _nameLabel.textColor = [UIColor blackColor];
+        _nameLabel.textColor = [UIColor darkTextColor];
     }
     return _nameLabel;
 }
@@ -505,7 +505,7 @@
 
 - (void)setModel:(EaseMessageModel *)model
 {
-    _model = model;
+    self.nameLabel.textColor = [UIColor darkTextColor];
     self.noMessage.hidden = self.displayType != EMThreadHeaderTypeDisplayNoMessage;
     if (self.threadNameField.isHidden == YES) {
         CGSize size = CGSizeMake(EMScreenWidth - 70 ,CGFLOAT_MAX);
@@ -526,10 +526,10 @@
         return;
     }
     self.bubbleView.model = model;
-    if (model.userDataProfile && [model.userDataProfile respondsToSelector:@selector(showName)] && model.userDataProfile.showName) {
-        self.nameLabel.text = model.userDataProfile.showName;
+    if (model.threadUserProfile && [model.threadUserProfile respondsToSelector:@selector(showName)] && model.threadUserProfile.showName) {
+        self.nameLabel.text = model.threadUserProfile.showName;
         if (self.displayType == EMThreadHeaderTypeDisplay || self.displayType == EMThreadHeaderTypeDisplayNoMessage) {
-            _alertMessage.text = [_alertMessage.text stringByAppendingString:model.userDataProfile.showName];
+            _alertMessage.text = [_alertMessage.text stringByAppendingString:model.threadUserProfile.showName];
         } else {
             _alertMessage.text = @"Send a message to start a thread in this Group Chat.";
         }
