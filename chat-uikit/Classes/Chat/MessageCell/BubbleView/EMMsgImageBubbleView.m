@@ -12,7 +12,7 @@
 
 #define kEMMsgImageDefaultSize 120
 #define kEMMsgImageMinWidth 50
-#define kEMMsgImageMaxWidth 120
+#define kEMMsgImageMaxWidth 180
 #define kEMMsgImageMaxHeight 260
 
 @implementation EMMsgImageBubbleView
@@ -71,6 +71,8 @@
     __weak typeof(self) weakself = self;
     void (^block)(CGSize aSize) = ^(CGSize aSize) {
         CGSize layoutSize = [weakself _getImageSize:aSize];
+        NSLog(@"layoutSize:%@",NSStringFromCGSize(layoutSize));
+
         [weakself Ease_updateConstraints:^(EaseConstraintMaker *make) {
             make.width.Ease_equalTo(layoutSize.width);
             make.height.Ease_equalTo(layoutSize.height);
@@ -91,10 +93,19 @@
         size = img.size;
         block(size);
     } else {
-        block(size);
+//        block(size);
         BOOL isAutoDownloadThumbnail = ([AgoraChatClient sharedClient].options.isAutoDownloadThumbnail);
         if (isAutoDownloadThumbnail) {
-            [self Ease_setImageWithURL:[NSURL URLWithString:aRemotePath] placeholderImage:[UIImage easeUIImageNamed:@"msg_img_broken"] completed:^(UIImage * _Nullable image, NSError * _Nullable error, EaseImageCacheType cacheType, NSURL * _Nullable imageURL) {}];
+            [self Ease_setImageWithURL:[NSURL URLWithString:aRemotePath] placeholderImage:[UIImage easeUIImageNamed:@"msg_img_broken"] completed:^(UIImage * _Nullable image, NSError * _Nullable error, EaseImageCacheType cacheType, NSURL * _Nullable imageURL) {
+                if (image) {
+                    CGFloat imWidth = image.size.width;
+                    CGFloat imHeight = image.size.height;
+                    NSLog(@"imSize:%@",NSStringFromCGSize(image.size));
+                    
+                    block(image.size);
+
+                }
+            }];
         } else {
             self.image = [UIImage easeUIImageNamed:@"msg_img_broken"];
         }

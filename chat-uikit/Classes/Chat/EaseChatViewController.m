@@ -526,6 +526,17 @@
 
 - (void)messageCellDidSelected:(EaseMessageCell *)aCell
 {
+    AgoraChatMessage *message = aCell.model.message;
+    NSDictionary *dic = message.ext;
+    NSString *emojiUrlString = dic[EaseEmojiUrlKey];
+    NSString *emojiTypeString = dic[EaseEmojiTypeKey];
+    
+    //striker && giphy do not response touch gesture
+    if ([emojiUrlString isKindOfClass:[NSString class]] && emojiUrlString.length > 0) {
+        return;
+    }
+    
+    
     [self hideLongPressView];
     BOOL isCustom = NO;
     if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectMessageItem:userProfile:)]) {
@@ -827,7 +838,6 @@
         NSString *fileName = [urlString lastPathComponent];
         
         AgoraChatImageMessageBody *imgBody = [[AgoraChatImageMessageBody alloc] initWithLocalPath:@"" displayName:fileName];
-        
         NSDictionary *dic = @{EaseEmojiUrlKey:urlString,EaseEmojiTypeKey:fileType};
         [self sendMessageWithBody:imgBody ext:dic];
     }
