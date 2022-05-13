@@ -33,7 +33,6 @@
 #import "UIAlertAction+Custom.h"
 #import "EaseInputMenu+Private.h"
 #import "EMBottomMoreFunctionView.h"
-@import AgoraChat;
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMBottomReactionDetailView.h"
 #import "ChatUIOptions.h"
