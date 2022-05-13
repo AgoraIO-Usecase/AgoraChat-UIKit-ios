@@ -263,6 +263,7 @@ static EMBottomMoreFunctionView *shareView;
     
     _emojiCollectionViewHeightConstraint.constant = 344;
     self.contentViewBottomConstraint.constant -= 344 - 36 - self.itemTableViewHeightConstraint.constant;
+    _tableViewTopContraint.constant += 344 - 36;
     _itemTableViewHeightConstraint.constant = 0;
     [UIView animateWithDuration:0.35 animations:^{
         [self layoutIfNeeded];

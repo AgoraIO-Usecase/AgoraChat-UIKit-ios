@@ -926,8 +926,10 @@
             }
         }];
     }];
-    [self.dataArray removeObject:dic];
-    [self.tableView reloadData];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.dataArray removeObject:dic];
+        [self.tableView reloadData];
+    });
 }
 
 
@@ -962,9 +964,7 @@
                 }
             }
         }];
-        
-    
-        
+                
     });
 }
 
@@ -1407,6 +1407,7 @@
     
     [[AgoraChatClient sharedClient].chatManager sendMessage:message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
         [weakself msgStatusDidChange:message error:error];
+        [self showHint:error.errorDescription];
         if (weakself.delegate && [weakself.delegate respondsToSelector:@selector(didSendMessage:error:)]) {
             [weakself.delegate didSendMessage:message error:error];
         }
