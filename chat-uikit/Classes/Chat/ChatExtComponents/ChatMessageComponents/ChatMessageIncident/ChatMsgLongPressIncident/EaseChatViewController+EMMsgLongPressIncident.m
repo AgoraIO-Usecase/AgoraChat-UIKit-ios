@@ -26,7 +26,7 @@ static const void *recallViewKey = &recallViewKey;
 
 - (void)resetCellLongPressStatus:(EaseMessageCell *)aCell
 {
-    if (aCell.model.type == AgoraChatMessageTypeText) {
+    if (aCell.model.type == AgoraChatMessageTypeText && [aCell.bubbleView isKindOfClass:EMMsgTextBubbleView.class]) {
         EMMsgTextBubbleView *textBubbleView = (EMMsgTextBubbleView*)aCell.bubbleView;
         textBubbleView.textLabel.backgroundColor = [UIColor clearColor];
     }

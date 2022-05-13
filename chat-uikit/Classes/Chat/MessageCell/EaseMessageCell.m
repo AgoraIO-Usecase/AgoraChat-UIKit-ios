@@ -46,7 +46,7 @@
                             viewModel:(EaseChatViewModel*)viewModel
 
 {
-    NSString *identifier = [EaseMessageCell cellIdentifierWithDirection:aDirection type:aMessageType];
+    NSString *identifier = [self.class cellIdentifierWithDirection:aDirection type:aMessageType];
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     if (self) {
         _direction = aDirection;
@@ -131,7 +131,7 @@
     _nameLabel.font = [UIFont fontWithName:@"PingFang SC" size:10.0];
     _nameLabel.textColor = [UIColor colorWithHexString:@"#999999"];
     
-    _bubbleView = [self _getBubbleViewWithType:aType];
+    _bubbleView = [self getBubbleViewWithType:aType];
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
     
@@ -139,16 +139,7 @@
     [self.contentView addSubview:_bubbleView];
     [self.contentView addSubview:_nameLabel];
     
-    CGFloat width = self.bounds.size.width;
-    CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
-    if (_viewModel.displayReceivedAvatar) {
-        bubbleViewWidth -= (avatarLonger + componentSpacing);
-    }
-    if (_viewModel.displaySentAvatar) {
-        bubbleViewWidth -= (avatarLonger + componentSpacing);
-    };
-    
-    self.bubbleView.maxBubbleWidth = bubbleViewWidth * 0.8;
+    self.bubbleView.maxBubbleWidth = [self maxBubbleViewWidth];
     
     __weak typeof(self)weakSelf = self;
     _reactionView = [[EMMessageReactionView alloc] init];
@@ -290,6 +281,20 @@
     [self setCellIsReadReceipt];
 }
 
+- (CGFloat)maxBubbleViewWidth
+{
+    CGFloat width = self.bounds.size.width;
+    CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
+    if (_viewModel.displayReceivedAvatar) {
+        bubbleViewWidth -= (avatarLonger + componentSpacing);
+    }
+    if (_viewModel.displaySentAvatar) {
+        bubbleViewWidth -= (avatarLonger + componentSpacing);
+    };
+    
+    return bubbleViewWidth * 0.8;
+}
+
 - (void)setCellIsReadReceipt{
     _readReceiptBtn = [[UIButton alloc]init];
     _readReceiptBtn.layer.cornerRadius = 5;
@@ -309,7 +314,7 @@
     }
 }
 
-- (EaseChatMessageBubbleView *)_getBubbleViewWithType:(AgoraChatMessageType)aType
+- (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType
 {
     EaseChatMessageBubbleView *bubbleView = nil;
     switch (aType) {
