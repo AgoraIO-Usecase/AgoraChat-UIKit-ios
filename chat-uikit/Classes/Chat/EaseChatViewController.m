@@ -498,7 +498,6 @@
     if (cell.model.message.body.type == AgoraChatMessageTypeVoice) {
         cell.model.weakMessageCell = cell;
     }
-    model.isPlaying = NO;
     cell.model = model;
 
     return cell;

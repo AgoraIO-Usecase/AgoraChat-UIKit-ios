@@ -20,7 +20,7 @@
 #import "UIImageView+EaseWebCache.h"
 #import "EaseMessageCell+Category.h"
 #define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
-
+#import "EMAudioPlayerUtil.h"
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMMessageReactionView.h"
 
@@ -396,6 +396,10 @@
         [self.statusView setSenderStatus:model.message.status isReadAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isReadAcked : NO isDeliverAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isDeliverAcked : NO ];
     } else {
         if (model.type == AgoraChatMessageBodyTypeVoice) {
+            if (model.message.isChatThread == YES) {
+                NSDictionary *dic = [EMAudioPlayerUtil sharedHelper].listenMap;
+                model.message.isListened = [[dic valueForKey:model.message.messageId] boolValue];
+            }
             self.statusView.hidden = model.message.isListened;
         }
     }
@@ -526,6 +530,7 @@
 @end
 
 @implementation EaseMessageCell (Category)
+
 - (void)setStatusHidden:(BOOL)isHidden
 {
     self.statusView.hidden = isHidden;

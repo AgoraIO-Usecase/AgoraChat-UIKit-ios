@@ -17,6 +17,7 @@
 #import "EMMsgRecordCell.h"
 #import "EaseHeaders.h"
 #import "EMMsgTextBubbleView.h"
+#import "EaseMessageCell+Category.h"
 
 @implementation AgoraChatMessageEventStrategy
 
@@ -185,6 +186,10 @@
     void (^playBlock)(EaseMessageModel *aModel) = ^(EaseMessageModel *aModel) {
         if (!aModel.message.isListened) {
             aModel.message.isListened = YES;
+            if (aModel.message.isChatThread) {
+                [[EMAudioPlayerUtil sharedHelper].listenMap setValue:@(YES) forKey:aModel.message.messageId];
+                [[NSUserDefaults standardUserDefaults] setValue:[EMAudioPlayerUtil sharedHelper].listenMap forKey:@"EMListenHashMap"];
+            }
         }
         
         if (!aModel.message.isReadAcked) {
@@ -197,14 +202,20 @@
             if (oldModel == aCell.model && oldModel.isPlaying == YES) {
                 [[EMAudioPlayerUtil sharedHelper] stopPlayer];
                 [EMAudioPlayerUtil sharedHelper].model = nil;
-                [[NSNotificationCenter defaultCenter] postNotificationName:AUDIOMSGSTATECHANGE object:aModel];
+                aCell.bubbleView.isPlaying = NO;
                 return;
             }
         }
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:AUDIOMSGSTATECHANGE object:aModel];
+        if (aModel.isPlaying == YES) {
+            aCell.bubbleView.isPlaying = aModel.isPlaying;
+            [aCell setStatusHidden:aModel.message.isListened];
+        } else {
+            aCell.bubbleView.isPlaying = !aCell.bubbleView.isPlaying;
+        }
         [[EMAudioPlayerUtil sharedHelper] startPlayerWithPath:body.localPath model:aModel completion:^(NSError * _Nonnull error) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:AUDIOMSGSTATECHANGE object:aModel];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                aCell.bubbleView.isPlaying = NO;
+            });
         }];
     };
     

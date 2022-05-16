@@ -143,6 +143,16 @@
 
 #pragma mark - Setter
 
+- (void)setIsPlaying:(BOOL)isPlaying {
+    if (isPlaying == YES) {
+        [self.imgView startAnimating];
+//        [self.imgView setNeedsLayout];
+//        [self.imgView layoutIfNeeded];
+    } else {
+        [self.imgView stopAnimating];
+    }
+}
+
 - (void)setModel:(EaseMessageModel *)model
 {
     [super setModel:model];
@@ -168,12 +178,7 @@
     if (type == AgoraChatMessageTypeVoice) {
         AgoraChatVoiceMessageBody *body = (AgoraChatVoiceMessageBody *)model.message.body;
         self.textLabel.text = [NSString stringWithFormat:@"%d\"",(int)body.duration];
-        [self.imgView stopAnimating];
-        if (model.isPlaying) {
-            [self.imgView startAnimating];
-        }
-        [self.imgView setNeedsLayout];
-        [self.imgView layoutIfNeeded];
+        
         
         float width = kEMMsgAudioMinWidth * body.duration / 10;
         if (width > _maxWidth) {

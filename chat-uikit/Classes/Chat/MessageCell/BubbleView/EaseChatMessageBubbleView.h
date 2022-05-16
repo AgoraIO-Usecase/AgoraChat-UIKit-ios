@@ -25,6 +25,8 @@
 
 @property (nonatomic) CGFloat maxBubbleWidth;
 
+@property (nonatomic, assign) BOOL isPlaying;
+
 - (instancetype)initWithDirection:(AgoraChatMessageDirection)aDirection
                              type:(AgoraChatMessageType)aType
                         viewModel:(EaseChatViewModel *)viewModel;

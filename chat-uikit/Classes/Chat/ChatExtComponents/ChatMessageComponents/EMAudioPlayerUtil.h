@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EMAudioPlayerUtil : NSObject
 
+@property (nonatomic, strong) NSMutableDictionary *listenMap;
+
 @property (nonatomic, strong) id model;
 
 + (instancetype)sharedHelper;
