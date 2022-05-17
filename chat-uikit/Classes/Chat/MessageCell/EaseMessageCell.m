@@ -128,6 +128,7 @@
     _nameLabel.textColor = [UIColor colorWithHexString:@"#999999"];
     
     _bubbleView = [self _getBubbleViewWithType:aType];
+ 
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
     
@@ -288,7 +289,17 @@
             bubbleView = [[EMMsgTextBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
             break;
         case AgoraChatMessageTypeImage:
-            bubbleView = [[EMMsgImageBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
+            {
+                EMMsgImageBubbleView *imageBubbleView = [[EMMsgImageBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
+                imageBubbleView.downloadEmojiBlock = ^(BOOL downloadSuccess) {
+                    if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellWillReload:)]) {
+                        [self.delegate messageCellWillReload:self];
+                    }
+                };
+                
+                bubbleView = imageBubbleView;
+            }
+        
             break;
         case AgoraChatMessageTypeVoice:
             bubbleView = [[EMMsgAudioBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];

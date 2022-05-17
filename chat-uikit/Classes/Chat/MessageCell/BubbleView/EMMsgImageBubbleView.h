@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EMMsgImageBubbleView : EaseChatMessageBubbleView
 
+@property (nonatomic, copy)void (^downloadEmojiBlock)(BOOL downloadSuccess);
+
 - (void)setThumbnailImageWithLocalPath:(NSString *)aLocalPath
                             remotePath:(NSString *)aRemotePath
                           thumbImgSize:(CGSize)aThumbSize

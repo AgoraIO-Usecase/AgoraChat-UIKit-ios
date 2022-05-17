@@ -393,6 +393,7 @@
     }
     NSString *identifier = [EaseMessageCell cellIdentifierWithDirection:model.direction type:model.type];
     EaseMessageCell *cell = (EaseMessageCell *)[tableView dequeueReusableCellWithIdentifier:identifier];
+    
     // Configure the cell...
     if (cell == nil || _isReloadViewWithModel == YES) {
         _isReloadViewWithModel = NO;
@@ -523,6 +524,15 @@
 }
 
 #pragma mark - EaseMessageCellDelegate
+- (void)messageCellWillReload:(EaseMessageCell *)aCell {
+
+    EaseMessageModel *model = aCell.model;
+    NSInteger indexModel = [self.dataArray indexOfObject:model];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:indexModel inSection:0];
+    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+
+}
+
 
 - (void)messageCellDidSelected:(EaseMessageCell *)aCell
 {
@@ -846,27 +856,31 @@
 
 #pragma mark GiphyDelegate
 - (void)didSelectMediaWithGiphyViewController:(GiphyViewController *)giphyViewController media:(GPHMedia *)media {
-         
-//    GPHMediaTypeGif = 0,
-//  /// Sticker Media Type
-//    GPHMediaTypeSticker = 1,
-//  /// Text Media Type
-//    GPHMediaTypeText = 2,
-//  /// Video Media Type
-//    GPHMediaTypeVideo = 3,
-    
-    
-    NSString *url = media.images.fixedWidth.gifUrl;
+
     GPHMediaType type = media.type;
-    NSLog(@"media:%@",media);
+//    NSString *fileUrlString = media.images.fixedWidth.gifUrl;
+    NSString *fileUrlString = media.images.fixedHeight.gifUrl;
+
+//    NSString *fileUrlString = media.url;
+    NSString *fileType = [self getFileTypeWithMediaType:media.type];
     
-    NSString *fileName = [url lastPathComponent];
-    AgoraChatImageMessageBody *imgBody = [[AgoraChatImageMessageBody alloc] initWithLocalPath:@"" displayName:fileName];
-    NSDictionary *dic = @{EaseEmojiUrlKey:url,EaseEmojiTypeKey:@(type)};
+    AgoraChatImageMessageBody *imgBody = [[AgoraChatImageMessageBody alloc] initWithLocalPath:@"" displayName:fileUrlString];
+    NSDictionary *dic = @{EaseEmojiUrlKey:fileUrlString,EaseEmojiTypeKey:fileType};
+    NSLog(@"%s dic:%@\n",__func__,dic);
+
     [self sendMessageWithBody:imgBody ext:dic];
     
 }
 
+- (NSString *)getFileTypeWithMediaType:(GPHMediaType)mediaType {
+    NSString *typeString = @"gif";
+    if (mediaType == GPHMediaTypeVideo) {
+        typeString = @"video";
+    }else {
+        typeString = @"gif";
+    }
+    return typeString;
+}
 
 - (void)didDismissWithController:(GiphyViewController *)controller {
 

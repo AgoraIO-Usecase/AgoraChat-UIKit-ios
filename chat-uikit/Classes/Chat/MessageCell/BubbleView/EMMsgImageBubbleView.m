@@ -23,7 +23,7 @@
 {
     self = [super initWithDirection:aDirection type:aType viewModel:viewModel];
     if (self) {
-        self.contentMode = UIViewContentModeScaleAspectFill;
+        self.contentMode = UIViewContentModeScaleAspectFit;
     }
     
     return self;
@@ -77,9 +77,13 @@
             make.width.Ease_equalTo(layoutSize.width);
             make.height.Ease_equalTo(layoutSize.height);
         }];
-        
+
         CGRect rect = CGRectMake(0, 0, layoutSize.width, layoutSize.height);
         [weakself setCornerRadius:rect];
+        
+        if (self.downloadEmojiBlock) {
+            self.downloadEmojiBlock(YES);
+        }
     };
     
     CGSize size = aThumbSize;
@@ -93,17 +97,18 @@
         size = img.size;
         block(size);
     } else {
-//        block(size);
+        block(size);
+        
         BOOL isAutoDownloadThumbnail = ([AgoraChatClient sharedClient].options.isAutoDownloadThumbnail);
         if (isAutoDownloadThumbnail) {
+            NSLog(@"aRemotePath:%@",aRemotePath);
+
             [self Ease_setImageWithURL:[NSURL URLWithString:aRemotePath] placeholderImage:[UIImage easeUIImageNamed:@"msg_img_broken"] completed:^(UIImage * _Nullable image, NSError * _Nullable error, EaseImageCacheType cacheType, NSURL * _Nullable imageURL) {
                 if (image) {
                     CGFloat imWidth = image.size.width;
                     CGFloat imHeight = image.size.height;
-                    NSLog(@"imSize:%@",NSStringFromCGSize(image.size));
-                    
+                    NSLog(@"imageURL:%@ imSize:%@",imageURL,NSStringFromCGSize(image.size));
                     block(image.size);
-
                 }
             }];
         } else {
@@ -128,6 +133,9 @@
         NSDictionary *dic = model.message.ext;
         NSString *emojiUrlString = dic[EaseEmojiUrlKey];
         NSString *emojiTypeString = dic[EaseEmojiTypeKey];
+        
+        //handle chinese of urlString
+        emojiUrlString = [emojiUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         
         if ([emojiUrlString isKindOfClass:[NSString class]] && emojiUrlString.length > 0) {
             [self setThumbnailImageWithLocalPath:@"" remotePath:emojiUrlString thumbImgSize:CGSizeZero imgSize:CGSizeZero];
