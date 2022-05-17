@@ -1365,6 +1365,7 @@
 - (void)sendMessageWithBody:(AgoraChatMessageBody *)aBody
                         ext:(NSDictionary * __nullable)aExt
 {
+//    [self.view endEditing:YES];
     NSString *from = [[AgoraChatClient sharedClient] currentUsername];
     NSString *to = self.currentConversation.conversationId;
     AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:to from:from to:to body:aBody ext:aExt];
@@ -1407,10 +1408,15 @@
     
     [[AgoraChatClient sharedClient].chatManager sendMessage:message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
         [weakself msgStatusDidChange:message error:error];
-        [self showHint:error.errorDescription];
         if (weakself.delegate && [weakself.delegate respondsToSelector:@selector(didSendMessage:error:)]) {
             [weakself.delegate didSendMessage:message error:error];
         }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (error) {
+                [self.view endEditing:YES];
+                [self showHint:error.errorDescription];
+            }
+        });
     }];
 }
 
