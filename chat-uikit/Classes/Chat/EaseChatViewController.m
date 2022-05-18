@@ -1187,17 +1187,10 @@
     };
     if (self.isChatThread == YES) {
         if (self.dataArray.count > 0) {
-            if (self.cursor.list.count < 20) {
+            if (self.cursor.list.count < 20 || [self.cursor.cursor isEqualToString:@""]) {
                 return;
             }
-            for (EaseMessageModel *model in [[[self.dataArray mutableCopy] reverseObjectEnumerator] allObjects]) {
-                if ([model isKindOfClass:[EaseMessageModel class]]) {
-                    if (model.message.messageId.length) {
-                        self.moreMsgId = model.message.messageId;
-                    }
-                    break;
-                }
-            }
+            self.moreMsgId = self.cursor.cursor;
         } else {
             self.moreMsgId = @"";
         }

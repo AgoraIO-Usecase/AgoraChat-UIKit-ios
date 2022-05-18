@@ -275,9 +275,6 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 
 - (void)messagesDidReceive:(NSArray *)aMessages
 {
-    for (AgoraChatMessage *msg in aMessages) {
-        NSLog(@"");
-    }
     if (aMessages && [aMessages count]) {
         AgoraChatMessage *msg = aMessages[0];
         if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThread != YES) {

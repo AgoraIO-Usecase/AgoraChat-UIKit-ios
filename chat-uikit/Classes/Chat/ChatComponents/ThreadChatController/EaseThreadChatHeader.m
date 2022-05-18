@@ -34,7 +34,7 @@
         if (type != EMThreadHeaderTypeDisplayNoMessage) {
             self.frame = CGRectMake(0, 0, EMScreenWidth, size.height);
         } else {
-            self.frame = CGRectMake(0, 0, EMScreenWidth, 134);
+            self.frame = CGRectMake(0, 0, EMScreenWidth, 140);
         }
         [self addSubview:cell];
         self.header = cell;
