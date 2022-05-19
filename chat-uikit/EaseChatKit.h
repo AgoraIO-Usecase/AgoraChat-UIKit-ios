@@ -32,3 +32,9 @@ FOUNDATION_EXPORT const unsigned char EaseChatKitVersionString[];
 #import "EaseInputMenu.h"
 
 
+//chatroom
+#import "EaseChatView.h"
+#import "EaseCustomMessageHelper.h"
+#import "EaseChatViewCustomOption.h"
+#import "EaseUserInfoManagerHelper.h"
+

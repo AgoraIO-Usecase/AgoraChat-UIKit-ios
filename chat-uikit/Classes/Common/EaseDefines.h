@@ -119,4 +119,17 @@
 #define CHATROOM_INFO_UPDATED @"EaseChatroomInfoUpdated"
 #define CHATROOM_INFO_PUSHVIEWCONTROLLER @"EasePushChatroomInfoViewController"
 
+
+//custom message type
+#define kCustomMsgChatroomGift @"chatroom_gift"
+#define kCustomMsgChatroomPraise @"chatroom_praise"
+#define kCustomMsgChatroomBarrage @"chatroom_barrage"
+
+//send or receive
+#define kGiftIdKey @"gift_id"
+#define kGiftNumKey @"gift_num"
+
+#define EaseKit_chatroom_join @"chatroom_join"
+
+
 #endif /* EaseDefines_h */

@@ -15,5 +15,5 @@
 #import "UIViewController+HUD.h"
 #import "UIColor+EaseUI.h"
 #import "UIImage+EaseUI.h"
-
+#import "EaseKitDefine.h"
 

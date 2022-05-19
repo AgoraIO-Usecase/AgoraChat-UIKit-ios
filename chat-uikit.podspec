@@ -49,7 +49,12 @@ Pod::Spec.new do |s|
         
         'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewModel.h',
         'chat-uikit/Classes/BaseTableviewController/EaseUserProfile.h',
-        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h'
+        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h',
+        
+        'chat-uikit/Classes/Chat/LiveStream/EaseChatView.h',
+        'chat-uikit/Classes/Chat/LiveStream/EaseCustomMessageHelper.h',
+        'chat-uikit/Classes/Chat/LiveStream/EaseChatViewCustomOption.h',
+        'chat-uikit/Classes/Chat/LiveStream/UserInfo/EaseUserInfoManagerHelper.h'
     ]
     
     s.static_framework = true
