@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (EaseChatViewCustomOption *)customOption;
 
 //set custom tableview message cell
-@property (nonatomic, strong) UITableViewCell *customMessageCell;
+@property (nonatomic, assign) BOOL customMessageCell;
 //set custom user join cell
-@property (nonatomic, strong) UITableViewCell *customJoinCell;
+@property (nonatomic, assign) BOOL customJoinCell;
 
 
 //set tableView backgroud color
@@ -33,7 +33,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 //set whether display sender nickname
 @property (nonatomic, assign) BOOL   displaySenderNickname;
-
 
 
 // Avatar style

@@ -217,6 +217,14 @@
 #pragma  mark - UITableViewDelegate
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
 {
+    if ([self.delegate respondsToSelector:@selector(easeMessageCellHeightAtIndexPath:)]) {
+        return [self.delegate easeMessageCellHeightAtIndexPath:indexPath];
+    }
+    
+    if ([self.delegate respondsToSelector:@selector(easeJoinCellHeightAtIndexPath:)]) {
+        return [self.delegate easeJoinCellHeightAtIndexPath:indexPath];
+    }
+
     AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
     if ([message.ext objectForKey:EaseKit_chatroom_join]) {
         return 44.0;
@@ -251,51 +259,30 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-//    UITableViewCell *messageCell = nil;
-//    UITableViewCell *joinCell = nil;
-//
-//    if (self.customOption.customMessageCell) {
-//        messageCell = [tableView dequeueReusableCellWithIdentifier:@"customMessageCell"];
-//        if (messageCell == nil) {
-//            messageCell = [[[self.customOption.customMessageCell class] alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"customMessageCell"];
-//        }
-//    }else {
-//        messageCell = [tableView dequeueReusableCellWithIdentifier:[EaseChatroomMessageCell reuseIdentifier]];
-//    }
-//
-//    if (self.customOption.customJoinCell) {
-//        joinCell = [tableView dequeueReusableCellWithIdentifier:@"customJoinCell"];
-//        if (joinCell == nil) {
-//            joinCell = [[[self.customOption.customJoinCell class] alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"customJoinCell"];
-//        }
-//    }else {
-//        joinCell = [tableView dequeueReusableCellWithIdentifier:[EaseChatroomJoinCell reuseIdentifier]];
-//    }
-//
-//
-//    if (!self.datasource || [self.datasource count] < 1)
-//        return nil;
-//    AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
-//    if ([message.ext objectForKey:EaseKit_chatroom_join]) {
-//        [joinCell updateWithObj:message];
-//        return joinCell;
-//    }else {
-//        [messageCell setMesssage:message chatroom:self.chatroom];
-//    }
-//    return messageCell;
+    if (self.customOption.customMessageCell) {
+        if ([self.delegate respondsToSelector:@selector(easeMessageCellForRowAtIndexPath:)]) {
+            return [self.delegate easeMessageCellForRowAtIndexPath:indexPath];
+        }
+    }
+
     
+    if (self.customOption.customJoinCell) {
+        if ([self.delegate respondsToSelector:@selector(easeJoinCellForRowAtIndexPath:)]) {
+            return [self.delegate easeJoinCellForRowAtIndexPath:indexPath];
+        }
+    }
     
     EaseChatroomMessageCell *messageCell = [tableView dequeueReusableCellWithIdentifier:[EaseChatroomMessageCell reuseIdentifier]];
     if (messageCell == nil) {
         messageCell = [[[EaseChatroomMessageCell class] alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:[EaseChatroomMessageCell reuseIdentifier] customOption:self.customOption];
     }
-    
-    
+
+
     EaseChatroomJoinCell *joinCell = [tableView dequeueReusableCellWithIdentifier:[EaseChatroomJoinCell reuseIdentifier]];
     if (joinCell == nil) {
         joinCell = [[[EaseChatroomJoinCell class] alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:[EaseChatroomJoinCell reuseIdentifier] customOption:self.customOption];
     }
-    
+
     if (!self.datasource || [self.datasource count] < 1)
         return nil;
     AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
@@ -312,6 +299,10 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (self.customOption.customMessageCell || self.customOption.customJoinCell) {
+        return;
+    }
+    
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
     if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectUserWithMessage:)]) {

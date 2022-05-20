@@ -14,11 +14,19 @@
 @protocol EaseChatViewDelegate <NSObject>
 
 @optional
+//display custom message cell at indexpath
+- (UITableViewCell *)easeMessageCellForRowAtIndexPath:(NSIndexPath *)indexPath;
 
-//- (void)easeChatKeyboardWillShowWithHeight:(CGFloat)height
-//                             animationTime:(NSInteger)animationTime;
-//
-//- (void)easeChatKeyboardWillHidden;
+//height for custom message cell at indexpath
+- (CGFloat)easeMessageCellHeightAtIndexPath:(NSIndexPath *)indexPath;
+
+
+//display custom join cell at indexpath
+- (UITableViewCell *)easeJoinCellForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+//height for custom join cell at indexpath
+- (CGFloat)easeJoinCellHeightAtIndexPath:(NSIndexPath *)indexPath;
+
 
 - (void)didSelectUserWithMessage:(AgoraChatMessage*)message;
 
