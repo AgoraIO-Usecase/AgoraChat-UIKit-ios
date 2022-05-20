@@ -21,7 +21,29 @@ static EaseChatViewCustomOption *instance = nil;
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.isShowAvatar = YES;
+        self.displaySenderAvatar = YES;
+        self.displaySenderNickname = YES;
+        self.avatarStyle = Circular;
+        self.avatarCornerRadius = 0;
+        self.tableViewBottomMargin = 20.0;
+       
+        
+//        self.tableViewBgColor = UIColor.redColor;
+//        self.tableViewRightMargin = 0;
+//        self.tableViewBottomMargin = 20.0;
+//        self.sendTextButtonRightMargin = 0;
+//
+//        self.displaySenderAvatar = YES;
+//        self.displaySenderNickname = NO;
+//        self.avatarStyle = Rectangular;
+//        self.avatarCornerRadius = 6.0;
+//
+//        self.cellBgColor = UIColor.greenColor;
+//        self.messageLabelColor = UIColor.yellowColor;
+//        self.messageLabelSize = 14.0;
+//        self.nameLabelColor = UIColor.purpleColor;
+//        self.nameLabelFontSize = 10.0;
+        
     }
     return self;
 }

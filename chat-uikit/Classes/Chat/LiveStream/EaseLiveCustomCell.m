@@ -14,19 +14,23 @@
 @property (nonatomic, strong) UIView* bottomLine;
 @property (nonatomic, strong)UITapGestureRecognizer *tapGestureRecognizer;
 @property (nonatomic, strong) AgoraChatUserInfo *userInfo;
-
 @end
 
 @implementation EaseLiveCustomCell
 
-- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+- (instancetype)initWithStyle:(UITableViewCellStyle)style
+              reuseIdentifier:(NSString *)reuseIdentifier
+                 customOption:(EaseChatViewCustomOption *)customOption {
+    
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
+        self.customOption = customOption;
         [self prepare];
         [self placeSubViews];
     }
     return self;
 }
+
 
 - (void)tapAction {
     if (self.tapCellBlock) {
@@ -110,19 +114,6 @@
     return _tapGestureRecognizer;
 }
 
-
-- (void)setCellBgColor:(UIColor *)cellBgColor {
-    self.contentView.backgroundColor = cellBgColor;
-}
-
-
-- (void)setNameLabelFontSize:(CGFloat)nameLabelFontSize {
-    self.nameLabel.font = EaseKitNFont(nameLabelFontSize);
-}
-
-- (void)setNameLabelColor:(UIColor *)nameLabelColor {
-    self.nameLabel.textColor = nameLabelColor;
-}
 
 
 @end

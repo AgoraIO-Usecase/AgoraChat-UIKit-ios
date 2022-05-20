@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EaseChatroomMessageCell : EaseLiveCustomCell
 
-
+@property (nonatomic,strong,readonly) UILabel *messageLabel;
 
 - (void)setMesssage:(AgoraChatMessage*)message chatroom:(AgoraChatroom*)chatroom;
 

@@ -7,9 +7,9 @@
 
 #import <UIKit/UIKit.h>
 #import "EaseHeaders.h"
+#import "EaseChatViewCustomOption.h"
 
 #define EaseAvatarHeight 32.0f
-
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,21 +20,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong, readonly) UIView* bottomLine;
 @property (nonatomic, strong, readonly)UITapGestureRecognizer *tapGestureRecognizer;
+//custom chatView UI with option
+@property (nonatomic, strong) EaseChatViewCustomOption *customOption;
 
 
-//set cell contentview backgroud color
-@property (nonatomic, strong) UIColor *cellBgColor;
-//set whether display avatarImageView
-@property (nonatomic, assign) BOOL    isShowAvatar;
-//set nameLabel text font size
-@property (nonatomic, assign) CGFloat nameLabelFontSize;
-//set nameLabel text color
-@property (nonatomic, strong) UIColor *nameLabelColor;
-//set messageLabel font size
-@property (nonatomic, assign) CGFloat messageLabelSize;
-//set messageLabel text color
-@property (nonatomic, strong) UIColor *messageLabelColor;
-
+- (instancetype)initWithStyle:(UITableViewCellStyle)style
+              reuseIdentifier:(NSString *)reuseIdentifier
+                 customOption:(EaseChatViewCustomOption *)customOption;
 
 + (NSString *)reuseIdentifier;
 + (CGFloat)height;
@@ -44,7 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 // fetch userInfo update cell with userId
 - (void)fetchUserInfoWithUserId:(NSString *)userId;
-
 
 
 @end

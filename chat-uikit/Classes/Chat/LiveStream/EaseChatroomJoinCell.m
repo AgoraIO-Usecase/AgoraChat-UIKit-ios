@@ -19,6 +19,7 @@
 @implementation EaseChatroomJoinCell
 
 - (void)prepare {
+    
     self.backgroundColor = UIColor.clearColor;
 
     self.nameLabel.textColor = EaseKitTextLabelGrayColor;
@@ -55,6 +56,14 @@
         make.left.equalTo(self.joinLabel.ease_right).offset(2.0);
     }];
     
+    if (self.customOption.nameLabelColor) {
+        self.nameLabel.textColor = self.customOption.nameLabelColor;
+    }
+    
+    if (self.customOption.nameLabelFontSize) {
+        self.nameLabel.font = EaseKitNFont(self.customOption.nameLabelFontSize);
+    }
+    
 }
 
 - (void)updateWithObj:(id)obj {
@@ -84,14 +93,6 @@
         _joinLabel.text = @"Joined";
     }
     return _joinLabel;
-}
-
-- (void)setMessageLabelSize:(CGFloat)messageLabelSize {
-    self.joinLabel.font = EaseKitNFont(messageLabelSize);
-}
-
-- (void)setMessageLabelColor:(UIColor *)messageLabelColor {
-    self.joinLabel.textColor = messageLabelColor;
 }
 
 

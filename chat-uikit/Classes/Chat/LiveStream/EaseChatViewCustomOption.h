@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "EaseChatEnums.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -27,10 +28,23 @@ NS_ASSUME_NONNULL_BEGIN
 //set sendTextButton right margin of EaseChatView
 @property (nonatomic, assign) CGFloat sendTextButtonRightMargin;
 
+//set whether display sender avatarImageView
+@property (nonatomic, assign) BOOL   displaySenderAvatar;
+
+//set whether display sender nickname
+@property (nonatomic, assign) BOOL   displaySenderNickname;
+
+
+
+// Avatar style
+@property (nonatomic) EaseChatAvatarStyle avatarStyle;
+
+// Avatar cornerRadius Default: 0 (Only avatar type RoundedCorner)
+@property (nonatomic) CGFloat avatarCornerRadius;
+
+
 //set cell contentview backgroud color
 @property (nonatomic, strong) UIColor *cellBgColor;
-//set whether display avatarImageView
-@property (nonatomic, assign) BOOL    isShowAvatar;
 //set nameLabel text font size
 @property (nonatomic, assign) CGFloat nameLabelFontSize;
 //set nameLabel text color

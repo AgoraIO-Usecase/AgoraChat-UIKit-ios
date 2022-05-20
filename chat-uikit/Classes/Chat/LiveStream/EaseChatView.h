@@ -15,7 +15,10 @@
 
 @optional
 
-- (void)easeChatViewDidChangeFrameToHeight:(CGFloat)toHeight;
+//- (void)easeChatKeyboardWillShowWithHeight:(CGFloat)height
+//                             animationTime:(NSInteger)animationTime;
+//
+//- (void)easeChatKeyboardWillHidden;
 
 - (void)didSelectUserWithMessage:(AgoraChatMessage*)message;
 
@@ -35,21 +38,10 @@
 @property (nonatomic,assign) BOOL isMuted;
 
 
-@property (nonatomic, strong) EaseChatViewCustomOption *customOption;
-
-
-- (instancetype)initWithFrame:(CGRect)frame
-                   chatroomId:(NSString*)chatroomId;
-
 - (instancetype)initWithFrame:(CGRect)frame
                    chatroomId:(NSString*)chatroomId
-                    isPublish:(BOOL)isPublish;
-
-- (instancetype)initWithFrame:(CGRect)frame
-                   chatroomId:(NSString*)chatroomId
-                    isPublish:(BOOL)isPublish
-              customMsgHelper:(EaseCustomMessageHelper*)customMsgHelper;
-
+              customMsgHelper:(EaseCustomMessageHelper*)customMsgHelper
+                 customOption:(EaseChatViewCustomOption *)customOption;
 
 - (void)sendGiftAction:(NSString *)giftId num:(NSInteger)num completion:(void (^)(BOOL success))aCompletion;
 
