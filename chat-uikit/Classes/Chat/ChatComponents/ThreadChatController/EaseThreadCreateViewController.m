@@ -378,10 +378,10 @@
     cell.delegate = self;
     model.isHeader = YES;
     model.isPlaying = NO;
-    cell.model = model;
     if (cell.model.message.body.type == AgoraChatMessageTypeVoice) {
         cell.model.weakMessageCell = cell;
     }
+    cell.model = model;
     return cell;
 }
 

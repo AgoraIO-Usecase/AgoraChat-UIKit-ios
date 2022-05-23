@@ -98,23 +98,35 @@
         if (weakself.model.message.threadOverView && weakself.model.isHeader == NO) {
             space = 12*2;
         }
-        if (weakself.model.message.threadOverView && weakself.model.isHeader == NO) {
-            [weakself Ease_updateConstraints:^(EaseConstraintMaker *make) {
-                make.width.Ease_equalTo(KEMThreadBubbleWidth+space);
-                make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4+layoutSize.height+8+12*2);
-            }];
-            [weakself.photo Ease_updateConstraints:^(EaseConstraintMaker *make) {
-                make.left.equalTo(weakself).offset(12);
-                make.top.Ease_equalTo(12);
-                make.width.Ease_equalTo(layoutSize.width);
-                make.height.Ease_equalTo(layoutSize.height);
-            }];
-            [weakself.threadBubble Ease_makeConstraints:^(EaseConstraintMaker *make) {
-                make.top.equalTo(weakself.photo.ease_bottom).offset(8);
-                make.left.equalTo(weakself).offset(12);
-                make.right.equalTo(weakself).offset(-12);
-                make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4);
-            }];
+        if (weakself.model.message.threadOverView) {
+            if (weakself.model.isHeader == NO) {
+                [weakself Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                    make.width.Ease_equalTo(KEMThreadBubbleWidth+space);
+                    make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4+layoutSize.height+8+12*2);
+                }];
+                [weakself.photo Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                    make.left.equalTo(weakself).offset(12);
+                    make.top.Ease_equalTo(12);
+                    make.width.Ease_equalTo(layoutSize.width);
+                    make.height.Ease_equalTo(layoutSize.height);
+                }];
+                [weakself.threadBubble Ease_makeConstraints:^(EaseConstraintMaker *make) {
+                    make.top.equalTo(weakself.photo.ease_bottom).offset(8);
+                    make.left.equalTo(weakself).offset(12);
+                    make.right.equalTo(weakself).offset(-12);
+                    make.height.Ease_equalTo(KEMThreadBubbleWidth*0.4);
+                }];
+            } else {
+                [weakself Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                    make.width.Ease_equalTo(layoutSize.width);
+                    make.height.Ease_equalTo(layoutSize.height);
+                }];
+                [weakself.threadBubble Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+
+                }];
+            }
+            
+            
         } else {
             [weakself Ease_updateConstraints:^(EaseConstraintMaker *make) {
                 make.width.Ease_equalTo(layoutSize.width);
@@ -125,8 +137,8 @@
             }];
         }
         CGRect rect;
-        if (!weakself.model.thread) {
-            if (weakself.model.message.threadOverView) {
+        if (weakself.model.message.threadOverView) {
+            if (weakself.model.isHeader == NO) {
                 rect = CGRectMake(0, 0, KEMThreadBubbleWidth+space, KEMThreadBubbleWidth*0.4+layoutSize.height+4+space);
             } else {
                 rect = CGRectMake(0, 0, layoutSize.width+space, layoutSize.height+space);
@@ -144,9 +156,13 @@
         size = CGSizeMake(70, 70);
     
     if (img) {
-        if (self.model.message.threadOverView && weakself.model.isHeader == NO) {
-            [self setupBubbleBackgroundImage];
-            self.photo.image = img;
+        if (self.model.message.threadOverView) {
+            if (weakself.model.isHeader == NO) {
+                [self setupBubbleBackgroundImage];
+                self.photo.image = img;
+            } else {
+                self.image = img;
+            }
         } else {
             self.image = img;
         }

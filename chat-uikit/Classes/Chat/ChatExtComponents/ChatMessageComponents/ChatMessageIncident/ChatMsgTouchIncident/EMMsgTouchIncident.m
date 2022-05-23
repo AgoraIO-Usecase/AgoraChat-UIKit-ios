@@ -187,8 +187,15 @@
         if (!aModel.message.isListened) {
             aModel.message.isListened = YES;
             if (aModel.message.isChatThread) {
-                [[EMAudioPlayerUtil sharedHelper].listenMap setValue:@(YES) forKey:aModel.message.messageId];
-                [[NSUserDefaults standardUserDefaults] setValue:[EMAudioPlayerUtil sharedHelper].listenMap forKey:@"EMListenHashMap"];
+                NSMutableDictionary *dic;
+                if (![[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"]) {
+                    dic = [[NSMutableDictionary alloc]init];
+                } else {
+                    dic = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"] mutableCopy];
+                }
+                
+                [dic setObject:@"1" forKey:aModel.message.messageId];
+                [[NSUserDefaults standardUserDefaults] setObject:dic forKey:@"EMListenHashMap"];
             }
         }
         

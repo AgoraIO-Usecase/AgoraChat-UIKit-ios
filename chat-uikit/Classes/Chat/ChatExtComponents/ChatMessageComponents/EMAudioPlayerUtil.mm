@@ -185,18 +185,6 @@ static EMAudioPlayerUtil *playerUtil = nil;
     }
 }
 
-- (NSMutableDictionary *)listenMap {
-    if (!_listenMap) {
-        _listenMap = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"];
-        if (!_listenMap) {
-            _listenMap = [NSMutableDictionary dictionary];
-        }
-    }
-    return _listenMap;
-}
-
-
-
 - (void)stopPlayer
 {
     if(_player) {

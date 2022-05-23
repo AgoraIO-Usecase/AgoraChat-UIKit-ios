@@ -233,7 +233,7 @@
         }
         if (model.message.threadOverView && model.isHeader == NO) {
             self.threadBubble.model = model;
-        } else self.threadBubble.model = nil;
+        }
         
     }
 }

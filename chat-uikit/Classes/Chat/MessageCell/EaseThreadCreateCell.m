@@ -429,17 +429,14 @@
 }
 
 - (void)bubbleLayout {
-    if (self.messageType == AgoraChatMessageTypeFile) {
-        self.bubbleView.maxBubbleWidth = self.bubbleView.maxBubbleWidth+50;
-    }
     [self.bubbleView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.nameLabel.ease_bottom).offset(4);
         make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
         make.bottom.equalTo(self.contentView).offset(-28);
         if (self.messageType == AgoraChatMessageTypeFile) {
-            make.right.equalTo(@(self.bubbleView.maxBubbleWidth));
+            make.right.equalTo(@(-16));
         } else {
-            self.bubbleView.maxBubbleWidth = EMScreenWidth - 48 - 16;
+            self.bubbleView.maxBubbleWidth = EMScreenWidth - 48 - 32;
             make.width.lessThanOrEqualTo(@(self.bubbleView.maxBubbleWidth));
         }
     }];
@@ -505,6 +502,7 @@
 
 - (void)setModel:(EaseMessageModel *)model
 {
+    _model = model;
     self.nameLabel.textColor = [UIColor darkTextColor];
     self.noMessage.hidden = self.displayType != EMThreadHeaderTypeDisplayNoMessage;
     if (self.threadNameField.isHidden == YES) {

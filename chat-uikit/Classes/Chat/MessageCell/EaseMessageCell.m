@@ -397,8 +397,8 @@
     } else {
         if (model.type == AgoraChatMessageBodyTypeVoice) {
             if (model.message.isChatThread == YES) {
-                NSDictionary *dic = [EMAudioPlayerUtil sharedHelper].listenMap;
-                model.message.isListened = [[dic valueForKey:model.message.messageId] boolValue];
+                NSMutableDictionary *dic = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"] mutableCopy];
+                model.message.isListened = [dic[model.message.messageId] boolValue];
             }
             self.statusView.hidden = model.message.isListened;
         }

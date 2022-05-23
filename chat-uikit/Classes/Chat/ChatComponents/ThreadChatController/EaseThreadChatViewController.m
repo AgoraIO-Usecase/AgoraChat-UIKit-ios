@@ -219,7 +219,7 @@
     [self.parentViewController.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)onUserKickOutOfThread:(AgoraChatThreadEvent *)event {
+- (void)onUserKickOutOfChatThread:(AgoraChatThreadEvent *)event {
     if (![event.threadId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }

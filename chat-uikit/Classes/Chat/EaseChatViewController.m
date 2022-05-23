@@ -40,6 +40,7 @@
 #import "EMBottomReactionDetailView.h"
 #import "ChatUIOptions.h"
 
+#define chatThreadPageSize 10
 
 @interface EaseChatViewController ()<EaseMoreFunctionViewDelegate, EMBottomMoreFunctionViewDelegate>
 {
@@ -543,7 +544,7 @@
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (self.isChatThread == YES) {
-        if (self.dataArray.count - 1 == indexPath.row && self.cursor.list.count == 20 && self.loadFinished == YES) {
+        if (self.dataArray.count - 1 == indexPath.row && self.cursor.list.count == chatThreadPageSize && self.loadFinished == YES) {
             self.loadFinished = NO;
             [self loadData:YES];
         }
@@ -1144,7 +1145,18 @@
     [self hideLongPressView];
     NSInteger toRow = -1;
     if ([self.dataArray count] > 0) {
-        toRow = self.dataArray.count - 1;
+        if ([self.dataArray.lastObject isKindOfClass:[EaseMessageModel class]]) {
+            toRow = self.dataArray.count - 1;
+        } else {
+            EaseMessageModel *tmp;
+            for (EaseMessageModel *model in [[self.dataArray reverseObjectEnumerator] allObjects]) {
+                if ([model isKindOfClass:[EaseMessageModel class]]) {
+                    tmp = model;
+                    toRow = [self.dataArray indexOfObject:tmp];
+                    break;
+                }
+            }
+        }
         NSIndexPath *toIndexPath = [NSIndexPath indexPathForRow:toRow inSection:0];
         [self.tableView scrollToRowAtIndexPath:toIndexPath atScrollPosition:UITableViewScrollPositionBottom animated:YES];
     }
@@ -1186,18 +1198,14 @@
         });
     };
     if (self.isChatThread == YES) {
-        if (self.dataArray.count > 0) {
-            if (self.cursor.list.count < 20 || [self.cursor.cursor isEqualToString:@""]) {
-                return;
-            }
-            self.moreMsgId = self.cursor.cursor;
-        } else {
+        if (self.dataArray.count <= 0) {
             self.moreMsgId = @"";
         }
-        [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:AgoraChatMessageFetchHidtoryDirectionDown pageSize:20 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
+        [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:AgoraChatMessageFetchHidtoryDirectionDown pageSize:10 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
             self.loadFinished = YES;
             if (!aError) {
                 self.cursor = aResult;
+                self.moreMsgId = self.cursor.cursor;
                 [self refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
             }
         }];
@@ -1300,7 +1308,9 @@
         if (weakself.tableView.isRefreshing) {
             [weakself.tableView endRefreshing];
         }
-        [self.tableView reloadData];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.tableView reloadData];
+        });
     }
 }
 
@@ -1385,7 +1395,7 @@
     BOOL sendRefresh = NO;
     if (self.isChatThread == NO) {
         sendRefresh = YES;
-    } else if (self.isChatThread == YES && self.cursor.list.count < 20) {
+    } else if (self.isChatThread == YES && self.cursor.list.count < chatThreadPageSize) {
         sendRefresh = YES;
     }
     if (!self.moreMsgId) {
@@ -1432,18 +1442,18 @@
 {
     __weak typeof(self) weakself = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [weakself.tableView reloadData];
-//        [weakself.tableView setNeedsLayout];
-//        [weakself.tableView layoutIfNeeded];
+        [self.tableView reloadData];
+        [self.tableView setNeedsLayout];
+        [self.tableView layoutIfNeeded];
         if (isScrollBottom) {
             if (self.isChatThread == YES) {
-                if ( self.cursor.list.count < 20) {
-                    [weakself scrollToBottomRow];
+                if ( self.cursor.list.count < chatThreadPageSize) {
+                    [self scrollToBottomRow];
                 }
-            } else [weakself scrollToBottomRow];
+            } else [self scrollToBottomRow];
         } else {
-            if (self.isChatThread == YES && self.dataArray.count < 20) {
-                [weakself scrollToTopRow];
+            if (self.isChatThread == YES && self.dataArray.count < chatThreadPageSize) {
+                [self scrollToTopRow];
             }
         }
     });
