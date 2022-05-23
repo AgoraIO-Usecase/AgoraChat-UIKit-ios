@@ -20,25 +20,24 @@
 //height for custom message cell at indexpath
 - (CGFloat)easeMessageCellHeightAtIndexPath:(NSIndexPath *)indexPath;
 
-
 //display custom join cell at indexpath
 - (UITableViewCell *)easeJoinCellForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 //height for custom join cell at indexpath
 - (CGFloat)easeJoinCellHeightAtIndexPath:(NSIndexPath *)indexPath;
 
-
 - (void)didSelectUserWithMessage:(AgoraChatMessage*)message;
 
-- (void)textViewWillShow:(BOOL)isShow;
+- (void)chatViewDidBottomOffset:(CGFloat)offset;
+
+- (void)chatViewDidSendMessage:(AgoraChatMessage *)message
+                         error:(AgoraChatError *)error;
 
 @end
 
 @interface EaseChatView : UIView
 
 @property (nonatomic, weak) id<EaseChatViewDelegate> delegate;
-
-@property (nonatomic,strong) AgoraChatroom *chatroom;
 
 @property (nonatomic,strong) UITableView *tableView;
 @property (nonatomic,strong) UIButton *sendTextButton;
@@ -54,5 +53,6 @@
 - (void)sendGiftAction:(NSString *)giftId num:(NSInteger)num completion:(void (^)(BOOL success))aCompletion;
 
 - (void)updateChatViewWithHidden:(BOOL)isHidden;
+
 
 @end

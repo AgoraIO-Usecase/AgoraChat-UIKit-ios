@@ -34,6 +34,8 @@ static AgoraChatroom *_chatroom;
 
 @implementation EaseChatroomMessageCell
 - (void)prepare {
+    [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
+    
     if (self.customOption.displaySenderAvatar) {
         self.backgroundColor = UIColor.clearColor;
         [self.contentView addSubview:self.avatarImageView];
@@ -161,8 +163,6 @@ static AgoraChatroom *_chatroom;
     self.messageLabel.attributedText = [EaseChatroomMessageCell _attributedStringWithMessage:message];
     _chatroom = chatroom;
 }
-
-
 
 
 + (CGFloat)heightForMessage:(AgoraChatMessage *)message

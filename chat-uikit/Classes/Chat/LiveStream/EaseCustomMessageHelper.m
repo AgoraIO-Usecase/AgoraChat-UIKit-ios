@@ -52,17 +52,14 @@
                 }
                 AgoraChatCustomMessageBody* body = (AgoraChatCustomMessageBody*)message.body;
                 if ([body.event isEqualToString:kCustomMsgChatroomBarrage]) {
-                    //弹幕消息
                     if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectedBarrageSwitch:)]) {
                         [self.delegate didSelectedBarrageSwitch:message];
                     }
                 } else if ([body.event isEqualToString:kCustomMsgChatroomPraise]) {
-                    //点赞消息
                     if (self.delegate && [self.delegate respondsToSelector:@selector(didReceivePraiseMessage:)]) {
                         [self.delegate didReceivePraiseMessage:message];
                     }
                 } else if ([body.event isEqualToString:kCustomMsgChatroomGift]) {
-                    //礼物消息
                     
                     NSString *giftId = [body.ext objectForKey:kGiftIdKey];
                     NSInteger giftNum = [[body.ext objectForKey:kGiftNumKey] integerValue];

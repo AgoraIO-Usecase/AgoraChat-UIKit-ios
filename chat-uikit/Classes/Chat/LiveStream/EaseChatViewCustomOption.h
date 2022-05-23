@@ -23,8 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIColor *tableViewBgColor;
 //set right margin of EaseChatView
 @property (nonatomic, assign) CGFloat tableViewRightMargin;
-//set right margin of EaseChatView
-@property (nonatomic, assign) CGFloat tableViewBottomMargin;
+//set sendTextButton bottom margin of EaseChatView
+@property (nonatomic, assign) CGFloat sendTextButtonBottomMargin;
 //set sendTextButton right margin of EaseChatView
 @property (nonatomic, assign) CGFloat sendTextButtonRightMargin;
 

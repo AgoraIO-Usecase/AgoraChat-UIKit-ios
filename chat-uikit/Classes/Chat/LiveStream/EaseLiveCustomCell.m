@@ -53,8 +53,8 @@
 
 - (void)fetchUserInfoWithUserId:(NSString *)userId {
     [EaseUserInfoManagerHelper fetchUserInfoWithUserIds:@[userId] completion:^(NSDictionary * _Nonnull userInfoDic) {
-        self.userInfo = [userInfoDic objectForKey:userId];
         dispatch_async(dispatch_get_main_queue(), ^{
+            self.userInfo = [userInfoDic objectForKey:userId];
             [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
             self.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
         });
@@ -87,7 +87,6 @@
 - (UILabel *)nameLabel {
     if (_nameLabel == nil) {
         _nameLabel = [[UILabel alloc] init];
-//        PingFangSC-Semibold
         _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16.0f];
         _nameLabel.textColor = UIColor.whiteColor;
         _nameLabel.textAlignment = NSTextAlignmentLeft;

@@ -25,12 +25,12 @@ static EaseChatViewCustomOption *instance = nil;
         self.displaySenderNickname = YES;
         self.avatarStyle = Circular;
         self.avatarCornerRadius = 0;
-        self.tableViewBottomMargin = 20.0;
+        self.sendTextButtonBottomMargin = 20.0;
        
         
 //        self.tableViewBgColor = UIColor.redColor;
 //        self.tableViewRightMargin = 0;
-//        self.tableViewBottomMargin = 20.0;
+//        self.sendTextButtonBottomMargin = 30.0;
 //        self.sendTextButtonRightMargin = 0;
 //
 //        self.displaySenderAvatar = YES;

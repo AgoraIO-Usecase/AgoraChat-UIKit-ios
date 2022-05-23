@@ -19,35 +19,43 @@
 #define kDefaultSpace 8.f
 #define kDefaulfLeftSpace 10.f
 #define kTextViewHeight 30.f
+#define kUnreadButtonWitdh 150.0
+#define kUnreadButtonHeight 20.0
 
+
+void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 @interface EaseChatView () <AgoraChatManagerDelegate,UITableViewDelegate,UITableViewDataSource,UITextViewDelegate>
 {
     NSString *_chatroomId;
-    
     long long _curtime;
-    
-    BOOL _isBarrageInfo;//弹幕消息
-    
+    BOOL _isBarrageInfo;
     NSTimer *_timer;
-    NSInteger _praiseInterval;//点赞间隔
-    NSInteger _praiseCount;//点赞计数
+    NSInteger _praiseInterval;
+    NSInteger _praiseCount;
     
 }
 
 
 @property (nonatomic,strong) AgoraChatConversation *conversation;
+@property (nonatomic,strong) AgoraChatroom *chatroom;
 
 @property (nonatomic,strong) UIView *bottomSendMsgView;
 @property (nonatomic,strong) EaseInputTextView *textView;
-@property (nonatomic,strong) UIButton *sendButton;
-@property (nonatomic,assign) CGFloat height;
-
+//@property (nonatomic,strong) UIButton *sendButton;
+@property (nonatomic,strong) UIButton *unreadButton;
+@property (nonatomic, strong) UILabel *unreadLabel;
 
 @property (nonatomic,strong) EaseCustomMessageHelper* customMsgHelper;
 
 //custom chatView UI with option
 @property (nonatomic, strong) EaseChatViewCustomOption *customOption;
+
+//unread message count
+@property (nonatomic, assign) NSInteger unreadMsgCount;
+
+@property (nonatomic, assign) BOOL canScroll;
+
 
 @end
 
@@ -68,13 +76,12 @@
         _praiseInterval = 0;
         _praiseCount = 0;
         _curtime = (long long)([[NSDate date] timeIntervalSince1970]*1000);
-        self.height = self.frame.size.height;
+        _canScroll = YES;
         
         [[AgoraChatClient sharedClient].chatManager addDelegate:self delegateQueue:dispatch_get_main_queue()];
 
         self.datasource = [NSMutableArray array];
         self.conversation = [[AgoraChatClient sharedClient].chatManager getConversation:_chatroomId type:AgoraChatConversationTypeChatRoom createIfNotExist:NO];
-        
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillShow:) name:UIKeyboardWillShowNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
@@ -84,36 +91,6 @@
 
     }
     
-    return self;
-}
-
-
-- (instancetype)initWithFrame:(CGRect)frame
-                   chatroomId:(NSString*)chatroomId
-                    isPublish:(BOOL)isPublish {
-    
-    self = [super initWithFrame:frame];
-    if (self) {
-        _chatroomId = chatroomId;
-        _isBarrageInfo = false;
-        _praiseInterval = 0;
-        _praiseCount = 0;
-        _curtime = (long long)([[NSDate date] timeIntervalSince1970]*1000);
-        self.height = self.frame.size.height;
-        
-        [[AgoraChatClient sharedClient].chatManager addDelegate:self delegateQueue:dispatch_get_main_queue()];
-
-        self.datasource = [NSMutableArray array];
-        self.conversation = [[AgoraChatClient sharedClient].chatManager getConversation:_chatroomId type:AgoraChatConversationTypeChatRoom createIfNotExist:NO];
-        
-
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
-        
-        
-        [self placeAndLayoutSubviews];
-
-    }
     return self;
 }
 
@@ -126,15 +103,25 @@
 
 - (void)placeAndLayoutSubviews {
     [self addSubview:self.tableView];
+    [self addSubview:self.unreadButton];
     [self addSubview:self.sendTextButton];
-        
+    
     [self.tableView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self);
         make.left.equalTo(self);
         make.right.equalTo(self).offset(-self.customOption.tableViewRightMargin);
         make.bottom.equalTo(self.sendTextButton.ease_top);
     }];
+    
+    
+    [self.unreadButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.width.equalTo(@(kUnreadButtonWitdh));
+        make.height.equalTo(@(kUnreadButtonHeight));
+        make.left.equalTo(self.tableView).offset(12.0);
+        make.bottom.equalTo(self.sendTextButton.ease_top).offset(-12.0);
+    }];
 
+    
     [self.sendTextButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.left.equalTo(self).offset(12.0);
         if (self.customOption.sendTextButtonRightMargin > 0) {
@@ -143,37 +130,34 @@
             make.width.equalTo(@(kSendTextButtonWitdh));
         }
         make.height.equalTo(@(kSendTextButtonHeight));
-        make.bottom.equalTo(self).offset(-EaseKitBottomSafeHeight);
+        make.bottom.equalTo(self).offset(-self.customOption.sendTextButtonBottomMargin);
     }];
     
-    //底部消息发送按钮
+    //bottom textView && sendButton
     [self placeAndLayoutBottomSendView];
 }
 
 - (void)placeAndLayoutBottomSendView {
     [self addSubview:self.bottomSendMsgView];
     [self.bottomSendMsgView addSubview:self.textView];
-    [self.bottomSendMsgView addSubview:self.sendButton];
+//    [self.bottomSendMsgView addSubview:self.sendButton];
     
     [self.bottomSendMsgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.left.right.equalTo(self);
         make.height.equalTo(@(kSendTextButtonHeight));
-        make.bottom.equalTo(self).offset(-EaseKitBottomSafeHeight-self.customOption.tableViewBottomMargin);
+        make.bottom.equalTo(self).offset(-self.customOption.sendTextButtonBottomMargin);
     }];
     
     [self.textView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.bottomSendMsgView);
-        make.left.equalTo(self.bottomSendMsgView).offset(5);
-        make.right.equalTo(self.sendButton.ease_left).offset(-5);
-        make.bottom.equalTo(self.bottomSendMsgView);
+        make.edges.equalTo(self.bottomSendMsgView).insets(UIEdgeInsetsMake(2.0, 2.0, 2.0, 2.0));
     }];
     
-    [self.sendButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.centerY.equalTo(self.textView);
-        make.width.equalTo(@(40.0));
-        make.right.equalTo(self.bottomSendMsgView).offset(-5);
-        make.height.equalTo(self.textView);
-    }];
+//    [self.sendButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
+//        make.centerY.equalTo(self.textView);
+//        make.width.equalTo(@(40.0));
+//        make.right.equalTo(self.bottomSendMsgView).offset(-5);
+//        make.height.equalTo(self.textView);
+//    }];
 }
 
 
@@ -181,6 +165,8 @@
 #pragma mark - AgoraChatManagerDelegate
 - (void)messagesDidReceive:(NSArray *)aMessages
 {
+#warning/使用coversatoin 拉取过滤消息 显示是否停止滚动
+        
     for (AgoraChatMessage *message in aMessages) {
         if ([message.conversationId isEqualToString:_chatroomId]) {
 
@@ -197,7 +183,16 @@
             }
             [self.datasource addObject:message];
             [self.tableView reloadData];
-            [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+
+            
+            if (self.canScroll) {
+                [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+            }else {
+                self.unreadMsgCount ++;
+                self.unreadLabel.text = [NSString stringWithFormat:@"%@ New Messages",@(self.unreadMsgCount)];
+                self.unreadButton.hidden = NO;
+            }
+        
         }
     }
 }
@@ -288,28 +283,43 @@
     AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
     if ([message.ext objectForKey:EaseKit_chatroom_join]) {
         [joinCell updateWithObj:message];
+        joinCell.tapCellBlock = ^{
+            [self.textView resignFirstResponder];
+            self.canScroll = NO;
+
+            if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectUserWithMessage:)]) {
+                [self.delegate didSelectUserWithMessage:message];
+            }
+        };
+
         return joinCell;
     }else {
         [messageCell setMesssage:message chatroom:self.chatroom];
+        messageCell.tapCellBlock = ^{
+            [self.textView resignFirstResponder];
+            self.canScroll = NO;
+
+            if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectUserWithMessage:)]) {
+                [self.delegate didSelectUserWithMessage:message];
+            }
+        };
     }
     return messageCell;
     
 }
 
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (self.customOption.customMessageCell || self.customOption.customJoinCell) {
-        return;
-    }
-    
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
-    if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectUserWithMessage:)]) {
-        [self.delegate didSelectUserWithMessage:message];
-    }
+#pragma mark - UIScrollViewDelegate
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    [self resetUnreadState];
 }
 
+
+- (void)resetUnreadState {
+    self.canScroll = YES;
+    self.unreadButton.hidden = YES;
+    self.unreadMsgCount = 0;
+}
 
 #pragma mark - UITextViewDelegate
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView
@@ -333,6 +343,22 @@
     return YES;
 }
 
+- (void)textViewDidEndEditing:(UITextView *)textView
+{
+    [self _setSendState:NO];
+}
+
+- (void)textViewDidChange:(UITextView *)textView
+{
+//    if (self.textView.text.length > 0 && ![self.textView.text isEqualToString:@""]) {
+//        self.sendButton.backgroundColor = [UIColor colorWithRed:4/255.0 green:174/255.0 blue:240/255.0 alpha:1.0];
+//        self.sendButton.tag = 1;
+//    } else {
+//        self.sendButton.backgroundColor = [UIColor lightGrayColor];
+//        self.sendButton.tag = 0;
+//    }
+    
+}
 
 #pragma mark public method
 - (void)updateChatViewWithHidden:(BOOL)isHidden {
@@ -349,52 +375,30 @@
     // Get keyboard height
     CGRect keyBoardBounds  = [[userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGFloat keyBoardHeight = keyBoardBounds.size.height;
-    
-    CGFloat animationTime  = [[userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] floatValue];
+        
+    CGFloat offSet = keyBoardHeight - self.customOption.sendTextButtonBottomMargin;
 
-    NSLog(@"%s keyboadHeight:%@ animationTime:%@",__func__,@(keyBoardHeight),@(animationTime));
-    
-    [UIView animateWithDuration:animationTime animations:^{
-        [self.bottomSendMsgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-            make.bottom.equalTo(self).offset(-keyBoardHeight + self.customOption.tableViewBottomMargin);
-        }];
-    }];
-    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(chatViewDidBottomOffset:)]) {
+        [self.delegate chatViewDidBottomOffset:offSet];
+    }
+
 }
 
 
 - (void)keyBoardWillHide:(NSNotification *)note
 {
-    [self.bottomSendMsgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        make.bottom.equalTo(self.sendTextButton);
-    }];
     
-}
-
-- (void)textViewDidEndEditing:(UITextView *)textView
-{
-    [self _setSendState:NO];
-}
-
-- (void)textViewDidChange:(UITextView *)textView
-{
-    if (self.textView.text.length > 0 && ![self.textView.text isEqualToString:@""]) {
-        self.sendButton.backgroundColor = [UIColor colorWithRed:4/255.0 green:174/255.0 blue:240/255.0 alpha:1.0];
-        self.sendButton.tag = 1;
-    } else {
-        self.sendButton.backgroundColor = [UIColor lightGrayColor];
-        self.sendButton.tag = 0;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(chatViewDidBottomOffset:)]) {
+        [self.delegate chatViewDidBottomOffset:0];
     }
-    
-}
 
+}
 
 - (AgoraChatMessage *)_sendTextMessage:(NSString *)text
-                             to:(NSString *)toUser
-                    messageType:(AgoraChatType)messageType
-                     messageExt:(NSDictionary *)messageExt
-
-{
+                                    to:(NSString *)toUser
+                           messageType:(AgoraChatType)messageType
+                            messageExt:(NSDictionary *)messageExt {
+    
     AgoraChatMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:text];
     NSString *from = [[AgoraChatClient sharedClient] currentUsername];
     AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:toUser from:from to:toUser body:body ext:messageExt];
@@ -404,10 +408,6 @@
 
 - (void)_setSendState:(BOOL)state
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewWillShow:)]) {
-        [self.delegate textViewWillShow:state];
-    }
-    
     if (state) {
         self.bottomSendMsgView.hidden = NO;
         self.sendTextButton.hidden = YES;
@@ -419,21 +419,23 @@
     }
 }
 
-- (CGFloat)_getTextViewContentH:(UITextView *)textView
-{
-    return ceilf([textView sizeThatFits:textView.frame.size].height);
-}
-
 #pragma mark - action
-- (void)sendMsgAction
-{
-    if (self.sendButton.tag == 1) {
-        if (_isBarrageInfo) {
-            [self sendBarrageMsg:self.textView.text];
-        } else {
-            [self sendText];
-        }
-    }
+//- (void)sendMsgAction
+//{
+//    if (self.sendButton.tag == 1) {
+//        if (_isBarrageInfo) {
+//            [self sendBarrageMsg:self.textView.text];
+//        } else {
+//            [self sendText];
+//        }
+//    }
+//}
+
+- (void)unreadButtonAction {
+    
+    [self resetUnreadState];
+
+    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
 }
 
 
@@ -442,19 +444,22 @@
     [self _setSendState:YES];
 }
 
-//普通文本消息
+
 - (void)sendText
 {
     if (self.textView.text.length > 0) {
         AgoraChatMessage *message = [self _sendTextMessage:self.textView.text to:_chatroomId messageType:AgoraChatTypeChatRoom messageExt:nil];
         EaseKit_WS
         [[AgoraChatClient sharedClient].chatManager sendMessage:message progress:NULL completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+            if ([self.delegate respondsToSelector:@selector(chatViewDidSendMessage:error:)]) {
+                [self.delegate chatViewDidSendMessage:message error:error];
+            }
+            
             if (!error) {
                 [weakSelf currentViewDataFill:message];
                 weakSelf.textView.text = @"";
                 [weakSelf _setSendState:NO];
-            } else {
-//                [MBProgressHUD showError:@"消息发送失败" toView:weakSelf];
+                [weakSelf resetUnreadState];
             }
         }];
         
@@ -462,10 +467,9 @@
 }
 
 
-//发送弹幕消息
 - (void)sendBarrageMsg:(NSString*)text
 {
-    __weak EaseChatView *weakSelf = self;
+    EaseKit_WS
     [self.customMsgHelper sendCustomMessage:text num:0 to:_chatroomId messageType:AgoraChatTypeChatRoom customMsgType:customMessageType_barrage completion:^(AgoraChatMessage * _Nonnull message, AgoraChatError * _Nonnull error) {
         if (!error) {
 //            [_customMsgHelper barrageAction:message backView:self.superview];
@@ -478,8 +482,6 @@
 }
 
 
-
-//发送礼物
 - (void)sendGiftAction:(NSString *)giftId
                    num:(NSInteger)num
             completion:(void (^)(BOOL success))aCompletion
@@ -498,7 +500,6 @@
 
 
 #pragma mark - private
-//当前视图数据填充
 - (void)currentViewDataFill:(AgoraChatMessage*)message
 {
     if ([self.datasource count] >= 200) {
@@ -521,7 +522,7 @@
         _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         _tableView.scrollsToTop = NO;
         _tableView.showsVerticalScrollIndicator = NO;
-                
+        
         if (self.customOption.tableViewBgColor) {
             _tableView.backgroundColor = self.customOption.tableViewBgColor;
         }
@@ -570,7 +571,7 @@
         _textView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
         _textView.scrollEnabled = YES;
         _textView.returnKeyType = UIReturnKeySend;
-        _textView.enablesReturnKeyAutomatically = YES; // UITextView内部判断send按钮是否可以用
+        _textView.enablesReturnKeyAutomatically = YES;
         _textView.placeHolder = NSLocalizedString(@"chat.input.placeholder", @"input a new message");
         _textView.delegate = self;
         _textView.backgroundColor = EaseKitRGBACOLOR(236, 236, 236, 1);
@@ -579,20 +580,61 @@
     return _textView;
 }
 
-- (UIButton*)sendButton
-{
-    if (_sendButton == nil) {
-        _sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _sendButton.backgroundColor = [UIColor lightGrayColor];
-        _sendButton.tag = 0;
-        [_sendButton setTitle:@"发送" forState:UIControlStateNormal];
-        _sendButton.titleLabel.font = [UIFont systemFontOfSize:14];
-        [_sendButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        _sendButton.layer.cornerRadius = 3;
-        [_sendButton addTarget:self action:@selector(sendMsgAction) forControlEvents:UIControlEventTouchUpInside];
+//- (UIButton*)sendButton
+//{
+//    if (_sendButton == nil) {
+//        _sendButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//        _sendButton.backgroundColor = [UIColor lightGrayColor];
+//        _sendButton.tag = 0;
+//        [_sendButton setTitle:@"send" forState:UIControlStateNormal];
+//        _sendButton.titleLabel.font = [UIFont systemFontOfSize:14];
+//        [_sendButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+//        _sendButton.layer.cornerRadius = 3;
+//        [_sendButton addTarget:self action:@selector(sendMsgAction) forControlEvents:UIControlEventTouchUpInside];
+//    }
+//    return _sendButton;
+//}
+
+- (UIButton *)unreadButton {
+    if (_unreadButton == nil) {
+        _unreadButton = [[UIButton alloc] init];
+        [_unreadButton setBackgroundImage:[UIImage easeUIImageNamed:@"chatroom_unread_bg"] forState:UIControlStateNormal];
+        _unreadButton.layer.cornerRadius = kUnreadButtonHeight * 0.5;
+        [_unreadButton addTarget:self action:@selector(unreadButtonAction) forControlEvents:UIControlEventTouchUpInside];
+        _unreadButton.hidden = YES;
+        
+        UIImageView *iconImageView = [[UIImageView alloc] init];
+        [iconImageView setImage:[UIImage easeUIImageNamed:@"chatroom_unread_arrow"]];
+        
+        [_unreadButton addSubview:self.unreadLabel];
+        [_unreadButton addSubview:iconImageView];
+        
+        [self.unreadLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.centerY.equalTo(_unreadButton);
+            make.left.equalTo(_unreadButton).offset(10.0);
+            make.right.equalTo(iconImageView.ease_left).offset(-5.0);
+        }];
+        
+        [iconImageView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.centerY.equalTo(_unreadButton);
+            make.right.equalTo(_unreadButton).offset(-10.0);
+        }];
     }
-    return _sendButton;
+    return _unreadButton;
 }
+
+- (UILabel *)unreadLabel {
+    if (_unreadLabel == nil) {
+        _unreadLabel = UILabel.new;
+        _unreadLabel.font = EaseKitNFont(12.0f);
+        _unreadLabel.textColor = UIColor.whiteColor;
+        _unreadLabel.textAlignment = NSTextAlignmentLeft;
+        _unreadLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+        _unreadLabel.text = @"76 New Messages";
+    }
+    return _unreadLabel;
+}
+
 
 
 - (void)setIsMuted:(BOOL)isMuted {
@@ -609,4 +651,6 @@
 #undef kDefaultSpace
 #undef kDefaulfLeftSpace
 #undef kTextViewHeight
+#undef kUnreadButtonWitdh
+#undef kUnreadButtonHeight
 

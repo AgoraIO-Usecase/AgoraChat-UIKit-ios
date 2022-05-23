@@ -20,6 +20,8 @@
 
 - (void)prepare {
     
+    [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
+
     self.backgroundColor = UIColor.clearColor;
 
     self.nameLabel.textColor = EaseKitTextLabelGrayColor;
@@ -78,7 +80,7 @@
     if (_joinImageView == nil) {
         _joinImageView = [[UIImageView alloc] init];
         _joinImageView.contentMode = UIViewContentModeScaleAspectFit;
-        [_joinImageView setImage:EaseKitImageWithName(@"live_join")];
+        [_joinImageView setImage:[UIImage easeUIImageNamed:@"live_join"]];
     }
     return _joinImageView;
 }
