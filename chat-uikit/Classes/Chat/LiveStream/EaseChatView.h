@@ -46,7 +46,7 @@
 
 
 - (instancetype)initWithFrame:(CGRect)frame
-                   chatroomId:(NSString*)chatroomId
+                     chatroom:(AgoraChatroom*)chatroom
               customMsgHelper:(EaseCustomMessageHelper*)customMsgHelper
                  customOption:(EaseChatViewCustomOption *)customOption;
 
