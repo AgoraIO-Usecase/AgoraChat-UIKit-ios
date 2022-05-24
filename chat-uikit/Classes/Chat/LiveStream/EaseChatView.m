@@ -51,8 +51,14 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 //custom chatView UI with option
 @property (nonatomic, strong) EaseChatViewCustomOption *customOption;
 
+//message queue
+@property (nonatomic, strong) dispatch_queue_t msgQueue;
+
+@property (nonatomic, strong) NSString *moreMsgId;
+
+
 //unread message count
-@property (nonatomic, assign) NSInteger unreadMsgCount;
+//@property (nonatomic, assign) NSInteger unreadMsgCount;
 
 @property (nonatomic, assign) BOOL canScroll;
 
@@ -77,18 +83,21 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         _praiseCount = 0;
         _curtime = (long long)([[NSDate date] timeIntervalSince1970]*1000);
         _canScroll = YES;
-        
-        [[AgoraChatClient sharedClient].chatManager addDelegate:self delegateQueue:dispatch_get_main_queue()];
+        _msgQueue = dispatch_queue_create("emmessage.com", NULL);
 
-        self.datasource = [NSMutableArray array];
-        self.conversation = [[AgoraChatClient sharedClient].chatManager getConversation:_chatroomId type:AgoraChatConversationTypeChatRoom createIfNotExist:NO];
-
+    
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillShow:) name:UIKeyboardWillShowNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
         
-        
         [self placeAndLayoutSubviews];
+        
+        
+        [[AgoraChatClient sharedClient].chatManager addDelegate:self delegateQueue:dispatch_get_main_queue()];
 
+        self.conversation = [[AgoraChatClient sharedClient].chatManager getConversation:_chatroomId type:AgoraChatConversationTypeChatRoom createIfNotExist:YES];
+        self.moreMsgId = @"";
+        
+        [self loadMessageScrollBottom:YES];
     }
     
     return self;
@@ -160,41 +169,117 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 //    }];
 }
 
+#pragma mark load message
+- (void)loadMessageScrollBottom:(BOOL)isScrollBottom
+{
+    
+//    void (^block)(NSArray *aMessages, AgoraChatError *aError) = ^(NSArray *aMessages, AgoraChatError *aError) {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+////            [weakself refreshTableViewWithData:aMessages isInsertBottom:NO isScrollBottom:isScrollBottom];
+//
+//            [self.tableView reloadData];
+//            [self updateUI];
+//
+//        });
+//    };
+    
+    
+    [self.conversation loadMessagesStartFromId:self.moreMsgId count:50 searchDirection:AgoraChatMessageSearchDirectionUp completion:^(NSArray *aMessages, AgoraChatError *aError) {
+        [self.tableView reloadData];
+        [self updateUI];
+
+    }];
+    
+    
+}
+
 
 
 #pragma mark - AgoraChatManagerDelegate
 - (void)messagesDidReceive:(NSArray *)aMessages
 {
-#warning/使用coversatoin 拉取过滤消息 显示是否停止滚动
-        
-    for (AgoraChatMessage *message in aMessages) {
-        if ([message.conversationId isEqualToString:_chatroomId]) {
-
+            
+    EaseKit_WS
+    dispatch_async(self.msgQueue, ^{
+        NSString *conId = weakSelf.conversation.conversationId;
+        NSMutableArray *msgArray = [[NSMutableArray alloc] init];
+        for (int i = 0; i < [aMessages count]; i++) {
+            AgoraChatMessage *msg = aMessages[i];
+            if (![msg.conversationId isEqualToString:conId]) {
+                continue;
+            }
+            
             //filter custom gift message
-            if (message.body.type == AgoraChatMessageBodyTypeCustom) {
-                AgoraChatCustomMessageBody* customBody = (AgoraChatCustomMessageBody*)message.body;
+            if (msg.body.type == AgoraChatMessageBodyTypeCustom) {
+                AgoraChatCustomMessageBody* customBody = (AgoraChatCustomMessageBody*)msg.body;
                 if ([customBody.event isEqualToString:kCustomMsgChatroomGift]) {
                     continue;
                 }
             }
-                
-            if ([self.datasource count] >= 200) {
-                [self.datasource removeObjectsInRange:NSMakeRange(0, 190)];
-            }
-            [self.datasource addObject:message];
-            [self.tableView reloadData];
-
             
-            if (self.canScroll) {
-                [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
-            }else {
-                self.unreadMsgCount ++;
-                self.unreadLabel.text = [NSString stringWithFormat:@"%@ New Messages",@(self.unreadMsgCount)];
-                self.unreadButton.hidden = NO;
-            }
-        
+            [msgArray addObject:msg];
         }
+        
+        if (self.canScroll) {
+            AgoraChatError *error = nil;
+            [weakSelf.conversation markAllMessagesAsRead:&error];
+            if (error) {
+                return;
+            }
+        }
+
+        [self.datasource addObjectsFromArray:msgArray];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            [self.tableView reloadData];
+            [self updateUI];
+        });
+    });
+    
+    
+    
+//    for (AgoraChatMessage *message in aMessages) {
+//        if ([message.conversationId isEqualToString:_chatroomId]) {
+//
+//            //filter custom gift message
+//            if (message.body.type == AgoraChatMessageBodyTypeCustom) {
+//                AgoraChatCustomMessageBody* customBody = (AgoraChatCustomMessageBody*)message.body;
+//                if ([customBody.event isEqualToString:kCustomMsgChatroomGift]) {
+//                    continue;
+//                }
+//            }
+//
+//            if ([self.datasource count] >= 200) {
+//                [self.datasource removeObjectsInRange:NSMakeRange(0, 190)];
+//            }
+//            [self.datasource addObject:message];
+//            [self.tableView reloadData];
+//
+//
+//            if (self.canScroll) {
+//                [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+//            }else {
+//                self.unreadMsgCount ++;
+//                self.unreadLabel.text = [NSString stringWithFormat:@"%@ New Messages",@(self.unreadMsgCount)];
+//                self.unreadButton.hidden = NO;
+//            }
+//
+//        }
+//    }
+    
+}
+
+- (void)updateUI {
+    if (self.canScroll) {
+        if (self.datasource.count > 0) {
+            [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+        }
+    }else {
+        self.unreadLabel.text = [NSString stringWithFormat:@"%@ New Messages",@(self.conversation.unreadMessagesCount)];
+        self.unreadButton.hidden = NO;
     }
+    
 }
 
 - (void)cmdMessagesDidReceive:(NSArray *)aCmdMessages
@@ -318,7 +403,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 - (void)resetUnreadState {
     self.canScroll = YES;
     self.unreadButton.hidden = YES;
-    self.unreadMsgCount = 0;
+    [self.conversation markAllMessagesAsRead:nil];
 }
 
 #pragma mark - UITextViewDelegate
@@ -475,7 +560,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 //            [_customMsgHelper barrageAction:message backView:self.superview];
             [weakSelf currentViewDataFill:message];
         } else {
-//            [MBProgressHUD showError:@"弹幕消息发送失败" toView:weakSelf];
+            [self.delegate chatViewDidSendMessage:message error:error];
         }
     }];
     self.textView.text = @"";
@@ -529,6 +614,13 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         
     }
     return _tableView;
+}
+
+- (NSMutableArray *)datasource {
+    if (_datasource == nil) {
+        _datasource = NSMutableArray.new;
+    }
+    return _datasource;
 }
 
 

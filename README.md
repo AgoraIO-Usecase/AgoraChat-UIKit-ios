@@ -121,7 +121,7 @@ App Transport Security Settings -> Allow Arbitrary Loads //开启网络服务
 ```objective-c
 (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 	// Override point for customization after application launch.
-	AgoraChatOptions *options = [AgoraChatOptions optionsWithAppkey:@"您创建的 APPKEY"];
+	AgoraChatOptions *options = [AgoraChatOptions optionsWithAppkey:@"You created APPKEY"];
 	[EaseChatKitManager initWithAgoraChatOptions:options];
 	//登录操作
 	return YES;
@@ -341,7 +341,7 @@ chat-uikit 显示的是默认的UI样式，以下是对聊天会话样式进行�
 
 ```objective-c
 EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init]; //默认样式
-EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"会话 ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
+EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"Conversation ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
 ```
 
 默认样式的聊天页面示例图：
@@ -362,7 +362,7 @@ viewModel.sentFontColor = [UIColor redColor];           //发送方文本颜色
 viewModel.inputMenuStyle = EaseInputMenuStyleNoAudio;   //输入区菜单样式
 viewModel.msgTimeItemFontColor = [UIColor blackColor];  //消息时间字体颜色
 viewModel.msgTimeItemBgColor = [UIColor greenColor];    //消息时间区域背景色
-EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"会话 ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
+EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"Conversation ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
 ```
 
 部分自定义样式配置示例图：

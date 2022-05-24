@@ -2,7 +2,7 @@
 //  EaseCustomMessageHelper.h
 //  EaseMobLiveDemo
 //
-//  Created by 娜塔莎 on 2020/3/12.
+//  Created by easemob on 2020/3/12.
 //  Copyright © 2020 zmw. All rights reserved.
 //
 

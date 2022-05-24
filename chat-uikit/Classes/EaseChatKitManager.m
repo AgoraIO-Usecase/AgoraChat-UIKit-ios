@@ -168,15 +168,15 @@ static NSString *g_ChatKitVersion = @"3.8.7";
     NSString *notificationStr = nil;
     NSString *notiType = nil;
     if (reason == ContanctsRequestDidReceive) {
-        notificationStr = [NSString stringWithFormat:@"好友申请来自：%@",conversationId];
+        notificationStr = [NSString stringWithFormat:@"friend request from：%@",conversationId];
         notiType = SYSTEM_NOTI_TYPE_CONTANCTSREQUEST;
     }
     if (reason == GroupInvitationDidReceive) {
-        notificationStr = [NSString stringWithFormat:@"加群邀请来自：%@",userName];
+        notificationStr = [NSString stringWithFormat:@"Add group invitation from：%@",userName];
         notiType = SYSTEM_NOTI_TYPE_GROUPINVITATION;
     }
     if (reason == JoinGroupRequestDidReceive) {
-        notificationStr = [NSString stringWithFormat:@"加群申请来自：%@",userName];
+        notificationStr = [NSString stringWithFormat:@"Join the group application from：%@",userName];
         notiType = SYSTEM_NOTI_TYPE_JOINGROUPREQUEST;
     }
     if (self.systemNotiDelegate && [self.systemNotiDelegate respondsToSelector:@selector(requestDidReceiveShowMessage:requestUser:reason:)]) {
@@ -220,20 +220,20 @@ static NSString *g_ChatKitVersion = @"3.8.7";
     NSString *to = itemId;
     AgoraChatMessage *message;
     if (conversationType == AgoraChatTypeChat) {
-        body = [[AgoraChatTextMessageBody alloc] initWithText:[NSString stringWithFormat:@"你与%@已经成为好友，开始聊天吧",aUserName]];
+        body = [[AgoraChatTextMessageBody alloc] initWithText:[NSString stringWithFormat:@"You and %@ have become friends, start chatting",aUserName]];
         message = [[AgoraChatMessage alloc] initWithConversationID:to from:AgoraChatClient.sharedClient.currentUsername to:to body:body ext:@{MSG_EXT_NEWNOTI:NOTI_EXT_ADDFRIEND}];
     } else if (conversationType == AgoraChatTypeGroupChat) {
         if ([aUserName isEqualToString:AgoraChatClient.sharedClient.currentUsername]) {
-            body = [[AgoraChatTextMessageBody alloc] initWithText:@"你已加入本群，开始发言吧"];
+            body = [[AgoraChatTextMessageBody alloc] initWithText:@"You have joined the group, start speaking"];
         } else {
-            body = [[AgoraChatTextMessageBody alloc] initWithText:[NSString stringWithFormat:@"%@ 加入了群聊",aUserName]];
+            body = [[AgoraChatTextMessageBody alloc] initWithText:[NSString stringWithFormat:@"%@ joined the group chat",aUserName]];
         }
         message = [[AgoraChatMessage alloc] initWithConversationID:to from:aUserName to:to body:body ext:@{MSG_EXT_NEWNOTI:NOTI_EXT_ADDGROUP}];
     }
     message.chatType = (AgoraChatType)conversation.type;
     message.isRead = YES;
     [conversation insertMessage:message error:nil];
-    //刷新会话列表
+    //Refresh the conversation list
     [[NSNotificationCenter defaultCenter] postNotificationName:CONVERSATIONLIST_UPDATE object:nil];
 }
 */
@@ -309,6 +309,7 @@ static NSString *g_ChatKitVersion = @"3.8.7";
         if ([conversation.conversationId isEqualToString:_currentConversationId]) {
             continue;
         }
+        
         unreadCount += conversation.unreadMessagesCount;
     }
     _currentUnreadCount = unreadCount;

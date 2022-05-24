@@ -2,7 +2,7 @@
 //  EaseCustomMessageHelper.m
 //  EaseMobLiveDemo
 //
-//  Created by 娜塔莎 on 2020/3/12.
+//  Created by easemob on 2020/3/12.
 //  Copyright © 2020 zmw. All rights reserved.
 //
 
@@ -82,7 +82,7 @@
 //    if ([customBody.event isEqualToString:kCustomMsgChatroomBarrage]) {
 //        msgContent = (NSString*)[customBody.ext objectForKey:@"txt"];
 //    } else if ([customBody.event isEqualToString:kCustomMsgChatroomPraise]) {
-//        msgContent = [NSString stringWithFormat:@"给主播点了%ld个赞",(long)[(NSString*)[customBody.ext objectForKey:@"num"] integerValue]];
+//        msgContent = [NSString stringWithFormat:@"Liked %ld for the anchor",(long)[(NSString*)[customBody.ext objectForKey:@"num"] integerValue]];
 //    } else if ([customBody.event isEqualToString:kCustomMsgChatroomGift]) {
 //        NSString *giftid = [customBody.ext objectForKey:kGiftIdKey];
 //        NSString *giftNum = [customBody.ext objectForKey:kGiftNumKey];
@@ -91,7 +91,7 @@
 //            int index = [[giftid substringFromIndex:5] intValue];
 //            if (index >= EaseLiveGiftHelper.sharedInstance.giftArray.count) {
 //                ELDGiftModel *model = EaseLiveGiftHelper.sharedInstance.giftArray[index-1];
-//                msgContent = [NSString stringWithFormat:@"赠送了 %@x%@",NSLocalizedString(model.giftname,@""),giftNum];
+//                msgContent = [NSString stringWithFormat:@"gifted %@x%@",NSLocalizedString(model.giftname,@""),giftNum];
 //            }
 //
 //        } else {

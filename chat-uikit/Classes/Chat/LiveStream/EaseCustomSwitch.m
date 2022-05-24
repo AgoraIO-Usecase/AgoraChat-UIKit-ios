@@ -2,7 +2,7 @@
 //  EaseCustomSwitch.m
 //  EaseMobLiveDemo
 //
-//  Created by 娜塔莎 on 2020/3/2.
+//  Created by easemob on 2020/3/2.
 //  Copyright © 2020 zmw. All rights reserved.
 //
 
@@ -51,14 +51,14 @@
             self.onText = onText;
         } else {
             //缺省值
-            self.onText = @"文字";
+            self.onText = @"text";
         }
         
         if (offText) {
             self.offText = offText;
         } else {
             //缺省值
-            self.offText = @"文字";
+            self.offText = @"text";
         }
         
         if (bgOnColor) {
@@ -250,7 +250,7 @@
 - (UILabel *)contentLabel{
     if (!_contentLabel){
         _contentLabel = [[UILabel alloc] init];
-        _contentLabel.text = @"弹";
+        _contentLabel.text = @"";
         _contentLabel.font = _textFont;
         _contentLabel.textColor = [UIColor colorWithRed:225./255. green:223./255. blue:223./255. alpha:1];
         _contentLabel.textAlignment = NSTextAlignmentCenter;

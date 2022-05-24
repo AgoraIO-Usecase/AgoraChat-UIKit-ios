@@ -75,14 +75,14 @@
     NSString *text = [EaseEmojiHelper convertEmoji:body.text];
     NSMutableAttributedString *attaStr = [[NSMutableAttributedString alloc] initWithString:text];
     /*
-    //下滑线
-    NSMutableAttributedString *underlineStr = [[NSMutableAttributedString alloc] initWithString:@"下滑线"];
+    //glideline
+    NSMutableAttributedString *underlineStr = [[NSMutableAttributedString alloc] initWithString:@"glideline"];
     [underlineStr addAttributes:@{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle),
                                   NSUnderlineColorAttributeName: [UIColor redColor]
                                   } range:NSMakeRange(0, 3)];
     [attaStr appendAttributedString:underlineStr];
-    //删除线
-    NSMutableAttributedString *throughlineStr = [[NSMutableAttributedString alloc] initWithString:@"删除线"];
+    //strikethrough
+    NSMutableAttributedString *throughlineStr = [[NSMutableAttributedString alloc] initWithString:@"strikethrough"];
     [throughlineStr addAttributes:@{NSStrikethroughStyleAttributeName: @(NSUnderlineStyleSingle),
                                     NSStrikethroughColorAttributeName: [UIColor orangeColor]
                                     } range:NSMakeRange(0, 3)];
@@ -103,7 +103,7 @@
     NSMutableAttributedString *linkStr = [[NSMutableAttributedString alloc] initWithString:urlStr];
     [linkStr addAttributes:@{NSLinkAttributeName: [NSURL URLWithString:urlStr]} range:NSMakeRange(0, urlStr.length)];
     [attaStr appendAttributedString:linkStr];*/
-    //图片
+    //picture
     /*
     NSTextAttachment *imgAttach =  [[NSTextAttachment alloc] init];
     imgAttach.image = [UIImage imageNamed:@"dribbble64_imageio"];
@@ -111,7 +111,7 @@
     NSAttributedString *attachStr = [NSAttributedString attributedStringWithAttachment:imgAttach];
     [attaStr appendAttributedString:attachStr];*/
     
-    //防止输入时在中文后输入英文过长直接中文和英文换行
+    //Prevent the input of English after Chinese from being too long when inputting, direct Chinese and English line breaks
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
     NSDictionary *attributes = @{

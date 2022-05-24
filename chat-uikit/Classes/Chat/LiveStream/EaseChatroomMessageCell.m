@@ -201,7 +201,7 @@ static AgoraChatroom *_chatroom;
         AgoraChatMessageBody *messageBody = message.body;
         switch (messageBody.type) {
             case AgoraChatMessageBodyTypeImage:{
-                latestMessageTitle = @"[图片]";
+                latestMessageTitle = @"[picture]";
             } break;
             case AgoraChatMessageBodyTypeText:{
 //                NSString *didReceiveText = [EaseEmojiHelper
@@ -210,16 +210,16 @@ static AgoraChatroom *_chatroom;
                 latestMessageTitle = ((AgoraChatTextMessageBody *)messageBody).text;
             } break;
             case AgoraChatMessageBodyTypeVoice:{
-                latestMessageTitle = @"[语音]";
+                latestMessageTitle = @"[voice]";
             } break;
             case AgoraChatMessageBodyTypeLocation: {
-                latestMessageTitle = @"[位置]";
+                latestMessageTitle = @"[Location]";
             } break;
             case AgoraChatMessageBodyTypeVideo: {
-                latestMessageTitle = @"[视频]";
+                latestMessageTitle = @"[video]";
             } break;
             case AgoraChatMessageBodyTypeFile: {
-                latestMessageTitle = @"[文件]";
+                latestMessageTitle = @"[document]";
             } break;
             default: {
             } break;
