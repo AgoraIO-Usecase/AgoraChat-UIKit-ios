@@ -306,10 +306,12 @@ static NSString *g_ChatKitVersion = @"3.8.7";
     NSInteger unreadCount = 0;
     NSArray *conversationList = [AgoraChatClient.sharedClient.chatManager getAllConversations];
     for (AgoraChatConversation *conversation in conversationList) {
-        if ([conversation.conversationId isEqualToString:_currentConversationId]) {
-            continue;
+        if (conversation.isChatThread == NO) {
+            if ([conversation.conversationId isEqualToString:_currentConversationId]) {
+                continue;
+            }
+            unreadCount += conversation.unreadMessagesCount;
         }
-        unreadCount += conversation.unreadMessagesCount;
     }
     _currentUnreadCount = unreadCount;
     [self coversationsUnreadCountUpdate:unreadCount];

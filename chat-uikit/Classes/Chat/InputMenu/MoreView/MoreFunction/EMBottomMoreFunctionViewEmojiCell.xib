@@ -16,6 +16,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="177" height="146"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
+
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2au-qD-2ye">
                         <rect key="frame" x="68.5" y="53" width="40" height="40"/>
                         <color key="backgroundColor" red="0.80000000000000004" green="0.80000000000000004" blue="0.80000000000000004" alpha="1" colorSpace="calibratedRGB"/>

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'chat-uikit'
-    s.version          = '1.0.4'
+    s.version          = '1.0.5'
     s.summary = 'agora im UIKit'
     s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
     s.description = <<-DESC
@@ -11,14 +11,14 @@ Pod::Spec.new do |s|
                   DESC
     s.license          = { :type => 'MIT', :file => 'LICENSE' }
     s.author           = { 'agora' => 'dev@agora.com' }
-    s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.4'}
+    s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.5'}
     s.frameworks = 'UIKit'
     s.libraries = 'stdc++'
     s.ios.deployment_target = '11.0'
     s.source_files = [
         'chat-uikit/EaseChatKit.h',
         'chat-uikit/EasePublicHeaders.h',
-        'chat-uikit/**/*.{h,m,mm}'
+        'chat-uikit/**/*.{h,m,mm,xib}'
     ]
     s.public_header_files = [
         'chat-uikit/EaseChatKit.h',
@@ -49,14 +49,11 @@ Pod::Spec.new do |s|
         
         'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewModel.h',
         'chat-uikit/Classes/BaseTableviewController/EaseUserProfile.h',
-        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h'
+        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadCreateViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadListViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatHeader.h','chat-uikit/Classes/Chat/ChatModels/EaseThreadConversation.h','chat-uikit/Classes/Chat/InputMenu/MoreView/MoreFunction/EMBottomMoreFunctionView.h','chat-uikit/Classes/Chat/MessageCell/EaseThreadCell.h','chat-uikit/Classes/Chat/MessageCell/EaseThreadCreateCell.h'
     ]
     
     s.static_framework = true
-    s.resources = [
-        'chat-uikit/Resources/chat-uikit.bundle',
-        'chat-uikit/**/*.xib'
-    ]
+    s.resources = ['chat-uikit/**/*.bundle','chat-uikit/**/*.xib']
     s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
                               'VALID_ARCHS' => 'arm64 armv7 x86_64'
                             }

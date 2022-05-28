@@ -23,10 +23,13 @@
         _msgTimeItemFontColor = [UIColor colorWithHexString:@"#999999"];
         _receiverBubbleBgImage = [UIImage easeUIImageNamed:@"msg_bg_recv"];
         _senderBubbleBgImage = [UIImage easeUIImageNamed:@"msg_bg_send"];
+        _threadBubbleBgImage = [UIImage easeUIImageNamed:@"threading_bubble"];
         BubbleCornerRadius right = {16, 16, 16, 4};
         BubbleCornerRadius left = {16, 16, 4, 16};
+        BubbleCornerRadius thread = {8, 8, 8, 8};
         _rightAlignmentCornerRadius = right;
         _leftAlignmentCornerRadius = left;
+        _threadCornerRadius = thread;
         _bubbleBgEdgeInsets = UIEdgeInsetsMake(16, 16, 16, 16);
         _sentFontColor = [UIColor whiteColor];
         _reveivedFontColor = [UIColor blackColor];
