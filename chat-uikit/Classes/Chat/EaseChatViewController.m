@@ -757,7 +757,7 @@
         };
     }
     BOOL showReaction = YES;
-    if (self.conversationType == AgoraChatTypeChatRoom || self.isChatThread == YES) {
+    if (self.conversationType == AgoraChatTypeChatRoom) {
         showReaction = NO;
     }
     if (_delegate && [_delegate respondsToSelector:@selector(messageLongPressExtShowReaction:)]) {
@@ -1010,6 +1010,10 @@
         if ([obj isKindOfClass:[EaseMessageModel class]]) {
             EaseMessageModel *model = (EaseMessageModel *)obj;
             if ([messageIds containsObject:model.message.messageId]) {
+                AgoraChatMessage *message = [[AgoraChatClient sharedClient].chatManager getMessageWithMessageId:model.message.messageId];
+                if (message.messageId.length) {
+                    model.message = message;
+                }
                 [refreshRows addObject:row];
             }
         }
