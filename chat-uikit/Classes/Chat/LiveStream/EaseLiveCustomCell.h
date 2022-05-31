@@ -9,7 +9,7 @@
 #import "EaseHeaders.h"
 #import "EaseChatViewCustomOption.h"
 
-#define EaseAvatarHeight 32.0f
+#define EaseAvatarHeight 28.0f
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong, readonly) UIView* bottomLine;
 @property (nonatomic, strong, readonly)UITapGestureRecognizer *tapGestureRecognizer;
+@property (nonatomic, strong) UIView *bgView;
+
 //custom chatView UI with option
 @property (nonatomic, strong) EaseChatViewCustomOption *customOption;
 

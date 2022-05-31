@@ -13,7 +13,7 @@
 #import "EaseHeaders.h"
 
 
-#define kSendTextButtonWitdh 190.0
+#define kSendTextButtonWidth 198.0
 #define kSendTextButtonHeight 32.0
 #define kButtonHeight 40
 #define kDefaultSpace 8.f
@@ -45,6 +45,8 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 //@property (nonatomic,strong) UIButton *sendButton;
 @property (nonatomic,strong) UIButton *unreadButton;
 @property (nonatomic, strong) UILabel *unreadLabel;
+@property (nonatomic,strong) UILabel *sendTextLabel;
+
 
 @property (nonatomic,strong) EaseCustomMessageHelper* customMsgHelper;
 
@@ -133,7 +135,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         if (self.customOption.sendTextButtonRightMargin > 0) {
             make.width.equalTo(self).offset(-self.customOption.sendTextButtonRightMargin);
         }else {
-            make.width.equalTo(@(kSendTextButtonWitdh));
+            make.width.equalTo(@(kSendTextButtonWidth));
         }
         make.height.equalTo(@(kSendTextButtonHeight));
         make.bottom.equalTo(self).offset(-self.customOption.sendTextButtonBottomMargin);
@@ -146,16 +148,15 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 - (void)placeAndLayoutBottomSendView {
     [self addSubview:self.bottomSendMsgView];
     [self.bottomSendMsgView addSubview:self.textView];
-//    [self.bottomSendMsgView addSubview:self.sendButton];
     
     [self.bottomSendMsgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.left.right.equalTo(self);
-        make.height.equalTo(@(kSendTextButtonHeight));
+        make.height.equalTo(@(kSendTextButtonHeight + 8.0 * 2));
         make.bottom.equalTo(self).offset(-self.customOption.sendTextButtonBottomMargin);
     }];
     
     [self.textView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.edges.equalTo(self.bottomSendMsgView).insets(UIEdgeInsetsMake(2.0, 2.0, 2.0, 2.0));
+        make.edges.equalTo(self.bottomSendMsgView).insets(UIEdgeInsetsMake(8.0, 12.0, 8.0, 12.0));
     }];
     
 //    [self.sendButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -403,6 +404,14 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
     self.sendTextButton.hidden = isHidden;
 }
 
+- (void)updateSendTextButtonHint:(NSString *)hint {
+    self.sendTextLabel.text = hint;
+}
+
+- (void)updateInputViewPlaceHolder:(NSString *)placeHolder {
+    self.textView.placeHolder = placeHolder;
+}
+
 
 #pragma mark - UIKeyboardNotification
 - (void)keyBoardWillShow:(NSNotification *)note
@@ -580,18 +589,32 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 {
     if (_sendTextButton == nil) {
         _sendTextButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        _sendTextButton.frame = CGRectMake(kDefaultSpace*1.5, 0, kSendTextButtonWitdh, kButtonHeight);
+        _sendTextButton.frame = CGRectMake(kDefaultSpace*1.5, 0, kSendTextButtonWidth, kButtonHeight);
         _sendTextButton.layer.cornerRadius = kSendTextButtonHeight* 0.5;
-        _sendTextButton.layer.borderWidth = 1.0;
-        _sendTextButton.layer.borderColor = EaseKitTextLabelGrayColor.CGColor;
-        _sendTextButton.titleLabel.font = EaseKitNFont(14.0f);
-        _sendTextButton.titleLabel.textAlignment = NSTextAlignmentLeft;
-        [_sendTextButton setTitle:@"Say Hi to your Fans..." forState:UIControlStateNormal];
-        [_sendTextButton setTitleColor:EaseKitTextLabelGrayColor forState:UIControlStateNormal];
+        _sendTextButton.backgroundColor = EaseKitBlackAlphaColor;
         [_sendTextButton addTarget:self action:@selector(sendTextAction) forControlEvents:UIControlEventTouchUpInside];
 
+        [_sendTextButton addSubview:self.sendTextLabel];
+        [self.sendTextLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.left.equalTo(_sendTextButton).offset(13.0);
+            make.right.equalTo(_sendTextButton).offset(-13.0);
+            make.centerY.equalTo(_sendTextButton);
+        }];
     }
     return _sendTextButton;
+}
+
+- (UILabel *)sendTextLabel {
+    if (_sendTextLabel == nil) {
+        _sendTextLabel = UILabel.new;
+        _sendTextLabel.font = EaseKitNFont(14.0f);
+        _sendTextLabel.textColor = EaseKitWhiteAlphaColor;
+        _sendTextLabel.textAlignment = NSTextAlignmentLeft;
+        _sendTextLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+        _sendTextLabel.text = @"Say Hi to your Fans...";
+        
+    }
+    return _sendTextLabel;
 }
 
 
@@ -616,10 +639,11 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         _textView.scrollEnabled = YES;
         _textView.returnKeyType = UIReturnKeySend;
         _textView.enablesReturnKeyAutomatically = YES;
-        _textView.placeHolder = NSLocalizedString(@"chat.input.placeholder", @"input a new message");
+        _textView.placeHolder = @"Say Hi...";
         _textView.delegate = self;
-        _textView.backgroundColor = EaseKitRGBACOLOR(236, 236, 236, 1);
-        _textView.layer.cornerRadius = 4.0f;
+        _textView.backgroundColor = EaseKitCOLOR_HEX(0xF2F2F2);
+        _textView.layer.cornerRadius = kSendTextButtonHeight * 0.5;
+        
     }
     return _textView;
 }
@@ -635,7 +659,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 //        [_sendButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
 //        _sendButton.layer.cornerRadius = 3;
 //        [_sendButton addTarget:self action:@selector(sendMsgAction) forControlEvents:UIControlEventTouchUpInside];
-//    }
+//   }
 //    return _sendButton;
 //}
 
@@ -689,7 +713,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 @end
 
-#undef kSendTextButtonWitdh
+#undef kSendTextButtonWidth
 #undef kSendTextButtonHeight
 #undef kButtonHeight
 #undef kDefaultSpace

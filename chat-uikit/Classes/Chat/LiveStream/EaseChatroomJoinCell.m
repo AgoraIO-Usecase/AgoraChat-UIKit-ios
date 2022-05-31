@@ -23,11 +23,9 @@
     [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
 
     self.backgroundColor = UIColor.clearColor;
-
-    self.nameLabel.textColor = EaseKitTextLabelGrayColor;
-    self.nameLabel.font = EaseKitNFont(12.0f);
     
     [self.contentView addSubview:self.avatarImageView];
+    [self.contentView addSubview:self.bgView];
     [self.contentView addSubview:self.nameLabel];
     [self.contentView addSubview:self.joinLabel];
     [self.contentView addSubview:self.joinImageView];
@@ -41,9 +39,16 @@
         make.size.Ease_equalTo(EaseAvatarHeight);
     }];
     
+    [self.bgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.top.equalTo(self.nameLabel.ease_top).offset(-8.0);
+        make.left.equalTo(self.avatarImageView.ease_right).offset(8.0);
+        make.right.equalTo(self.joinImageView.ease_right).offset(8.0);
+        make.bottom.equalTo(self.nameLabel.ease_bottom).offset(8.0);
+    }];
+    
     [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.centerY.equalTo(self.avatarImageView);
-        make.left.equalTo(self.avatarImageView.ease_right).offset(10.0);
+        make.left.equalTo(self.avatarImageView.ease_right).offset(16.0);
         make.width.lessThanOrEqualTo(@100);
     }];
     
@@ -58,6 +63,10 @@
         make.left.equalTo(self.joinLabel.ease_right).offset(2.0);
     }];
     
+    if (self.customOption.cellBgColor) {
+        self.bgView.backgroundColor = self.customOption.cellBgColor;
+    }
+
     if (self.customOption.nameLabelColor) {
         self.nameLabel.textColor = self.customOption.nameLabelColor;
     }

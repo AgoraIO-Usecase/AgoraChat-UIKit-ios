@@ -14,6 +14,7 @@
 @property (nonatomic, strong) UIView* bottomLine;
 @property (nonatomic, strong)UITapGestureRecognizer *tapGestureRecognizer;
 @property (nonatomic, strong) AgoraChatUserInfo *userInfo;
+
 @end
 
 @implementation EaseLiveCustomCell
@@ -87,11 +88,10 @@
 - (UILabel *)nameLabel {
     if (_nameLabel == nil) {
         _nameLabel = [[UILabel alloc] init];
-        _nameLabel.font = [UIFont fontWithName:@"PingFangSC-Semibold" size:16.0f];
-        _nameLabel.textColor = UIColor.whiteColor;
         _nameLabel.textAlignment = NSTextAlignmentLeft;
         _nameLabel.lineBreakMode = NSLineBreakByTruncatingTail;
-
+        _nameLabel.font = EaseKitNFont(12.0f);
+        _nameLabel.textColor = EaseKitWhiteAlphaColor;
     }
     return _nameLabel;
 }
@@ -113,7 +113,13 @@
     return _tapGestureRecognizer;
 }
 
-
+- (UIView *)bgView {
+    if (_bgView == nil) {
+        _bgView = [[UIView alloc] init];
+        _bgView.layer.cornerRadius = 8.0f;
+    }
+    return _bgView;
+}
 
 @end
 

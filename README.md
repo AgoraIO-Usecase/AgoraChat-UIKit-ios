@@ -817,3 +817,6 @@ EaseConversationsViewControllerDelegate
 
 - (void)easeTableView:(UITableView *)tableView didEndEditingRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
+
+#### 直播聊天室
+

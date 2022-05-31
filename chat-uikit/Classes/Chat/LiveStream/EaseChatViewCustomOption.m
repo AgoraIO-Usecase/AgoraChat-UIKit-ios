@@ -6,6 +6,7 @@
 //
 
 #import "EaseChatViewCustomOption.h"
+#import "EaseHeaders.h"
 
 @implementation EaseChatViewCustomOption
 
@@ -26,7 +27,8 @@ static EaseChatViewCustomOption *instance = nil;
         self.avatarStyle = Circular;
         self.avatarCornerRadius = 0;
         self.sendTextButtonBottomMargin = 20.0;
-       
+        self.cellBgColor = EaseKitBlackAlphaColor;
+
         
 //        self.tableViewBgColor = UIColor.redColor;
 //        self.tableViewRightMargin = 0;

@@ -77,5 +77,8 @@
 #define EaseKitDefaultSystemLightGrayColor EaseKitRGBACOLOR(197, 197, 197, 1)
 #define EaseKitDefaultLoginButtonColor EaseKitRGBACOLOR(25, 163, 255, 1)
 
+#define  EaseKitBlackAlphaColor [UIColor colorWithRed:0 green:0 blue:0 alpha:0.4]
+
+#define  EaseKitWhiteAlphaColor [UIColor colorWithRed:255.0/255.0 green:255.0/255.0 blue:255.0/255.0 alpha:0.74]
 
 #endif /* EaseKitDefine_h */

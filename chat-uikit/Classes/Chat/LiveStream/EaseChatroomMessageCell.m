@@ -19,6 +19,9 @@
 
 #define kNameLabelHeight 14.0
 
+#define kBgViewPadding 5.0
+
+
 static AgoraChatroom *_chatroom;
 
 @interface EaseChatroomMessageCell ()
@@ -28,7 +31,7 @@ static AgoraChatroom *_chatroom;
 @property (nonatomic, strong) NSString *msgFrom;
 @property (nonatomic, strong) AgoraChatUserInfo *userInfo;
 @property (nonatomic, strong) AgoraChatroom *chatroom;
-
+@property (nonatomic, strong) UIImageView *muteImageView;
 
 @end
 
@@ -39,23 +42,26 @@ static AgoraChatroom *_chatroom;
     if (self.customOption.displaySenderAvatar) {
         self.backgroundColor = UIColor.clearColor;
         [self.contentView addSubview:self.avatarImageView];
+        [self.contentView addSubview:self.bgView];
         [self.contentView addSubview:self.nameLabel];
         [self.contentView addSubview:self.roleImageView];
+        [self.contentView addSubview:self.muteImageView];
         [self.contentView addSubview:self.messageLabel];
         
-        self.nameLabel.font = EaseKitNFont(12.0f);
-        self.nameLabel.textColor = EaseKitTextLabelGrayColor;
         self.avatarImageView.layer.cornerRadius = kIconImageViewHeight * 0.5;
     }else {
         self.backgroundColor = UIColor.clearColor;
+        [self.contentView addSubview:self.bgView];
         [self.contentView addSubview:self.nameLabel];
         [self.contentView addSubview:self.roleImageView];
+        [self.contentView addSubview:self.muteImageView];
         [self.contentView addSubview:self.messageLabel];
         
         self.nameLabel.font = EaseKitNFont(12.0f);
         self.nameLabel.textColor = EaseKitTextLabelGrayColor;
     }
 
+    
 }
 
 - (void)placeSubViews {
@@ -66,11 +72,17 @@ static AgoraChatroom *_chatroom;
             make.size.equalTo(@(kIconImageViewHeight));
         }];
             
+        [self.bgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewPadding);
+            make.left.equalTo(self.avatarImageView.ease_right).offset(kBgViewPadding);
+            make.right.equalTo(self.messageLabel.ease_right).offset(kBgViewPadding);
+            make.bottom.equalTo(self.messageLabel.ease_bottom).offset(kBgViewPadding);
+        }];
         
         [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.avatarImageView);
             make.height.equalTo(@(kNameLabelHeight));
-            make.left.equalTo(self.avatarImageView.ease_right).offset(10.0);
+            make.left.equalTo(self.avatarImageView.ease_right).offset(16.0);
         }];
         
         
@@ -79,13 +91,26 @@ static AgoraChatroom *_chatroom;
             make.left.equalTo(self.nameLabel.ease_right).offset(5.0f);
         }];
         
+        [self.muteImageView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.centerY.Ease_equalTo(self.nameLabel);
+            make.left.equalTo(self.roleImageView.ease_right).offset(10.0);
+        }];
+        
+        
         [self.messageLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.nameLabel.ease_bottom).offset(kCellVPadding);
             make.left.equalTo(self.nameLabel);
-            make.right.equalTo(self.contentView).offset(-10.0);
+            make.right.lessThanOrEqualTo(self.contentView).offset(-18.0);
         }];
     }else {
+        [self.bgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewPadding);
+            make.left.equalTo(self.contentView).offset(kBgViewPadding);
+            make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewPadding);
+            make.bottom.equalTo(self.messageLabel.ease_bottom).offset(kBgViewPadding);
+        }];
 
+        
         [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.contentView).offset(10.0);
             make.left.equalTo(self).offset(10.0);
@@ -97,10 +122,15 @@ static AgoraChatroom *_chatroom;
             make.left.equalTo(self.nameLabel.ease_right).offset(5.0f);
         }];
         
+        [self.muteImageView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.centerY.Ease_equalTo(self.nameLabel);
+            make.left.equalTo(self.roleImageView.ease_right).offset(10.0);
+        }];
+
         [self.messageLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.nameLabel.ease_bottom).offset(kCellVPadding);
             make.left.equalTo(self.nameLabel);
-            make.right.equalTo(self.contentView).offset(-10.0);
+            make.right.equalTo(self.contentView).offset(-18.0);
         }];
     }
    
@@ -119,7 +149,7 @@ static AgoraChatroom *_chatroom;
     }
     
     if (self.customOption.cellBgColor) {
-        self.contentView.backgroundColor = self.customOption.cellBgColor;
+        self.bgView.backgroundColor = self.customOption.cellBgColor;
     }
     
     if (self.customOption.messageLabelColor) {
@@ -137,7 +167,6 @@ static AgoraChatroom *_chatroom;
     if (self.customOption.nameLabelFontSize) {
         self.messageLabel.font  = EaseKitNFont(self.customOption.nameLabelFontSize);
     }
-        
 }
 
 #pragma mark
@@ -147,7 +176,8 @@ static AgoraChatroom *_chatroom;
     self.chatroom = chatroom;
     NSString *chatroomOwner = self.chatroom.owner;
     
-
+    CGFloat nameLineWidth = self.nameLabel.text.length;
+    
     if ([message.from isEqualToString:chatroomOwner]) {
         [self.roleImageView setImage:[UIImage easeUIImageNamed:@"live_streamer"]];
     }else if ([self.chatroom.adminList containsObject:message.from]){
@@ -156,12 +186,17 @@ static AgoraChatroom *_chatroom;
         [self.roleImageView setImage:[UIImage easeUIImageNamed:@""]];
     }
     
+    if ([self.chatroom.muteList containsObject:self.userInfo.userId]) {
+        self.muteImageView.hidden = NO;
+    }else {
+        self.muteImageView.hidden = YES;
+    }
+    
     self.msgFrom = message.from;
     [self fetchUserInfoWithUserId:self.msgFrom];
 
-    
     self.messageLabel.attributedText = [EaseChatroomMessageCell _attributedStringWithMessage:message];
-    _chatroom = chatroom;
+    
 }
 
 
@@ -178,7 +213,7 @@ static AgoraChatroom *_chatroom;
                                            }
                                  context:nil].size;
     height = retSize.height;
-    height += kCellVPadding * 3 + kNameLabelHeight;
+    height += kCellVPadding * 3 + kNameLabelHeight + kBgViewPadding;
 
     
     return height;
@@ -267,6 +302,15 @@ static AgoraChatroom *_chatroom;
     return _messageLabel;
 }
 
+- (UIImageView *)muteImageView {
+    if (_muteImageView == nil) {
+        _muteImageView = [[UIImageView alloc] init];
+        _muteImageView.contentMode = UIViewContentModeScaleAspectFit;
+        [_muteImageView setImage:[UIImage easeUIImageNamed:@"member_mute_icon"]];
+    }
+    return _muteImageView;
+}
+
 
 @end
 
@@ -277,3 +321,5 @@ static AgoraChatroom *_chatroom;
 #undef kContentLabelMaxWidth
 
 #undef kNameLabelHeight
+
+#undef kBgViewPadding
