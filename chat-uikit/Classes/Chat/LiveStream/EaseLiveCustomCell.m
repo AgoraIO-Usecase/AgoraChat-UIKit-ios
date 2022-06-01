@@ -13,7 +13,6 @@
 @interface EaseLiveCustomCell ()
 @property (nonatomic, strong) UIView* bottomLine;
 @property (nonatomic, strong)UITapGestureRecognizer *tapGestureRecognizer;
-@property (nonatomic, strong) AgoraChatUserInfo *userInfo;
 
 @end
 
@@ -52,14 +51,9 @@
 }
 
 
-- (void)fetchUserInfoWithUserId:(NSString *)userId {
-    [EaseUserInfoManagerHelper fetchUserInfoWithUserIds:@[userId] completion:^(NSDictionary * _Nonnull userInfoDic) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.userInfo = [userInfoDic objectForKey:userId];
-            [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
-            self.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
-        });
-    }];
+- (void)fetchUserInfoWithUserId:(NSString *)userId
+                     completion:(void (^)(NSDictionary * _Nonnull userInfoDic))completion {
+    [EaseUserInfoManagerHelper fetchUserInfoWithUserIds:@[userId] completion:completion];
 }
 
 + (NSString *)reuseIdentifier {

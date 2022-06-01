@@ -16,4 +16,5 @@
 #import "UIColor+EaseUI.h"
 #import "UIImage+EaseUI.h"
 #import "EaseKitDefine.h"
+#import "UIImageView+EaseWebCache.h"
 

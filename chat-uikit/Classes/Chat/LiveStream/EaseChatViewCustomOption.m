@@ -26,10 +26,9 @@ static EaseChatViewCustomOption *instance = nil;
         self.displaySenderNickname = YES;
         self.avatarStyle = Circular;
         self.avatarCornerRadius = 0;
-        self.sendTextButtonBottomMargin = 20.0;
+        self.sendTextButtonBottomMargin = 12.0;
         self.cellBgColor = EaseKitBlackAlphaColor;
 
-        
 //        self.tableViewBgColor = UIColor.redColor;
 //        self.tableViewRightMargin = 0;
 //        self.sendTextButtonBottomMargin = 30.0;

@@ -9,9 +9,10 @@
 #import "EaseChatroomMessageCell.h"
 #import "EaseCustomMessageHelper.h"
 #import "EaseHeaders.h"
+#import "UIImageView+EaseWebCache.h"
 
 
-#define kIconImageViewHeight 30.0f
+#define kIconImageViewHeight 28.0f
 
 #define kCellVPadding  5.0
 
@@ -19,25 +20,32 @@
 
 #define kNameLabelHeight 14.0
 
-#define kBgViewPadding 5.0
+#define kBgViewPadding 8.0
 
-
-static AgoraChatroom *_chatroom;
+typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
+    MSGCellNameLineStyleName,
+    MSGCellNameLineStyleRole,
+    MSGCellNameLineStyleMute
+};
 
 @interface EaseChatroomMessageCell ()
 
 @property (nonatomic, strong) UIImageView *roleImageView;
+@property (nonatomic, strong) UIImageView *muteImageView;
 @property (nonatomic, strong) UILabel *messageLabel;
-@property (nonatomic, strong) NSString *msgFrom;
+
 @property (nonatomic, strong) AgoraChatUserInfo *userInfo;
 @property (nonatomic, strong) AgoraChatroom *chatroom;
-@property (nonatomic, strong) UIImageView *muteImageView;
+@property (nonatomic, strong) NSString *msgFrom;
+@property (nonatomic, assign) MSGCellNameLineStyle nameLineStyle;
 
 @end
 
 @implementation EaseChatroomMessageCell
 - (void)prepare {
+    
     [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
+    self.nameLineStyle = MSGCellNameLineStyleName;
     
     if (self.customOption.displaySenderAvatar) {
         self.backgroundColor = UIColor.clearColor;
@@ -67,8 +75,8 @@ static AgoraChatroom *_chatroom;
 - (void)placeSubViews {
     if (self.customOption.displaySenderAvatar) {
         [self.avatarImageView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.contentView).offset(kCellVPadding);
-            make.left.equalTo(self.contentView).offset(10.0);
+            make.top.equalTo(self.contentView).offset(kCellVPadding + kBgViewPadding);
+            make.left.equalTo(self.contentView).offset(12.0);
             make.size.equalTo(@(kIconImageViewHeight));
         }];
             
@@ -78,6 +86,7 @@ static AgoraChatroom *_chatroom;
             make.right.equalTo(self.messageLabel.ease_right).offset(kBgViewPadding);
             make.bottom.equalTo(self.messageLabel.ease_bottom).offset(kBgViewPadding);
         }];
+        
         
         [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.avatarImageView);
@@ -113,7 +122,7 @@ static AgoraChatroom *_chatroom;
         
         [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.contentView).offset(10.0);
-            make.left.equalTo(self).offset(10.0);
+            make.left.equalTo(self).offset(10.0 + kBgViewPadding);
             make.height.equalTo(@(kNameLabelHeight));
         }];
         
@@ -175,34 +184,93 @@ static AgoraChatroom *_chatroom;
     
     self.chatroom = chatroom;
     NSString *chatroomOwner = self.chatroom.owner;
-    
-    CGFloat nameLineWidth = self.nameLabel.text.length;
-    
-    if ([message.from isEqualToString:chatroomOwner]) {
-        [self.roleImageView setImage:[UIImage easeUIImageNamed:@"live_streamer"]];
-    }else if ([self.chatroom.adminList containsObject:message.from]){
-        [self.roleImageView setImage:[UIImage easeUIImageNamed:@"live_moderator"]];
-    }else {
-        [self.roleImageView setImage:[UIImage easeUIImageNamed:@""]];
-    }
-    
-    if ([self.chatroom.muteList containsObject:self.userInfo.userId]) {
-        self.muteImageView.hidden = NO;
-    }else {
-        self.muteImageView.hidden = YES;
-    }
-    
-    self.msgFrom = message.from;
-    [self fetchUserInfoWithUserId:self.msgFrom];
 
-    self.messageLabel.attributedText = [EaseChatroomMessageCell _attributedStringWithMessage:message];
+    self.msgFrom = message.from;
     
+    [self fetchUserInfoWithUserId:self.msgFrom completion:^(NSDictionary * _Nonnull userInfoDic) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.userInfo = [userInfoDic objectForKey:message.from];
+            [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
+            self.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
+            
+            CGFloat nameLineWidth = [self nameLabelWidth];
+            CGFloat messageLineWidth = [EaseChatroomMessageCell messageLabelSizeWithMessage:message].width;
+            
+            
+            if ([message.from isEqualToString:chatroomOwner]) {
+                [self.roleImageView setImage:[UIImage easeUIImageNamed:@"live_streamer"]];
+                nameLineWidth += 44.0;
+                self.nameLineStyle = MSGCellNameLineStyleRole;
+            }else if ([self.chatroom.adminList containsObject:message.from]){
+                [self.roleImageView setImage:[UIImage easeUIImageNamed:@"live_moderator"]];
+                nameLineWidth += 44.0;
+                self.nameLineStyle = MSGCellNameLineStyleRole;
+            }else {
+                [self.roleImageView setImage:[UIImage easeUIImageNamed:@""]];
+            }
+            
+            if ([self.chatroom.muteList containsObject:self.userInfo.userId]) {
+                self.muteImageView.hidden = NO;
+                nameLineWidth += 16.0;
+                self.nameLineStyle = MSGCellNameLineStyleMute;
+            }else {
+                self.muteImageView.hidden = YES;
+            }
+            
+            if (nameLineWidth > messageLineWidth) {
+                EaseKit_WS
+                [self.bgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                    if (self.nameLineStyle == MSGCellNameLineStyleMute) {
+                        make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewPadding);
+                    }else if (self.nameLineStyle == MSGCellNameLineStyleRole){
+                        make.right.equalTo(self.roleImageView.ease_right).offset(kBgViewPadding);
+                    }else {
+                        make.right.equalTo(self.nameLabel.ease_right).offset(kBgViewPadding);
+                    }
+                    
+                }];
+            }else {
+                [self.bgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                    make.right.equalTo(self.messageLabel.ease_right).offset(kBgViewPadding);
+                }];
+            }
+            
+            self.messageLabel.attributedText = [EaseChatroomMessageCell _attributedStringWithMessage:message];
+        });
+    }];
+}
+
+
+- (CGFloat)nameLabelWidth {
+    CGFloat nameWidth = [self.nameLabel.text sizeWithAttributes:@{
+        NSFontAttributeName:self.nameLabel.font,
+        NSParagraphStyleAttributeName:[EaseChatroomMessageCell contentLabelParaStyle]
+    }].width;
+    
+    return nameWidth;
 }
 
 
 + (CGFloat)heightForMessage:(AgoraChatMessage *)message
 {
     CGFloat height = 0;
+//    CGSize textBlockMinSize = {kContentLabelMaxWidth, CGFLOAT_MAX};
+//    CGSize retSize;
+//    NSString *text = [EaseChatroomMessageCell contentWithMessage:message];
+//    retSize = [text boundingRectWithSize:textBlockMinSize options:NSStringDrawingUsesLineFragmentOrigin
+//                              attributes:@{
+//                                           NSFontAttributeName:[EaseChatroomMessageCell contentFont],
+//                                           NSParagraphStyleAttributeName:[EaseChatroomMessageCell contentLabelParaStyle]
+//                                           }
+//                                 context:nil].size;
+    CGSize messageSize = [self messageLabelSizeWithMessage:message];
+    height = messageSize.height;
+    height += kCellVPadding * 3 + kNameLabelHeight + kBgViewPadding;
+
+    return height;
+}
+
++ (CGSize)messageLabelSizeWithMessage:(AgoraChatMessage *)message {
     CGSize textBlockMinSize = {kContentLabelMaxWidth, CGFLOAT_MAX};
     CGSize retSize;
     NSString *text = [EaseChatroomMessageCell contentWithMessage:message];
@@ -212,13 +280,8 @@ static AgoraChatroom *_chatroom;
                                            NSParagraphStyleAttributeName:[EaseChatroomMessageCell contentLabelParaStyle]
                                            }
                                  context:nil].size;
-    height = retSize.height;
-    height += kCellVPadding * 3 + kNameLabelHeight + kBgViewPadding;
-
-    
-    return height;
+    return retSize;
 }
-
 
 + (NSMutableAttributedString*)_attributedStringWithMessage:(AgoraChatMessage*)message
 {
@@ -266,7 +329,7 @@ static AgoraChatroom *_chatroom;
 
 + (NSMutableParagraphStyle *)contentLabelParaStyle {
     NSMutableParagraphStyle *paraStyle = [[NSMutableParagraphStyle alloc] init];
-    paraStyle.lineBreakMode = NSLineBreakByCharWrapping;
+    paraStyle.lineBreakMode = NSLineBreakByWordWrapping;
     paraStyle.lineSpacing = [EaseChatroomMessageCell lineSpacing];
     return paraStyle;
 }
@@ -295,9 +358,9 @@ static AgoraChatroom *_chatroom;
         _messageLabel.font = [EaseChatroomMessageCell contentFont];
         _messageLabel.textColor = UIColor.whiteColor;
         _messageLabel.textAlignment = NSTextAlignmentLeft;
-        _messageLabel.lineBreakMode = NSLineBreakByCharWrapping;
+        _messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
         _messageLabel.numberOfLines = 0;
-        _messageLabel.preferredMaxLayoutWidth = EaseKitScreenWidth -kIconImageViewHeight -EaseKitPadding *3;
+        _messageLabel.preferredMaxLayoutWidth = kContentLabelMaxWidth;
     }
     return _messageLabel;
 }

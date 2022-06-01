@@ -7,10 +7,14 @@
 //
 
 #import "EaseChatroomJoinCell.h"
+#import "UIImageView+EaseWebCache.h"
+
+#define kBgViewPadding 8.0
 
 @interface EaseChatroomJoinCell ()
 @property (nonatomic, strong) UIImageView *joinImageView;
 @property (nonatomic, strong) UILabel *joinLabel;
+@property (nonatomic, strong) AgoraChatUserInfo *userInfo;
 
 @end
 
@@ -23,7 +27,6 @@
     [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
 
     self.backgroundColor = UIColor.clearColor;
-    
     [self.contentView addSubview:self.avatarImageView];
     [self.contentView addSubview:self.bgView];
     [self.contentView addSubview:self.nameLabel];
@@ -40,10 +43,10 @@
     }];
     
     [self.bgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.nameLabel.ease_top).offset(-8.0);
-        make.left.equalTo(self.avatarImageView.ease_right).offset(8.0);
-        make.right.equalTo(self.joinImageView.ease_right).offset(8.0);
-        make.bottom.equalTo(self.nameLabel.ease_bottom).offset(8.0);
+        make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewPadding);
+        make.left.equalTo(self.avatarImageView.ease_right).offset(kBgViewPadding);
+        make.right.equalTo(self.joinImageView.ease_right).offset(kBgViewPadding);
+        make.bottom.equalTo(self.nameLabel.ease_bottom).offset(kBgViewPadding);
     }];
     
     [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -79,7 +82,14 @@
 
 - (void)updateWithObj:(id)obj {
     AgoraChatMessage *message = (AgoraChatMessage *)obj;
-    [self fetchUserInfoWithUserId:message.from];
+    [self fetchUserInfoWithUserId:message.from completion:^(NSDictionary * _Nonnull userInfoDic) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.userInfo = [userInfoDic objectForKey:message.from];
+            [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
+            self.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
+        });
+
+    }];
 }
 
 
@@ -109,3 +119,4 @@
 
 @end
 
+#undef kBgViewPadding

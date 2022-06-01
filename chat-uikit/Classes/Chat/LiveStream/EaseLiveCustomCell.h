@@ -37,8 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)updateWithObj:(id)obj;
 
 // fetch userInfo update cell with userId
-- (void)fetchUserInfoWithUserId:(NSString *)userId;
-
+- (void)fetchUserInfoWithUserId:(NSString *)userId
+                     completion:(void (^)(NSDictionary * _Nonnull userInfoDic))completion;
 
 @end
 

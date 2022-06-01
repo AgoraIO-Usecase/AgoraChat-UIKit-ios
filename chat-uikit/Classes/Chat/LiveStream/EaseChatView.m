@@ -110,6 +110,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 
 - (void)placeAndLayoutSubviews {
+    
     [self addSubview:self.tableView];
     [self addSubview:self.unreadButton];
     [self addSubview:self.sendTextButton];
@@ -118,7 +119,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         make.top.equalTo(self);
         make.left.equalTo(self);
         make.right.equalTo(self).offset(-self.customOption.tableViewRightMargin);
-        make.bottom.equalTo(self.sendTextButton.ease_top);
+        make.bottom.equalTo(self.sendTextButton.ease_top).offset(-12.0);
     }];
     
     
@@ -137,6 +138,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         }else {
             make.width.equalTo(@(kSendTextButtonWidth));
         }
+        
         make.height.equalTo(@(kSendTextButtonHeight));
         make.bottom.equalTo(self).offset(-self.customOption.sendTextButtonBottomMargin);
     }];
@@ -266,9 +268,13 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 }
 
 #pragma mark - UITableViewDataSource
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 10.0;
+}
+
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
 {
-    return 5;
+    return 10.0;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
@@ -406,10 +412,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 - (void)updateSendTextButtonHint:(NSString *)hint {
     self.sendTextLabel.text = hint;
-}
-
-- (void)updateInputViewPlaceHolder:(NSString *)placeHolder {
-    self.textView.placeHolder = placeHolder;
+    self.textView.placeHolder = hint;
 }
 
 
@@ -423,7 +426,9 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
     CGFloat keyBoardHeight = keyBoardBounds.size.height;
         
     CGFloat offSet = keyBoardHeight - self.customOption.sendTextButtonBottomMargin;
-
+    
+//    CGFloat offSet = keyBoardHeight + 8.0 * 2 - self.customOption.sendTextButtonBottomMargin;
+        
     if (self.delegate && [self.delegate respondsToSelector:@selector(chatViewDidBottomOffset:)]) {
         [self.delegate chatViewDidBottomOffset:offSet];
     }

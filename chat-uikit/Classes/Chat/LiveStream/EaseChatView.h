@@ -56,6 +56,4 @@
 
 - (void)updateSendTextButtonHint:(NSString *)hint;
 
-- (void)updateInputViewPlaceHolder:(NSString *)placeHolder;
-
 @end
