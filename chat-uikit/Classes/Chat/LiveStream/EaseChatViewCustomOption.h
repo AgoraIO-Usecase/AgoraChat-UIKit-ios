@@ -13,44 +13,76 @@ NS_ASSUME_NONNULL_BEGIN
 @interface EaseChatViewCustomOption : NSObject
 + (EaseChatViewCustomOption *)customOption;
 
-//set custom tableview message cell
+/**
+ * set custom tableview message cell
+ */
 @property (nonatomic, assign) BOOL customMessageCell;
-//set custom user join cell
+/**
+ * set custom user join cell
+ */
 @property (nonatomic, assign) BOOL customJoinCell;
 
-
-//set tableView backgroud color
+/**
+ * set tableView backgroud color
+ */
 @property (nonatomic, strong) UIColor *tableViewBgColor;
-//set right margin of EaseChatView
+
+/**
+ * set right margin of EaseChatView
+ */
 @property (nonatomic, assign) CGFloat tableViewRightMargin;
-//set sendTextButton bottom margin of EaseChatView
+
+/**
+ * set sendTextButton bottom margin of EaseChatView
+ */
 @property (nonatomic, assign) CGFloat sendTextButtonBottomMargin;
-//set sendTextButton right margin of EaseChatView
+
+/**
+ * set sendTextButton right margin of EaseChatView
+ */
 @property (nonatomic, assign) CGFloat sendTextButtonRightMargin;
 
-//set whether display sender avatarImageView
+/**
+ * set whether display sender avatarImageView
+ */
 @property (nonatomic, assign) BOOL   displaySenderAvatar;
 
-//set whether display sender nickname
+/**
+ * set whether display sender nickname
+ */
 @property (nonatomic, assign) BOOL   displaySenderNickname;
 
-
-// Avatar style
+/**
+ * Avatar style
+ */
 @property (nonatomic) EaseChatAvatarStyle avatarStyle;
 
-// Avatar cornerRadius Default: 0 (Only avatar type RoundedCorner)
+/**
+ * Avatar cornerRadius Default: 0 (Only avatar type RoundedCorner)
+ */
 @property (nonatomic) CGFloat avatarCornerRadius;
 
-
-//set cell contentview backgroud color
+/**
+ * set cell contentview backgroud color
+ */
 @property (nonatomic, strong) UIColor *cellBgColor;
-//set nameLabel text font size
+
+/**
+ * set nameLabel text font size
+ */
 @property (nonatomic, assign) CGFloat nameLabelFontSize;
-//set nameLabel text color
+/**
+ * set nameLabel text color
+ */
 @property (nonatomic, strong) UIColor *nameLabelColor;
-//set messageLabel font size
+/**
+ * set messageLabel font size
+ */
 @property (nonatomic, assign) CGFloat messageLabelSize;
-//set messageLabel text color
+
+/**
+ * set messageLabel text color
+ */
 @property (nonatomic, strong) UIColor *messageLabelColor;
 
 

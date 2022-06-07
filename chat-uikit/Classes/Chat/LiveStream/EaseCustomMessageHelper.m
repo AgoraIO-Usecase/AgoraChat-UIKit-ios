@@ -74,34 +74,6 @@
     }
 }
 
-//解析消息内容
-+ (NSString*)getMsgContent:(AgoraChatMessageBody*)messageBody
-{
-//    NSString *msgContent = @"";
-//    AgoraChatCustomMessageBody *customBody = (AgoraChatCustomMessageBody*)messageBody;
-//    if ([customBody.event isEqualToString:kCustomMsgChatroomBarrage]) {
-//        msgContent = (NSString*)[customBody.ext objectForKey:@"txt"];
-//    } else if ([customBody.event isEqualToString:kCustomMsgChatroomPraise]) {
-//        msgContent = [NSString stringWithFormat:@"Liked %ld for the anchor",(long)[(NSString*)[customBody.ext objectForKey:@"num"] integerValue]];
-//    } else if ([customBody.event isEqualToString:kCustomMsgChatroomGift]) {
-//        NSString *giftid = [customBody.ext objectForKey:kGiftIdKey];
-//        NSString *giftNum = [customBody.ext objectForKey:kGiftNumKey];
-//
-//        if (giftid) {
-//            int index = [[giftid substringFromIndex:5] intValue];
-//            if (index >= EaseLiveGiftHelper.sharedInstance.giftArray.count) {
-//                ELDGiftModel *model = EaseLiveGiftHelper.sharedInstance.giftArray[index-1];
-//                msgContent = [NSString stringWithFormat:@"gifted %@x%@",NSLocalizedString(model.giftname,@""),giftNum];
-//            }
-//
-//        } else {
-//            msgContent = @"";
-//        }
-//    }
-//    return msgContent;
-    return @"";
-    
-}
 
 /*
 发送自定义消息（礼物，点赞，弹幕）

@@ -819,4 +819,317 @@ EaseConversationsViewControllerDelegate
 ```
 
 #### 直播聊天室
+##### 1.创建直播聊天室 
+##### 聊天室列表及发送消息
+```objective-c
+/// Init a chatView
+/// @param frame assign frame
+/// @param chatroom a AgoraChatroom
+/// @param customMsgHelper a EaseCustomMessageHelper
+/// @param customOption a EaseChatViewCustomOption
+- (instancetype)initWithFrame:(CGRect)frame
+                     chatroom:(AgoraChatroom*)chatroom
+              customMsgHelper:(EaseCustomMessageHelper*)customMsgHelper
+                 customOption:(EaseChatViewCustomOption *)customOption;
+
+```
+
+##### 聊天室发送礼物消息
+```objective-c
+/// send gift
+/// @param giftId  a giftId
+/// @param num gift num
+/// @param aCompletion a callback send gift message
+- (void)sendGiftAction:(NSString *)giftId
+                   num:(NSInteger)num
+            completion:(void (^)(BOOL success))aCompletion;
+
+```
+
+##### 聊天室界面是否显示
+```objective-c
+/// display or hidden chatview
+/// @param isHidden whether hidden
+- (void)updateChatViewWithHidden:(BOOL)isHidden;
+```
+
+##### 聊天室输入按钮提示信息更新
+```objective-c
+/// update sendTextButton title
+/// @param hint sendTextButton title
+- (void)updateSendTextButtonHint:(NSString *)hint;
+```
+##### 聊天室代理方法
+###### 自定义消息类型Cell
+```objective-c 
+/// display custom message cell at indexpath
+/// @param indexPath indexPath
+- (UITableViewCell *)easeMessageCellForRowAtIndexPath:(NSIndexPath *)indexPath;
+```
+
+###### 自定义消息类型Cell高度
+```objective-c 
+/// height for custom message cell at indexpath
+/// @param indexPath indexPath
+- (CGFloat)easeMessageCellHeightAtIndexPath:(NSIndexPath *)indexPath;
+```
+
+###### 自定义加入类型Cell
+```objective-c 
+/// display custom join cell at indexpath
+/// @param indexPath indexPath
+- (UITableViewCell *)easeJoinCellForRowAtIndexPath:(NSIndexPath *)indexPath;
+```
+
+###### 自定义加入类型Cell高度
+```objective-c 
+/// height for custom join cell at indexpath
+/// @param indexPath indexPath
+- (CGFloat)easeJoinCellHeightAtIndexPath:(NSIndexPath *)indexPath;
+```
+
+###### 点击消息回调
+```objective-c 
+/// tap  message callback
+/// @param message  tap message
+- (void)didSelectUserWithMessage:(AgoraChatMessage*)message;
+```
+
+###### 弹出输入框回调
+```objective-c 
+/// change chatview offset from bottom
+/// @param offset offset from bottom
+- (void)chatViewDidBottomOffset:(CGFloat)offset;
+```
+
+###### 发送消息回调
+```objective-c 
+/// chatview send message
+/// @param message send message
+/// @param error error
+- (void)chatViewDidSendMessage:(AgoraChatMessage *)message
+                         error:(AgoraChatError *)error;
+```
+
+
+##### 2. 设置聊天室自定义选项
+```objective-c 
+/**
+ * set custom tableview message cell
+ */
+@property (nonatomic, assign) BOOL customMessageCell;
+/**
+ * set custom user join cell
+ */
+@property (nonatomic, assign) BOOL customJoinCell;
+
+/**
+ * set tableView backgroud color
+ */
+@property (nonatomic, strong) UIColor *tableViewBgColor;
+
+/**
+ * set right margin of EaseChatView
+ */
+@property (nonatomic, assign) CGFloat tableViewRightMargin;
+
+/**
+ * set sendTextButton bottom margin of EaseChatView
+ */
+@property (nonatomic, assign) CGFloat sendTextButtonBottomMargin;
+
+/**
+ * set sendTextButton right margin of EaseChatView
+ */
+@property (nonatomic, assign) CGFloat sendTextButtonRightMargin;
+
+/**
+ * set whether display sender avatarImageView
+ */
+@property (nonatomic, assign) BOOL   displaySenderAvatar;
+
+/**
+ * set whether display sender nickname
+ */
+@property (nonatomic, assign) BOOL   displaySenderNickname;
+
+/**
+ * Avatar style
+ */
+@property (nonatomic) EaseChatAvatarStyle avatarStyle;
+
+/**
+ * Avatar cornerRadius Default: 0 (Only avatar type RoundedCorner)
+ */
+@property (nonatomic) CGFloat avatarCornerRadius;
+
+/**
+ * set cell contentview backgroud color
+ */
+@property (nonatomic, strong) UIColor *cellBgColor;
+
+/**
+ * set nameLabel text font size
+ */
+@property (nonatomic, assign) CGFloat nameLabelFontSize;
+/**
+ * set nameLabel text color
+ */
+@property (nonatomic, strong) UIColor *nameLabelColor;
+/**
+ * set messageLabel font size
+ */
+@property (nonatomic, assign) CGFloat messageLabelSize;
+
+/**
+ * set messageLabel text color
+ */
+@property (nonatomic, strong) UIColor *messageLabelColor;
+```
+
+##### 3. 发送即解析custom消息
+###### 创建自定义消息辅助类
+```objective-c 
+/// create a EaseCustomMessageHelper Instance
+/// @param customMsgImp a delegate which implment EaseCustomMessageHelperDelegate
+/// @param chatId a chatroom Id
+- (instancetype)initWithCustomMsgImp:(id<EaseCustomMessageHelperDelegate>)customMsgImp chatId:(NSString*)chatId;
+```
+
+###### 发送自定义消息 
+```objective-c 
+/*
+ send custom message (gift,like,Barrage)
+ @param text                 Message content
+ @param num                  Number of message content
+ @param messageType          chat type
+ @param customMsgType        custom message type
+ @param aCompletionBlock     send completion callback
+*/
+- (void)sendCustomMessage:(NSString*)text
+                      num:(NSInteger)num
+                       to:(NSString*)toUser
+              messageType:(AgoraChatType)messageType
+            customMsgType:(customMessageType)customMsgType
+               completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
+```
+
+###### 发送自定义消息 （有扩展参数）
+```objective-c 
+/*
+ send custom message (gift,like,Barrage) (with extended parameters)
+ @param text                 Message content
+ @param num                  Number of message content
+ @param messageType          chat type
+ @param customMsgType        custom message type
+ @param ext              message extension
+ @param aCompletionBlock     send completion callback
+*/
+- (void)sendCustomMessage:(NSString*)text
+                      num:(NSInteger)num
+                       to:(NSString*)toUser
+              messageType:(AgoraChatType)messageType
+            customMsgType:(customMessageType)customMsgType
+                      ext:(NSDictionary*)ext
+               completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
+```
+
+
+###### 发送用户自定义消息体事件（其他自定义消息体事件）
+```objective-c 
+/*
+ send user custom message (Other custom message body events)
+ 
+@param event                custom message body event
+@param customMsgBodyExt     custom message body event parameters
+@param to                   message receiver
+@param messageType          chat type
+@param aCompletionBlock     send completion callback
+*/
+- (void)sendUserCustomMessage:(NSString*)event
+             customMsgBodyExt:(NSDictionary*)customMsgBodyExt
+                           to:(NSString*)toUser
+                  messageType:(AgoraChatType)messageType
+                   completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
+```
+
+###### 发送用户自定义消息体事件（有消息扩展参数）
+```objective-c 
+/*
+ send user custom message (Other custom message body events) (extension parameters)
+ 
+@param event                custom message body event
+@param customMsgBodyExt     custom message body event parameters
+@param to                   message receiver
+@param messageType          chat type
+@param ext                  message extension
+@param aCompletionBlock     send completion callback
+*/
+- (void)sendUserCustomMessage:(NSString*)event
+             customMsgBodyExt:(NSDictionary*)customMsgBodyExt
+                           to:(NSString*)toUser
+                  messageType:(AgoraChatType)messageType
+                          ext:(NSDictionary*)ext
+                   completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
+```      
+##### 4. 获取个人信息
+###### 创建获取个人信息辅助类
+```objective-c 
+/// create EaseUserInfoManagerHelper instance.
++ (EaseUserInfoManagerHelper *)sharedHelper;
+```    
+
+###### 通过用户Ids获取个人信息
+```objective-c 
+/// fetch userInfos
+/// @param userIds userIds
+/// @param completion completion
++ (void)fetchUserInfoWithUserIds:(NSArray<NSString *> *)userIds
+                      completion:(void(^)(NSDictionary *userInfoDic))completion;
+
+```    
+
+###### 通过用户Ids和用户信息类型获取个人信息
+```objective-c 
+/// fetch user information by user ID and information type
+/// @param userIds userIds
+/// @param userInfoTypes userInfo types
+/// @param completion completion
++ (void)fetchUserInfoWithUserIds:(NSArray<NSString *> *)userIds
+                   userInfoTypes:(NSArray<NSNumber *> *)userInfoTypes
+                      completion:(void(^)(NSDictionary *userInfoDic))completion;
+
+```    
+
+
+###### 更新个人信息
+```objective-c 
+/// Update user information
+/// @param userInfo userInfo
+/// @param completion completion
++ (void)updateUserInfo:(AgoraChatUserInfo *)userInfo
+            completion:(void(^)(AgoraChatUserInfo *aUserInfo))completion;
+
+```  
+
+###### 根据用户Id更新个人信息
+```objective-c 
+/// Update user information
+/// @param userId user ID
+/// @param type userInfo type
+/// @param completion completion
++ (void)updateUserInfoWithUserId:(NSString *)userId
+                        withType:(AgoraChatUserInfoType)type
+                      completion:(void(^)(AgoraChatUserInfo *aUserInfo))completion;
+```  
+
+
+###### 获取当前登录用户个人信息
+```objective-c 
+
+/// Obtain personal user information
+/// @param completion completion
++ (void)fetchOwnUserInfoCompletion:(void(^)(AgoraChatUserInfo *ownUserInfo))completion;
++ ``` 
+
 

@@ -22,6 +22,7 @@
 #define kUnreadButtonWitdh 150.0
 #define kUnreadButtonHeight 20.0
 
+#define kMaxMessageLength 150
 
 void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
@@ -394,14 +395,16 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 - (void)textViewDidChange:(UITextView *)textView
 {
-//    if (self.textView.text.length > 0 && ![self.textView.text isEqualToString:@""]) {
-//        self.sendButton.backgroundColor = [UIColor colorWithRed:4/255.0 green:174/255.0 blue:240/255.0 alpha:1.0];
-//        self.sendButton.tag = 1;
-//    } else {
-//        self.sendButton.backgroundColor = [UIColor lightGrayColor];
-//        self.sendButton.tag = 0;
-//    }
-    
+    UITextRange *selectedRange = [textView markedTextRange];
+    UITextPosition *pos = [textView positionFromPosition:selectedRange.start offset:0];
+    if (selectedRange && pos) {
+        return;
+    }
+    NSInteger realLength = textView.text.length;
+    if (realLength > kMaxMessageLength) {
+        textView.text = [textView.text substringToIndex:kMaxMessageLength];
+    }
+
 }
 
 #pragma mark public method
@@ -535,9 +538,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 - (void)sendGiftAction:(NSString *)giftId
                    num:(NSInteger)num
-            completion:(void (^)(BOOL success))aCompletion
-
-{
+            completion:(void (^)(BOOL success))aCompletion {
     [self.customMsgHelper sendCustomMessage:giftId num:num to:_chatroomId messageType:AgoraChatTypeChatRoom customMsgType:customMessageType_gift completion:^(AgoraChatMessage * _Nonnull message, AgoraChatError * _Nonnull error) {
         bool ret = false;
         if (!error) {
@@ -727,3 +728,4 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 #undef kUnreadButtonWitdh
 #undef kUnreadButtonHeight
 
+#undef kMaxMessageLength

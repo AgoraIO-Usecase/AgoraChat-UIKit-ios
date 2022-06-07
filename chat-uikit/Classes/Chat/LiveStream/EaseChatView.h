@@ -11,25 +11,44 @@
 
 @class AgoraChatMessage;
 @class EaseLiveRoom;
+
 @protocol EaseChatViewDelegate <NSObject>
 
 @optional
-//display custom message cell at indexpath
+
+/// display custom message cell at indexpath
+/// @param indexPath indexPath
 - (UITableViewCell *)easeMessageCellForRowAtIndexPath:(NSIndexPath *)indexPath;
 
-//height for custom message cell at indexpath
+
+/// height for custom message cell at indexpath
+/// @param indexPath indexPath
 - (CGFloat)easeMessageCellHeightAtIndexPath:(NSIndexPath *)indexPath;
 
-//display custom join cell at indexpath
+
+/// display custom join cell at indexpath
+/// @param indexPath indexPath
 - (UITableViewCell *)easeJoinCellForRowAtIndexPath:(NSIndexPath *)indexPath;
 
-//height for custom join cell at indexpath
+
+/// height for custom join cell at indexpath
+/// @param indexPath indexPath
 - (CGFloat)easeJoinCellHeightAtIndexPath:(NSIndexPath *)indexPath;
 
+
+/// tap  message callback
+/// @param message  tap message
 - (void)didSelectUserWithMessage:(AgoraChatMessage*)message;
 
+
+/// change chatview offset from bottom
+/// @param offset offset from bottom
 - (void)chatViewDidBottomOffset:(CGFloat)offset;
 
+
+/// chatview send message
+/// @param message send message
+/// @param error error
 - (void)chatViewDidSendMessage:(AgoraChatMessage *)message
                          error:(AgoraChatError *)error;
 
@@ -38,22 +57,39 @@
 @interface EaseChatView : UIView
 
 @property (nonatomic, weak) id<EaseChatViewDelegate> delegate;
-
 @property (nonatomic,strong) UITableView *tableView;
 @property (nonatomic,strong) UIButton *sendTextButton;
 @property (nonatomic,strong) NSMutableArray *datasource;
 @property (nonatomic,assign) BOOL isMuted;
 
 
+/// Init a chatView
+/// @param frame assign frame
+/// @param chatroom a AgoraChatroom
+/// @param customMsgHelper a EaseCustomMessageHelper
+/// @param customOption a EaseChatViewCustomOption
 - (instancetype)initWithFrame:(CGRect)frame
                      chatroom:(AgoraChatroom*)chatroom
               customMsgHelper:(EaseCustomMessageHelper*)customMsgHelper
                  customOption:(EaseChatViewCustomOption *)customOption;
 
-- (void)sendGiftAction:(NSString *)giftId num:(NSInteger)num completion:(void (^)(BOOL success))aCompletion;
 
+/// send gift
+/// @param giftId  a giftId
+/// @param num gift num
+/// @param aCompletion a callback send gift message
+- (void)sendGiftAction:(NSString *)giftId
+                   num:(NSInteger)num
+            completion:(void (^)(BOOL success))aCompletion;
+
+
+/// display or hidden chatview
+/// @param isHidden whether hidden
 - (void)updateChatViewWithHidden:(BOOL)isHidden;
 
+
+/// update sendTextButton title
+/// @param hint sendTextButton title
 - (void)updateSendTextButtonHint:(NSString *)hint;
 
 @end

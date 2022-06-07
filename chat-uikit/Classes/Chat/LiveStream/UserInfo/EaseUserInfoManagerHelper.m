@@ -50,10 +50,6 @@ static dispatch_once_t oneToken;
     [[self sharedHelper] fetchOwnUserInfoCompletion:completion];
 }
 
-+ (void)fetchUserInfoModelsWithUserId:(NSArray *)userIds completion:(void (^)(NSDictionary * _Nonnull))completion {
-    [[self sharedHelper] fetchUserInfoModelsWithUserId:userIds completion:completion];
-}
-
 #pragma mark instance method
 - (void)fetchUserInfoWithUserIds:(NSArray<NSString *> *)userIds
                       completion:(void(^)(NSDictionary *userInfoDic))completion {
@@ -61,7 +57,6 @@ static dispatch_once_t oneToken;
     if (userIds.count == 0) {
         return;
     }
-    
     
     [self splitUserIds:userIds completion:^(NSMutableDictionary<NSString *,AgoraChatUserInfo *> *resultDic, NSMutableArray<NSString *> *reqIds) {
         if (reqIds.count == 0) {

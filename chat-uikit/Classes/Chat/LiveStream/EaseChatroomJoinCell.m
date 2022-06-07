@@ -19,7 +19,6 @@
 @end
 
 
-
 @implementation EaseChatroomJoinCell
 
 - (void)prepare {
@@ -82,11 +81,16 @@
 
 - (void)updateWithObj:(id)obj {
     AgoraChatMessage *message = (AgoraChatMessage *)obj;
+    EaseKit_WS
     [self fetchUserInfoWithUserId:message.from completion:^(NSDictionary * _Nonnull userInfoDic) {
+        
+        EaseKit_SS(weakSelf)
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.userInfo = [userInfoDic objectForKey:message.from];
-            [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
-            self.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
+            
+            strongSelf.userInfo = [userInfoDic objectForKey:message.from];
+            [strongSelf.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
+            strongSelf.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
         });
 
     }];

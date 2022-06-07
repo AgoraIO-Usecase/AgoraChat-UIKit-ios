@@ -188,8 +188,9 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
     self.msgFrom = message.from;
     
     [self fetchUserInfoWithUserId:self.msgFrom completion:^(NSDictionary * _Nonnull userInfoDic) {
+        self.userInfo = [userInfoDic objectForKey:message.from];
+
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.userInfo = [userInfoDic objectForKey:message.from];
             [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
             self.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
             
@@ -218,7 +219,7 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
             }
             
             if (nameLineWidth > messageLineWidth) {
-                EaseKit_WS
+                
                 [self.bgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
                     if (self.nameLineStyle == MSGCellNameLineStyleMute) {
                         make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewPadding);

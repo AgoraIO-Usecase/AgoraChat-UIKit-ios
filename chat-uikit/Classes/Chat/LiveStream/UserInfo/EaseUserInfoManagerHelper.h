@@ -15,28 +15,48 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly)NSMutableDictionary *userInfoCacheDic;
 
+
+/// create EaseUserInfoManagerHelper instance.
 + (EaseUserInfoManagerHelper *)sharedHelper;
 
 
+/// fetch userInfos
+/// @param userIds userIds
+/// @param completion completion
 + (void)fetchUserInfoWithUserIds:(NSArray<NSString *> *)userIds
                       completion:(void(^)(NSDictionary *userInfoDic))completion;
 
+
+/// fetch user information by user ID and information type
+/// @param userIds userIds
+/// @param userInfoTypes userInfo types
+/// @param completion completion
 + (void)fetchUserInfoWithUserIds:(NSArray<NSString *> *)userIds
                    userInfoTypes:(NSArray<NSNumber *> *)userInfoTypes
                       completion:(void(^)(NSDictionary *userInfoDic))completion;
 
+
+/// Update user information
+/// @param userInfo userInfo
+/// @param completion completion
 + (void)updateUserInfo:(AgoraChatUserInfo *)userInfo
             completion:(void(^)(AgoraChatUserInfo *aUserInfo))completion;
 
 
+
+/// Update user information
+/// @param userId user ID
+/// @param type userInfo type
+/// @param completion completion
 + (void)updateUserInfoWithUserId:(NSString *)userId
                         withType:(AgoraChatUserInfoType)type
                       completion:(void(^)(AgoraChatUserInfo *aUserInfo))completion;
 
+
+/// Obtain personal user information
+/// @param completion completion
 + (void)fetchOwnUserInfoCompletion:(void(^)(AgoraChatUserInfo *ownUserInfo))completion;
 
-
-+ (void)fetchUserInfoModelsWithUserId:(NSArray *)userIds completion:(void(^)(NSDictionary *dic))completion;
 
 @end
 

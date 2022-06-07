@@ -36,18 +36,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EaseCustomMessageHelper : NSObject
 
+
+/// create a EaseCustomMessageHelper Instance
+/// @param customMsgImp a delegate which implment EaseCustomMessageHelperDelegate
+/// @param chatId a chatroom Id
 - (instancetype)initWithCustomMsgImp:(id<EaseCustomMessageHelperDelegate>)customMsgImp chatId:(NSString*)chatId;
 
-//解析消息内容
-+ (NSString*)getMsgContent:(AgoraChatMessageBody*)messageBody;
-
 /*
- 发送自定义消息 （礼物，点赞，弹幕）
- @param text                 消息内容
- @param num                  消息内容数量
- @param messageType          聊天类型
- @param customMsgType        自定义消息类型
- @param aCompletionBlock     发送完成回调block
+ send custom message (gift,like,Barrage)
+ @param text                 Message content
+ @param num                  Number of message content
+ @param messageType          chat type
+ @param customMsgType        custom message type
+ @param aCompletionBlock     send completion callback
 */
 - (void)sendCustomMessage:(NSString*)text
                       num:(NSInteger)num
@@ -57,13 +58,13 @@ NS_ASSUME_NONNULL_BEGIN
                completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
 
 /*
- 发送自定义消息（礼物，点赞，弹幕）（有扩展参数）
- @param text             消息内容
- @param num              消息内容数量
- @param messageType      聊天类型
- @param customMsgType    自定义消息类型
- @param ext              消息扩展
- @param aCompletionBlock 发送完成回调block
+ send custom message (gift,like,Barrage) (with extended parameters)
+ @param text                 Message content
+ @param num                  Number of message content
+ @param messageType          chat type
+ @param customMsgType        custom message type
+ @param ext              message extension
+ @param aCompletionBlock     send completion callback
 */
 - (void)sendCustomMessage:(NSString*)text
                       num:(NSInteger)num
@@ -74,33 +75,35 @@ NS_ASSUME_NONNULL_BEGIN
                completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
 
 /*
-发送用户自定义消息体事件（其他自定义消息体事件）
-@param event                自定义消息体事件
-@param customMsgBodyExt     自定义消息体事件参数
-@param to                   消息发送对象
-@param messageType          聊天类型
-@param aCompletionBlock     发送完成回调block
-*/
-- (void)sendUserCustomMessage:(NSString*)event
-                customMsgBodyExt:(NSDictionary*)customMsgBodyExt
-                            to:(NSString*)toUser
-                        messageType:(AgoraChatType)messageType
-                   completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
-
-/*
-发送用户自定义消息体事件（其他自定义消息体事件）（有消息扩展参数）
-@param event                自定义消息体事件
-@param customMsgBodyExt     自定义消息体事件参数
-@param to                   消息发送对象
-@param messageType          聊天类型
-@param ext                  消息扩展
-@param aCompletionBlock     发送完成回调block
+ send user custom message (Other custom message body events)
+ 
+@param event                custom message body event
+@param customMsgBodyExt     custom message body event parameters
+@param to                   message receiver
+@param messageType          chat type
+@param aCompletionBlock     send completion callback
 */
 - (void)sendUserCustomMessage:(NSString*)event
              customMsgBodyExt:(NSDictionary*)customMsgBodyExt
-                            to:(NSString*)toUser
-                        messageType:(AgoraChatType)messageType
-                               ext:(NSDictionary*)ext
+                           to:(NSString*)toUser
+                  messageType:(AgoraChatType)messageType
+                   completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
+
+/*
+ send user custom message (Other custom message body events) (extension parameters)
+ 
+@param event                custom message body event
+@param customMsgBodyExt     custom message body event parameters
+@param to                   message receiver
+@param messageType          chat type
+@param ext                  message extension
+@param aCompletionBlock     send completion callback
+*/
+- (void)sendUserCustomMessage:(NSString*)event
+             customMsgBodyExt:(NSDictionary*)customMsgBodyExt
+                           to:(NSString*)toUser
+                  messageType:(AgoraChatType)messageType
+                          ext:(NSDictionary*)ext
                    completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
 
 
