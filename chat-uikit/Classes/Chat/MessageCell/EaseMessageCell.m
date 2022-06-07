@@ -19,8 +19,12 @@
 #import "EMMsgExtGifBubbleView.h"
 #import "UIImageView+EaseWebCache.h"
 #import "EaseMessageCell+Category.h"
+#define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
+#import "EMAudioPlayerUtil.h"
+#import "EMMaskHighlightViewDelegate.h"
+#import "EMMessageReactionView.h"
 
-@interface EaseMessageCell()
+@interface EaseMessageCell() <EMMaskHighlightViewDelegate>
 
 @property (nonatomic, strong) UIImageView *avatarView;
 
@@ -32,6 +36,8 @@
 
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
 
+@property (nonatomic, strong) EMMessageReactionView *reactionView;
+
 @end
 
 @implementation EaseMessageCell
@@ -42,7 +48,7 @@
                             viewModel:(EaseChatViewModel*)viewModel
 
 {
-    NSString *identifier = [EaseMessageCell cellIdentifierWithDirection:aDirection type:aMessageType];
+    NSString *identifier = [self.class cellIdentifierWithDirection:aDirection type:aMessageType];
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     if (self) {
         _direction = aDirection;
@@ -66,6 +72,7 @@
 
     // Configure the view for the selected state
 }
+
 
 #pragma mark - Class Methods
 
@@ -127,24 +134,25 @@
     _nameLabel.font = [UIFont fontWithName:@"PingFang SC" size:10.0];
     _nameLabel.textColor = [UIColor colorWithHexString:@"#999999"];
     
-    _bubbleView = [self _getBubbleViewWithType:aType];
+    _bubbleView = [self getBubbleViewWithType:aType];
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
-    
     [self.contentView addSubview:_avatarView];
     [self.contentView addSubview:_bubbleView];
     [self.contentView addSubview:_nameLabel];
+
     
-    CGFloat width = self.bounds.size.width;
-    CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
-    if (_viewModel.displayReceivedAvatar) {
-        bubbleViewWidth -= (avatarLonger + componentSpacing);
-    }
-    if (_viewModel.displaySentAvatar) {
-        bubbleViewWidth -= (avatarLonger + componentSpacing);
+    self.bubbleView.maxBubbleWidth = [self maxBubbleViewWidth];
+    
+    __weak typeof(self)weakSelf = self;
+    _reactionView = [[EMMessageReactionView alloc] init];
+    _reactionView.direction = _direction;
+    _reactionView.onClick = ^{
+        if (weakSelf.delegate && [weakSelf.delegate respondsToSelector:@selector(messageCellDidClickReactionView:)]) {
+            [weakSelf.delegate messageCellDidClickReactionView:weakSelf.model];
+        }
     };
-    
-    self.bubbleView.maxBubbleWidth = bubbleViewWidth * 0.8;
+    [self.contentView addSubview:_reactionView];
     
     if (self.direction == AgoraChatMessageDirectionReceive) {
         if (_viewModel.displayReceivedAvatar) {
@@ -156,7 +164,9 @@
         }
         
         [_bubbleView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            if (!_viewModel.displayReceiverName) {
+            if (_viewModel.displayReceiverName) {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(componentSpacing / 2);
+            } else {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
             }
             make.bottom.equalTo(self.contentView).offset(-componentSpacing);
@@ -174,10 +184,9 @@
         }];
 
         _nameLabel.textAlignment = NSTextAlignmentLeft;
-        if (_viewModel.displayReceiverName) {
+        if (_viewModel.displayReceiverName || _viewModel.displaySentName) {
             [_nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
-                make.bottom.equalTo(self.bubbleView.ease_top).offset(-componentSpacing / 2);
                 if (_viewModel.displayReceivedAvatar) {
                     make.left.equalTo(self.avatarView.ease_right).offset(2 * componentSpacing);
                 } else {
@@ -186,6 +195,13 @@
                 make.right.equalTo(self.contentView).offset(-componentSpacing);
             }];
         }
+        
+        [_reactionView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.left.equalTo(self.bubbleView);
+            make.width.Ease_equalTo(200);
+            make.top.equalTo(self.bubbleView).offset(-18);
+            make.height.Ease_equalTo(28);
+        }];
     } else {
         if (_viewModel.displaySentAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -196,7 +212,9 @@
         }
         
         [_bubbleView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            if (!_viewModel.displaySentName) {
+            if (_viewModel.displayReceiverName) {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(componentSpacing / 2);
+            } else {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
             }
             make.bottom.equalTo(self.contentView).offset(-componentSpacing);
@@ -214,10 +232,9 @@
         }];
         
         _nameLabel.textAlignment = NSTextAlignmentRight;
-        if (_viewModel.displaySentName) {
+        if (_viewModel.displaySentName || _viewModel.displaySentName) {
             [_nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
-                make.bottom.equalTo(self.bubbleView.ease_top).offset(-componentSpacing / 2);
                 if (_viewModel.displaySentAvatar) {
                     make.right.equalTo(self.avatarView.ease_left).offset(-2 * componentSpacing);
                 } else {
@@ -226,6 +243,13 @@
                 make.left.equalTo(self.contentView).offset(componentSpacing);
             }];
         }
+        
+        [_reactionView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.right.equalTo(self.bubbleView);
+            make.width.Ease_equalTo(200);
+            make.top.equalTo(self.bubbleView).offset(-18);
+            make.height.Ease_equalTo(28);
+        }];
     }
 
     _statusView = [[EaseMessageStatusView alloc] init];
@@ -260,6 +284,42 @@
     [self setCellIsReadReceipt];
 }
 
+- (void)getBubbleWidth:(EaseMessageModel *)model {
+    if (model.message.threadOverView) {
+        self.bubbleView.maxBubbleWidth = KEMThreadBubbleWidth + 24;
+    } else {
+        CGFloat width = self.bounds.size.width;
+        CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
+        if (_viewModel.displayReceivedAvatar) {
+            bubbleViewWidth -= (avatarLonger + componentSpacing);
+        }
+        if (_viewModel.displaySentAvatar) {
+            bubbleViewWidth -= (avatarLonger + componentSpacing);
+        };
+        self.bubbleView.maxBubbleWidth = bubbleViewWidth;
+    }
+}
+
+- (void)threadBubbleAction {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(toThreadChat:channelId:)]) {
+        [self.delegate toThreadChat:self.model];
+    }
+}
+
+- (CGFloat)maxBubbleViewWidth
+{
+    CGFloat width = self.bounds.size.width;
+    CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
+    if (_viewModel.displayReceivedAvatar) {
+        bubbleViewWidth -= (avatarLonger + componentSpacing);
+    }
+    if (_viewModel.displaySentAvatar) {
+        bubbleViewWidth -= (avatarLonger + componentSpacing);
+    };
+    
+    return bubbleViewWidth * 0.8;
+}
+
 - (void)setCellIsReadReceipt{
     _readReceiptBtn = [[UIButton alloc]init];
     _readReceiptBtn.layer.cornerRadius = 5;
@@ -279,8 +339,9 @@
     }
 }
 
-- (EaseChatMessageBubbleView *)_getBubbleViewWithType:(AgoraChatMessageType)aType
+- (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType
 {
+    __weak typeof(self) weakSelf = self;
     EaseChatMessageBubbleView *bubbleView = nil;
     switch (aType) {
         case AgoraChatMessageTypeText:
@@ -323,16 +384,22 @@
     return bubbleView;
 }
 
+
 #pragma mark - Setter
 
 - (void)setModel:(EaseMessageModel *)model
 {
     _model = model;
+    model.thread = nil;
     self.bubbleView.model = model;
     if (model.direction == AgoraChatMessageDirectionSend) {
         [self.statusView setSenderStatus:model.message.status isReadAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isReadAcked : NO isDeliverAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isDeliverAcked : NO ];
     } else {
         if (model.type == AgoraChatMessageBodyTypeVoice) {
+            if (model.message.isChatThread == YES) {
+                NSMutableDictionary *dic = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"] mutableCopy];
+                model.message.isListened = [dic[model.message.messageId] boolValue];
+            }
             self.statusView.hidden = model.message.isListened;
         }
     }
@@ -352,12 +419,12 @@
     if (_model.userDataProfile && [_model.userDataProfile respondsToSelector:@selector(avatarURL)]) {
         if ([_model.userDataProfile.avatarURL length] > 0) {
             [_avatarView Ease_setImageWithURL:[NSURL URLWithString:_model.userDataProfile.avatarURL]
-                               placeholderImage:[UIImage easeUIImageNamed:@"defaultAvatar"]];
+                               placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             isCustomAvatar = YES;
         }
     }
     if (!isCustomAvatar) {
-        _avatarView.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
+        _avatarView.image = [UIImage easeUIImageNamed:@"default_avatar"];
     }
     if (model.message.isNeedGroupAck) {
         self.readReceiptBtn.hidden = NO;
@@ -365,6 +432,24 @@
     } else {
         self.readReceiptBtn.hidden = YES;
     }
+    
+    _reactionView.reactionList = model.message.reactionList;
+    
+    [_bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+        if (_viewModel.displayReceiverName || _viewModel.displaySentName) {
+            if (model.message.reactionList.count > 0) {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(22);
+            } else {
+                make.top.equalTo(self.nameLabel.ease_bottom).offset(6);
+            }
+        } else {
+            if (model.message.reactionList.count > 0) {
+                make.top.equalTo(self.contentView).offset(componentSpacing + 10);
+            } else {
+                make.top.equalTo(self.contentView).offset(componentSpacing);
+            }
+        }
+    }];
 }
 
 #pragma mark - Action
@@ -398,9 +483,27 @@
 //Bubble view click
 - (void)bubbleViewTapAction:(UITapGestureRecognizer *)aTap
 {
-    if (aTap.state == UIGestureRecognizerStateEnded) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
-            [self.delegate messageCellDidSelected:self];
+    UIView *view = [self.bubbleView viewWithTag:666];
+    CGPoint point = [aTap locationInView:self.contentView];
+    if (view != nil && view.hidden == NO) {
+        if (point.y > view.frame.origin.y) {
+            if (aTap.state == UIGestureRecognizerStateEnded) {
+                if (self.delegate && [self.delegate respondsToSelector:@selector(toThreadChat:)]) {
+                    [self.delegate toThreadChat:self.model];
+                }
+            }
+        } else {
+            if (aTap.state == UIGestureRecognizerStateEnded) {
+                if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
+                    [self.delegate messageCellDidSelected:self];
+                }
+            }
+        }
+    } else {
+        if (aTap.state == UIGestureRecognizerStateEnded) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
+                [self.delegate messageCellDidSelected:self];
+            }
         }
     }
 }
@@ -420,9 +523,14 @@
     //[aLongPress release];
 }
 
+- (NSArray<UIView *> *)maskHighlight {
+    return @[_bubbleView, _reactionView, _avatarView];
+}
+
 @end
 
 @implementation EaseMessageCell (Category)
+
 - (void)setStatusHidden:(BOOL)isHidden
 {
     self.statusView.hidden = isHidden;

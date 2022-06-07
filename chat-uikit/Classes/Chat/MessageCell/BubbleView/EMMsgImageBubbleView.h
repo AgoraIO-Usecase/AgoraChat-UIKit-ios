@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EMMsgImageBubbleView : EaseChatMessageBubbleView
 
+@property (nonatomic, strong) UIImageView *photo;
+
 - (void)setThumbnailImageWithLocalPath:(NSString *)aLocalPath
                             remotePath:(NSString *)aRemotePath
                           thumbImgSize:(CGSize)aThumbSize

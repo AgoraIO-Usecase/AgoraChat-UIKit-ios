@@ -29,14 +29,22 @@
         }
         _timeLabel.font = viewModel.msgTimeItemFont;
         _timeLabel.textAlignment = NSTextAlignmentCenter;
+        _timeLabel.numberOfLines = 0;
         [self.contentView addSubview:_timeLabel];
         [_timeLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.center.equalTo(self.contentView);
-            make.height.equalTo(@30);
+            make.top.left.equalTo(self.contentView).offset(5);
+            make.bottom.right.equalTo(self.contentView).offset(-5);
         }];
     }
     
     return self;
+}
+
+- (NSAttributedString *)cellAttributeText:(NSString *)string {
+    NSMutableAttributedString *attribute = [[NSMutableAttributedString alloc]initWithString:string];
+    [attribute addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightRegular],NSForegroundColorAttributeName:[UIColor colorWithHexString:@"#999999"]} range:NSMakeRange(0, string.length)];
+    [attribute addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightSemibold],NSForegroundColorAttributeName:[UIColor colorWithHexString:@"#154DFE"]} range:NSMakeRange(string.length-15, 15)];
+    return attribute;
 }
 
 - (void)awakeFromNib {
