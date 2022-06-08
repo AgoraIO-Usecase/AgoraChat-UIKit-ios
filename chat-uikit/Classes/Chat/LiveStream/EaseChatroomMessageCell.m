@@ -190,8 +190,9 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
     [self fetchUserInfoWithUserId:self.msgFrom completion:^(NSDictionary * _Nonnull userInfoDic) {
         self.userInfo = [userInfoDic objectForKey:message.from];
 
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
+            [self.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             self.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
             
             CGFloat nameLineWidth = [self nameLabelWidth];
