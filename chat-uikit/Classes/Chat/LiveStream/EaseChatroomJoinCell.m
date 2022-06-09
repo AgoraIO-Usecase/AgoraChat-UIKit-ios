@@ -22,7 +22,8 @@
 @implementation EaseChatroomJoinCell
 
 - (void)prepare {
-    
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+
     [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
 
     self.backgroundColor = UIColor.clearColor;
@@ -89,7 +90,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             
             strongSelf.userInfo = [userInfoDic objectForKey:message.from];
-            [strongSelf.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:EaseKitImageWithName(@"")];
+            [strongSelf.avatarImageView Ease_setImageWithURL:[NSURL URLWithString:self.userInfo.avatarUrl] placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             strongSelf.nameLabel.text = self.userInfo.nickName ?:self.userInfo.userId;
         });
 

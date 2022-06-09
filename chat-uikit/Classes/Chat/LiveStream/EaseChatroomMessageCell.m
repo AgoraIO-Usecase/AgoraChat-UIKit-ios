@@ -43,6 +43,7 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
 
 @implementation EaseChatroomMessageCell
 - (void)prepare {
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
     
     [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
     self.nameLineStyle = MSGCellNameLineStyleName;
