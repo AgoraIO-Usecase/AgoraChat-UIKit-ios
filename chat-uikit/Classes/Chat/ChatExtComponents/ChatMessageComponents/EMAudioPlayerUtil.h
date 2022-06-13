@@ -7,20 +7,17 @@
 
 #import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
 
 @interface EMAudioPlayerUtil : NSObject
 
-@property (nonatomic, strong) id model;
+@property (nonatomic, strong) id _Nullable model;
 
-+ (instancetype)sharedHelper;
++ (instancetype _Nonnull )sharedHelper;
 
-- (void)startPlayerWithPath:(NSString *)aPath
-                      model:(id)aModel
-                 completion:(void(^)(NSError *error))aCompleton;
+- (void)startPlayerWithPath:(NSString * _Nonnull)aPath
+                      model:(id _Nonnull)aModel
+                 completion:(void(^_Nullable)(NSError * _Nullable error))aCompleton;
 
 - (void)stopPlayer;
 
 @end
-
-NS_ASSUME_NONNULL_END

@@ -288,7 +288,6 @@
     if (model.message.threadOverView) {
         self.bubbleView.maxBubbleWidth = KEMThreadBubbleWidth + 24;
     } else {
-        CGFloat width = self.bounds.size.width;
         CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
         if (_viewModel.displayReceivedAvatar) {
             bubbleViewWidth -= (avatarLonger + componentSpacing);
@@ -308,7 +307,6 @@
 
 - (CGFloat)maxBubbleViewWidth
 {
-    CGFloat width = self.bounds.size.width;
     CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
     if (_viewModel.displayReceivedAvatar) {
         bubbleViewWidth -= (avatarLonger + componentSpacing);
@@ -341,7 +339,6 @@
 
 - (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType
 {
-    __weak typeof(self) weakSelf = self;
     EaseChatMessageBubbleView *bubbleView = nil;
     switch (aType) {
         case AgoraChatMessageTypeText:
@@ -513,7 +510,7 @@
 {
     if (aLongPress.state == UIGestureRecognizerStateBegan) {
         if (self.model.type == AgoraChatMessageTypeText) {
-            EMMsgTextBubbleView *textBubbleView = (EMMsgTextBubbleView*)self.bubbleView;
+            //EMMsgTextBubbleView *textBubbleView = (EMMsgTextBubbleView*)self.bubbleView;
             //textBubbleView.textLabel.backgroundColor = [UIColor colorWithRed:156/255.0 green:206/255.0 blue:243/255.0 alpha:1.0];
         }
         if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidLongPress:cgPoint:)]) {

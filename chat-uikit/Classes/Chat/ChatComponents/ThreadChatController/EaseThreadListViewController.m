@@ -33,7 +33,6 @@
 - (instancetype)initWithGroup:(AgoraChatGroup *)group chatViewModel:(EaseChatViewModel *)viewModel{
     if ([super init]) {
         self.group = group;
-        __weak typeof(self) weakSelf = self;
         self.viewModel = viewModel;
         self.threadMessageMap = [NSMutableDictionary dictionary];
         [self requestList];

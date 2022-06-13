@@ -95,7 +95,6 @@
     NSDate *ago = [NSDate dateWithTimeIntervalSince1970:(timeStamp/1000.0)];
     
     NSDate *current = [NSDate date];
-    NSCalendar *agoc;
     // 创建日历对象
     NSCalendar *calendar = [NSCalendar currentCalendar];
     // 获得NSDate的每一个元素

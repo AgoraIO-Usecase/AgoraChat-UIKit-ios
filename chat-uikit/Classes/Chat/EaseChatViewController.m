@@ -509,7 +509,6 @@
     //NSLog(@"indexpath.row : %ld ", (long)indexPath.row);
     id obj = [self.dataArray objectAtIndex:indexPath.row];
     NSString *cellString = nil;
-    EaseChatWeakRemind type = EaseChatWeakRemindMsgTime;
     if ([obj isKindOfClass:[NSString class]]) {
         cellString = (NSString *)obj;
     }
@@ -814,7 +813,6 @@
     [self.inputBar resignFirstResponder];
     
     [EMBottomReactionDetailView showMenuItems:model.message animation:YES didRemoveSelfReaction:^(NSString * _Nonnull reaction) {
-        __weak typeof(self)weakSelf = self;
         [AgoraChatClient.sharedClient.chatManager removeReaction:reaction fromMessage:model.message.messageId completion:^(AgoraChatError * _Nullable error) {
             if (error) {
                 return;
@@ -917,7 +915,6 @@
     __block NSDictionary *dic;
     [aRecallMessagesInfo enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         EMRecallMessageInfo *recallMessageInfo = (EMRecallMessageInfo *)obj;
-        AgoraChatMessage *msg = recallMessageInfo.recallMessage;
         [[[self.dataArray reverseObjectEnumerator] allObjects] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj isKindOfClass:[NSDictionary class]]) {
                 if ([((NSDictionary *)obj).allValues.firstObject isEqualToString:recallMessageInfo.recallMessage.messageId]) {
@@ -1446,18 +1443,18 @@
 {
     __weak typeof(self) weakself = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.tableView reloadData];
-        [self.tableView setNeedsLayout];
-        [self.tableView layoutIfNeeded];
+        [weakself.tableView reloadData];
+        [weakself.tableView setNeedsLayout];
+        [weakself.tableView layoutIfNeeded];
         if (isScrollBottom) {
-            if (self.isChatThread == YES) {
-                if ( self.cursor.list.count < chatThreadPageSize) {
-                    [self scrollToBottomRow];
+            if (weakself.isChatThread == YES) {
+                if ( weakself.cursor.list.count < chatThreadPageSize) {
+                    [weakself scrollToBottomRow];
                 }
-            } else [self scrollToBottomRow];
+            } else [weakself scrollToBottomRow];
         } else {
-            if (self.isChatThread == YES && self.dataArray.count < chatThreadPageSize) {
-                [self scrollToTopRow];
+            if (weakself.isChatThread == YES && weakself.dataArray.count < chatThreadPageSize) {
+                [weakself scrollToTopRow];
             }
         }
     });

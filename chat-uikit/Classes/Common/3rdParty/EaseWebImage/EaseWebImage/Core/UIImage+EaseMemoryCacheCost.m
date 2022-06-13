@@ -39,6 +39,11 @@ FOUNDATION_STATIC_INLINE NSUInteger EaseMemoryCacheCostForImage(UIImage *image) 
     return memoryCost;
 }
 
+- (void)setEase_memoryCost:(NSUInteger)Ease_memoryCost
+{
+    [self setSd_memoryCost:Ease_memoryCost];
+}
+
 - (void)setSd_memoryCost:(NSUInteger)Ease_memoryCost {
     objc_setAssociatedObject(self, @selector(Ease_memoryCost), @(Ease_memoryCost), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }

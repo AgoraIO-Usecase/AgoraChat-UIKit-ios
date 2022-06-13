@@ -183,7 +183,7 @@ static NSString * kSDCGImageDestinationRequestedFileSize = @"kCGImageDestination
         image = [EaseImageIOAnimatedCoder createFrameAtIndex:0 source:_imageSource scale:scale preserveAspectRatio:_preserveAspectRatio thumbnailSize:_thumbnailSize options:nil];
         if (image) {
             CFStringRef uttype = CGImageSourceGetType(_imageSource);
-            image.Ease_imageFormat = [NSData Ease_imageFormatFromUTType:uttype];
+            image.ease_imageFormat = [NSData Ease_imageFormatFromUTType:uttype];
         }
     }
     

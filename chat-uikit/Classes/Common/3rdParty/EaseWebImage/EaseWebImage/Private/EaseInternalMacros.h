@@ -12,39 +12,19 @@
 #import "Easemetamacros.h"
 
 #ifndef Ease_LOCK_DECLARE
-#if TARGET_OS_MACCATALYST
 #define Ease_LOCK_DECLARE(lock) os_unfair_lock lock;
-#else
-#define Ease_LOCK_DECLARE(lock) os_unfair_lock lock API_AVAILABLE(ios(10.0), tvos(10), watchos(3), macos(10.12)); \
-OSSpinLock lock##_deprecated;
-#endif
 #endif
 
 #ifndef Ease_LOCK_INIT
-#if TARGET_OS_MACCATALYST
 #define Ease_LOCK_INIT(lock) lock = OS_UNFAIR_LOCK_INIT;
-#else
-#define Ease_LOCK_INIT(lock) if (@available(iOS 10, tvOS 10, watchOS 3, macOS 10.12, *)) lock = OS_UNFAIR_LOCK_INIT; \
-else lock##_deprecated = OS_SPINLOCK_INIT;
-#endif
 #endif
 
 #ifndef Ease_LOCK
-#if TARGET_OS_MACCATALYST
 #define Ease_LOCK(lock) os_unfair_lock_lock(&lock);
-#else
-#define Ease_LOCK(lock) if (@available(iOS 10, tvOS 10, watchOS 3, macOS 10.12, *)) os_unfair_lock_lock(&lock); \
-else OSSpinLockLock(&lock##_deprecated);
-#endif
 #endif
 
 #ifndef Ease_UNLOCK
-#if TARGET_OS_MACCATALYST
 #define Ease_UNLOCK(lock) os_unfair_lock_unlock(&lock);
-#else
-#define Ease_UNLOCK(lock) if (@available(iOS 10, tvOS 10, watchOS 3, macOS 10.12, *)) os_unfair_lock_unlock(&lock); \
-else OSSpinLockUnlock(&lock##_deprecated);
-#endif
 #endif
 
 #ifndef Ease_OPTIONS_CONTAINS

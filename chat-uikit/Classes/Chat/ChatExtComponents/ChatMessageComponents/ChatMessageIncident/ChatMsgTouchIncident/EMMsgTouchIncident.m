@@ -112,7 +112,7 @@
         return;
     }
     
-    BOOL isAutoDownloadThumbnail = [AgoraChatClient sharedClient].options.isAutoDownloadThumbnail;
+    BOOL isAutoDownloadThumbnail = [AgoraChatClient sharedClient].options.autoDownloadThumbnail;
     if (body.thumbnailDownloadStatus == AgoraChatDownloadStatusPending && !isAutoDownloadThumbnail) {
         downloadThumbBlock(aCell.model);
         return;
