@@ -228,7 +228,9 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 - (void)updateUI {
     if (self.canScroll) {
-        if (self.datasource.count > 0) {
+        BOOL canScrollBottom = !self.tableView.isTracking && !self.tableView.isDragging;
+        
+        if (canScrollBottom && self.datasource.count > 0) {
             [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
         }
     }else {
@@ -280,7 +282,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
 {
-    UIView *blank = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.frame.size.width, 5)];
+    UIView *blank = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.frame.size.width, 10.0)];
     blank.backgroundColor = [UIColor clearColor];
     return blank;
 }
@@ -313,6 +315,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
     }
     
     EaseChatroomMessageCell *messageCell = [tableView dequeueReusableCellWithIdentifier:[EaseChatroomMessageCell reuseIdentifier]];
+    
     if (messageCell == nil) {
         messageCell = [[[EaseChatroomMessageCell class] alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:[EaseChatroomMessageCell reuseIdentifier] customOption:self.customOption];
     }
@@ -649,7 +652,8 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         _textView.delegate = self;
         _textView.backgroundColor = EaseKitCOLOR_HEX(0xF2F2F2);
         _textView.layer.cornerRadius = kSendTextButtonHeight * 0.5;
-        
+        _textView.textContainer.lineFragmentPadding = 12.0;
+        _textView.textContainerInset = UIEdgeInsetsMake(8.0, 0, 0, 0);
     }
     return _textView;
 }
