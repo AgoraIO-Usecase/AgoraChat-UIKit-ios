@@ -23,6 +23,7 @@
 #define kUnreadButtonHeight 20.0
 
 #define kMaxMessageLength 150
+#define kTFooterViewHeight 6.0
 
 void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
@@ -61,6 +62,9 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 @property (nonatomic, assign) BOOL canScroll;
 
+@property (nonatomic, assign) CGFloat tableViewHeight;
+
+@property (nonatomic, assign) CGFloat maxTableViewHeight;
 
 @end
 
@@ -111,6 +115,11 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 
 - (void)placeAndLayoutSubviews {
+    
+    // table view max height
+    self.maxTableViewHeight = self.frame.size.height - -self.customOption.sendTextButtonBottomMargin -kSendTextButtonWidth -12.0;
+    
+    NSLog(@"%s self.maxTableViewHeight:%@",__func__,@(self.maxTableViewHeight));
     
     [self addSubview:self.tableView];
     [self addSubview:self.unreadButton];
@@ -175,9 +184,9 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 {
     
     [self.conversation loadMessagesStartFromId:self.moreMsgId count:50 searchDirection:AgoraChatMessageSearchDirectionUp completion:^(NSArray *aMessages, AgoraChatError *aError) {
-        [self.tableView reloadData];
-        [self updateUI];
-
+//        self.tableViewHeight = 0;
+//        [self.tableView reloadData];
+//        [self updateUI];
     }];
 }
 
@@ -219,7 +228,6 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         [self.datasource addObjectsFromArray:msgArray];
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            
             [self.tableView reloadData];
             [self updateUI];
         });
@@ -227,6 +235,8 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 }
 
 - (void)updateUI {
+//    [self updateTableViewHeight];
+    
     if (self.canScroll) {
         BOOL canScrollBottom = !self.tableView.isTracking && !self.tableView.isDragging;
         
@@ -238,6 +248,40 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         self.unreadButton.hidden = NO;
     }
     
+}
+
+- (void)updateTableViewHeight {
+    
+    NSLog(@"=================%s self.tableViewHeight:%@\n",__func__,@(self.tableViewHeight));
+
+    if (self.tableViewHeight > self.maxTableViewHeight) {
+        return;
+    }
+    
+    CGFloat totalHeight = 0;
+    for (AgoraChatMessage *message in self.datasource) {
+        if ([message.ext objectForKey:EaseKit_chatroom_join]) {
+            totalHeight += 28.0;
+        }else {
+            totalHeight += [EaseChatroomMessageCell heightForMessage:message];
+        }
+        
+        if (totalHeight >= self.maxTableViewHeight) {
+            break;
+        }
+    }
+    
+    self.tableViewHeight = totalHeight;
+
+    [self.tableView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+        CGFloat tableHeight = self.tableViewHeight + self.datasource.count * kTFooterViewHeight;
+        NSLog(@"=================%s tableHeight:%@\n",__func__,@(tableHeight));
+        if (self.tableViewHeight >= self.maxTableViewHeight) {
+            make.top.equalTo(self);
+        }else {
+            make.top.equalTo(self.sendTextButton.ease_top).offset(-12.0 -tableHeight);
+        }
+    }];
 }
 
 - (void)cmdMessagesDidReceive:(NSArray *)aCmdMessages
@@ -257,6 +301,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 {
     if ([self.delegate respondsToSelector:@selector(easeMessageCellHeightAtIndexPath:)]) {
         return [self.delegate easeMessageCellHeightAtIndexPath:indexPath];
+       
     }
     
     if ([self.delegate respondsToSelector:@selector(easeJoinCellHeightAtIndexPath:)]) {
@@ -265,24 +310,21 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
     AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
     if ([message.ext objectForKey:EaseKit_chatroom_join]) {
-        return 44.0;
+        return 28.0;
     }
+    
     return [EaseChatroomMessageCell heightForMessage:message];
 }
 
 #pragma mark - UITableViewDataSource
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-    return 10.0;
-}
-
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
 {
-    return 10.0;
+    return kTFooterViewHeight;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
 {
-    UIView *blank = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.frame.size.width, 10.0)];
+    UIView *blank = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.frame.size.width, 6.0)];
     blank.backgroundColor = [UIColor clearColor];
     return blank;
 }
@@ -489,9 +531,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 //}
 
 - (void)unreadButtonAction {
-    
     [self resetUnreadState];
-
     [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
 }
 
@@ -582,6 +622,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
             _tableView.backgroundColor = self.customOption.tableViewBgColor;
         }
         
+//        _tableView.backgroundColor = [UIColor grayColor];
     }
     return _tableView;
 }
@@ -733,3 +774,4 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 #undef kUnreadButtonHeight
 
 #undef kMaxMessageLength
+#undef kTFooterViewHeight

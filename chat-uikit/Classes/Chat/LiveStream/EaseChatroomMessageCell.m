@@ -12,15 +12,11 @@
 #import "UIImageView+EaseWebCache.h"
 
 
-#define kIconImageViewHeight 28.0f
-
-#define kCellVPadding  5.0
-
-#define kContentLabelMaxWidth EaseKitScreenWidth -kIconImageViewHeight -EaseKitPadding *3
-
+#define kIconImageViewHeight 28.0
+#define kContentLabelMaxWidth 244.0
 #define kNameLabelHeight 14.0
-
-#define kBgViewPadding 8.0
+#define kBgViewVPadding 4.0
+#define kBgViewHPadding 8.0
 
 typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
     MSGCellNameLineStyleName,
@@ -47,7 +43,7 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
     
     [self.contentView addGestureRecognizer:self.tapGestureRecognizer];
     self.nameLineStyle = MSGCellNameLineStyleName;
-    
+        
     if (self.customOption.displaySenderAvatar) {
         self.backgroundColor = UIColor.clearColor;
         [self.contentView addSubview:self.avatarImageView];
@@ -76,16 +72,16 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
 - (void)placeSubViews {
     if (self.customOption.displaySenderAvatar) {
         [self.avatarImageView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.contentView).offset(kCellVPadding + kBgViewPadding);
+            make.top.equalTo(self.contentView).offset(kBgViewVPadding);
             make.left.equalTo(self.contentView).offset(12.0);
             make.size.equalTo(@(kIconImageViewHeight));
         }];
             
         [self.bgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewPadding);
-            make.left.equalTo(self.avatarImageView.ease_right).offset(kBgViewPadding);
-            make.right.equalTo(self.messageLabel.ease_right).offset(kBgViewPadding);
-            make.bottom.equalTo(self.messageLabel.ease_bottom).offset(kBgViewPadding);
+            make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewVPadding);
+            make.left.equalTo(self.avatarImageView.ease_right).offset(kBgViewHPadding);
+            make.right.equalTo(self.messageLabel.ease_right).offset(kBgViewHPadding);
+            make.bottom.equalTo(self.messageLabel.ease_bottom).offset(kBgViewVPadding);
         }];
         
         
@@ -108,22 +104,22 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
         
         
         [self.messageLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.nameLabel.ease_bottom).offset(kCellVPadding);
+            make.top.equalTo(self.nameLabel.ease_bottom).offset(kBgViewVPadding);
             make.left.equalTo(self.nameLabel);
-            make.right.lessThanOrEqualTo(self.contentView).offset(-18.0);
+            make.width.lessThanOrEqualTo(@(kContentLabelMaxWidth));
         }];
     }else {
         [self.bgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewPadding);
-            make.left.equalTo(self.contentView).offset(kBgViewPadding);
-            make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewPadding);
-            make.bottom.equalTo(self.messageLabel.ease_bottom).offset(kBgViewPadding);
+            make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewVPadding);
+            make.left.equalTo(self.contentView).offset(kBgViewHPadding);
+            make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewHPadding);
+            make.bottom.equalTo(self.messageLabel.ease_bottom).offset(kBgViewVPadding);
         }];
 
         
         [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.contentView).offset(10.0);
-            make.left.equalTo(self).offset(10.0 + kBgViewPadding);
+            make.top.equalTo(self.contentView).offset(kBgViewVPadding);
+            make.left.equalTo(self).offset(10.0 + kBgViewHPadding);
             make.height.equalTo(@(kNameLabelHeight));
         }];
         
@@ -138,9 +134,9 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
         }];
 
         [self.messageLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.nameLabel.ease_bottom).offset(kCellVPadding);
+            make.top.equalTo(self.nameLabel.ease_bottom).offset(kBgViewVPadding);
             make.left.equalTo(self.nameLabel);
-            make.right.equalTo(self.contentView).offset(-18.0);
+            make.width.lessThanOrEqualTo(@(kContentLabelMaxWidth));
         }];
     }
    
@@ -154,10 +150,8 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
     }
     
     
-    if (self.customOption.displaySenderNickname) {
-        self.nameLabel.hidden = NO;
-    }
-    
+    self.nameLabel.hidden = !self.customOption.displaySenderNickname;
+
     if (self.customOption.cellBgColor) {
         self.bgView.backgroundColor = self.customOption.cellBgColor;
     }
@@ -224,17 +218,17 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
                 
                 [self.bgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
                     if (self.nameLineStyle == MSGCellNameLineStyleMute) {
-                        make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewPadding);
+                        make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewHPadding);
                     }else if (self.nameLineStyle == MSGCellNameLineStyleRole){
-                        make.right.equalTo(self.roleImageView.ease_right).offset(kBgViewPadding);
+                        make.right.equalTo(self.roleImageView.ease_right).offset(kBgViewHPadding);
                     }else {
-                        make.right.equalTo(self.nameLabel.ease_right).offset(kBgViewPadding);
+                        make.right.equalTo(self.nameLabel.ease_right).offset(kBgViewHPadding);
                     }
                     
                 }];
             }else {
                 [self.bgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-                    make.right.equalTo(self.messageLabel.ease_right).offset(kBgViewPadding);
+                    make.right.equalTo(self.messageLabel.ease_right).offset(kBgViewHPadding);
                 }];
             }
             
@@ -257,18 +251,10 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
 + (CGFloat)heightForMessage:(AgoraChatMessage *)message
 {
     CGFloat height = 0;
-//    CGSize textBlockMinSize = {kContentLabelMaxWidth, CGFLOAT_MAX};
-//    CGSize retSize;
-//    NSString *text = [EaseChatroomMessageCell contentWithMessage:message];
-//    retSize = [text boundingRectWithSize:textBlockMinSize options:NSStringDrawingUsesLineFragmentOrigin
-//                              attributes:@{
-//                                           NSFontAttributeName:[EaseChatroomMessageCell contentFont],
-//                                           NSParagraphStyleAttributeName:[EaseChatroomMessageCell contentLabelParaStyle]
-//                                           }
-//                                 context:nil].size;
+
     CGSize messageSize = [self messageLabelSizeWithMessage:message];
     height = messageSize.height;
-    height += kCellVPadding * 3 + kNameLabelHeight + kBgViewPadding;
+    height += kBgViewVPadding * 3 + kNameLabelHeight;
 
     return height;
 }
@@ -381,11 +367,8 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
 @end
 
 #undef kIconImageViewHeight
-
-#undef kCellVPadding
-
 #undef kContentLabelMaxWidth
-
 #undef kNameLabelHeight
+#undef kBgViewVPadding
+#undef kBgViewHPadding
 
-#undef kBgViewPadding

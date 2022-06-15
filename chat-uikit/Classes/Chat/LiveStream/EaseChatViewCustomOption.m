@@ -34,7 +34,7 @@ static EaseChatViewCustomOption *instance = nil;
 //        self.sendTextButtonBottomMargin = 30.0;
 //        self.sendTextButtonRightMargin = 0;
 //
-//        self.displaySenderAvatar = YES;
+//        self.displaySenderAvatar = NO;
 //        self.displaySenderNickname = NO;
 //        self.avatarStyle = Rectangular;
 //        self.avatarCornerRadius = 6.0;

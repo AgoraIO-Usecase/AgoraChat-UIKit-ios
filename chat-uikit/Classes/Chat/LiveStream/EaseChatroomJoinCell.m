@@ -9,7 +9,8 @@
 #import "EaseChatroomJoinCell.h"
 #import "UIImageView+EaseWebCache.h"
 
-#define kBgViewPadding 8.0
+#define kBgViewVPadding  7.0
+#define kBgViewHPadding  8.0
 
 @interface EaseChatroomJoinCell ()
 @property (nonatomic, strong) UIImageView *joinImageView;
@@ -43,10 +44,10 @@
     }];
     
     [self.bgView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewPadding);
-        make.left.equalTo(self.avatarImageView.ease_right).offset(kBgViewPadding);
-        make.right.equalTo(self.joinImageView.ease_right).offset(kBgViewPadding);
-        make.bottom.equalTo(self.nameLabel.ease_bottom).offset(kBgViewPadding);
+        make.top.equalTo(self.nameLabel.ease_top).offset(-kBgViewVPadding);
+        make.left.equalTo(self.avatarImageView.ease_right).offset(kBgViewHPadding);
+        make.right.equalTo(self.joinImageView.ease_right).offset(kBgViewHPadding);
+        make.bottom.equalTo(self.nameLabel.ease_bottom).offset(kBgViewVPadding);
     }];
     
     [self.nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -124,4 +125,5 @@
 
 @end
 
-#undef kBgViewPadding
+#undef kBgViewVPadding
+#undef kBgViewHPadding
