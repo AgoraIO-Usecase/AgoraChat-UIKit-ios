@@ -14,6 +14,9 @@
 
 #define kIconImageViewHeight 28.0
 #define kContentLabelMaxWidth 244.0
+
+//#define kContentLabelMaxWidth EaseKitScreenWidth -kIconImageViewHeight -EaseKitPadding *3
+
 #define kNameLabelHeight 14.0
 #define kBgViewVPadding 4.0
 #define kBgViewHPadding 8.0
@@ -66,7 +69,6 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
         self.nameLabel.textColor = EaseKitTextLabelGrayColor;
     }
 
-    
 }
 
 - (void)placeSubViews {
@@ -214,8 +216,25 @@ typedef NS_ENUM(NSInteger, MSGCellNameLineStyle) {
                 self.muteImageView.hidden = YES;
             }
             
-            if (nameLineWidth > messageLineWidth) {
+            if (nameLineWidth >= kContentLabelMaxWidth) {
+                nameLineWidth = kContentLabelMaxWidth;
                 
+                CGFloat nameWidth = nameLineWidth;
+                if (self.nameLineStyle == MSGCellNameLineStyleMute) {
+                    nameWidth = nameWidth -44.0 -16.0;
+                }else if (self.nameLineStyle == MSGCellNameLineStyleRole){
+                    nameWidth = nameWidth -44.0;
+                }else {
+                   // do nothing
+                }
+                
+                [self.nameLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                    make.width.equalTo(@(nameWidth));
+                }];
+                
+            }
+            
+            if (nameLineWidth > messageLineWidth) {
                 [self.bgView Ease_updateConstraints:^(EaseConstraintMaker *make) {
                     if (self.nameLineStyle == MSGCellNameLineStyleMute) {
                         make.right.equalTo(self.muteImageView.ease_right).offset(kBgViewHPadding);

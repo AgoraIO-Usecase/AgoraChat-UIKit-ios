@@ -24,6 +24,7 @@
 
 #define kMaxMessageLength 150
 #define kTFooterViewHeight 6.0
+#define kJoinCellHeight 44.0
 
 void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
@@ -117,21 +118,13 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 - (void)placeAndLayoutSubviews {
     
     // table view max height
-    self.maxTableViewHeight = self.frame.size.height - -self.customOption.sendTextButtonBottomMargin -kSendTextButtonWidth -12.0;
+    self.maxTableViewHeight = self.frame.size.height - -self.customOption.sendTextButtonBottomMargin -kSendTextButtonHeight -12.0;
     
     NSLog(@"%s self.maxTableViewHeight:%@",__func__,@(self.maxTableViewHeight));
     
     [self addSubview:self.tableView];
     [self addSubview:self.unreadButton];
     [self addSubview:self.sendTextButton];
-    
-    [self.tableView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self);
-        make.left.equalTo(self);
-        make.right.equalTo(self).offset(-self.customOption.tableViewRightMargin);
-        make.bottom.equalTo(self.sendTextButton.ease_top).offset(-12.0);
-    }];
-    
     
     [self.unreadButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.width.equalTo(@(kUnreadButtonWitdh));
@@ -228,14 +221,15 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         [self.datasource addObjectsFromArray:msgArray];
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
             [self updateUI];
         });
     });
 }
 
 - (void)updateUI {
-//    [self updateTableViewHeight];
+    [self.tableView reloadData];
+
+    [self updateTableViewHeight];
     
     if (self.canScroll) {
         BOOL canScrollBottom = !self.tableView.isTracking && !self.tableView.isDragging;
@@ -261,27 +255,32 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
     CGFloat totalHeight = 0;
     for (AgoraChatMessage *message in self.datasource) {
         if ([message.ext objectForKey:EaseKit_chatroom_join]) {
-            totalHeight += 28.0;
+            totalHeight += kJoinCellHeight;
         }else {
             totalHeight += [EaseChatroomMessageCell heightForMessage:message];
         }
         
+        //Stop if it exceeds the height of the tableview, reducing the calculation time
         if (totalHeight >= self.maxTableViewHeight) {
             break;
         }
     }
     
     self.tableViewHeight = totalHeight;
-
-    [self.tableView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+    
+    [self.tableView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
         CGFloat tableHeight = self.tableViewHeight + self.datasource.count * kTFooterViewHeight;
-        NSLog(@"=================%s tableHeight:%@\n",__func__,@(tableHeight));
         if (self.tableViewHeight >= self.maxTableViewHeight) {
             make.top.equalTo(self);
         }else {
-            make.top.equalTo(self.sendTextButton.ease_top).offset(-12.0 -tableHeight);
+            make.height.equalTo(@(tableHeight));
         }
+
+        make.left.equalTo(self);
+        make.right.equalTo(self).offset(-self.customOption.tableViewRightMargin);
+        make.bottom.equalTo(self.sendTextButton.ease_top).offset(-12.0);
     }];
+    
 }
 
 - (void)cmdMessagesDidReceive:(NSArray *)aCmdMessages
@@ -310,7 +309,7 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
     AgoraChatMessage *message = [self.datasource objectAtIndex:indexPath.section];
     if ([message.ext objectForKey:EaseKit_chatroom_join]) {
-        return 28.0;
+        return kJoinCellHeight;
     }
     
     return [EaseChatroomMessageCell heightForMessage:message];
@@ -601,9 +600,9 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
         [self.datasource removeObjectsInRange:NSMakeRange(0, 190)];
     }
     [self.datasource addObject:message];
-    [self.tableView reloadData];
-    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:[self.datasource count] - 1] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    [self updateUI];
 }
+
 
 
 #pragma mark getter and setter
@@ -622,7 +621,6 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
             _tableView.backgroundColor = self.customOption.tableViewBgColor;
         }
         
-//        _tableView.backgroundColor = [UIColor grayColor];
     }
     return _tableView;
 }
@@ -775,3 +773,4 @@ void(^sendMsgCompletion)(AgoraChatMessage *message, AgoraChatError *error);
 
 #undef kMaxMessageLength
 #undef kTFooterViewHeight
+#undef kJoinCellHeight
