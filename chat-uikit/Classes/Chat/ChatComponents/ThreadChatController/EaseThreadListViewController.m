@@ -228,7 +228,7 @@
     if (message.messageId.length) {
         model = [[EaseMessageModel alloc]initWithAgoraChatMessage:message];
         model.direction = message.direction;
-        model.type = message.body.type;
+        model.type = (AgoraChatMessageType)message.body.type;
         model.thread = conv.threadInfo;
     }
     [AgoraChatClient.sharedClient.threadManager joinChatThread:conv.threadInfo.threadId completion:^(AgoraChatThread *thread, AgoraChatError *aError) {

@@ -223,17 +223,17 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         NSDictionary *dict = [notification object];
         id <EasePhoto> photoWithProgress = [dict objectForKey:@"photo"];
-        if (photoWithProgress == _photo) {
+        if (photoWithProgress == self->_photo) {
 //            NSLog(@"%f", [[dict valueForKey:@"progress"] floatValue]);
             float progress = [[dict valueForKey:@"progress"] floatValue];
-            _loadingIndicator.progress = MAX(MIN(1, progress), 0);
+            self->_loadingIndicator.progress = MAX(MIN(1, progress), 0);
         }
     });
 }
 
 - (void)handleMWPhotoLoadingDidEndNotification:(NSNotification *)notification {
     id <EasePhoto> photo = [notification object];
-    if (photo == _photo) {
+    if (photo == self->_photo) {
         if ([photo underlyingImage]) {
             // Successful load
             [self displayImage];

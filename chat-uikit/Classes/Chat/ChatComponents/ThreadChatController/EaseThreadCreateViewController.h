@@ -13,29 +13,29 @@
 {
     EMThreadHeaderType _displayType;
 }
-@property (nonatomic, weak) id<EaseChatViewControllerDelegate> delegate;
+@property (nonatomic, weak) id<EaseChatViewControllerDelegate> _Nullable delegate;
 
-@property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) UITableView * _Nonnull tableView;
 
-@property (nonatomic, strong) NSMutableArray *dataArray;
+@property (nonatomic, strong) NSMutableArray * _Nonnull dataArray;
 
-@property (nonatomic) EaseChatViewModel *viewModel;
+@property (nonatomic) EaseChatViewModel * _Nonnull viewModel;
 
 
-- (instancetype)initWithType:(EMThreadHeaderType)type viewModel:(EaseChatViewModel *)viewModel message:(EaseMessageModel *)message;
+- (instancetype _Nonnull)initWithType:(EMThreadHeaderType)type viewModel:(EaseChatViewModel *_Nonnull)viewModel message:(EaseMessageModel *_Nonnull)message;
 
-- (void)setUserProfiles:(NSArray<id<EaseUserProfile>> *)userProfileAry;
+- (void)setUserProfiles:(NSArray<id<EaseUserProfile>> *_Nullable)userProfileAry;
 
 // Set chat controller view
-- (void)setChatVCWithViewModel:(EaseChatViewModel *)viewModel;
+- (void)setChatVCWithViewModel:(EaseChatViewModel *_Nonnull)viewModel;
 
-- (void)setNavgation:(UIView *)view;
+- (void)setNavgation:(UIView *_Nonnull)view;
 
 // Setup inputbar
-- (void)setupInputMenu:(EaseInputMenu *)inputbar;
+- (void)setupInputMenu:(EaseInputMenu * _Nonnull)inputbar;
 
 // Sending text messages
-- (void)sendTextAction:(NSString *)aText ext:(NSDictionary * __nullable)aExt;
+- (void)sendTextAction:(NSString * _Nonnull)aText ext:(NSDictionary * __nullable)aExt;
 
 // Sending message body
 - (void)sendMessageWithBody:(AgoraChatMessageBody * __nonnull)aBody ext:(NSDictionary * __nullable)aExt;
