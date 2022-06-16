@@ -8,6 +8,7 @@
 #import <UIKit/UIKit.h>
 
 @class EaseExtendMenuModel;
+
 @class EMBottomMoreFunctionView;
 
 NS_ASSUME_NONNULL_BEGIN

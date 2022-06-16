@@ -17,6 +17,7 @@
 #import "EMMsgRecordCell.h"
 #import "EaseHeaders.h"
 #import "EMMsgTextBubbleView.h"
+#import "EaseMessageCell+Category.h"
 
 @implementation AgoraChatMessageEventStrategy
 
@@ -185,6 +186,17 @@
     void (^playBlock)(EaseMessageModel *aModel) = ^(EaseMessageModel *aModel) {
         if (!aModel.message.isListened) {
             aModel.message.isListened = YES;
+            if (aModel.message.isChatThreadMessage) {
+                NSMutableDictionary *dic;
+                if (![[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"]) {
+                    dic = [[NSMutableDictionary alloc]init];
+                } else {
+                    dic = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"] mutableCopy];
+                }
+                
+                [dic setObject:@"1" forKey:aModel.message.messageId];
+                [[NSUserDefaults standardUserDefaults] setObject:dic forKey:@"EMListenHashMap"];
+            }
         }
         
         if (!aModel.message.isReadAcked) {
@@ -197,14 +209,20 @@
             if (oldModel == aCell.model && oldModel.isPlaying == YES) {
                 [[EMAudioPlayerUtil sharedHelper] stopPlayer];
                 [EMAudioPlayerUtil sharedHelper].model = nil;
-                [[NSNotificationCenter defaultCenter] postNotificationName:AUDIOMSGSTATECHANGE object:aModel];
+                aCell.bubbleView.isPlaying = NO;
                 return;
             }
         }
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:AUDIOMSGSTATECHANGE object:aModel];
+        if (aModel.isPlaying == YES) {
+            aCell.bubbleView.isPlaying = aModel.isPlaying;
+            [aCell setStatusHidden:aModel.message.isListened];
+        } else {
+            aCell.bubbleView.isPlaying = !aCell.bubbleView.isPlaying;
+        }
         [[EMAudioPlayerUtil sharedHelper] startPlayerWithPath:body.localPath model:aModel completion:^(NSError * _Nonnull error) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:AUDIOMSGSTATECHANGE object:aModel];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                aCell.bubbleView.isPlaying = NO;
+            });
         }];
     };
     
@@ -310,32 +328,33 @@
         [EaseAlertController showInfoAlert:@"Downloading file, click later"];
         return;
     }
-    __weak typeof(self.chatController) weakself = self.chatController;
-    void (^checkFileBlock)(NSString *aPath) = ^(NSString *aPathe) {
-        NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:aPathe];
-        NSLog(@"\nfile  --    :%@",[fileHandle readDataToEndOfFile]);
-        [fileHandle closeFile];
-        UIDocumentInteractionController *docVc = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:aPathe]];
-        docVc.delegate = weakself;
-        [docVc presentPreviewAnimated:YES];
-    };
     
     if (body.downloadStatus == AgoraChatDownloadStatusSuccessed && [fileManager fileExistsAtPath:body.localPath]) {
-        checkFileBlock(body.localPath);
+        [self openFile:body.localPath];
         return;
-    }
-    
-    [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
-        [weakself hideHud];
-        if (error) {
-            [EaseAlertController showErrorAlert:@"Download file failed !"];
-        } else {
-            if (!message.isReadAcked) {
-                [[AgoraChatClient sharedClient].chatManager sendMessageReadAck:message.messageId toUser:message.conversationId completion:nil];
+    } else {
+        [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+            [self.chatController hideHud];
+            if (error) {
+                [EaseAlertController showErrorAlert:@"Download file failed !"];
+            } else {
+                if (!message.isReadAcked) {
+                    [[AgoraChatClient sharedClient].chatManager sendMessageReadAck:message.messageId toUser:message.conversationId completion:nil];
+                }
+                [self openFile:[(AgoraChatFileMessageBody*)message.body localPath]];
             }
-            checkFileBlock([(AgoraChatFileMessageBody*)message.body localPath]);
-        }
-    }];
+        }];
+        
+    }
+}
+
+- (void)openFile:(NSString *)aPath {
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:aPath];
+    NSLog(@"\nfile  --    :%@",[fileHandle readDataToEndOfFile]);
+    [fileHandle closeFile];
+    UIDocumentInteractionController *docVc = [UIDocumentInteractionController interactionControllerWithURL:[NSURL fileURLWithPath:aPath]];
+    docVc.delegate = self.chatController;
+    [docVc presentPreviewAnimated:YES];
 }
 
 @end

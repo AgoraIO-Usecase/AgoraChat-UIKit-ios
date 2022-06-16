@@ -14,8 +14,9 @@
 #import "EaseTextView.h"
 #import "EaseMessageCell.h"
 #import "EaseChatViewController+EaseUI.h"
+#import "EaseThreadListViewController.h"
 
-@interface EMGroupChatViewController () <AgoraChatGroupManagerDelegate>
+@interface EMGroupChatViewController () <AgoraChatGroupManagerDelegate,AgoraChatThreadManagerDelegate>
 
 @property (nonatomic, strong) AgoraChatGroup *group;
 
@@ -26,6 +27,7 @@
 - (instancetype)initGroupChatViewControllerWithCoversationid:(NSString *)conversationId
                                                chatViewModel:(EaseChatViewModel *)viewModel
 {
+    self.group = [AgoraChatGroup groupWithId:conversationId];
     return [super initChatViewControllerWithCoversationid:conversationId
                        conversationType:AgoraChatConversationTypeGroupChat
                           chatViewModel:(EaseChatViewModel *)viewModel];
@@ -33,14 +35,23 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    [[AgoraChatClient sharedClient].threadManager addDelegate:self delegateQueue:nil];
+    [[AgoraChatClient sharedClient] addMultiDevicesDelegate:self delegateQueue:nil];
     [[AgoraChatClient sharedClient].groupManager addDelegate:self delegateQueue:nil];
+    
 }
 
 - (void)dealloc
 {
     [[AgoraChatClient sharedClient].groupManager removeDelegate:self];
+    [[AgoraChatClient sharedClient].threadManager removeDelegate:self];
+    [[AgoraChatClient sharedClient] removeMultiDevicesDelegate:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)threadsList {
+//    [super threadsList];
+    
 }
 
 #pragma mark - EaseMessageCellDelegate
@@ -122,6 +133,43 @@
 - (void)userDidJoinGroup:(AgoraChatGroup *)aGroup
                     user:(NSString *)aUsername
 {
+}
+
+
+
+- (void)onChatThreadCreate:(AgoraChatThreadEvent *)event {
+    if (event.chatThread.threadName && event.from && [event.chatThread.parentId isEqualToString:self.currentConversation.conversationId]) {
+        id<EaseUserProfile> userThreadData = [self.delegate userProfile:event.from];
+        NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nJoin the thread",userThreadData.showName ? userThreadData.showName:event.from,event.chatThread.threadName];
+        [self.dataArray addObject:@{threadNotify:event.chatThread.messageId}];
+        [self refreshTableView:YES];
+    }
+}
+
+- (void)onChatThreadDestroy:(AgoraChatThreadEvent *)event {
+    if (![event.chatThread.parentId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    [self refreshTableView:YES];
+}
+
+- (void)onChatThreadUpdate:(AgoraChatThreadEvent *)event {
+    if (![event.chatThread.parentId isEqualToString:self.currentConversation.conversationId]) {
+        return;
+    }
+    AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:event.chatThread.messageId];
+    if (message.messageId.length) {
+        for (id obj in self.dataArray) {
+            if ([obj isKindOfClass:[EaseMessageModel class]]) {
+                EaseMessageModel *model = (EaseMessageModel *)obj;
+                if ([model.message.messageId isEqualToString:message.messageId]) {
+                    model.message = message;
+                    break;
+                }
+            }
+        }
+    }
+    [self refreshTableView:YES];
 }
 
 @end

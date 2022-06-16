@@ -19,6 +19,8 @@
 #import "EMMsgExtGifBubbleView.h"
 #import "UIImageView+EaseWebCache.h"
 #import "EaseMessageCell+Category.h"
+#define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
+#import "EMAudioPlayerUtil.h"
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMMessageReactionView.h"
 
@@ -70,6 +72,7 @@
 
     // Configure the view for the selected state
 }
+
 
 #pragma mark - Class Methods
 
@@ -141,10 +144,10 @@
     }
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
-    
     [self.contentView addSubview:_avatarView];
     [self.contentView addSubview:_bubbleView];
     [self.contentView addSubview:_nameLabel];
+
     
     self.bubbleView.maxBubbleWidth = [self maxBubbleViewWidth];
     
@@ -288,6 +291,28 @@
     [self setCellIsReadReceipt];
 }
 
+- (void)getBubbleWidth:(EaseMessageModel *)model {
+    if (model.message.chatThread) {
+        self.bubbleView.maxBubbleWidth = KEMThreadBubbleWidth + 24;
+    } else {
+        CGFloat width = self.bounds.size.width;
+        CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
+        if (_viewModel.displayReceivedAvatar) {
+            bubbleViewWidth -= (avatarLonger + componentSpacing);
+        }
+        if (_viewModel.displaySentAvatar) {
+            bubbleViewWidth -= (avatarLonger + componentSpacing);
+        };
+        self.bubbleView.maxBubbleWidth = bubbleViewWidth;
+    }
+}
+
+- (void)threadBubbleAction {
+    if (self.delegate && [self.delegate respondsToSelector:@selector(toThreadChat:channelId:)]) {
+        [self.delegate toThreadChat:self.model];
+    }
+}
+
 - (CGFloat)maxBubbleViewWidth
 {
     CGFloat width = self.bounds.size.width;
@@ -323,6 +348,7 @@
 
 - (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType
 {
+    __weak typeof(self) weakSelf = self;
     EaseChatMessageBubbleView *bubbleView = nil;
     switch (aType) {
         case AgoraChatMessageTypeText:
@@ -358,16 +384,22 @@
     return bubbleView;
 }
 
+
 #pragma mark - Setter
 
 - (void)setModel:(EaseMessageModel *)model
 {
     _model = model;
+    model.thread = nil;
     self.bubbleView.model = model;
     if (model.direction == AgoraChatMessageDirectionSend) {
         [self.statusView setSenderStatus:model.message.status isReadAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isReadAcked : NO isDeliverAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isDeliverAcked : NO ];
     } else {
         if (model.type == AgoraChatMessageBodyTypeVoice) {
+            if (model.message.isChatThreadMessage == YES) {
+                NSMutableDictionary *dic = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"] mutableCopy];
+                model.message.isListened = [dic[model.message.messageId] boolValue];
+            }
             self.statusView.hidden = model.message.isListened;
         }
     }
@@ -387,12 +419,12 @@
     if (_model.userDataProfile && [_model.userDataProfile respondsToSelector:@selector(avatarURL)]) {
         if ([_model.userDataProfile.avatarURL length] > 0) {
             [_avatarView Ease_setImageWithURL:[NSURL URLWithString:_model.userDataProfile.avatarURL]
-                               placeholderImage:[UIImage easeUIImageNamed:@"defaultAvatar"]];
+                               placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
             isCustomAvatar = YES;
         }
     }
     if (!isCustomAvatar) {
-        _avatarView.image = [UIImage easeUIImageNamed:@"defaultAvatar"];
+        _avatarView.image = [UIImage easeUIImageNamed:@"default_avatar"];
     }
     if (model.message.isNeedGroupAck) {
         self.readReceiptBtn.hidden = NO;
@@ -451,9 +483,27 @@
 //Bubble view click
 - (void)bubbleViewTapAction:(UITapGestureRecognizer *)aTap
 {
-    if (aTap.state == UIGestureRecognizerStateEnded) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
-            [self.delegate messageCellDidSelected:self];
+    UIView *view = [self.bubbleView viewWithTag:666];
+    CGPoint point = [aTap locationInView:self.contentView];
+    if (view != nil && view.hidden == NO) {
+        if (point.y > view.frame.origin.y) {
+            if (aTap.state == UIGestureRecognizerStateEnded) {
+                if (self.delegate && [self.delegate respondsToSelector:@selector(toThreadChat:)]) {
+                    [self.delegate toThreadChat:self.model];
+                }
+            }
+        } else {
+            if (aTap.state == UIGestureRecognizerStateEnded) {
+                if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
+                    [self.delegate messageCellDidSelected:self];
+                }
+            }
+        }
+    } else {
+        if (aTap.state == UIGestureRecognizerStateEnded) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellDidSelected:)]) {
+                [self.delegate messageCellDidSelected:self];
+            }
         }
     }
 }
@@ -480,6 +530,7 @@
 @end
 
 @implementation EaseMessageCell (Category)
+
 - (void)setStatusHidden:(BOOL)isHidden
 {
     self.statusView.hidden = isHidden;

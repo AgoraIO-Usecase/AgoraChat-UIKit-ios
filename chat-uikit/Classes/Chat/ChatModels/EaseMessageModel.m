@@ -10,6 +10,7 @@
 #import "EaseHeaders.h"
 #import "EaseMessageCell.h"
 #import "EaseMessageCell+Category.h"
+#import <AgoraChat/NSObject+Coding.h>
 
 @implementation EaseMessageModel
 
@@ -47,28 +48,16 @@
             _type = AgoraChatMessageTypeText;
         }
     }
-    if (aMsg.body.type == AgoraChatMessageTypeVoice) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(audioStateChange:) name:AUDIOMSGSTATECHANGE object:nil];
-    }
+
     return self;
 }
 
-- (void)audioStateChange:(NSNotification *)aNotif
-{
-    id object = aNotif.object;
-    if ([object isKindOfClass:[EaseMessageModel class]]) {
-        EaseMessageModel *model = (EaseMessageModel *)object;
-        if (model == self && self.isPlaying == NO) {
-            self.isPlaying = YES;
-        } else {
-            self.isPlaying = NO;
-        }
-        
-        [self.weakMessageCell.bubbleView setModel:self];
-        if (model == self && model.direction == AgoraChatMessageDirectionReceive) {
-            [self.weakMessageCell setStatusHidden:model.message.isListened];
-        }
-    }
+- (id)copyWithZone:(NSZone *)zone {
+    return [self ease_copyWithZone:zone];
+}
+
+- (id)mutableCopyWithZone:(NSZone *)zone {
+    return [self ease_mutableCopyWithZone:zone];
 }
 
 @end

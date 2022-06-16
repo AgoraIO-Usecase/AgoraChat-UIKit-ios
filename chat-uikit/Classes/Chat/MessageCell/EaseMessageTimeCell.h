@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithViewModel:(EaseChatViewModel *)viewModel remindType:(EaseChatWeakRemind)remidType;
 
+- (NSAttributedString *)cellAttributeText:(NSString *)string;
+
 @end
 
 NS_ASSUME_NONNULL_END

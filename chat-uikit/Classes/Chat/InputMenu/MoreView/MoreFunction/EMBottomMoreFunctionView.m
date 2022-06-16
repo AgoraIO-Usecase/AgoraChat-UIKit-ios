@@ -11,6 +11,7 @@
 #import "EaseExtendMenuModel.h"
 
 typedef struct PanData {
+
     CGFloat beiginBottom;
     CGFloat step[3];
     uint8_t currentStep;
@@ -27,6 +28,7 @@ typedef struct PanData {
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *emojiCollectionViewHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *itemTableViewHeightConstraint;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *bottomContainerHeightConstraint;
+
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *tableViewTopContraint;
 
 @property (nonatomic, strong) CAShapeLayer *shapeLayer;
@@ -36,12 +38,14 @@ typedef struct PanData {
 @property (nonatomic, strong) NSArray <EaseExtendMenuModel *>*menuItems;
 @property (nonatomic, strong) NSArray <UIBezierPath *>*bgMaskPaths;
 
+
 @property (nonatomic, weak) id<EMBottomMoreFunctionViewDelegate> delegate;
 @property (nonatomic, strong) NSDictionary *userInfo;
 
 @property (nonatomic, assign) BOOL isShowEmojiList;
 
 @property (nonatomic, assign) PanData panData;
+
 
 @property (nonatomic, strong) NSMutableArray <UIImageView *>*maskHighlightImageViews;
 
@@ -51,6 +55,7 @@ typedef struct PanData {
 
 static EMBottomMoreFunctionView *shareView;
 
+
 + (instancetype)share
 {
     if (!shareView) {
@@ -58,6 +63,7 @@ static EMBottomMoreFunctionView *shareView;
     }
     return shareView;
 }
+
 
 + (void)showMenuItems:(NSArray<EaseExtendMenuModel *> *)menuItems delegate:(id<EMBottomMoreFunctionViewDelegate>)delegate animation:(BOOL)animation
 {
@@ -121,6 +127,7 @@ static EMBottomMoreFunctionView *shareView;
         [shareView layoutIfNeeded];
         shareView.contentViewBottomConstraint.constant = -shareView.mainView.bounds.size.height;
         [shareView layoutIfNeeded];
+
         if (menuItems.count > 3) {
             shareView.contentViewBottomConstraint.constant = -54 * (CGFloat)(menuItems.count - 3) - EMBottomMoreFunctionView.share.bottomContainerHeightConstraint.constant;
         } else {
@@ -139,6 +146,7 @@ static EMBottomMoreFunctionView *shareView;
         [shareView resetPanData];
     }
 }
+
 
 
 + (void)updateHighlightViews:(nullable NSArray <UIView *>*)views {
@@ -164,6 +172,7 @@ static EMBottomMoreFunctionView *shareView;
         clearFunc();
     }
 }
+
 
 - (UIImage *)convertViewToImage:(UIView *)view {
     UIGraphicsBeginImageContextWithOptions(view.frame.size, NO, [UIScreen mainScreen].scale);
@@ -238,6 +247,7 @@ static EMBottomMoreFunctionView *shareView;
 }
 
 - (void)switchEmojiListView {
+
     CGFloat spacing = (UIScreen.mainScreen.bounds.size.width - 14 - _emojiDataList.count * 40) / (_emojiDataList.count - 1);
 
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)_emojiCollectionView.collectionViewLayout;
@@ -269,6 +279,7 @@ static EMBottomMoreFunctionView *shareView;
 
 - (IBAction)onContentViewPan:(UIPanGestureRecognizer *)sender {
     if (sender.state == UIGestureRecognizerStateBegan) {
+
         _panData.beiginBottom = _contentViewBottomConstraint.constant;
     } else if (sender.state == UIGestureRecognizerStateEnded || sender.state == UIGestureRecognizerStateCancelled) {
         CGFloat offset = [sender translationInView:self].y;
@@ -276,7 +287,6 @@ static EMBottomMoreFunctionView *shareView;
         if (newBottom > 0) {
             newBottom = 0;
         }
-        
         CGFloat minDistance = 0;
         int index = -1;
         for (int i = 0; i < 3; i ++) {
@@ -286,7 +296,6 @@ static EMBottomMoreFunctionView *shareView;
                 minDistance = distance;
             }
         }
-        
         _panData.currentStep = index;
         _contentViewBottomConstraint.constant = -_panData.step[index];
         [UIView animateWithDuration:0.25 animations:^{
@@ -303,6 +312,7 @@ static EMBottomMoreFunctionView *shareView;
             self.itemTableView.scrollEnabled = index == 0 && self.panData.step[1] != 0;
         }];
     } else {
+
         CGFloat offset = [sender translationInView:self].y;
         CGFloat newBottom = _panData.beiginBottom - offset;
         if (newBottom > -_panData.step[0]) {
@@ -346,7 +356,6 @@ static EMBottomMoreFunctionView *shareView;
             cell.added = NO;
         }
     }
-    
     return cell;
 }
 
@@ -386,6 +395,7 @@ static EMBottomMoreFunctionView *shareView;
 
 #pragma mark - UITableViewDelegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+
     if (_delegate && [_delegate conformsToProtocol:@protocol(EMBottomMoreFunctionViewDelegate)] && [_delegate respondsToSelector:@selector(bottomMoreFunctionView:didSelectedMenuItem:)]) {
         [_delegate bottomMoreFunctionView:self didSelectedMenuItem:_menuItems[indexPath.row]];
     }

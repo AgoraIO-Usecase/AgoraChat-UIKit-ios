@@ -33,7 +33,9 @@
 //    }
     
     //[self az_setGradientBackgroundWithColors:@[[UIColor redColor],[UIColor orangeColor]] locations:nil startPoint:CGPointMake(0, 0) endPoint:CGPointMake(1, 1)];
-    
+    if (self.unDrawCorner) {
+        return;
+    }
     UIEdgeInsets edge = UIEdgeInsetsMake(_viewModel.bubbleBgEdgeInsets.top, _viewModel.bubbleBgEdgeInsets.left, _viewModel.bubbleBgEdgeInsets.bottom, _viewModel.bubbleBgEdgeInsets.right);
     if (self.direction == AgoraChatMessageDirectionSend) {
         UIImage *image = [_viewModel.senderBubbleBgImage resizableImageWithCapInsets:edge resizingMode:UIImageResizingModeStretch];
@@ -44,8 +46,23 @@
     }
 }
 
+- (void)setupThreadBubbleBackgroundImage {
+    UIEdgeInsets edge = UIEdgeInsetsMake(8, 8, 8, 8);
+    UIImage *image = [_viewModel.threadBubbleBgImage resizableImageWithCapInsets:edge resizingMode:UIImageResizingModeStretch];
+    [self setImage:image];
+}
+
+- (void)setUnDrawCorner:(BOOL)unDrawCorner {
+    _unDrawCorner = unDrawCorner;
+    [self setImage:nil];
+    [self setBackgroundColor:[UIColor clearColor]];
+}
+
 - (void)setCornerRadius:(CGRect)bounds
 {
+    if (_unDrawCorner == YES) {
+        return;
+    }
     CAShapeLayer *shapeLayer = [CAShapeLayer layer];
     CGPathRef path = [self CYPathCreateWithRoundedRect:bounds];
     shapeLayer.path = path;
@@ -58,7 +75,10 @@
 - (CGPathRef)CYPathCreateWithRoundedRect:(CGRect)bounds
 {
     BubbleCornerRadius cornerRadius = self.direction == AgoraChatMessageDirectionSend ? self.viewModel.rightAlignmentCornerRadius : self.viewModel.leftAlignmentCornerRadius;
-    
+    BOOL thread = (self.model.message.chatThread != nil);//self.model.message.isChatThreadMessage
+    if (thread == YES) {
+        cornerRadius = self.viewModel.threadCornerRadius;
+    }
     const CGFloat minX = CGRectGetMinX(bounds);
     const CGFloat minY = CGRectGetMinY(bounds);
     const CGFloat maxX = CGRectGetMaxX(bounds);
@@ -87,6 +107,10 @@
     CGPathAddArc(path, NULL, bottomLeftCenterX, bottomLeftCenterY, cornerRadius.bottomLeft, M_PI_2,M_PI, NO);
     CGPathCloseSubpath(path);
     return path;
+}
+
+- (void)setModel:(EaseMessageModel *)model {
+    _model = model;
 }
 
 @end

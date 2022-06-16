@@ -6,7 +6,6 @@
 //
 
 #import "EMBottomMoreFunctionViewMenuItemCell.h"
-
 #import "EaseExtendMenuModel.h"
 #import "UIImage+EaseUI.h"
 
@@ -21,9 +20,15 @@
 
 - (void)setMenuItem:(EaseExtendMenuModel *)menuItem {
     _menuItem = menuItem;
-    
+    if (menuItem.showMore == YES) {
+        self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    } else {
+        self.accessoryType = UITableViewCellAccessoryNone;
+    }
     _iconImageView.image = menuItem.icon;
     _descLabel.text = menuItem.funcDesc;
+    _descLabel.textColor = menuItem.funcDescColor;
+
 }
 
 @end

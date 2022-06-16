@@ -191,14 +191,14 @@ static EMBottomReactionDetailView *shareView;
                 [page clear];
             }
             if (page.dataList.count <= 0 && reaction.isAddedBySelf) {
-                [page appendData:@[AgoraChatClient.sharedClient.currentUsername] lastId:cursor];
+                [page appendData:@[[AgoraChatClient.sharedClient.currentUsername lowercaseString]] lastId:cursor];
             }
             // 自己的操作置顶
             NSArray <NSString *>*userList = reaction.userList;
             if (page.userInfo[@"index"] || !reaction.isAddedBySelf) {
                 [page appendData:userList lastId:cursor];
             } else {
-                NSUInteger index = [userList indexOfObject:AgoraChatClient.sharedClient.currentUsername];
+                NSUInteger index = [userList indexOfObject:[AgoraChatClient.sharedClient.currentUsername lowercaseString]];
                 if (index == NSNotFound) {
                     [page appendData:userList lastId:cursor];
                 } else {
