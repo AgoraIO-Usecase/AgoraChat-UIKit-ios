@@ -154,7 +154,7 @@
     /*
     self.audioDescBtn = [[UIButton alloc]init];
     [self.audioDescBtn setBackgroundColor:[UIColor colorWithHexString:@"#E9E9E9"]];
-    [self.audioDescBtn setTitle:@"按住 说话" forState:UIControlStateNormal];
+    [self.audioDescBtn setTitle:@"hold to speak" forState:UIControlStateNormal];
     [self.audioDescBtn.titleLabel setFont:[UIFont systemFontOfSize:14]];
     [self.audioDescBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [self.audioDescBtn.titleLabel setTextAlignment:NSTextAlignmentCenter];

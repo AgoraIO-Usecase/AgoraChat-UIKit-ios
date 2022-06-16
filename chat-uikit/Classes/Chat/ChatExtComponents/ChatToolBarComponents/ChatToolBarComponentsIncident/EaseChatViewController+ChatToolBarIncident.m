@@ -303,7 +303,7 @@ static const void *imagePickerKey = &imagePickerKey;
         [urls.firstObject stopAccessingSecurityScopedResource];
         return;
     }
-    [self showHint:@"授权失败!"];
+    [self showHint:@"Authorization failed!"];
 }
 - (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller
 {

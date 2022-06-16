@@ -227,7 +227,7 @@
         self.detailLabel.text = [NSString stringWithFormat:@"%.2lf MB",(float)body.fileLength / (1024 * 1024)];
         
         if (self.direction == AgoraChatMessageDirectionReceive && body.downloadStatus == AgoraChatDownloadStatusSucceed) {
-            self.downloadStatusLabel.text = @"已下载";
+            self.downloadStatusLabel.text = @"Downloaded";
         } else {
             self.downloadStatusLabel.text = @"";
         }
