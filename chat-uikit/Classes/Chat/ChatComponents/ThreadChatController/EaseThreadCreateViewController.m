@@ -72,6 +72,7 @@
 //        make.width.equalTo(self.view);
         make.bottom.equalTo(self.view);
     }];
+    self.inputBar.hidden = YES;
     [self.view addSubview:self.tableView];
     [self.tableView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.view);
@@ -336,8 +337,11 @@
             make.bottom.equalTo(self.view).offset(-keyBoardHeight);
         }];
     };
-    [self keyBoardWillShow:note animations:animation completion:^(BOOL finished, CGRect keyBoardBounds) {
-    }];
+    
+    if (!self.inputBar.hidden) {
+        [self keyBoardWillShow:note animations:animation completion:^(BOOL finished, CGRect keyBoardBounds) {
+        }];
+    }
 }
 
 - (void)keyBoardWillHide:(NSNotification *)note
@@ -347,7 +351,10 @@
             make.bottom.equalTo(self.view);
         }];
     };
-    [self keyBoardWillHide:note animations:animation completion:nil];
+    
+    if (!self.inputBar.hidden) {
+        [self keyBoardWillHide:note animations:animation completion:nil];
+    }
 }
 
 
@@ -401,6 +408,12 @@
 
 - (void)textFieldEndText:(NSString *)text {
     self.threadName = text;
+}
+
+- (void)textFieldShouldReturn:(NSString *)text
+{
+    self.inputBar.hidden = NO;
+    [[self.inputBar viewWithTag:123] becomeFirstResponder];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {

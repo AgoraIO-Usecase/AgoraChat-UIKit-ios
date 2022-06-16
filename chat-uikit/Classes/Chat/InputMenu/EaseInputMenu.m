@@ -504,6 +504,7 @@
         _textView.returnKeyType = UIReturnKeySend;
         _textView.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
         _textView.layer.cornerRadius = 17.5;
+        _textView.tag = 123;
     }
     return _textView;
 }

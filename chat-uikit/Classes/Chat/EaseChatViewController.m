@@ -1239,7 +1239,7 @@
         CGFloat interval = (self.msgTimelTag - msg.timestamp) / 1000;
         NSString *timeStr;
         if (self.msgTimelTag < 0 || interval > 60 || interval < -60) {
-            timeStr = [EaseDateHelper formattedTimeFromTimeInterval:msg.timestamp];
+            timeStr = [EaseDateHelper formattedTimeFromTimeInterval:msg.timestamp dateType:EaseDateTypeChat];
             [formated addObject:timeStr];
             self.msgTimelTag = msg.timestamp;
         }

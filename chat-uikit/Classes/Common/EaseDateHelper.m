@@ -135,18 +135,69 @@ static EaseDateHelper *shared = nil;
     return ret;
 }
 
-+ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval
++ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval dateType:(EaseDateType)type
 {
     NSDate *date = [EaseDateHelper dateWithTimeIntervalInMilliSecondSince1970:aTimeInterval];
-    return [EaseDateHelper formattedTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    if (type == EaseDateTypeChat) {
+        return [EaseDateHelper formattedChatTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    }
+    if (type == EaseDateTypeConversastion) {
+        return [EaseDateHelper formattedConversationTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    }
+    return @"";
 }
 
-+ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval forDateFormatter:(NSDateFormatter *)formatter {
++ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval forDateFormatter:(NSDateFormatter *)formatter  dateType:(EaseDateType)type {
     NSDate *date = [EaseDateHelper dateWithTimeIntervalInMilliSecondSince1970:aTimeInterval];
-    return [EaseDateHelper formattedTime:date forDateFormatter:formatter];
+    if (type == EaseDateTypeChat) {
+        return [EaseDateHelper formattedChatTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    }
+    if (type == EaseDateTypeConversastion) {
+        return [EaseDateHelper formattedConversationTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    }
+    return @"";
 }
 
-+ (NSString *)formattedTime:(NSDate *)aDate forDateFormatter:(NSDateFormatter *)formatter
++ (NSString *)formattedConversationTime:(NSDate *)aDate forDateFormatter:(NSDateFormatter *)formatter
+{
+    EaseDateHelper *helper = [EaseDateHelper shareHelper];
+    
+    NSString *dateNow = [formatter stringFromDate:[NSDate date]];
+    NSDateComponents *components = [[NSDateComponents alloc] init];
+    [components setDay:[[dateNow substringWithRange:NSMakeRange(8, 2)] intValue]];
+    [components setMonth:[[dateNow substringWithRange:NSMakeRange(5, 2)] intValue]];
+    [components setYear:[[dateNow substringWithRange:NSMakeRange(0, 4)] intValue]];
+    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSDate *date = [gregorian dateFromComponents:components];
+    
+    NSInteger hour = [EaseDateHelper hoursFromDate:aDate toDate:date];
+    NSDateFormatter *dateFormatter = helper.dfYMDHM;
+    
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
+    NSTimeZone *zone = [NSTimeZone systemTimeZone];
+    [calendar setTimeZone:zone];
+    NSDateComponents *theComponents = [calendar components:NSCalendarUnitYear|NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitHour|NSCalendarUnitMinute|NSCalendarUnitSecond|NSCalendarUnitWeekday fromDate:aDate];
+    
+    if (hour <= 24 && hour >= 0) {
+        dateFormatter = helper.dfHM;
+    }
+    else if (hour < 0 && hour >= -24) {
+        return @"Yday";
+    }
+    else if (hour < -24 && hour >= -24 * 6) {
+        NSArray *weekdays = [NSArray arrayWithObjects: [NSNull null], @"Sun", @"Mon", @"Tues", @"Wed", @"Thur", @"Fri", @"Sat", nil];
+        
+        return [weekdays objectAtIndex:theComponents.weekday];
+    } else {
+        NSArray *months = [NSArray arrayWithObjects: [NSNull null], @"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sept", @"Oct", @"Nov", @"Dec", nil];
+        
+        return [NSString stringWithFormat:@"%d %@ %d", theComponents.year, (NSString *)[months objectAtIndex:theComponents.month], theComponents.day];
+    }
+    
+    return [dateFormatter stringFromDate:aDate];
+}
+
++ (NSString *)formattedChatTime:(NSDate *)aDate forDateFormatter:(NSDateFormatter *)formatter
 {
     EaseDateHelper *helper = [EaseDateHelper shareHelper];
     

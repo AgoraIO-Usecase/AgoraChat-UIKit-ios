@@ -33,10 +33,10 @@
 
     _displayChatroom = NO;
     _canRefresh = NO;
-    
-    _avatarType = Circular;
     _avatarSize = CGSizeMake(58, 58);
-    _avatarCornerRadius = 5;
+    _groupAvatarStyle = [[EaseConversationAvatarParam alloc]initWithParams:RoundedCorner radius:1];
+    _chatroomAvatarStyle = [[EaseConversationAvatarParam alloc]init];
+    _chatAvatarStyle = [[EaseConversationAvatarParam alloc]init];
     _avatarEdgeInsets = UIEdgeInsetsMake(7, 16, -7, 0);
     [UIFont systemFontOfSize:16.0 weight:UIFontWeightBold];
     _nameLabelFont = [UIFont fontWithName:@"PingFangSC-Medium" size:16.0];

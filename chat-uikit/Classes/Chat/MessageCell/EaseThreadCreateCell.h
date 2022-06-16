@@ -57,4 +57,6 @@ typedef NS_ENUM(NSUInteger, EMThreadHeaderType) {
 
 - (void)textFieldEndText:(NSString *)text;
 
+- (void)textFieldShouldReturn:(NSString *)text;
+
 @end
