@@ -9,7 +9,7 @@
 #import "EaseUserInfoManagerHelper.h"
 #import "AgoraChatUserInfo+expireTime.h"
 
-#define kExpireSeconds 60
+#define kExpireSeconds 20
 
 @interface EaseUserInfoManagerHelper ()
 @property (nonatomic, strong)NSMutableDictionary *userInfoCacheDic;
@@ -71,6 +71,9 @@ static dispatch_once_t oneToken;
                     user.expireTime = [[NSDate date] timeIntervalSince1970];
                     if (user) {
                         resultDic[userKey] = user;
+                        if (self.userInfoCacheDic == nil) {
+                            self.userInfoCacheDic = [[NSMutableDictionary alloc] init];
+                        }
                         self.userInfoCacheDic[userKey] = user;
                     }
                 }
