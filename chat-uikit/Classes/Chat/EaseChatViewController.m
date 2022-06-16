@@ -718,7 +718,7 @@
             [extMenuArray addObject:recallExtModel];
         }
         if (_currentLongPressCell.model.type == AgoraChatMessageTypeText || _currentLongPressCell.model.type == AgoraChatMessageTypeImage || _currentLongPressCell.model.type == AgoraChatMessageTypeVideo || _currentLongPressCell.model.type == AgoraChatMessageTypeFile || _currentLongPressCell.model.type == AgoraChatMessageTypeVoice) {
-            if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isChatThread && _currentLongPressCell.model.message.threadOverView == nil) {
+            if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isChatThread && _currentLongPressCell.model.message.chatThread == nil) {
                 EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Replay" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
                     if ([aCell isKindOfClass:[EaseMessageCell class]]) {
                         if (self.delegate && [self.delegate respondsToSelector:@selector(createThread:)]) {
@@ -855,17 +855,17 @@
 }
 
 - (void)pushThreadChat:(EaseMessageModel *)model {
-    if (!model.message.threadOverView.threadId.length) {
+    if (!model.message.chatThread.threadId.length) {
         [self showHint:@"conversationId is empty!"];
         return;
     }
-    [AgoraChatClient.sharedClient.threadManager joinChatThread:model.message.threadOverView.threadId completion:^(AgoraChatThread *thread,AgoraChatError *aError) {
+    [AgoraChatClient.sharedClient.threadManager joinChatThread:model.message.chatThread.threadId completion:^(AgoraChatThread *thread,AgoraChatError *aError) {
         if (!aError || aError.code == AgoraChatErrorUserAlreadyExist) {
             if (thread) {
                 model.thread = thread;
             }
-            EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:model.message.threadOverView.threadId chatViewModel:self.viewModel parentMessageId:model.message.messageId model:model];
-            self.title = model.thread ? model.thread.threadName:model.message.threadOverView.threadName;;
+            EaseThreadChatViewController *VC = [[EaseThreadChatViewController alloc] initThreadChatViewControllerWithCoversationid:model.message.chatThread.threadId chatViewModel:self.viewModel parentMessageId:model.message.messageId model:model];
+            self.title = model.thread ? model.thread.threadName:model.message.chatThread.threadName;;
             [self.navigationController pushViewController:VC animated:YES];
         }
     }];
@@ -1010,9 +1010,11 @@
         if ([obj isKindOfClass:[EaseMessageModel class]]) {
             EaseMessageModel *model = (EaseMessageModel *)obj;
             if ([messageIds containsObject:model.message.messageId]) {
-                AgoraChatMessage *message = [[AgoraChatClient sharedClient].chatManager getMessageWithMessageId:model.message.messageId];
-                if (message.messageId.length) {
-                    model.message = message;
+                if (self.isChatThread == YES) {
+                    AgoraChatMessage *message = [[AgoraChatClient sharedClient].chatManager getMessageWithMessageId:model.message.messageId];
+                    if (message.messageId.length) {
+                        model.message = message;
+                    }
                 }
                 [refreshRows addObject:row];
             }
@@ -1259,9 +1261,9 @@
                 if (self.delegate && [self.delegate respondsToSelector:@selector(userProfile:)]) {
                     id<EaseUserProfile> userData = [self.delegate userProfile:msg.from];
                     model.userDataProfile = userData;
-                    if (msg.threadOverView) {
-                        if (msg.threadOverView.from != nil && msg.threadOverView.from.length > 0) {
-                            id<EaseUserProfile> userThreadData = [self.delegate userProfile:msg.threadOverView.lastMessage.from];
+                    if (msg.chatThread) {
+                        if (msg.chatThread.lastMessage.from != nil && msg.chatThread.lastMessage.from.length > 0) {
+                            id<EaseUserProfile> userThreadData = [self.delegate userProfile:msg.chatThread.lastMessage.from];
                             model.threadUserProfile = userThreadData;
                         }
                     }
@@ -1381,7 +1383,7 @@
         message.isNeedGroupAck = YES;
     }
     message.chatType = (AgoraChatType)self.conversationType;
-    message.isChatThread = self.isChatThread;
+    message.isChatThreadMessage = self.isChatThread;
     __weak typeof(self) weakself = self;
     if (self.delegate && [self.delegate respondsToSelector:@selector(willSendMessage:)]) {
         AgoraChatMessage *callbackMsg = [self.delegate willSendMessage:message];

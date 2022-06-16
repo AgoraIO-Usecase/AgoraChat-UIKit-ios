@@ -68,7 +68,7 @@
             }
         }];
     } else {
-        [AgoraChatClient.sharedClient.threadManager getMineChatThreadsFromServerWithParentId:self.group.groupId cursor:self.cursor ? self.cursor.cursor:@"" pageSize:20 completion:^(AgoraChatCursorResult * _Nonnull result, AgoraChatError * _Nonnull aError) {
+        [AgoraChatClient.sharedClient.threadManager getJoinedChatThreadsFromServerWithParentId:self.group.groupId cursor:self.cursor ? self.cursor.cursor:@"" pageSize:20 completion:^(AgoraChatCursorResult * _Nonnull result, AgoraChatError * _Nonnull aError) {
             if (!aError) {
                 self.loadMoreFinished = YES;
                 self.cursor = result;
@@ -91,7 +91,7 @@
         [self.dataArray addObject:model];
     }
     [self.threadList reloadData];
-    [[AgoraChatClient sharedClient].threadManager getLastMesssageFromSeverWithChatThreads:ids completion:^(NSDictionary<NSString *,AgoraChatMessage *> * _Nonnull messageMap, AgoraChatError * _Nonnull aError) {
+    [[AgoraChatClient sharedClient].threadManager getLastMessageFromSeverWithChatThreads:ids completion:^(NSDictionary<NSString *,AgoraChatMessage *> * _Nonnull messageMap, AgoraChatError * _Nonnull aError) {
         if (!aError) {
             [self.threadMessageMap addEntriesFromDictionary:messageMap];
             [self mapMessage];
@@ -243,13 +243,13 @@
 
 
 - (void)onChatThreadCreate:(AgoraChatThreadEvent *)event {
-    if (event.threadName && event.from && [self.group.groupId isEqualToString:event.channelId]) {
+    if (event.chatThread.threadName && event.from && [self.group.groupId isEqualToString:event.chatThread.parentId]) {
         [self dropdownRefreshTableViewWithData];
     }
 }
 
 - (void)onChatThreadDestroy:(AgoraChatThreadEvent *)event {
-    if (event.threadName && event.from && [self.group.groupId isEqualToString:event.channelId]) {
+    if (event.chatThread.threadName && event.from && [self.group.groupId isEqualToString:event.chatThread.parentId]) {
         [self dropdownRefreshTableViewWithData];
     }
 }

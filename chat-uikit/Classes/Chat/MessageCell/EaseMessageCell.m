@@ -285,7 +285,7 @@
 }
 
 - (void)getBubbleWidth:(EaseMessageModel *)model {
-    if (model.message.threadOverView) {
+    if (model.message.chatThread) {
         self.bubbleView.maxBubbleWidth = KEMThreadBubbleWidth + 24;
     } else {
         CGFloat width = self.bounds.size.width;
@@ -396,7 +396,7 @@
         [self.statusView setSenderStatus:model.message.status isReadAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isReadAcked : NO isDeliverAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isDeliverAcked : NO ];
     } else {
         if (model.type == AgoraChatMessageBodyTypeVoice) {
-            if (model.message.isChatThread == YES) {
+            if (model.message.isChatThreadMessage == YES) {
                 NSMutableDictionary *dic = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"] mutableCopy];
                 model.message.isListened = [dic[model.message.messageId] boolValue];
             }
