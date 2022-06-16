@@ -19,7 +19,7 @@
 
 @property (nonatomic, strong) AgoraChatMessage *message;
 
-@property (nonatomic, strong) NSString *channelId;
+@property (nonatomic, strong) NSString *parentId;
 
 @end
 
@@ -40,7 +40,7 @@
 }
 
 - (void)getThread {
-    [AgoraChatClient.sharedClient.threadManager getChatThreadDetail:self.currentConversation.conversationId completion:^(AgoraChatThread *thread, AgoraChatError *aError) {
+    [AgoraChatClient.sharedClient.threadManager getChatThreadFromSever:self.currentConversation.conversationId completion:^(AgoraChatThread * _Nonnull thread, AgoraChatError * _Nonnull aError) {
         if (!aError) {
             [self createHeaderWithThread:thread];
         } else {
@@ -55,7 +55,7 @@
         self.tableView.tableHeaderView = [self.delegate threadChatHeader];
         return;
     }
-    self.channelId = thread.channelId;
+    self.parentId = thread.parentId;
     EaseMessageModel *model;
     if (self.messageId.length) {
         self.model.thread = thread;
@@ -105,8 +105,8 @@
 
 - (AgoraChatGroup *)group {
     if (!_group) {
-        if (self.channelId) {
-            _group = [AgoraChatGroup groupWithId:self.channelId];
+        if (self.parentId) {
+            _group = [AgoraChatGroup groupWithId:self.parentId];
         }
     }
     return _group;
@@ -193,11 +193,11 @@
 #pragma mark - EMThreadManagerDelegate
 
 - (void)onChatThreadUpdate:(AgoraChatThreadEvent *)event {
-    if (![event.threadId isEqualToString:self.currentConversation.conversationId]) {
+    if (![event.chatThread.threadId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }
-    if (event.lastMessage == nil) {
-        NSString *threadName = event.threadName;
+    if (event.chatThread.lastMessage == nil) {
+        NSString *threadName = event.chatThread.threadName;
         if (!threadName) {
             return;
         }
@@ -209,7 +209,7 @@
 }
 
 - (void)onChatThreadDestroy:(AgoraChatThreadEvent *)event {
-    if (![event.threadId isEqualToString:self.currentConversation.conversationId]) {
+    if (![event.chatThread.threadId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }
     if (self.delegate && [self.delegate respondsToSelector:@selector(popThreadChat)]) {
@@ -220,7 +220,7 @@
 }
 
 - (void)onUserKickOutOfChatThread:(AgoraChatThreadEvent *)event {
-    if (![event.threadId isEqualToString:self.currentConversation.conversationId]) {
+    if (![event.chatThread.threadId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }
     if (self.delegate && [self.delegate respondsToSelector:@selector(popThreadChat)]) {
@@ -235,14 +235,14 @@
         return;
     }
     switch (aEvent) {
-        case AgoraChatMultiDevicesEventThreadLeave:
+        case AgoraChatMultiDevicesEventChatThreadLeave:
             if (self.delegate && [self.delegate respondsToSelector:@selector(popThreadChat)]) {
                 [self.delegate popThreadChat];
                 return;
             }
             [self.parentViewController.navigationController popViewControllerAnimated:YES];
             break;
-        case AgoraChatMultiDevicesEventThreadUpdate:
+        case AgoraChatMultiDevicesEventChatThreadUpdate:
             //MARK: - threadNotify 已经刷新过了。这里刷新会重复刷新
             break;
         default:

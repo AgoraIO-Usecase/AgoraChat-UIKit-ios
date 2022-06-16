@@ -195,8 +195,8 @@
 //        return;
 //    }
     [super setModel:model];
-    self.threadName.text = model.message.threadOverView.threadName;
-    self.updateTime.text = [EMTimeConvertUtils durationString:model.message.threadOverView.lastMessage.timestamp];
+    self.threadName.text = model.message.chatThread.threadName;
+    self.updateTime.text = [EMTimeConvertUtils durationString:model.message.chatThread.lastMessage.timestamp];
     BOOL isCustomAvatar = NO;
     if (model.userDataProfile && [model.userDataProfile respondsToSelector:@selector(defaultAvatar)]) {
         if (model.userDataProfile.defaultAvatar) {
@@ -211,26 +211,26 @@
             isCustomAvatar = YES;
         }
     }
-    [self.messageBadge setTitle:[self convertMessageCount:model.message.threadOverView.messageCount] forState:UIControlStateNormal];
+    [self.messageBadge setTitle:[self convertMessageCount:model.message.chatThread.messageCount] forState:UIControlStateNormal];
     if (!isCustomAvatar) {
         _avatar.image = [UIImage easeUIImageNamed:@"default_avatar"];
     }
-    if (model.message.threadOverView.lastMessage.body.type == AgoraChatMessageBodyTypeText) {
-        NSString *text = [((AgoraChatTextMessageBody *)model.message.threadOverView.lastMessage.body) text];
+    if (model.message.chatThread.lastMessage.body.type == AgoraChatMessageBodyTypeText) {
+        NSString *text = [((AgoraChatTextMessageBody *)model.message.chatThread.lastMessage.body) text];
         if (!text) {
             text = @"";
         }
         self.messageContent.text = text;
     } else {
-        self.messageContent.text = [self convertType:model.message.threadOverView.lastMessage.body.type];
+        self.messageContent.text = [self convertType:model.message.chatThread.lastMessage.body.type];
     }
     if (model.threadUserProfile && [model.threadUserProfile respondsToSelector:@selector(showName)] && model.threadUserProfile.showName) {
         self.userName.text = model.threadUserProfile.showName;
     } else {
-        self.userName.text = model.message.threadOverView.lastMessage.from;
+        self.userName.text = model.message.chatThread.lastMessage.from;
     }
     
-    if (model.message.threadOverView.lastMessage.messageId == nil || [model.message.threadOverView.lastMessage.messageId isEqualToString:@""]) {
+    if (model.message.chatThread.lastMessage.messageId == nil || [model.message.chatThread.lastMessage.messageId isEqualToString:@""]) {
         self.messageContent.text = @"No Message";
         self.avatar.hidden = YES;
         _messageContent.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];

@@ -168,7 +168,7 @@
     NSString *to = thread.threadId;
     AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:to from:from to:to body:aBody ext:aExt];
     message.chatType = AgoraChatTypeGroupChat;
-    message.isChatThread = YES;
+    message.isChatThreadMessage = YES;
     __weak typeof(self) weakself = self;
     if (self.delegate && [self.delegate respondsToSelector:@selector(willSendMessage:)]) {
         AgoraChatMessage *callbackMsg = [self.delegate willSendMessage:message];

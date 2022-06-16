@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
     s.source_files = [
         'chat-uikit/EaseChatKit.h',
         'chat-uikit/EasePublicHeaders.h',
-        'chat-uikit/**/*.{h,m,mm,xib}'
+        'chat-uikit/**/*.{h,m,mm}'
     ]
     s.public_header_files = [
         'chat-uikit/EaseChatKit.h',

@@ -60,7 +60,7 @@
 }
 
 - (void)remakeLayout:(EaseMessageModel *)model {
-    if (model.message.threadOverView != nil && model.isHeader == NO) {
+    if (model.message.chatThread != nil && model.isHeader == NO) {
         [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.ease_top).offset(kHorizontalPadding);
             make.bottom.equalTo(self.ease_bottom).offset(-(KEMThreadBubbleWidth*0.4+12+5));
@@ -94,9 +94,9 @@
 {
     [super setModel:model];
     if (model.isHeader == NO) {
-        if (model.message.threadOverView) {
+        if (model.message.chatThread) {
             self.threadBubble.model = model;
-            self.threadBubble.hidden = !model.message.threadOverView;
+            self.threadBubble.hidden = !model.message.chatThread;
         }else {
             self.threadBubble.hidden = YES;
         }
@@ -162,7 +162,7 @@
    
     [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
     self.textLabel.attributedText = attaStr;
-    if (model.isHeader == NO && model.message.threadOverView) {
+    if (model.isHeader == NO && model.message.chatThread) {
         self.threadBubble.model = model;
     }
     [self remakeLayout:model];

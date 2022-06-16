@@ -277,11 +277,11 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 {
     if (aMessages && [aMessages count]) {
         AgoraChatMessage *msg = aMessages[0];
-        if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThread != YES) {
+        if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThreadMessage != YES) {
             AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO];
             //群聊@“我”提醒
             NSString *content = [NSString stringWithFormat:@"@%@",AgoraChatClient.sharedClient.currentUsername];
-            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThread != YES) {
+            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThreadMessage != YES) {
                 [conversation setRemindMe:msg.messageId];
             };
         }
