@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'chat-uikit'
-    s.version          = '1.0.1'
+    s.version          = '1.0.6'
     s.summary = 'agora im UIKit'
     s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
     s.description = <<-DESC
@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
                   DESC
     s.license          = { :type => 'MIT', :file => 'LICENSE' }
     s.author           = { 'agora' => 'dev@agora.com' }
-    s.source = { :git => 'git@github.com:AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.1'}
+    s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.6'}
     s.frameworks = 'UIKit'
     s.libraries = 'stdc++'
     s.ios.deployment_target = '11.0'
@@ -54,11 +54,20 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/Chat/LiveStream/EaseChatView.h',
         'chat-uikit/Classes/Chat/LiveStream/EaseCustomMessageHelper.h',
         'chat-uikit/Classes/Chat/LiveStream/EaseChatViewCustomOption.h',
-        'chat-uikit/Classes/Chat/LiveStream/UserInfo/EaseUserInfoManagerHelper.h'
+        'chat-uikit/Classes/Chat/LiveStream/UserInfo/EaseUserInfoManagerHelper.h',
+        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadCreateViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadListViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatHeader.h',
+        'chat-uikit/Classes/Chat/ChatModels/EaseThreadConversation.h',
+        'chat-uikit/Classes/Chat/InputMenu/MoreView/MoreFunction/EMBottomMoreFunctionView.h',
+        'chat-uikit/Classes/Chat/MessageCell/EaseThreadCell.h',
+        'chat-uikit/Classes/Chat/MessageCell/EaseThreadCreateCell.h',
     ]
     
     s.static_framework = true
-    s.resource = 'chat-uikit/Resources/chat-uikit.bundle'
+    s.resources = ['chat-uikit/**/*.bundle','chat-uikit/**/*.xib']
     s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
                               'VALID_ARCHS' => 'arm64 armv7 x86_64'
                             }
@@ -66,5 +75,6 @@ Pod::Spec.new do |s|
 
     s.dependency 'Agora_Chat_iOS'
     s.dependency 'EMVoiceConvert', '0.1.0'
+    s.dependency 'MJRefresh'
 
 end

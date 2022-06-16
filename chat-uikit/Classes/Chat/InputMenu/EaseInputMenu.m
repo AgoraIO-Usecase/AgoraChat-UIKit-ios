@@ -56,6 +56,12 @@
     return self;
 }
 
+- (BOOL)resignFirstResponder
+{
+    [_textView resignFirstResponder];
+    return [super resignFirstResponder];
+}
+
 #pragma mark - Subviews
 
 - (void)_setupAttachment

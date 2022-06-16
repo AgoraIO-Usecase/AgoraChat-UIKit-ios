@@ -26,7 +26,7 @@ static const void *recallViewKey = &recallViewKey;
 
 - (void)resetCellLongPressStatus:(EaseMessageCell *)aCell
 {
-    if (aCell.model.type == AgoraChatMessageTypeText) {
+    if (aCell.model.type == AgoraChatMessageTypeText && [aCell.bubbleView isKindOfClass:EMMsgTextBubbleView.class]) {
         EMMsgTextBubbleView *textBubbleView = (EMMsgTextBubbleView*)aCell.bubbleView;
         textBubbleView.textLabel.backgroundColor = [UIColor clearColor];
     }
@@ -55,10 +55,21 @@ static const void *recallViewKey = &recallViewKey;
                 [indexPaths addObject:[NSIndexPath indexPathForRow:(weakself.longPressIndexPath.row - 1) inSection:0]];
             }
         }
+        __block NSDictionary *notify;
+        [[self.dataArray.reverseObjectEnumerator allObjects] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj isKindOfClass:[NSDictionary class]]) {
+                NSString *msgId = [[obj allValues] firstObject];
+                if ([msgId isEqualToString:model.message.messageId]) {
+                    notify = obj;
+                    *stop = YES;
+                }
+            }
+        }];
+        if (notify) {
+            [weakself.dataArray removeObject:notify];
+        }
         [weakself.dataArray removeObjectsAtIndexes:indexs];
-        [weakself.tableView beginUpdates];
-        [weakself.tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-        [weakself.tableView endUpdates];
+        [weakself.tableView reloadData];
         if ([weakself.dataArray count] == 0) {
             weakself.msgTimelTag = -1;
         }
@@ -118,9 +129,21 @@ static const void *recallViewKey = &recallViewKey;
             message.timestamp = model.message.timestamp;
             message.localTime = model.message.localTime;
             [weakself.currentConversation insertMessage:message error:nil];
-            
+            __block NSDictionary *notify;
+            [[self.dataArray.reverseObjectEnumerator allObjects] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if ([obj isKindOfClass:[NSDictionary class]]) {
+                    NSString *msgId = [[obj allValues] firstObject];
+                    if ([msgId isEqualToString:model.message.messageId]) {
+                        notify = obj;
+                        *stop = YES;
+                    }
+                }
+            }];
             EaseMessageModel *model = [[EaseMessageModel alloc] initWithAgoraChatMessage:message];
             [weakself.dataArray replaceObjectAtIndex:indexPath.row withObject:model];
+            if (notify) {
+                [self.dataArray removeObject:notify];
+            }
             [weakself.tableView reloadData];
         }
     }];

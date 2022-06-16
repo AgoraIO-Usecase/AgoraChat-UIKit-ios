@@ -21,6 +21,12 @@
 
 #define EaseVIEWBOTTOMMARGIN (kIsBangsScreen ? 34.f : 0.f)
 
+#define EMNavgationHeight (kIsBangsScreen ? 87.f : 64.f)
+
+#define EMScreenHeight [UIScreen mainScreen].bounds.size.height
+
+#define EMScreenWidth [UIScreen mainScreen].bounds.size.width
+
 #define EaseSYSTEMNOTIFICATIONID @"Easesystemnotificationid"
 
 //账号状态

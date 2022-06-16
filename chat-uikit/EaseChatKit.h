@@ -22,7 +22,6 @@ FOUNDATION_EXPORT const unsigned char EaseChatKitVersionString[];
 #import "EaseConversationModel.h"
 #import "EaseConversationViewModel.h"
 #import "EaseConversationCell.h"
-
 // chat
 #import "EaseChatViewController.h"
 #import "EaseMessageModel.h"
@@ -31,6 +30,12 @@ FOUNDATION_EXPORT const unsigned char EaseChatKitVersionString[];
 #import "EaseMessageCell.h"
 #import "EaseInputMenu.h"
 
+//thread
+#import "EaseThreadChatViewController.h"
+#import "EaseThreadCreateViewController.h"
+#import "EaseThreadListViewController.h"
+#import "EaseThreadChatHeader.h"
+#import "EMBottomMoreFunctionView.h"
 
 //chatroom
 #import "EaseChatView.h"

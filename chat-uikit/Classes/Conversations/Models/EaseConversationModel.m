@@ -180,7 +180,7 @@
         if ([self.easeId isEqualToString:EaseSYSTEMNOTIFICATIONID]) {
             return [UIImage easeUIImageNamed:@"systemNoti"];;
         }
-        return [UIImage easeUIImageNamed:@"defaultAvatar"];
+        return [UIImage easeUIImageNamed:@"default_avatar"];
     }
     if (self.type == AgoraChatConversationTypeGroupChat) {
         return [UIImage easeUIImageNamed:@"groupConversation"];

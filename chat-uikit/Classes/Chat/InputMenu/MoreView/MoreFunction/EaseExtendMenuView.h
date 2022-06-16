@@ -34,7 +34,6 @@ typedef NS_ENUM(NSInteger, ExtType) {
 - (instancetype)initWithType:(ExtType)type itemCount:(NSInteger)itemCount extendMenuModel:(EaseExtendMenuViewModel*)extendMenuModel;
 @end
 
-
 @protocol EaseMoreFunctionViewDelegate <NSObject>
 @optional
 - (void)menuExtItemDidSelected:(EaseExtendMenuModel*)menuItemModel extType:(ExtType)extType;

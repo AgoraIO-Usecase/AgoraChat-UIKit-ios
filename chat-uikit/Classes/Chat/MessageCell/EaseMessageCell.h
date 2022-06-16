@@ -36,6 +36,10 @@ NS_ASSUME_NONNULL_BEGIN
                   messageType:(AgoraChatMessageType)aMessageType
                     viewModel:(EaseChatViewModel*)viewModel;
 
+- (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType;
+
+- (CGFloat)maxBubbleViewWidth;
+
 @end
 
 
@@ -49,6 +53,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)avatarDidSelected:(EaseMessageModel *)model;
 - (void)avatarDidLongPress:(EaseMessageModel *)model;
+
+- (void)toThreadChat:(EaseMessageModel *)model;
+- (void)messageCellDidClickReactionView:(EaseMessageModel *)model;
 
 @end
 
