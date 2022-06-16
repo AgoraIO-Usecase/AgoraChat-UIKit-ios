@@ -132,6 +132,13 @@
     _nameLabel.textColor = [UIColor colorWithHexString:@"#999999"];
     
     _bubbleView = [self getBubbleViewWithType:aType];
+    if (_bubbleView) {
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewTapAction:)];
+        [_bubbleView addGestureRecognizer:tap];
+        
+        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewLongPressAction:)];
+        [_bubbleView addGestureRecognizer:longPress];
+    }
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
     
@@ -346,13 +353,6 @@
             break;
         default:
             break;
-    }
-    if (bubbleView) {
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewTapAction:)];
-        [bubbleView addGestureRecognizer:tap];
-        
-        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewLongPressAction:)];
-        [bubbleView addGestureRecognizer:longPress];
     }
     
     return bubbleView;
