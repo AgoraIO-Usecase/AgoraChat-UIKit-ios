@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "EaseBaseTableViewModel.h"
 #import "EaseChatEnums.h"
+#import "EaseConversationAvatarParam.h"
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -17,14 +18,17 @@ NS_ASSUME_NONNULL_BEGIN
 // display chatroom
 @property (nonatomic) BOOL displayChatroom;
 
-// avatar style
-@property (nonatomic) EaseChatAvatarStyle avatarType;
-
 // avatar size
 @property (nonatomic) CGSize avatarSize;
 
-// avatar cornerRadius
-@property (nonatomic) CGFloat avatarCornerRadius;
+// group conversation avatar style
+@property (nonatomic, strong) EaseConversationAvatarParam *groupAvatarStyle;
+
+// chatroom conversation avatar style
+@property (nonatomic, strong) EaseConversationAvatarParam *chatroomAvatarStyle;
+
+// single chat conversation avatar style
+@property (nonatomic, strong) EaseConversationAvatarParam *chatAvatarStyle;
 
 // avatar location
 @property (nonatomic) UIEdgeInsets avatarEdgeInsets;

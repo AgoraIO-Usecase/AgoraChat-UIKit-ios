@@ -29,6 +29,7 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewModel.h',
         'chat-uikit/Classes/Conversations/Views/EaseConversationCell.h',
         'chat-uikit/Classes/Conversations/Models/EaseConversationViewModel.h',
+        'chat-uikit/Classes/Conversations/Models/EaseConversationAvatarParam.h',
         'chat-uikit/Classes/Conversations/Models/EaseConversationModel.h',
         'chat-uikit/Classes/Conversations/Controllers/EaseConversationsViewController.h',
         

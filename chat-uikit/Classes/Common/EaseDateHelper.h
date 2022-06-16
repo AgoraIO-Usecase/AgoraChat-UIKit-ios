@@ -29,14 +29,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSDateFormatter *dfPPHM;
 @property (nonatomic, strong) NSDateFormatter *dfNightHM;
 
+typedef NS_ENUM(NSInteger, EaseDateType) {
+    EaseDateTypeChat,
+    EaseDateTypeConversastion
+};
 
 + (instancetype)shareHelper;
 
 + (NSDate *)dateWithTimeIntervalInMilliSecondSince1970:(double)aMilliSecond;
 
-+ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval;
++ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval dateType:(EaseDateType)type;
 
-+ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval forDateFormatter:(NSDateFormatter *)formatter;
++ (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval forDateFormatter:(NSDateFormatter *)formatter  dateType:(EaseDateType)type;
 
 @end
 

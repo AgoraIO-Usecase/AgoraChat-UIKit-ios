@@ -102,7 +102,11 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 
 - (void)autoLoginDidCompleteWithError:(AgoraChatError *)aError
 {
-    [self _loadAllConversationsFromDB];
+    [[AgoraChatClient sharedClient].groupManager getJoinedGroupsFromServerWithCompletion:^(NSArray *aList, AgoraChatError *aError) {
+        NSArray *ary = [[AgoraChatClient sharedClient].groupManager getJoinedGroups];
+        [self _loadAllConversationsFromDB];
+    }];
+    
 }
 
 #pragma mark - Table view data source
@@ -383,7 +387,6 @@ static NSString *cellIdentifier = @"EaseConversationCell";
         weakSelf.dataAry = (NSMutableArray *)totals;
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.tableView reloadData];
             [weakSelf endRefresh];
             [weakSelf _updateBackView];
         });
