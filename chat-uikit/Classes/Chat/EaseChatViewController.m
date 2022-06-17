@@ -955,15 +955,12 @@
                     if (index != NSNotFound) {
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [weakself.dataArray replaceObjectAtIndex:index withObject:reloadModel];
-                            [weakself.tableView beginUpdates];
-                            [weakself.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
-                            [weakself.tableView endUpdates];
                         });
+
                     }
                 }
             }
         }];
-                
     });
 }
 
