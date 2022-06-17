@@ -135,6 +135,13 @@
     _nameLabel.textColor = [UIColor colorWithHexString:@"#999999"];
     
     _bubbleView = [self getBubbleViewWithType:aType];
+    if (_bubbleView) {
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewTapAction:)];
+        [_bubbleView addGestureRecognizer:tap];
+        
+        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewLongPressAction:)];
+        [_bubbleView addGestureRecognizer:longPress];
+    }
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
     [self.contentView addSubview:_avatarView];
@@ -285,7 +292,7 @@
 }
 
 - (void)getBubbleWidth:(EaseMessageModel *)model {
-    if (model.message.threadOverView) {
+    if (model.message.chatThread) {
         self.bubbleView.maxBubbleWidth = KEMThreadBubbleWidth + 24;
     } else {
         CGFloat bubbleViewWidth = self.contentView.bounds.size.width - 4 * componentSpacing;
@@ -370,13 +377,6 @@
         default:
             break;
     }
-    if (bubbleView) {
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewTapAction:)];
-        [bubbleView addGestureRecognizer:tap];
-        
-        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(bubbleViewLongPressAction:)];
-        [bubbleView addGestureRecognizer:longPress];
-    }
     
     return bubbleView;
 }
@@ -393,7 +393,7 @@
         [self.statusView setSenderStatus:model.message.status isReadAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isReadAcked : NO isDeliverAcked:model.message.chatType == AgoraChatTypeChat ? model.message.isDeliverAcked : NO ];
     } else {
         if (model.type == AgoraChatMessageBodyTypeVoice) {
-            if (model.message.isChatThread == YES) {
+            if (model.message.isChatThreadMessage == YES) {
                 NSMutableDictionary *dic = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"] mutableCopy];
                 model.message.isListened = [dic[model.message.messageId] boolValue];
             }

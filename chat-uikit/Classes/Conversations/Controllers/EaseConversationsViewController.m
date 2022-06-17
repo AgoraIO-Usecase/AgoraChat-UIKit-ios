@@ -102,7 +102,11 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 
 - (void)autoLoginDidCompleteWithError:(AgoraChatError *)aError
 {
-    [self _loadAllConversationsFromDB];
+    [[AgoraChatClient sharedClient].groupManager getJoinedGroupsFromServerWithCompletion:^(NSArray *aList, AgoraChatError *aError) {
+        NSArray *ary = [[AgoraChatClient sharedClient].groupManager getJoinedGroups];
+        [self _loadAllConversationsFromDB];
+    }];
+    
 }
 
 #pragma mark - Table view data source
@@ -277,11 +281,11 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 {
     if (aMessages && [aMessages count]) {
         AgoraChatMessage *msg = aMessages[0];
-        if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThread != YES) {
+        if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThreadMessage != YES) {
             AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO];
             //群聊@“我”提醒
             NSString *content = [NSString stringWithFormat:@"@%@",AgoraChatClient.sharedClient.currentUsername];
-            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThread != YES) {
+            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThreadMessage != YES) {
                 [conversation setRemindMe:msg.messageId];
             };
         }
@@ -383,7 +387,6 @@ static NSString *cellIdentifier = @"EaseConversationCell";
         weakSelf.dataAry = (NSMutableArray *)totals;
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            [weakSelf.tableView reloadData];
             [weakSelf endRefresh];
             [weakSelf _updateBackView];
         });

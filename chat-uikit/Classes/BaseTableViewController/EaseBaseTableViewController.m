@@ -44,10 +44,10 @@
     _baseViewModel = viewModel;
     [self _setupSubViews];
     if (_baseViewModel.canRefresh) {
-        [self refreshTable];
+        [self refreshTabView];
     }else {
         [self.tableView disableRefresh];
-        [self refreshTabView];
+        [self refreshTable];
     }
     
     [self.tableView setSeparatorInset:_baseViewModel.cellSeparatorInset];
@@ -63,7 +63,7 @@
 }
 
 #pragma mark - actions
-- (void)refreshTable {
+- (void)refreshTabView {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.tableView setContentOffset:CGPointMake(0, self.tableView.contentOffset.y - self.tableView.refreshControl.frame.size.height) animated:NO];
         [self.tableView.refreshControl beginRefreshing];
@@ -71,7 +71,7 @@
     });
 }
 
--(void)refreshTabView
+-(void)refreshTable
 {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self.tableView reloadData];

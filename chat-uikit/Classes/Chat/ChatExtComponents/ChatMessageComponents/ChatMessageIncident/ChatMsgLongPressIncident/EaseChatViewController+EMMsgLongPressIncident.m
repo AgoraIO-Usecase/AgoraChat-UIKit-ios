@@ -199,7 +199,7 @@ static const void *recallViewKey = &recallViewKey;
         
         CGFloat interval = (self.msgTimelTag - msg.timestamp) / 1000;
         if (self.msgTimelTag < 0 || interval > 60 || interval < -60) {
-            NSString *timeStr = [EaseDateHelper formattedTimeFromTimeInterval:msg.timestamp];
+            NSString *timeStr = [EaseDateHelper formattedTimeFromTimeInterval:msg.timestamp dateType:EaseDateTypeChat];
             [formated addObject:timeStr];
             self.msgTimelTag = msg.timestamp;
         }

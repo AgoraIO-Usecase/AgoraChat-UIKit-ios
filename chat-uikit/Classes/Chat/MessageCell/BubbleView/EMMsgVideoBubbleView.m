@@ -49,7 +49,7 @@
 
 - (void)_setupSubviews
 {
-    if (self.model.message.threadOverView && self.model.isHeader == NO) {
+    if (self.model.message.chatThread && self.model.isHeader == NO) {
         [self.shadowView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.edges.equalTo(self.photo);
         }];

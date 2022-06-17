@@ -60,7 +60,7 @@
 }
 
 - (void)remakeLayout:(EaseMessageModel *)model {
-    if (model.message.threadOverView != nil && model.isHeader == NO) {
+    if (model.message.chatThread != nil && model.isHeader == NO) {
         [self.textLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.ease_top).offset(kHorizontalPadding);
             make.bottom.equalTo(self.ease_bottom).offset(-(KEMThreadBubbleWidth*0.4+12+5));
@@ -94,9 +94,9 @@
 {
     [super setModel:model];
     if (model.isHeader == NO) {
-        if (model.message.threadOverView) {
+        if (model.message.chatThread) {
             self.threadBubble.model = model;
-            self.threadBubble.hidden = !model.message.threadOverView;
+            self.threadBubble.hidden = !model.message.chatThread;
         }else {
             self.threadBubble.hidden = YES;
         }
@@ -108,14 +108,14 @@
     NSString *text = [EaseEmojiHelper convertEmoji:body.text];
     NSMutableAttributedString *attaStr = [[NSMutableAttributedString alloc] initWithString:text];
     /*
-    //下滑线
-    NSMutableAttributedString *underlineStr = [[NSMutableAttributedString alloc] initWithString:@"下滑线"];
+    //glideline
+    NSMutableAttributedString *underlineStr = [[NSMutableAttributedString alloc] initWithString:@"glideline"];
     [underlineStr addAttributes:@{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle),
                                   NSUnderlineColorAttributeName: [UIColor redColor]
                                   } range:NSMakeRange(0, 3)];
     [attaStr appendAttributedString:underlineStr];
-    //删除线
-    NSMutableAttributedString *throughlineStr = [[NSMutableAttributedString alloc] initWithString:@"删除线"];
+    //strikethrough
+    NSMutableAttributedString *throughlineStr = [[NSMutableAttributedString alloc] initWithString:@"strikethrough"];
     [throughlineStr addAttributes:@{NSStrikethroughStyleAttributeName: @(NSUnderlineStyleSingle),
                                     NSStrikethroughColorAttributeName: [UIColor orangeColor]
                                     } range:NSMakeRange(0, 3)];
@@ -136,7 +136,7 @@
     NSMutableAttributedString *linkStr = [[NSMutableAttributedString alloc] initWithString:urlStr];
     [linkStr addAttributes:@{NSLinkAttributeName: [NSURL URLWithString:urlStr]} range:NSMakeRange(0, urlStr.length)];
     [attaStr appendAttributedString:linkStr];*/
-    //图片
+    //picture
     /*
     NSTextAttachment *imgAttach =  [[NSTextAttachment alloc] init];
     imgAttach.image = [UIImage imageNamed:@"dribbble64_imageio"];
@@ -151,8 +151,9 @@
     } else {
         color = (model.direction == AgoraChatMessageDirectionReceive ? _viewModel.reveivedFontColor:_viewModel.sentFontColor);
     }
+    
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-    paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
+    paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
     NSDictionary *attributes = @{
                                  NSFontAttributeName:[UIFont systemFontOfSize:16],
                                  NSParagraphStyleAttributeName:paragraphStyle
@@ -162,7 +163,7 @@
    
     [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
     self.textLabel.attributedText = attaStr;
-    if (model.isHeader == NO && model.message.threadOverView) {
+    if (model.isHeader == NO && model.message.chatThread) {
         self.threadBubble.model = model;
     }
     [self remakeLayout:model];

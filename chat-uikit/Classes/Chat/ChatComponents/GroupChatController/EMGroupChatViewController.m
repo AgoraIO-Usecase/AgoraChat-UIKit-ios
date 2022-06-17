@@ -138,26 +138,46 @@
 
 
 - (void)onChatThreadCreate:(AgoraChatThreadEvent *)event {
-    if (event.threadName && event.from && [event.channelId isEqualToString:self.currentConversation.conversationId]) {
+    if (event.chatThread.threadName && event.from && [event.chatThread.parentId isEqualToString:self.currentConversation.conversationId]) {
         id<EaseUserProfile> userThreadData = [self.delegate userProfile:event.from];
-        NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nJoin the thread",userThreadData.showName ? userThreadData.showName:event.from,event.threadName];
-        [self.dataArray addObject:@{threadNotify:event.messageId}];
+        NSString *threadNotify = [NSString stringWithFormat:@"%@ started a thread:%@\nJoin the thread",userThreadData.showName ? userThreadData.showName:event.from,event.chatThread.threadName];
+        [self.dataArray addObject:@{threadNotify:event.chatThread.messageId}];
         [self refreshTableView:YES];
     }
 }
 
 - (void)onChatThreadDestroy:(AgoraChatThreadEvent *)event {
-    if (![event.channelId isEqualToString:self.currentConversation.conversationId]) {
+    if (![event.chatThread.parentId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }
     [self refreshTableView:YES];
 }
 
 - (void)onChatThreadUpdate:(AgoraChatThreadEvent *)event {
-    if (![event.channelId isEqualToString:self.currentConversation.conversationId]) {
+    if (![event.chatThread.parentId isEqualToString:self.currentConversation.conversationId]) {
         return;
     }
-    [self refreshTableView:YES];
+    AgoraChatMessage *message = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:event.chatThread.messageId];
+    if (message.messageId.length) {
+        for (id obj in self.dataArray) {
+            if ([obj isKindOfClass:[EaseMessageModel class]]) {
+                EaseMessageModel *model = (EaseMessageModel *)obj;
+                if ([model.message.messageId isEqualToString:message.messageId]) {
+                    model.message = message;
+                    break;
+                }
+            }
+        }
+    }
+    for (EaseMessageCell *cell in self.tableView.visibleCells) {
+        if ([cell isKindOfClass:[EaseMessageCell class]]) {
+            if ([cell.model.message.messageId isEqualToString:message.messageId]) {
+                cell.model.message = message;
+                cell.model = cell.model;
+                break;
+            }
+        }
+    }
 }
 
 @end

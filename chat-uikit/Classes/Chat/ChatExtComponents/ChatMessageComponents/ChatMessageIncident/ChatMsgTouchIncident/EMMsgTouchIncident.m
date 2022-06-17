@@ -186,7 +186,7 @@
     void (^playBlock)(EaseMessageModel *aModel) = ^(EaseMessageModel *aModel) {
         if (!aModel.message.isListened) {
             aModel.message.isListened = YES;
-            if (aModel.message.isChatThread) {
+            if (aModel.message.isChatThreadMessage) {
                 NSMutableDictionary *dic;
                 if (![[NSUserDefaults standardUserDefaults] dictionaryForKey:@"EMListenHashMap"]) {
                     dic = [[NSMutableDictionary alloc]init];

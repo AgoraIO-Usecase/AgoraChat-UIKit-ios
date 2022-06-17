@@ -75,9 +75,9 @@
     
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[[UIImage easeUIImageNamed:@"close_gray"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] style:UIBarButtonItemStylePlain target:self action:@selector(closeAction)];
     if (self.canSend) {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"发送" style:UIBarButtonItemStylePlain target:self action:@selector(sendAction)];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"send" style:UIBarButtonItemStylePlain target:self action:@selector(sendAction)];
     }
-    self.title = @"地理位置";*/
+    self.title = @"Geographical location";*/
     self.navigationController.navigationBar.hidden = YES;
     self.view.backgroundColor = [UIColor whiteColor];
     self.mapView = [[MKMapView alloc] initWithFrame:self.view.bounds];
