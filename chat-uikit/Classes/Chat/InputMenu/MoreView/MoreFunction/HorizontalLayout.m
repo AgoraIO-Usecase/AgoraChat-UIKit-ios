@@ -81,8 +81,6 @@
     
     CGFloat width = self.collectionView.bounds.size.width;
     
-    CGFloat lineDis = self.minimumLineSpacing;
-    CGFloat itemDis = self.minimumInteritemSpacing;
     
     NSInteger index = attr.indexPath.item;
     

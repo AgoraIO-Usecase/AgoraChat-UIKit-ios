@@ -33,7 +33,6 @@
 - (instancetype)initWithGroup:(AgoraChatGroup *)group chatViewModel:(EaseChatViewModel *)viewModel{
     if ([super init]) {
         self.group = group;
-        __weak typeof(self) weakSelf = self;
         self.viewModel = viewModel;
         self.threadMessageMap = [NSMutableDictionary dictionary];
         [self requestList];
@@ -229,7 +228,7 @@
     if (message.messageId.length) {
         model = [[EaseMessageModel alloc]initWithAgoraChatMessage:message];
         model.direction = message.direction;
-        model.type = message.body.type;
+        model.type = (AgoraChatMessageType)message.body.type;
         model.thread = conv.threadInfo;
     }
     [AgoraChatClient.sharedClient.threadManager joinChatThread:conv.threadInfo.threadId completion:^(AgoraChatThread *thread, AgoraChatError *aError) {

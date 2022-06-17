@@ -61,7 +61,6 @@
         if (aSize.width == 0 || aSize.height == 0) {
             break;
         }
-        CGFloat maxWidth = [UIScreen mainScreen].bounds.size.width / 2 - 60.0;
         NSInteger tmpWidth = aSize.width;
         if (aSize.width < kEMMsgImageMinWidth) {
             tmpWidth = kEMMsgImageMinWidth;
@@ -170,7 +169,7 @@
         block(size);
     } else {
         block(size);
-        BOOL isAutoDownloadThumbnail = ([AgoraChatClient sharedClient].options.isAutoDownloadThumbnail);
+        BOOL isAutoDownloadThumbnail = ([AgoraChatClient sharedClient].options.autoDownloadThumbnail);
         if (isAutoDownloadThumbnail) {
             [self Ease_setImageWithURL:[NSURL URLWithString:aRemotePath] placeholderImage:[UIImage easeUIImageNamed:@"msg_img_broken"] completed:^(UIImage * _Nullable image, NSError * _Nullable error, EaseImageCacheType cacheType, NSURL * _Nullable imageURL) {}];
         } else {

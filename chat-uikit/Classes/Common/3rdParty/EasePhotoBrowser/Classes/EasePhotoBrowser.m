@@ -1408,7 +1408,7 @@ static void * EaseVideoPlayerObservation = &EaseVideoPlayerObservation;
     if ([self areControlsHidden] && !hidden && animated) {
         
         // Toolbar
-        _toolbar.frame = CGRectOffset([self frameForToolbarAtOrientation:self.interfaceOrientation], 0, animatonOffset);
+        self->_toolbar.frame = CGRectOffset([self frameForToolbarAtOrientation:self.interfaceOrientation], 0, animatonOffset);
         
         // Captions
         for (EaseZoomingScrollView *page in _visiblePages) {
@@ -1430,12 +1430,12 @@ static void * EaseVideoPlayerObservation = &EaseVideoPlayerObservation;
         [self.navigationController.navigationBar setAlpha:alpha];
         
         // Toolbar
-        _toolbar.frame = [self frameForToolbarAtOrientation:self.interfaceOrientation];
-        if (hidden) _toolbar.frame = CGRectOffset(_toolbar.frame, 0, animatonOffset);
+        self->_toolbar.frame = [self frameForToolbarAtOrientation:self.interfaceOrientation];
+        if (hidden) self->_toolbar.frame = CGRectOffset(self->_toolbar.frame, 0, animatonOffset);
         _toolbar.alpha = alpha;
 
         // Captions
-        for (EaseZoomingScrollView *page in _visiblePages) {
+        for (EaseZoomingScrollView *page in self->_visiblePages) {
             if (page.captionView) {
                 EaseCaptionView *v = page.captionView;
                 // Pass any index, all we're interested in is the Y
@@ -1448,7 +1448,7 @@ static void * EaseVideoPlayerObservation = &EaseVideoPlayerObservation;
         }
         
         // Selected buttons
-        for (EaseZoomingScrollView *page in _visiblePages) {
+        for (EaseZoomingScrollView *page in self->_visiblePages) {
             if (page.selectedButton) {
                 UIButton *v = page.selectedButton;
                 CGRect newFrame = [self frameForSelectedButton:v atIndex:0];
