@@ -112,7 +112,7 @@
         make.width.Ease_equalTo(rect.size.width);
         make.height.Ease_equalTo(rect.size.height);
     }];
-    if (model.isHeader == NO && model.message.threadOverView) {
+    if (model.isHeader == NO && model.message.chatThread) {
         [_threadBubble Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.bottom.equalTo(self).offset(-12);
             make.left.equalTo(self).offset(12);
@@ -187,9 +187,9 @@
 {
     [super setModel:model];
     if (model.isHeader == NO) {
-        if (model.message.threadOverView) {
+        if (model.message.chatThread) {
             self.threadBubble.model = model;
-            self.threadBubble.hidden = !model.message.threadOverView;
+            self.threadBubble.hidden = !model.message.chatThread;
         }else {
             self.backgroundColor = [UIColor colorWithHexString:@"#F2F2F2"];
             self.threadBubble.hidden = YES;
@@ -203,10 +203,10 @@
     if (type == AgoraChatMessageTypeFile) {
         CGFloat height = 70;
         if (!model.isHeader) {
-            if (model.message.threadOverView) {
+            if (model.message.chatThread) {
                 self.maxBubbleWidth = KEMThreadBubbleWidth+24;
             }
-            if (model.message.threadOverView) {
+            if (model.message.chatThread) {
                 height = 65+4+12+KEMThreadBubbleWidth*0.4;
             }
         }
@@ -227,11 +227,11 @@
         self.detailLabel.text = [NSString stringWithFormat:@"%.2lf MB",(float)body.fileLength / (1024 * 1024)];
         
         if (self.direction == AgoraChatMessageDirectionReceive && body.downloadStatus == AgoraChatDownloadStatusSucceed) {
-            self.downloadStatusLabel.text = @"已下载";
+            self.downloadStatusLabel.text = @"Downloaded";
         } else {
             self.downloadStatusLabel.text = @"";
         }
-        if (model.message.threadOverView && model.isHeader == NO) {
+        if (model.message.chatThread && model.isHeader == NO) {
             self.threadBubble.model = model;
         }
         

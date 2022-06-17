@@ -75,7 +75,7 @@
 - (CGPathRef)CYPathCreateWithRoundedRect:(CGRect)bounds
 {
     BubbleCornerRadius cornerRadius = self.direction == AgoraChatMessageDirectionSend ? self.viewModel.rightAlignmentCornerRadius : self.viewModel.leftAlignmentCornerRadius;
-    BOOL thread = (self.model.message.threadOverView != nil);//self.model.message.isChatThread
+    BOOL thread = (self.model.message.chatThread != nil);//self.model.message.isChatThreadMessage
     if (thread == YES) {
         cornerRadius = self.viewModel.threadCornerRadius;
     }

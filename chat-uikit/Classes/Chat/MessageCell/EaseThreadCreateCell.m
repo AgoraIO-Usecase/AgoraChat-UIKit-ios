@@ -177,6 +177,8 @@
         _threadNameField.placeholder = @"Thread Name";
         _threadNameField.leftViewMode = UITextFieldViewModeAlways;
         _threadNameField.enabled = (self.displayType != EMThreadHeaderTypeDisplay);
+        _threadNameField.returnKeyType = UIReturnKeyDone;
+        [_threadNameField becomeFirstResponder];
         if (self.displayType != EMThreadHeaderTypeDisplay) {
             _threadNameField.delegate = self;
         }
@@ -562,8 +564,9 @@
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(textFieldEndText:)]) {
-        [self.delegate textFieldEndText:textField.text];
+    if (textField.text.length == 0) return YES;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textFieldShouldReturn:)]) {
+        [self.delegate textFieldShouldReturn:textField.text];
     }
     return YES;
 }

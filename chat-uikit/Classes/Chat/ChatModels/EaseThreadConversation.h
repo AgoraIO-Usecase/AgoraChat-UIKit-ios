@@ -7,7 +7,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import <AgoraChat/AgoraChatThreadInfo.h>
 #import <AgoraChat/AgoraChatMessage.h>
 #import "EaseUserProfile.h"
 
@@ -15,7 +14,7 @@
 
 @property (nonatomic) id<EaseUserProfile> userDataProfile;
 
-@property (nonatomic, strong) AgoraChatThreadInfo *threadInfo;
+@property (nonatomic, strong) AgoraChatThread *threadInfo;
 
 @property (nonatomic, strong) AgoraChatMessage *lastMessage;
 

@@ -52,6 +52,10 @@
     return self;
 }
 
+- (void)setMessage:(AgoraChatMessage *)message {
+    _message = message;
+}
+
 - (id)copyWithZone:(NSZone *)zone {
     return [self ease_copyWithZone:zone];
 }

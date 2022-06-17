@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'chat-uikit'
-    s.version          = '1.0.5'
+    s.version          = '1.0.6'
     s.summary = 'agora im UIKit'
     s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
     s.description = <<-DESC
@@ -11,14 +11,14 @@ Pod::Spec.new do |s|
                   DESC
     s.license          = { :type => 'MIT', :file => 'LICENSE' }
     s.author           = { 'agora' => 'dev@agora.com' }
-    s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.5'}
+    s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.6'}
     s.frameworks = 'UIKit'
     s.libraries = 'stdc++'
     s.ios.deployment_target = '11.0'
     s.source_files = [
         'chat-uikit/EaseChatKit.h',
         'chat-uikit/EasePublicHeaders.h',
-        'chat-uikit/**/*.{h,m,mm,xib}'
+        'chat-uikit/**/*.{h,m,mm}'
     ]
     s.public_header_files = [
         'chat-uikit/EaseChatKit.h',
@@ -29,6 +29,7 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewModel.h',
         'chat-uikit/Classes/Conversations/Views/EaseConversationCell.h',
         'chat-uikit/Classes/Conversations/Models/EaseConversationViewModel.h',
+        'chat-uikit/Classes/Conversations/Models/EaseConversationAvatarParam.h',
         'chat-uikit/Classes/Conversations/Models/EaseConversationModel.h',
         'chat-uikit/Classes/Conversations/Controllers/EaseConversationsViewController.h',
         
@@ -49,7 +50,21 @@ Pod::Spec.new do |s|
         
         'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewModel.h',
         'chat-uikit/Classes/BaseTableviewController/EaseUserProfile.h',
-        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadCreateViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadListViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatViewController.h','chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatHeader.h','chat-uikit/Classes/Chat/ChatModels/EaseThreadConversation.h','chat-uikit/Classes/Chat/InputMenu/MoreView/MoreFunction/EMBottomMoreFunctionView.h','chat-uikit/Classes/Chat/MessageCell/EaseThreadCell.h','chat-uikit/Classes/Chat/MessageCell/EaseThreadCreateCell.h'
+        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h',
+        
+        'chat-uikit/Classes/Chat/LiveStream/EaseChatView.h',
+        'chat-uikit/Classes/Chat/LiveStream/EaseCustomMessageHelper.h',
+        'chat-uikit/Classes/Chat/LiveStream/EaseChatViewCustomOption.h',
+        'chat-uikit/Classes/Chat/LiveStream/UserInfo/EaseUserInfoManagerHelper.h',
+        'chat-uikit/Classes/BaseTableViewController/EaseBaseTableViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadCreateViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadListViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatViewController.h',
+        'chat-uikit/Classes/Chat/ChatComponents/ThreadChatController/EaseThreadChatHeader.h',
+        'chat-uikit/Classes/Chat/ChatModels/EaseThreadConversation.h',
+        'chat-uikit/Classes/Chat/InputMenu/MoreView/MoreFunction/EMBottomMoreFunctionView.h',
+        'chat-uikit/Classes/Chat/MessageCell/EaseThreadCell.h',
+        'chat-uikit/Classes/Chat/MessageCell/EaseThreadCreateCell.h',
     ]
     
     s.static_framework = true

@@ -63,19 +63,6 @@
     
     self.backgroundColor = _viewModel.cellBgColor;
     
-    if (_viewModel.avatarType != Rectangular) {
-        _avatarView.clipsToBounds = YES;
-        if (_viewModel.avatarType == RoundedCorner) {
-            _avatarView.layer.cornerRadius = _viewModel.avatarCornerRadius;
-        }
-        else if(_viewModel.avatarType == Circular) {
-            _avatarView.layer.cornerRadius = _viewModel.avatarSize.width / 2;
-        }
-        
-    }else {
-        _avatarView.clipsToBounds = NO;
-    }
-    
     _avatarView.backgroundColor = [UIColor clearColor];
     _avatarView.contentMode = UIViewContentModeScaleAspectFit;
     
@@ -119,7 +106,7 @@
 - (void)_setupSubViewsConstraints
 {
     __weak typeof(self) weakSelf = self;
-    
+
     [_avatarView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(weakSelf.contentView.ease_top).offset(weakSelf.viewModel.avatarEdgeInsets.top);
         make.bottom.equalTo(weakSelf.contentView.ease_bottom).offset(weakSelf.viewModel.avatarEdgeInsets.bottom);
@@ -191,6 +178,16 @@
 {
     _model = model;
     
+    if (model.type == AgoraChatConversationTypeGroupChat) {
+        [self setAvatarCornerStyle:_viewModel.groupAvatarStyle];
+    }
+    if (model.type == AgoraChatConversationTypeChat) {
+        [self setAvatarCornerStyle:_viewModel.chatAvatarStyle];
+    }
+    if (model.type == AgoraChatConversationTypeChatRoom) {
+        [self setAvatarCornerStyle:_viewModel.chatroomAvatarStyle];
+    }
+    
     UIImage *img = nil;
     if ([_model respondsToSelector:@selector(defaultAvatar)]) {
         img = _model.defaultAvatar;
@@ -222,9 +219,25 @@
     
     self.noDisturbView.hidden = !_model.isNoDistrub;
     self.detailLabel.attributedText = _model.showInfo;
-    self.timeLabel.text = [EaseDateHelper formattedTimeFromTimeInterval:_model.lastestUpdateTime];
+    self.timeLabel.text = [EaseDateHelper formattedTimeFromTimeInterval:_model.lastestUpdateTime dateType:EaseDateTypeConversastion];
     if (_viewModel.needsDisplayBadge) {
         [self.badgeLabel setBagde:_model.unreadMessagesCount badgeStyle:_viewModel.badgeViewStyle];
+    }
+}
+
+- (void)setAvatarCornerStyle:(EaseConversationAvatarParam *)avatarParam
+{
+    if (avatarParam.avatarType != Rectangular) {
+        _avatarView.clipsToBounds = YES;
+        if (avatarParam.avatarType == RoundedCorner) {
+            _avatarView.layer.cornerRadius = avatarParam.avatarCornerRadius;
+        }
+        else if(avatarParam.avatarType == Circular) {
+            _avatarView.layer.cornerRadius = _viewModel.avatarSize.width / 2;
+        }
+        
+    } else {
+        _avatarView.clipsToBounds = NO;
     }
 }
 

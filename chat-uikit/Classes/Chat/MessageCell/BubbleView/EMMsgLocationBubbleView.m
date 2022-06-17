@@ -34,7 +34,7 @@
     if (type == AgoraChatMessageTypeLocation) {
         AgoraChatLocationMessageBody *body = (AgoraChatLocationMessageBody *)model.message.body;
         self.textLabel.text = body.address;
-        self.detailLabel.text = [NSString stringWithFormat:@"纬度:%.2lf°, 经度:%.2lf°", body.latitude, body.longitude];
+        self.detailLabel.text = [NSString stringWithFormat:@"latitude:%.2lf°, longitude:%.2lf°", body.latitude, body.longitude];
     }
 }
 

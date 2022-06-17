@@ -94,10 +94,10 @@
     void (^block)(CGSize aSize) = ^(CGSize aSize) {
         CGSize layoutSize = [weakself _getImageSize:aSize];
         CGFloat space = 0;
-        if (weakself.model.message.threadOverView && weakself.model.isHeader == NO) {
+        if (weakself.model.message.chatThread && weakself.model.isHeader == NO) {
             space = 12*2;
         }
-        if (weakself.model.message.threadOverView) {
+        if (weakself.model.message.chatThread) {
             if (weakself.model.isHeader == NO) {
                 [weakself Ease_updateConstraints:^(EaseConstraintMaker *make) {
                     make.width.Ease_equalTo(KEMThreadBubbleWidth+space);
@@ -136,7 +136,7 @@
             }];
         }
         CGRect rect;
-        if (weakself.model.message.threadOverView) {
+        if (weakself.model.message.chatThread) {
             if (weakself.model.isHeader == NO) {
                 rect = CGRectMake(0, 0, KEMThreadBubbleWidth+space, KEMThreadBubbleWidth*0.4+layoutSize.height+4+space);
             } else {
@@ -155,7 +155,7 @@
         size = CGSizeMake(70, 70);
     
     if (img) {
-        if (self.model.message.threadOverView) {
+        if (self.model.message.chatThread) {
             if (weakself.model.isHeader == NO) {
                 [self setupBubbleBackgroundImage];
                 self.photo.image = img;
@@ -184,20 +184,20 @@
 {
     [super setModel:model];
     if (model.isHeader == NO) {
-        if (model.message.threadOverView) {
+        if (model.message.chatThread) {
             self.threadBubble.model = model;
-            self.threadBubble.hidden = !model.message.threadOverView;
+            self.threadBubble.hidden = !model.message.chatThread;
         }
         
     } else {
         self.threadBubble.hidden = YES;
     }
     AgoraChatMessageType type = model.type;
-    self.threadBubble.hidden = !model.message.threadOverView;
+    self.threadBubble.hidden = !model.message.chatThread;
     if (model.thread && model.thread.threadId.length) {
         self.threadBubble.hidden = YES;
     }
-    self.photo.hidden = !model.message.threadOverView;
+    self.photo.hidden = !model.message.chatThread;
     if (type == AgoraChatMessageTypeImage) {
         AgoraChatImageMessageBody *body = (AgoraChatImageMessageBody *)model.message.body;
         NSString *imgPath = body.thumbnailLocalPath;
