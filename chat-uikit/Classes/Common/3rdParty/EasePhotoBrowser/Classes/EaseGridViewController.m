@@ -135,7 +135,7 @@
 #pragma mark - Layout
 
 - (CGFloat)getColumns {
-    if ((UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation))) {
+    if ((UIInterfaceOrientationIsPortrait(self.interfaceOrientation))) {
         return _columns;
     } else {
         return _columnsL;
@@ -143,7 +143,7 @@
 }
 
 - (CGFloat)getMargin {
-    if ((UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation))) {
+    if ((UIInterfaceOrientationIsPortrait(self.interfaceOrientation))) {
         return _margin;
     } else {
         return _marginL;
@@ -151,7 +151,7 @@
 }
 
 - (CGFloat)getGutter {
-    if ((UIInterfaceOrientationIsPortrait([UIApplication sharedApplication].statusBarOrientation))) {
+    if ((UIInterfaceOrientationIsPortrait(self.interfaceOrientation))) {
         return _gutter;
     } else {
         return _gutterL;
