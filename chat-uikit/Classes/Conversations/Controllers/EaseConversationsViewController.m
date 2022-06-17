@@ -102,6 +102,7 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 
 - (void)autoLoginDidCompleteWithError:(AgoraChatError *)aError
 {
+    [self _loadAllConversationsFromDB];
     [[AgoraChatClient sharedClient].groupManager getJoinedGroupsFromServerWithCompletion:^(NSArray *aList, AgoraChatError *aError) {
         NSArray *ary = [[AgoraChatClient sharedClient].groupManager getJoinedGroups];
         [self _loadAllConversationsFromDB];
