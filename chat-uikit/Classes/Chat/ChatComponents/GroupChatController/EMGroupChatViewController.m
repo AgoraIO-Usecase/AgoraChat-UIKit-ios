@@ -169,15 +169,7 @@
             }
         }
     }
-    for (EaseMessageCell *cell in self.tableView.visibleCells) {
-        if ([cell isKindOfClass:[EaseMessageCell class]]) {
-            if ([cell.model.message.messageId isEqualToString:message.messageId]) {
-                cell.model.message = message;
-                cell.model = cell.model;
-                break;
-            }
-        }
-    }
+    [self refreshTableView:YES];
 }
 
 @end
