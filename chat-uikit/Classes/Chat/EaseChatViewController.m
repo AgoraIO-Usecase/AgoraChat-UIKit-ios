@@ -960,12 +960,11 @@
                     }
                     if (index != NSNotFound) {
                         [weakself.dataArray replaceObjectAtIndex:index withObject:reloadModel];
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            if (refresh) {
+                        if (refresh) {
+                            dispatch_async(dispatch_get_main_queue(), ^{
                                 [weakself.tableView reloadData];
-                            }
-                        });
-
+                            });
+                        }
                     }
                 }
             }
