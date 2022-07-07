@@ -951,21 +951,21 @@
                     reloadModel = model;
                     index = idx;
                     *stop = YES;
-                    BOOL refresh = NO;
-                    for (EaseMessageCell *cell in weakself.tableView.visibleCells) {
-                        if ([cell isKindOfClass:[EaseMessageCell class]] && [weakself.tableView indexPathForCell:cell].row == index) {
-                            refresh = YES;
-                            break;
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        BOOL refresh = NO;
+                        for (EaseMessageCell *cell in weakself.tableView.visibleCells) {
+                            if ([cell isKindOfClass:[EaseMessageCell class]] && [weakself.tableView indexPathForCell:cell].row == index) {
+                                refresh = YES;
+                                break;
+                            }
                         }
-                    }
-                    if (index != NSNotFound) {
-                        [weakself.dataArray replaceObjectAtIndex:index withObject:reloadModel];
-                        if (refresh) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
+                        if (index != NSNotFound) {
+                            [weakself.dataArray replaceObjectAtIndex:index withObject:reloadModel];
+                            if (refresh) {
                                 [weakself.tableView reloadData];
-                            });
+                            }
                         }
-                    }
+                    });
                 }
             }
         }];
