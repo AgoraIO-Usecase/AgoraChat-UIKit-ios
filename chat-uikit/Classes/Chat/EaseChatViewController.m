@@ -452,29 +452,20 @@
         if (cell == nil) {
             cell = [[EaseMessageTimeCell alloc] initWithViewModel:_viewModel remindType:type];
         }
-        if ([cellString containsString:@"thread"] || [cellString containsString:@"See all threads"]) {
-            cell.timeLabel.text = @"";
-            cell.timeLabel.attributedText = [cell cellAttributeText:cellString];
-        } else {
-            cell.timeLabel.text = cellString;
-        }
+        
+        cell.timeLabel.text = cellString;
         return cell;
     }
     
     if (cellNotifyMap.count > 0) {
-        NSString *identifier = (type == EaseChatWeakRemindMsgTime) ? @"EaseMessageTimeCell" : @"AgoraChatMessageSystemHint";
+        NSString *identifier = @"AgoraChatMessageSystemHintThread";
         EaseMessageTimeCell *cell = (EaseMessageTimeCell *)[tableView dequeueReusableCellWithIdentifier:identifier];
         // Configure the cell...
         if (cell == nil) {
             cell = [[EaseMessageTimeCell alloc] initWithViewModel:_viewModel remindType:type];
         }
         NSString *text = cellNotifyMap.allKeys.firstObject;
-        if ([text containsString:@"thread"]) {
-            cell.timeLabel.text = @"";
-            cell.timeLabel.attributedText = [cell cellAttributeText:text];
-        } else {
-            cell.timeLabel.text = cellString;
-        }
+        cell.timeLabel.attributedText = [cell cellAttributeText:text];
         return cell;
     }
     
