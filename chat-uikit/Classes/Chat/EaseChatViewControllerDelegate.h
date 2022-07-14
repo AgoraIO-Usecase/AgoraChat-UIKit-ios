@@ -133,7 +133,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems message:(AgoraChatMessage*)message;
 
-
+/**
+ * The extended area data model group for the current specific message model
+ *
+ * @param   defaultLongPressItems       Default long press extended area function Data model group (default: copy, delete, recall)
+ * @param   messageModel                     Current long-press message model
+ *
+ */
 - (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems messageModel:(EaseMessageModel*)messageModel;
 
 
