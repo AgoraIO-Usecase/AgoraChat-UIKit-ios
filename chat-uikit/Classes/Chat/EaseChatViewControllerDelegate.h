@@ -132,6 +132,12 @@ NS_ASSUME_NONNULL_BEGIN
  *
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems message:(AgoraChatMessage*)message;
+
+
+- (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems messageModel:(EaseMessageModel*)messageModel;
+
+
+
 //MARK: - chatThreadFunction
 - (void)didSelectThreadBubble:(EaseMessageModel *)model;
 

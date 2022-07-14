@@ -744,6 +744,9 @@
     } else if (self.delegate && [self.delegate respondsToSelector:@selector(messageLongPressExtMenuItemArray:message:)]) {
         //默认消息长按
         extMenuArray = [self.delegate messageLongPressExtMenuItemArray:extMenuArray message:_currentLongPressCell.model.message];
+    } else if (self.delegate && [self.delegate respondsToSelector:@selector(messageLongPressExtMenuItemArray:messageModel:)]) {
+        //默认消息长按
+        extMenuArray = [self.delegate messageLongPressExtMenuItemArray:extMenuArray messageModel:_currentLongPressCell.model];
     }
     if ([extMenuArray count] <= 0) {
         return;
