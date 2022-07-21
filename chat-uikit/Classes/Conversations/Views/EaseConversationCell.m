@@ -218,8 +218,12 @@
     }
     
     self.noDisturbView.hidden = !_model.isNoDistrub;
-    self.detailLabel.attributedText = _model.showInfo;
-    self.timeLabel.text = [EaseDateHelper formattedTimeFromTimeInterval:_model.lastestUpdateTime dateType:EaseDateTypeConversastion];
+    if ([_model respondsToSelector:@selector(showInfo)]) {
+        self.detailLabel.attributedText = _model.showInfo;
+    }
+    if ([_model respondsToSelector:@selector(lastestUpdateTime)]) {
+        self.timeLabel.text = [EaseDateHelper formattedTimeFromTimeInterval:_model.lastestUpdateTime dateType:EaseDateTypeConversastion];
+    }
     if (_viewModel.needsDisplayBadge) {
         [self.badgeLabel setBagde:_model.unreadMessagesCount badgeStyle:_viewModel.badgeViewStyle];
     }

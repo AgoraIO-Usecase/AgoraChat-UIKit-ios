@@ -452,29 +452,20 @@
         if (cell == nil) {
             cell = [[EaseMessageTimeCell alloc] initWithViewModel:_viewModel remindType:type];
         }
-        if ([cellString containsString:@"thread"] || [cellString containsString:@"See all threads"]) {
-            cell.timeLabel.text = @"";
-            cell.timeLabel.attributedText = [cell cellAttributeText:cellString];
-        } else {
-            cell.timeLabel.text = cellString;
-        }
+        
+        cell.timeLabel.text = cellString;
         return cell;
     }
     
     if (cellNotifyMap.count > 0) {
-        NSString *identifier = (type == EaseChatWeakRemindMsgTime) ? @"EaseMessageTimeCell" : @"AgoraChatMessageSystemHint";
+        NSString *identifier = @"AgoraChatMessageSystemHintThread";
         EaseMessageTimeCell *cell = (EaseMessageTimeCell *)[tableView dequeueReusableCellWithIdentifier:identifier];
         // Configure the cell...
         if (cell == nil) {
             cell = [[EaseMessageTimeCell alloc] initWithViewModel:_viewModel remindType:type];
         }
         NSString *text = cellNotifyMap.allKeys.firstObject;
-        if ([text containsString:@"thread"]) {
-            cell.timeLabel.text = @"";
-            cell.timeLabel.attributedText = [cell cellAttributeText:text];
-        } else {
-            cell.timeLabel.text = cellString;
-        }
+        cell.timeLabel.attributedText = [cell cellAttributeText:text];
         return cell;
     }
     
@@ -744,6 +735,9 @@
     } else if (self.delegate && [self.delegate respondsToSelector:@selector(messageLongPressExtMenuItemArray:message:)]) {
         //默认消息长按
         extMenuArray = [self.delegate messageLongPressExtMenuItemArray:extMenuArray message:_currentLongPressCell.model.message];
+    } else if (self.delegate && [self.delegate respondsToSelector:@selector(messageLongPressExtMenuItemArray:messageModel:)]) {
+        //默认消息长按
+        extMenuArray = [self.delegate messageLongPressExtMenuItemArray:extMenuArray messageModel:_currentLongPressCell.model];
     }
     if ([extMenuArray count] <= 0) {
         return;
@@ -951,13 +945,21 @@
                     reloadModel = model;
                     index = idx;
                     *stop = YES;
-                    
-                    if (index != NSNotFound) {
-                        dispatch_async(dispatch_get_main_queue(), ^{
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        BOOL refresh = NO;
+                        for (EaseMessageCell *cell in weakself.tableView.visibleCells) {
+                            if ([cell isKindOfClass:[EaseMessageCell class]] && [weakself.tableView indexPathForCell:cell].row == index) {
+                                refresh = YES;
+                                break;
+                            }
+                        }
+                        if (index != NSNotFound) {
                             [weakself.dataArray replaceObjectAtIndex:index withObject:reloadModel];
-                        });
-
-                    }
+                            if (refresh) {
+                                [weakself.tableView reloadData];
+                            }
+                        }
+                    });
                 }
             }
         }];
