@@ -1,38 +1,39 @@
-# AgoraChatUIKit iOS 使用指南
+# Get Started with Agora Chat UIKit for iOS
 
-## 功能描述
+Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SDK. It provides a set of general UI components, such as a conversation list and chat UI, which allow developers to easily craft an Chat app to suit actual business needs. Also, this library calls methods in the Agora Chat SDK to implement Chat related logics and data processing, allowing developers to only focus on their own business and personalized extensions.
 
-chat-uikit 是基于声网 IM SDK 的一款 UI 组件库，它提供了一些通用的 UI 组件，“会话列表”和“聊天界面”，开发者可根据实际业务需求通过该组件库快速地搭建自定义 IM 应用。chat-uikit 中的组件在实现 UI 功能的同时，调用 IM SDK 相应的接口实现 IM 相关逻辑和数据的处理，因而开发者在使用 chat-uikit 时只需关注自身业务或个性化扩展即可。
+Source code URL of Agora Chat UIKit for iOS:
 
-chat-uikit 源码地址：
-  * https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git chat-uikit工程
+- https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
-使用 chat-uikit 的声网 IM App 地址：
-  * https://github.com/AgoraIO-Usecase/AgoraChat-ios.git 声网IM
+URL of Agora Chat app using Agora Chat UIKit for iOS:
 
-## 前提条件
+- https://github.com/AgoraIO-Usecase/AgoraChat-ios.git
 
-支持系统版本要求：
+## Prerequisites
 
-  * chat-uikit 支持 iOS 11.0及以上系统版本
-  * AgoraChatIM 支持 iOS 11.0及以上系统版本
+System compatibility:
 
-## 集成步骤
+- chat-uikit: iOS 11.0 and later
+- Chat app: iOS 11.0 and later
 
-### 一、导入
+##  Project setup
 
-#### 安装 Cocoapods 工具
+### Import chat-uikit
 
-1. 开始前确保你已安装 Cocoapods。参考 [Getting Started with CocoaPods](https://guides.cocoapods.org/using/getting-started.html#getting-started) 安装说明。
-2. 在终端里进入项目根目录，并运行 `pod init` 命令。项目文件夹下会生成一个 `Podfile` 文本文件。
+#### Install CocoaPods
 
-有两种方式集成，使用 pod 方式集成 chat-uikit 或者源码集成 chat-uikit，具体步骤如下：
+1. Install CocoaPods. For details, see [Getting Started with CocoaPods](https://guides.cocoapods.org/using/getting-started.html#getting-started).
 
-#### 使用 pod 方式集成 chat-uikit
+2. In the Terminal, open the root directory of the project and run the `pod init` command. Then the text file `Podfile` will be generated in the project folder.
 
-1. 打开 `Podfile` 文件，添加 chat-uikit 依赖。注意将 `ProjectName` 替换为你的 Target 名称。
+chat-uikit can be integrated using a pod or source code. The detailed procedures are as follows:
 
-```ruby
+#### Integrate the Agora Chat UIKit for iOS by using a pod
+
+1. In the `Podfile` file, add dependencies of chat-uikit. Remember to replace `ProjectName` with your project name.
+
+```
 platform :ios, '11.0'
 
 # Import CocoaPods sources
@@ -43,35 +44,33 @@ target 'ProjectName' do
 end
 ```
 
-2. 在终端 Terminal cd 到 podfile 文件所在目录，执行如下命令集成 SDK。
+2. In the Terminal, run the `cd` command to switch to the directory where the `Podfile` file is located. Then run the following command to integrate the SDK.
 
-```objective-c
+```
 pod install
 ```
 
-3. 成功安装后，Terminal 中会显示 `Pod installation complete!`，此时项目文件夹下会生成一个 `xcworkspace` 文件，打开新生成的 `xcworkspace` 文件运行项目。
+3. After pod installation is complete, the message `Pod installation complete!` will be displayed in the Terminal. At this time, the `xcworkspace` file will be generated in the project folder. You can open this new file to run the project.
 
-<alert>
-注意：
+**Note**
 
-chat-uikit 依赖于 AgoraChat SDK，其中包含了拍照，发语音，发图片，发视频，发附件等功能，需要使用录音，摄像头，相册权限。需要在您项目的 info.plist 中添加对应权限。
-</alert>
+Depending on AgoraChat SDK, chat-uikit provides such functions as taking photos and sending voice messages, image messages, and attachments and requires access to the recording, camera, and album. Therefore, you need to add related permissions in `info.plist`.
 
-##### 源码集成 chat-uikit
+##### Integrate the Agora Chat UIKit for iOS using source code
 
-1. github 下载源码
+1. Download source code from github:
 
-源码下载地址：https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
+Download URL: https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
-Terminal command : git clone https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
+Terminal command: git clone https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git
 
-2. 项目添加 chat-uikit 源码依赖
+1. Add source code dependencies of chat-uikit in the project.
 
-打开 `Podfile` 文件，在 podfile 文件里添加 chat-uikit 依赖。
+Open the `Podfile` file and add dependencies of chat-uikit.
 
-Podfile 文件示例：
+`Podfile` file example:
 
-```ruby
+```
 platform :ios, '11.0'
 
 source 'https://github.com/CocoaPods/Specs.git'
@@ -80,85 +79,83 @@ target 'ProjectName' do
     pod 'chat-uikit',  :path => "../chat-uikit"
 end
 
-#chat-uikit path 路径需指向 chat-uikit.podspec 文件所在目录
+#The chat-uikit path should point to the directory where chat-uikit.podspec resides.
 ```
 
-3. 项目集成本地 chat-uikit 源码
+1. Integrate the local source code of Agora Chat UIKit for iOS in the project.
 
-终端 Terminal cd 到 Podfile 文件所在目录，执行 pod install 命令在项目中安装 chat-uikit 本地源码
+In the Terminal, run the `cd` command to switch to the directory where the `Podfile` file is located. Then run the `pod install` command to install local source code of Agora Chat UIKit for iOS.
 
-执行完成后，则在 Xcode 项目目录 Pods/Development Pods/ 可找到 chat-uikit 源码
+After the command execution is complete, you can find the source code of Agora Chat UIKit for iOS in the Xcode project directory Pods/Development Pods/ and adapt it to align with your project objectives.
 
-可对源码进行符合自己项目目标的自定义修改
+### Add privileges
 
-### 二、添加权限
+Add privileges in `info.plist` of your project.
 
-在项目 `info.plist` 中添加相关权限：
-
-```xml
-Privacy - Photo Library Usage Description //相册权限
-Privacy - Microphone Usage Description //麦克风权限
-Privacy - Camera Usage Description //相机权限
-App Transport Security Settings -> Allow Arbitrary Loads //开启网络服务
+```
+Privacy - Photo Library Usage Description //Album privileges.
+Privacy - Microphone Usage Description //Microphone privileges.
+Privacy - Camera Usage Description //Camera privileges.
+App Transport Security Settings -> Allow Arbitrary Loads //Enable the network service.
 ```
 
-### 参考
+### Reference
 
-如果在源码自定义过程中有任何通用自定义都可以给我们仓库 https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git 提交代码，成为社区贡献者。
+If you have made any general customizations during source code customization, please submit them to our repository https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git to become a contributor of our community.
 
-### 三、初始化
 
-#### 1. 引入头文件
+### III. Initialization
 
-```objective-c
+#### 1. Import the header file
+```
 #import <chat-uikit/EaseChatKit.h>
 ```
 
-#### 2. 初始化chat-uikit
+#### 2. Initialize the chat-uikit
 
-在工程的 AppDelegate.m 中的以下方法中调用 EaseChatKitManager 的初始化方法一并初始化声网 AgoraChat sdk。(注: 此方法无需重复调用)
+In AppDelegate.m in the project, call the initialization method in EaseChatKitManager to initialize AgoraChat SDK (note that it is unnecessary to repeatedly call this method).
 
-```objective-c
+```
 (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 	// Override point for customization after application launch.
 	AgoraChatOptions *options = [AgoraChatOptions optionsWithAppkey:@"You created APPKEY"];
 	[EaseChatKitManager initWithAgoraChatOptions:options];
-	//登录操作
+	//Login operation.
 	return YES;
 }
 ```
 
-#### 3. 接收未读数回调
+#### 3. Callback for receiving the number of unread messages in all conversations
 
-EaseChatKitManagerDelegate 主要是会话未读数回调。
-用户需要注册自己的类到 EaseChatKitManagerDelegate 才可收到未读总数变化回调。
+EaseChatKitManagerDelegate is the callback for the total number of unread messages in all conversations.
 
-```objective-c
+You need to register your class in EaseChatKitManagerDelegate to receive the callback for the change to the total number of unread messages.
+
+```
 /*
  @method
- @brief   会话未读总数变化。
- @param   unreadCount     当前会话列表的总未读数。
+ @brief   Callback triggered when the total number of unread messages is changed.
+ @param   unreadCount     The total number of unread messages in all conversations.
  */
 
 - (void)conversationsUnreadCountUpdate:(NSInteger)unreadCount;
 ```
 
-### 四、快速搭建
+### IV. Rapid setup
 
-#### 聊天会话快速搭建
+#### Rapidly set up a chat conversation
 
-##### 1. 导入头文件
+##### 1.Import the header file
 
-```objective-c
+```
 #import <chat-uikit/EaseChatKit.h>
 ```
 
-##### 2. 加载会话页面
+##### 2.Load the conversation page
 
-chat-uikit 提供聊天会话 ViewController，可以通过创建 EaseChatViewController 实例，并嵌入进自己的聊天控制器方式（参考 AgoraChatIM 中 ACDChatViewController.m）实现对 chat-uikit 聊天会话的集成。
-创建聊天会话页面实例，需传递用户‘会话 ID’或‘群 ID’ ，会话类型（AgoraChatConversationType）以及必须传入聊天视图配置数据模型 EaseChatViewModel 实例。
+Agora Chat UIKit for iOS provides `ViewController` for chat conversations. You can create an `EaseChatViewController` instance and embed your chat controller (see `ACDChatViewController.m` in Agora Chat) in this instance to integrate the chat conversation function of this library. To create a chat conversation page instance, you need to pass the conversation ID, group ID, conversation type (`AgoraChatConversationType`), and `EaseChatViewModel` (chat view configuration data model) instance.
 
-```objective-c
+```
 EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init];
 EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"custom"
                                               conversationType:AgoraChatConversationTypeChat
@@ -168,19 +165,21 @@ EaseChatViewController *chatController = [EaseChatViewController initWithConvers
 chatController.view.frame = self.view.bounds;
 ```
 
-#### 会话列表快速搭建
+#### Rapidly set up the conversation list
 
-##### 1. 导入头文件
+##### 1. Import the header file.
 
-```objective-c
+```
 #import <chat-uikit/EaseChatKit.h>
 ```
 
-##### 2.加载会话列表
+##### 2.Load the conversation list.
 
-在自己聊天控制器内可嵌入 chat-uikit 的会话列表 EaseConversationsViewController，创建会话列表实例，实例化会话列表必须传入会话列表视图数据配置模型 EaseConversationViewModel 实例。
+In your chat controller, you can embed EaseConversationsViewController for the conversation list in the Agora Chat UIKit for iOS.
 
-```objective-c
+Create a conversation list instance. When instantiating the conversation list, ensure that you pass the EaseConversationViewModel instance.
+
+```
 EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init];
 
 EaseConversationsViewController *easeConvsVC = [[EaseConversationsViewController alloc] initWithModel:viewModel];
@@ -192,83 +191,84 @@ easeConvsVC.delegate = self;
 }];
 ```
 
-### 设置样式
+### V. Set styles
 
-#### 聊天会话样式配置
+#### Set chat conversation styles
 
-聊天会话可配置参数如下：
+For a chat conversation, you need to configure the following parameters:
 
-```objective-c
-// Chat view background color
+```
+// The background color of the chat view.
 @property (nonatomic, strong) UIColor *chatViewBgColor;
 
-// Timeline background color
+// The background color of the timeline.
 @property (nonatomic, strong) UIColor *msgTimeItemBgColor;
 
-// Timeline font
+// The timeline font.
 @property (nonatomic, strong) UIFont *msgTimeItemFont;
 
-// Timeline font color
+// The font color of the timeline.
 @property (nonatomic, strong) UIColor *msgTimeItemFontColor;
 
-// Bubble background image of received message
+// The bubble background image of the received message.
 @property (nonatomic, strong) UIImage *receiverBubbleBgImage;
 
-// Bubble background image of sent message
+// The bubble background image of the sent message.
 @property (nonatomic, strong) UIImage *senderBubbleBgImage;
 
-// Right align image/video/attachment message bubble cornerRadius
+// Right align image/video/attachment message bubble cornerRadius.
 @property (nonatomic) BubbleCornerRadius rightAlignmentCornerRadius;
 
-// Left align image/video/attachment message bubble cornerRadius
+// Left align image/video/attachment message bubble cornerRadius.
 @property (nonatomic) BubbleCornerRadius leftAlignmentCornerRadius;
 
-// Message bubble background protected area
+// Message bubble background protected area.
 @property (nonatomic) UIEdgeInsets bubbleBgEdgeInsets;
 
-// Sent message font color
+// The font color of the sent message.
 @property (nonatomic, strong) UIColor *sentFontColor;
 
-// Receiver message font Color
+// The font color of the receiver message.
 @property (nonatomic, strong) UIColor *reveivedFontColor;
 
-// Text message font
+// The font of the text message.
 @property (nonatomic) UIFont *textMessaegFont;
 
-// Input menu background color and input menu gradient color mutually exclusive. display background color first
+// Input menu background color and input menu gradient color mutually exclusive. display background color first.
 @property (nonatomic, strong) UIColor *inputMenuBgColor;
 
-// Input menu type
+// Input menu type.
 @property (nonatomic) EaseInputMenuStyle inputMenuStyle;
 
-// Input menu extend view model
+// Input menu extend view model.
 @property (nonatomic) EaseExtendMenuViewModel *extendMenuViewModel;
 
-// Display sent avatar
+// Whether to display the sent avatar.
 @property (nonatomic) BOOL displaySentAvatar;
 
-// Display received avatar
+// Whether to display the received avatar.
 @property (nonatomic) BOOL displayReceivedAvatar;
 
-// Display sent name
+// Whether to display the sent name.
 @property (nonatomic) BOOL displaySentName;
 
-// Display received name
+// Whether to display the received name.
 @property (nonatomic) BOOL displayReceiverName;
 
-// Avatar style
+// The avatar style.
 @property (nonatomic) EaseChatAvatarStyle avatarStyle;
 
-// Avatar cornerRadius Default: 0 (Only avatar type RoundedCorner)
+// The corner radius of the avatar. 
+// The default value is 0, indicating that only the rounded corner style is allowed.
 @property (nonatomic) CGFloat avatarCornerRadius;
 
-// Chat view message alignment
+// The message alignment style of in the chat view.
 @property (nonatomic) EaseAlignmentStyle msgAlignmentStyle;
 ```
 
-其中参数：extendMenuViewModel 输入区扩展功能数据配置模型(聊天会话页相机，相册等区域)内含可配参数：
+extendMenuViewModel (the model for extension function data configuration in the input area, like the camera or album area on the chat conversation page) contains the following configurable parameters:
 
-```objective-c
+```
 /*
  *  inputMenu "+" extend view style
  */
@@ -277,28 +277,28 @@ typedef NS_ENUM(NSInteger, EaseExtendViewStyle) {
     EasePopupView,                //viewcontroller popup view
 };
 
-// Icon background color
+// The background color of the icon.
 @property (nonatomic, strong) UIColor *iconBgColor;
 
-// View background color
+// The background color of the view.
 @property (nonatomic, strong) UIColor *viewBgColor;
 
-// Font color
+// The font color.
 @property (nonatomic, strong) UIColor *fontColor;
 
-// Font size
+// The font size.
 @property (nonatomic, assign) CGFloat fontSize;
 
-// View size
+// The view size.
 @property (nonatomic, assign) CGSize collectionViewSize;
 
-// Extend view style
+// The extension view style.
 @property (nonatomic) EaseExtendViewStyle extendViewStyle;
 ```
 
-其中参数：inputMenuStyle（输入区）包含五种样式：
+inputMenuStyle (input area) can be one of the following styles:
 
-```objective-c
+```
 /*
  *  Input menu style
  */
@@ -311,9 +311,9 @@ typedef NS_ENUM(NSInteger, EaseInputMenuStyle) {
 };
 ```
 
-其中参数：EaseAlignmentStyle （消息排列方式,仅群聊可生效）包含两种类型
+The EaseAlignmentStyle parameter (the message alignment mode, valid only for group chats) can be either of the following message alignment modes:
 
-```objective-c
+```
 /*
  *  Message alignment
  */
@@ -323,433 +323,429 @@ typedef NS_ENUM(NSInteger, EaseAlignmentStyle) {
 };
 ```
 
-实例化的聊天控制器可通过重置视图 UI 配置模型刷新页面。
+An instantiated chat controller can refresh the chat page by resetting the chat view UI configuration model.
 
-```objective-c
-//重置聊天控制器。
+```
+// Resets the chat controller.
 
 - (void)resetChatVCWithViewModel:(EaseChatViewModel *)viewModel;
 ```
 
-##### 聊天会话自定义样式示例
+##### Customize the chat UI
 
-chat-uikit 显示的是默认的UI样式，以下是对聊天会话样式进行自定义配置示例：
+Agora Chat UIKit for iOS uses default UI styles. You can customize your user interface by reference to the following paragraphs.
 
-* 默认样式示例：
+- Example of default styles:
 
-只需创建 EaseChatViewModel 实例，并作为参数传入聊天页面 EaseChatViewController 的构造方法。
+To customize the chat UI, you only need to modify style parameters in the EaseChatViewModel instance and then pass them to EaseChatViewController.
 
-```objective-c
-EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init]; //默认样式
+```
+EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init]; //Default styles.
 EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"Conversation ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
 ```
 
-默认样式的聊天页面示例图：
+The following figure is an example of a chat page with default styles:
 
-// TODO:合并之后确定地址
+[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
 
-![]()
+- Configuration example of a chat page with custom styles:
 
-* 自定义样式配置示例：
+Create an EaseChatViewModel instance with custom styles and pass this instance to the constructor of EaseChatViewController for the chat page.
 
-创建 EaseChatViewModel 实例，修改该实例的可配置样式参数，将实例传入聊天页面 EaseChatViewController 的构造方法。
-
-```objective-c
+```
 EaseChatViewModel *viewModel = [[EaseChatViewModel alloc]init];
-viewModel.chatViewBgColor = [UIColor systemGrayColor];  //聊天页背景色
-viewModel.inputMenuBgColor = [UIColor systemPinkColor]; //输入区背景色
-viewModel.sentFontColor = [UIColor redColor];           //发送方文本颜色
-viewModel.inputMenuStyle = EaseInputMenuStyleNoAudio;   //输入区菜单样式
-viewModel.msgTimeItemFontColor = [UIColor blackColor];  //消息时间字体颜色
-viewModel.msgTimeItemBgColor = [UIColor greenColor];    //消息时间区域背景色
+viewModel.chatViewBgColor = [UIColor systemGrayColor];  //The chat background color.
+viewModel.inputMenuBgColor = [UIColor systemPinkColor]; //The background color of the input area.
+viewModel.sentFontColor = [UIColor redColor];           //The sender's text color.
+viewModel.inputMenuStyle = EaseInputMenuStyleNoAudio;   //The menu style of the input area.
+viewModel.msgTimeItemFontColor = [UIColor blackColor];  //The message time font color.
+viewModel.msgTimeItemBgColor = [UIColor greenColor];    //The background color of the message time area.
 EaseChatViewController *chatController = [EaseChatViewController initWithConversationId:@"Conversation ID" conversationType:AgoraChatConversationTypeChat chatViewModel:viewModel];
 ```
 
-部分自定义样式配置示例图：
+The following figure is a configuration example of some custom styles:
 
-// TODO:合并之后确定地址
+[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
 
-![]()
+For details on more APIs, see APIs provided by EaseChatViewController and callback APIs in the EaseChatViewControllerDelegate protocol.
 
-关于更多 API 介绍请参考 EaseChatViewController 提供的 API，以及 EaseChatViewControllerDelegate 协议中的回调方法 API。
+#### Configure conversation list styles
 
-#### 会话列表样式配置
+For the conversation list, you can configure the following parameters:
 
-会话列表可配置参数如下：
-
-```objective-c
-// display chatroom
+```
+// Whether to display the chat room. By default, the chat room is displayed.
 @property (nonatomic) BOOL displayChatroom;
 
-// avatar style
+// The avatar style.
 @property (nonatomic) EaseChatAvatarStyle avatarType;
 
-// avatar size
+// The avatar size.
 @property (nonatomic) CGSize avatarSize;
 
-// avatar cornerRadius
+// The corner radius of the avatar.
 @property (nonatomic) CGFloat avatarCornerRadius;
 
-// avatar location
+// The avatar edge insets.
 @property (nonatomic) UIEdgeInsets avatarEdgeInsets;
 
-// conversation top style
+// The top style of the conversation.
 @property (nonatomic) EaseChatConversationTopStyle conversationTopStyle;
 
-// conversation top bgColor
+// The top background color of the conversation.
 @property (nonatomic, strong) UIColor *conversationTopBgColor;
 
-// conversation top icon
+// The top icon of the conversation.
 @property (nonatomic, strong) UIImage *conversationTopIcon;
 
-// top icon location
+// The insets of the top icon.
 @property (nonatomic) UIEdgeInsets conversationTopIconInsets;
 
-// top icon size
+// The size of the top icon.
 @property (nonatomic) CGSize conversationTopIconSize;
 
-// nickname font
+// The nickname font.  
 @property (nonatomic, strong) UIFont *nameLabelFont;
 
-// nickname color
+// The nickname color.
 @property (nonatomic, strong) UIColor *nameLabelColor;
 
-// nickname location
+// The edge insets of the nickname.
 @property (nonatomic) UIEdgeInsets nameLabelEdgeInsets;
 
-// message detail font
+// The font of message details.
 @property (nonatomic, strong) UIFont *detailLabelFont;
 
-// message detail text font
+// The text font of message details.
 @property (nonatomic, strong) UIColor *detailLabelColor;
 
-// message detail location
+// The edge insets of message details.
 @property (nonatomic) UIEdgeInsets detailLabelEdgeInsets;
 
-// message time font
+// The font of the message time.
 @property (nonatomic, strong) UIFont *timeLabelFont;
 
-// message time color
+// The color of the message time.
 @property (nonatomic, strong) UIColor *timeLabelColor;
 
-// message time location
+// The location of the message time.
 @property (nonatomic) UIEdgeInsets timeLabelEdgeInsets;
 
-// needs displayed Unread messages number
+// Whether to display the number of unread messages.     
 @property (nonatomic) BOOL needsDisplayBadge;
 
-// message unread position
+// The position of the unread message badge.
 @property (nonatomic) EaseChatUnReadCountViewPosition badgeLabelPosition;
 
-// message unread style
+// The style of the unread message badge.
 @property (nonatomic) EaseChatUnReadBadgeViewStyle badgeViewStyle;
 
-// message unread font
+// The font of the unread message badge. 
 @property (nonatomic, strong) UIFont *badgeLabelFont;
 
-// message unread text color
+// The color of the badge title of the unread messages.
 @property (nonatomic, strong) UIColor *badgeLabelTitleColor;
 
-// message unread bgColor
+// The background color of the unread message badge.
 @property (nonatomic, strong) UIColor *badgeLabelBgColor;
 
-// message unread angle height
+// The height of the unread message badge.
 @property (nonatomic) CGFloat badgeLabelHeight;
 
-// message unread red dot height
+// The height of the red dot for the unread messages.
 @property (nonatomic) CGFloat badgeLabelRedDotHeight;
 
-// message unread center position deviation
+// The deviation of the unread message badge from the center.
 @property (nonatomic) CGVector badgeLabelCenterVector;
 
-// message unread display limit, display after the upper limit is exceeded xx+
+// The displayed maximum number of unread messages. If the upper limit is exceeded, the maximum number will be followed by `+`.
 @property (nonatomic) int badgeMaxNum;
 
-// no disturb image
+// The do-not-disturb image.
 @property (nonatomic, strong) UIImage *noDisturbImg;
 
-// no disturb image location
+// The insets of the do-not-disturb image.
 @property (nonatomic) UIEdgeInsets noDisturbImgInsets;
 
-// no disturb image size
+// The size of the do-not-disturb image.
 @property (nonatomic) CGSize noDisturbImgSize;
 ```
 
-会话列表父类可配置参数如下：
+The parent class of the conversation class involves the following configurable parameters:
 
-```objective-c
-// Whether to refresh by pull-down
+```
+// Whether to refresh by pull-down.
 @property (nonatomic) BOOL canRefresh;
 
-// TableView bg view
+// The background view of TableView.
 @property (nonatomic, strong) UIView *bgView;
 
-// UITableViewCell bg color
+// The background color of UITableViewCell.
 @property (nonatomic, strong) UIColor *cellBgColor;
 
-// UITableViewCell cocation of the dividing line
+// The insets of the dividing line of UITableViewCell.
 @property (nonatomic) UIEdgeInsets cellSeparatorInset;
 
-// UITableViewCell color of the dividing line
+// The color of the dividing line of UITableViewCell.
 @property (nonatomic, strong) UIColor *cellSeparatorColor;
 ```
 
-##### 会话列表自定义样式示例
+##### Customize the conversation list UI
 
-chat-uikit 显示的是默认的UI样式，以下是对会话列表样式进行自定义配置示例：
+Agora Chat UIKit for iOS uses default UI styles. You can customize your conversation list by reference to the following paragraphs.
 
-* 默认样式示例：
+- Example of default styles:
 
-只需创建 EaseChatViewModel 实例，并作为参数传入聊天页面 EaseChatViewController 的构造方法。
+To customize the conversation list UI, you only need to create an EaseChatViewModel instance and pass it as a parameter to the constructor of EaseChatViewController for the chat page.
 
-```objective-c
-EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init]; //默认样式
+```
+EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init]; //Default styles.
 EaseConversationsViewController *chatsVC = [[EaseConversationsViewController alloc] initWithModel:viewModel];
 ```
 
-默认样式的聊天页面示例图：
+The following figure is an example of the conversation list with default styles:
 
-// TODO:合并之后确定地址
 
-![]()
+[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
 
-* 自定义样式配置示例：
+- Configuration example of custom styles:
 
-创建 EaseChatViewModel 实例，修改该实例的可配置样式参数，将实例传入聊天页面 EaseChatViewController 的构造方法。
+Create an EaseChatViewModel instance with custom styles and pass this instance to the constructor of EaseChatViewController for the chat page.
 
-```objective-c
+```
 EaseConversationViewModel *viewModel = [[EaseConversationViewModel alloc] init];
-viewModel.canRefresh = YES;                                //是否可刷新
-viewModel.badgeLabelCenterVector = CGVectorMake(-16, 0);   //未读数角标中心偏移量
-viewModel.avatarType = Rectangular;                        //头像类型
-viewModel.nameLabelColor = [UIColor blueColor];            //会话名称颜色
-viewModel.detailLabelColor = [UIColor redColor];           //会话详情颜色
-viewModel.timeLabelColor = [UIColor systemPinkColor];      //会话时间颜色
-viewModel.cellBgColor = [UIColor lightGrayColor];          //会话cell背景色
-viewModel.badgeLabelBgColor = [UIColor purpleColor];       //未读数背景色
+viewModel.canRefresh = YES;                                //Whether to enable refresh.
+viewModel.badgeLabelCenterVector = CGVectorMake(-16, 0);   //The Badge offset of the number of unread messages.
+viewModel.avatarType = Rectangular;                        //The avatar type.
+viewModel.nameLabelColor = [UIColor blueColor];            //The color of the conversation name.
+viewModel.detailLabelColor = [UIColor redColor];           //The color of conversation details.
+viewModel.timeLabelColor = [UIColor systemPinkColor];      //The color of conversation time.
+viewModel.cellBgColor = [UIColor lightGrayColor];          //The background color of the conversation cell.
+viewModel.badgeLabelBgColor = [UIColor purpleColor];       //The background color of the number of unread messages.
 
 EaseConversationsViewController *chatsVC = [[EaseConversationsViewController alloc] initWithModel:viewModel];
 ```
 
-部分自定义样式配置示例图：
+The following figure is a configuration example of some custom styles:
 
-// TODO:合并之后确定地址
+[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
 
-![]()
+For details on more APIs, see APIs provided by EaseConversationsViewController and callback APIs in the EaseConversationsViewControllerDelegate protocol.
 
-关于更多 API 介绍请参考 EaseConversationsViewController 提供的 API，以及 EaseConversationsViewControllerDelegate 协议中的回调方法 API。
+### Custom function extensions
 
-### 自定义功能扩展
+#### Custom conversation function extensions
 
-#### 会话自定义功能扩展
+After EaseChatViewController is instantiated, you can implement the EaseChatViewControllerDelegate protocol (chat controller callback delegate) to receive the callback of EaseChatViewController and further implement custom extensions.
 
-实例化 EaseChatViewController 之后，可选择实现EaseChatViewControllerDelegate 协议（聊天控制器回调代理），接收 EaseChatViewController 的回调并做进一步的自定义实现。
-
+```
 EaseChatViewControllerDelegate
+```
 
-#### 自定义会话 cell 回调
+#### Callback for a custom message cell
 
-通过实现聊天控制回调获取自定义消息 cell，根据 messageModel，用户自己判断是否显示自定义消息 cell。如果返回 nil 会显示默认；如果返回 cell 会显示用户自定义消息cell。
+You can get the custom message cell by implementing the conversation list callback protocol.
 
-```objective-c
+If nil is returned, the default message cell will be used; if cell is returned, a custom message cell will be used.
+
+```
 /**
  * Customize cell.
  *
- * @param tableView        Current Message view tableView
- * @param messageModel     Message data model
+ * @param tableView        The table view of the current message view.
+ * @param messageModel     The message data model.
  *
  */
 - (UITableViewCell *)cellForItem:(UITableView *)tableView messageModel:(EaseMessageModel *)messageModel;
 ```
 
-##### 选中消息的回调
+##### Callback of a selected message
 
-选中消息的回调（chat-uikit 没有对于自定义 cell 的选中事件回调，需用户自定义实现选中响应）。
+Callback of a selected message (chat-uikit does provide callback for a selected message cell and you need to implement the callback yourself).
 
-```objective-c
+```
 /**
- * Message click event (returns whether the default click event needs to be executed) Defaults to YES
+ * Message click callback.
+   
+ * It returns whether the default click event needs to be executed: 
+ * - `YES`: The event needs to be executed.
+ * - `NO`: The event does not need to be executed.
  *
- * @param   message         The currently clicked message
- * @param   userData        The user profile carried by the currently clicked message
+ * @param   message         The selected message.
+ * @param   userData        The user profile contained in the selected message.
  *
  */
 - (BOOL)didSelectMessageItem:(AgoraChatMessage *)message userProfile:(id<EaseUserProfile>)userData;
-
 ```
 
-##### 用户资料回调
+##### User profile callback
 
-用户资料回调（头像、昵称等）。
+Callback of the user profile (such as the avatar and nickname).
 
-```objective-c
+```
 /**
- * Returns user profile.
+ * User profile callback
  *
- * @discussion  Users according to huanxinID in their own user system to match the corresponding user information, and return the corresponding information, otherwise the default implementation.
+ * @discussion  Users will match the user ID against those in their own user system. If a match is found, the related user profile is returned; if `nil` is returned, the default implementation is used.
  *
- * @param   huanxinID        The huanxin ID.
+ * @param   userID        The user ID.
  *
  */
-- (id<EaseUserProfile>)userProfile:(NSString *)huanxinID;
+- (id<EaseUserProfile>)userProfile:(NSString *)userID;
 ```
 
-用户资料回调 AgoraChatIM Demo 中使用示例：
+Example of user profile callback in the Chat app:
 
-```objective-c
-- (id<EaseUserProfile>)userProfile:(NSString *)huanxinID
+```
+- (id<EaseUserProfile>)userProfile:(NSString *)userID
 {
     AgoraChatUserDataModel *model = nil;
-    AgoraChatUserInfo* userInfo = [[UserInfoStore sharedInstance] getUserInfoById:huanxinID];
+    AgoraChatUserInfo* userInfo = [[UserInfoStore sharedInstance] getUserInfoById:userID];
     if(userInfo) {
         model = [[AgoraChatUserDataModel alloc]initWithUserInfo:userInfo];
     }else{
-        [[UserInfoStore sharedInstance] fetchUserInfosFromServer:@[huanxinID]];
+        [[UserInfoStore sharedInstance] fetchUserInfosFromServer:@[userID]];
     }
     return model;
 }
 ```
 
-##### 选中头像回调
+##### Callback for a selected avatar
 
-```objective-c
+```
 /**
- * Avatar click event
+ * Occurs when an avatar is selected.
  *
- * @param   userData        The profile of the user pointed to by the currently clicked avatar.
+ * @param   userData        The user profile that contains the selected avatar.
  *
  */
 - (void)avatarDidSelected:(id<EaseUserProfile>)userData;
 ```
 
-##### 头像长按回调
+##### Callback for holding down the avatar
 
-```objective-c
+```
 /**
- * Avatar long press event
+ * Occurs when the avatar is held down.
  *
- * @param   userData        The current long-pressed Avatar points to the user profile.
+ * @param   userData        Occurs when the avatar is held down.
  *
  */
 - (void)avatarDidLongPress:(id<EaseUserProfile>)userData;
 ```
 
-##### 输入区回调
+##### Callback for the input area
 
-当前会话输入扩展区数据模型组（UI 配置可在聊天视图配置数据模型中设置）
+The data model group for the input extension area of the current conversation (UI configurations can be implemented in the chat view configuration data model).
 
-```objective-c
+```
 /**
- * The current Conversation enters the extended area data model group
+ * The data model group for the input extension area.
  *
- * @param   defaultInputBarItems        The default function Data model group (default order: photo album, camera, attachments).
- * @param   conversationType            The current Conversation type: single chat, group chat, chat room.
+ * @param   defaultInputBarItems        The data model group for the input extension area (default order: album, camera attachments).
+ * @param   conversationType            The current conversation type: single chat, group chat, chat room.
  *
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)inputBarExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultInputBarItems conversationType:(AgoraChatConversationType)conversationType;
 ```
 
-##### 键盘输入变化回调
+##### Callback for a keyboard input change
 
-```objective-c
+```
 /**
- * Input area Keyboard input change callback example: @ group member
+ * Example of callback for a keyboard input change in the input area: @ group member
  *
- * @brief Input area Keyboard input change callback example: @ group member
+ * @brief Example of callback for a keyboard input change: @ group member
  */
 - (BOOL)textViewShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
 ```
 
-##### 对方输入状态回调
+##### Callback for the input status of the other party
 
-对方正在输入状态回调（单聊有效）。
+The callback triggered when the peer user is typing. This callback is valid only for one-to-one chats.
 
-```objective-c
+```
 /**
- * In one-to-one chat, the other party is typing.
+ * Occurs when the peer user is typing during a one-to-one chat.
  */
 - (void)peerTyping;
 ```
 
-对方结束输入回调（单聊有效）。
+Callback triggered when the other party completes typing. This callback is valid only for one-to-one chats.
 
-```objective-c
+```
 /**
- * In one-to-one chat, the other party is typing.
+ * Occurs when the peer user completes typing.
  */
 - (void)peerEndTyping;
 ```
 
-##### 消息长按事件回调
+##### Callback for a message holding down event
 
-###### 默认消息 cell 长按回调
+###### Callback for holding down the default message cell
 
-```objective-c
+```
 /**
- * The extended area data model group for the current specific message
+ * Occurs when the default message cell is held down.
  *
- * @param   defaultLongPressItems       The default long press extended area function Data model group (default: copy, delete, recall).
- * @param   message                     The current long-press message.
+ * @param   defaultLongPressItems   A list of action options (copy, delete, and recall) shown when the default message cell is held down (the delivery time is less than 2 minutes).
+ * @param   message                  The default message cell.
  *
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)messageLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems message:(AgoraChatMessage*)message;
 ```
 
-###### 自定义 cell 长按回调
+###### Callback for holding down a custom message cell
 
-用户自定义消息 cell 长按事件回调。
+Callback for holding down a custom message cell.
 
-```objective-c
+```
 /**
- * The extension data model group of the current custom cell.
+ * Occurs when a custom message cell is held down.
  *
- * @param   defaultLongPressItems       The default long - press extended area functional data model group.    (The default values are copy, delete, and recall (the sending time is less than 2 minutes).)
- * @param   customCell                  The current long - pressed custom cell.
- *
+ * @param   defaultLongPressItems       A list of default action options (copy, delete, and recall) shown when a custom message cell is held down (the delivery time is less than 2 minutes).
+ * @param   customCell                  The custom message cell that is held down.
  */
 - (NSMutableArray<EaseExtendMenuModel *> *)customCellLongPressExtMenuItemArray:(NSMutableArray<EaseExtendMenuModel*>*)defaultLongPressItems customCell:(UITableViewCell*)customCell;
 ```
 
-#### 会话列表自定义功能扩展
+#### Custom function extension of the conversation list
 
-实例化 EaseConversationsViewController 之后，可选择实现 EaseConversationsViewControllerDelegate 协议（会话列表回调代理），接收 EaseConversationsViewController 的回调并做进一步的自定义实现。
+After EaseConversationsViewController is instantiated, you can implement the EaseConversationsViewControllerDelegate protocol (conversation list callback delegate) to receive the callback of EaseConversationsViewController and further implement custom extensions.
 
-```objective-c
+```
 EaseConversationsViewControllerDelegate
 ```
+ 
+#### Callback for a custom conversation cell
 
-#### 自定义cell回调
+You can obtain the custom conversation cell by implementing the conversation list callback.
 
-通过实现会话列表回调获取自定义消息 cell。
+If `nil` is returned, the default conversation cell will be used; if cell is returned, a custom conversation cell will be used.
 
-如果返回 nil 会显示默认；如果返回 cell 则会显示用户自定义 cell。
-
-```objective-c
+```
 /*
  *@method
- *@brief  Customize the conversation cell.
- *@discussion  Returns nil to display the default cell, otherwise display user-defined cell.
- *@param  tableView  The current Message view tableView.
- *@param  indexPath  The currently display the indexpath of the cell
- *@result Returns the customized cell.
+ *@brief  Occurs when a custom conversation cell is used.
+ *@discussion  Returns nil to use the default cell; otherwise, a custom cell will be used.
+ *@param  tableView  The table view of the current message view.
+ *@param  indexPath  The indexPath of the conversation cell.
+ *@result The custom conversation cell.
  */
 - (EaseConversationCell *)easeTableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
 
-##### 会话列表 cell 选中回调
+##### Callback for cell selection on the the conversation list
 
-```objective-c
+```
 /*
  *@method
- *@brief     The conversation list cell Select callback.
- *@param     tableView        The current Message view tableView.
- *@param     indexPath        The currently display the indexpath of the cell.
+ *@brief     Occurs when a cell is selected on the conversation list.
+ *@param     tableView        The table view of the current message view.
+ *@param     indexPath        The indexPath of the cell for sideslip.
  */
 - (void)easeTableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
-```
-
-```objective-c
-//会话列表 cell 选中回调示例（AgoraChatIM APP 有效）：
+//Example for cell selection on the conversation list (valid only for the Chat app).
   
 - (void)easeTableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -758,27 +754,24 @@ EaseConversationsViewControllerDelegate
     chatViewController.navTitle = cell.model.showName;
     chatViewController.hidesBottomBarWhenPushed = YES;
   
-    //跳转至聊天页。
+    //Jump to the chat page.
     [self.navigationController pushViewController:chatViewController animated:YES];
 }
 ```
 
-##### 会话列表用户资料回调
+##### Callback for the user profile of the conversation list
 
-```objective-c
+```
 /*
  @method
- @brief          The Conversation list User Profile callback.
- @discussion       The user profile data set can be returned based on conversationId or Type.
+ @brief         Callback for the user profile of the conversation list.
+ @discussion    The user profile dataset can be returned according to the ID or type of conversation.
  @param   conversationId    The conversation ID.
  @param   type              The conversation Type.
  */
 - (id<EaseUserProfile>)easeUserProfileAtConversationId:(NSString *)conversationId
                                       conversationType:(AgoraChatConversationType)type;
-```
-
-```objective-c
-//会话列表用户资料回调示例（AgoraChatIM APP 有效）。
+//Example of callback for the user profile of the conversation list (valid only for the Chat app).
 
 - (id<EaseUserProfile>)easeUserProfileAtConversationId:(NSString *)conversationId conversationType:(AgoraChatConversationType)type
 {
@@ -795,216 +788,234 @@ EaseConversationsViewControllerDelegate
 }
 ```
 
-##### 会话列表 cell 侧滑项回调
+##### Callback for cell sideslip items of the conversation list
 
-```objective-c
+```
 /*
  *@method
- *@brief     会话列表 cell 侧滑项回调。
- *@param     tableView     当前消息视图的 tableView。
- *@param     indexPath     当前所要侧滑 cell 的 indexPath。
- *@param     actions       返回侧滑项集合。
+ *@brief     Occurs when a cell on the conversation list sideslips.
+ *@param     tableView     tableView of the current message view.
+ *@param     indexPath     The indexPath of the cell for sideslip.
+ *@param     actions       A collection of cell sideslip items.
  */
 - (NSArray<UIContextualAction *> *)easeTableView:(UITableView *)tableView
       trailingSwipeActionsForRowAtIndexPath:(NSIndexPath *)indexPath
                                     actions:(NSArray<UIContextualAction *> *)actions;
 ```
 
-##### 会话列表 cell 侧滑状态回调
+##### Callback for the cell sideslip status of the conversation list
 
-```objective-c
+```
 - (void)easeTableView:(UITableView *)tableView willBeginEditingRowAtIndexPath:(NSIndexPath *)indexPath;
 
 - (void)easeTableView:(UITableView *)tableView didEndEditingRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
 
-#### 直播聊天室
-##### 1.创建直播聊天室 
-##### 聊天室列表及发送消息
-```objective-c
-/// Init a chatView
-/// @param frame assign frame
-/// @param chatroom a AgoraChatroom
-/// @param customMsgHelper a EaseCustomMessageHelper
-/// @param customOption a EaseChatViewCustomOption
+#### Live Streaming Chat Room
+
+#### 1.The message list of a live streaming chat room
+
+##### Create a message list of the live streaming chat room
+
+```
+/// Initializes a chat view.
+/// @param frame           The frame of the chat view.
+/// @param chatroom        An Agora chat room.
+/// @param customMsgHelper The custom message helper.
+/// @param customOption    The custom option of the chat view.
 - (instancetype)initWithFrame:(CGRect)frame
                      chatroom:(AgoraChatroom*)chatroom
               customMsgHelper:(EaseCustomMessageHelper*)customMsgHelper
                  customOption:(EaseChatViewCustomOption *)customOption;
-
 ```
 
-##### 聊天室发送礼物消息
-```objective-c
-/// send gift
-/// @param giftId  a giftId
-/// @param num gift num
-/// @param aCompletion a callback send gift message
+##### Send a gift message in the chat room
+
+```
+/// Sends a gift.
+/// @param giftId  The gift ID.
+/// @param num     The number of gifts.
+/// @param aCompletion The callback for sending a gift message.
 - (void)sendGiftAction:(NSString *)giftId
                    num:(NSInteger)num
             completion:(void (^)(BOOL success))aCompletion;
-
 ```
 
-##### 聊天室界面是否显示
-```objective-c
-/// display or hidden chatview
-/// @param isHidden whether hidden
+##### Whether to display the chat view
+
+```
+/// Whether to display or hide the chat view.
+/// @param isHidden Whether to hide the chat view.
 - (void)updateChatViewWithHidden:(BOOL)isHidden;
 ```
 
-##### 聊天室输入按钮提示信息更新
-```objective-c
-/// update sendTextButton title
+##### Update the title of sendTextButton
+
+```
+/// Updates the title of sendTextButton.
 /// @param hint sendTextButton title
 - (void)updateSendTextButtonHint:(NSString *)hint;
 ```
-##### 聊天室代理方法
-###### 自定义消息类型Cell
-```objective-c 
-/// display custom message cell at indexpath
+
+##### Chat room delegate methods
+
+###### The custom message cell
+
+```
+/// Displays the custom message cell position, i.e., the indexpath in the table view.
 /// @param indexPath indexPath
 - (UITableViewCell *)easeMessageCellForRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
 
-###### 自定义消息类型Cell高度
-```objective-c 
-/// height for custom message cell at indexpath
+###### The height of the custom message cell
+
+```
+/// Displays the height of the custom message cell.
 /// @param indexPath indexPath
 - (CGFloat)easeMessageCellHeightAtIndexPath:(NSIndexPath *)indexPath;
 ```
 
-###### 自定义加入类型Cell
-```objective-c 
-/// display custom join cell at indexpath
+###### The custom join cell
+
+```
+/// Displays the custom join cell.
 /// @param indexPath indexPath
 - (UITableViewCell *)easeJoinCellForRowAtIndexPath:(NSIndexPath *)indexPath;
 ```
 
-###### 自定义加入类型Cell高度
-```objective-c 
-/// height for custom join cell at indexpath
+###### The height of the custom join cell
+
+```
+/// Displays the height of the custom join cell.
 /// @param indexPath indexPath
 - (CGFloat)easeJoinCellHeightAtIndexPath:(NSIndexPath *)indexPath;
 ```
 
-###### 点击消息回调
-```objective-c 
-/// tap  message callback
-/// @param message  tap message
+###### The message tap callback
+
+```
+/// The message tap callback.
+/// @param message  The tapped message.
 - (void)didSelectUserWithMessage:(AgoraChatMessage*)message;
 ```
 
-###### 弹出输入框回调
-```objective-c 
-/// change chatview offset from bottom
-/// @param offset offset from bottom
+###### The callback for popping up an input box
+
+```
+/// Changes the offset of the chat view from the bottom edge of the current window. 
+/// @param offset  The offset of the chat view from the bottom edge of the current window.
 - (void)chatViewDidBottomOffset:(CGFloat)offset;
 ```
 
-###### 发送消息回调
-```objective-c 
-/// chatview send message
-/// @param message send message
-/// @param error error
+###### The message sending callback
+
+```
+/// Sends a message in the EaseChatView.
+/// @param message The message that is sent.
+/// @param error The error information.
 - (void)chatViewDidSendMessage:(AgoraChatMessage *)message
                          error:(AgoraChatError *)error;
 ```
 
+##### 2. Set custom chat room options
 
-##### 2. 设置聊天室自定义选项
-```objective-c 
+```
 /**
- * set custom tableview message cell
+ * Set the custom message cell in the EaseChatView.   
  */
 @property (nonatomic, assign) BOOL customMessageCell;
 /**
- * set custom user join cell
+ * Set the custom join cell.
  */
 @property (nonatomic, assign) BOOL customJoinCell;
 
 /**
- * set tableView backgroud color
+ * Set the background color of the EaseChatView.
  */
 @property (nonatomic, strong) UIColor *tableViewBgColor;
 
 /**
- * set right margin of EaseChatView
+ * Set the right margin of EaseChatView.
  */
 @property (nonatomic, assign) CGFloat tableViewRightMargin;
 
 /**
- * set sendTextButton bottom margin of EaseChatView
+ * Set the bottom margin of the sendTextButton of EaseChatView.
  */
 @property (nonatomic, assign) CGFloat sendTextButtonBottomMargin;
 
 /**
- * set sendTextButton right margin of EaseChatView
+ * Set the right margin of the sendTextButton of EaseChatView.
  */
 @property (nonatomic, assign) CGFloat sendTextButtonRightMargin;
 
 /**
- * set whether display sender avatarImageView
+ * Set whether to display the sender avatar view.
  */
 @property (nonatomic, assign) BOOL   displaySenderAvatar;
 
 /**
- * set whether display sender nickname
+ * Set whether to display the sender nickname.
  */
 @property (nonatomic, assign) BOOL   displaySenderNickname;
 
 /**
- * Avatar style
+ * Set the avatar style.
  */
 @property (nonatomic) EaseChatAvatarStyle avatarStyle;
 
 /**
- * Avatar cornerRadius Default: 0 (Only avatar type RoundedCorner)
+ * Set the corner radius of the avatar.
+ * 
+ * The default value is 0, indicating that only the rounded corner style is allowed.
  */
 @property (nonatomic) CGFloat avatarCornerRadius;
 
 /**
- * set cell contentview backgroud color
+ * Set the background color of the content view of a message cell.
  */
 @property (nonatomic, strong) UIColor *cellBgColor;
 
 /**
- * set nameLabel text font size
+ * Set the text font size of the name label.
  */
 @property (nonatomic, assign) CGFloat nameLabelFontSize;
 /**
- * set nameLabel text color
+ * Set the text color of the name label.
  */
 @property (nonatomic, strong) UIColor *nameLabelColor;
 /**
- * set messageLabel font size
+ * Set the font size of the message label.
  */
 @property (nonatomic, assign) CGFloat messageLabelSize;
 
 /**
- * set messageLabel text color
+ * Set the text color of the message label.
  */
 @property (nonatomic, strong) UIColor *messageLabelColor;
 ```
 
-##### 3. 发送即解析custom消息
-###### 创建自定义消息辅助类
-```objective-c 
-/// create a EaseCustomMessageHelper Instance
-/// @param customMsgImp a delegate which implment EaseCustomMessageHelperDelegate
-/// @param chatId a chatroom Id
+##### 3. Send a custom message
+
+###### Create the class for the custom message helper
+
+```
+/// Creates a EaseCustomMessageHelper instance.
+/// @param customMsgImp   The delegate which implements EaseCustomMessageHelperDelegate.
+/// @param chatId         The chat room ID.
 - (instancetype)initWithCustomMsgImp:(id<EaseCustomMessageHelperDelegate>)customMsgImp chatId:(NSString*)chatId;
 ```
 
-###### 发送自定义消息 
-```objective-c 
+###### Send a custom message
+
+```
 /*
- send custom message (gift,like,Barrage)
- @param text                 Message content
+ Sends a custom message (such as a gift, like, or barrage).
+ @param text                 The message content.
  @param num                  Number of message content
  @param messageType          chat type
- @param customMsgType        custom message type
- @param aCompletionBlock     send completion callback
+ @param customMsgType        The custom message type
+ @param aCompletionBlock     The completion block.
 */
 - (void)sendCustomMessage:(NSString*)text
                       num:(NSInteger)num
@@ -1014,16 +1025,17 @@ EaseConversationsViewControllerDelegate
                completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
 ```
 
-###### 发送自定义消息 （有扩展参数）
-```objective-c 
+###### Send a custom message (with extension parameters)
+
+```
 /*
- send custom message (gift,like,Barrage) (with extended parameters)
- @param text                 Message content
+ Sends a custom message (such as a gift, like, or barrage) (with extension parameters).
+ @param text                 The message content.
  @param num                  Number of message content
  @param messageType          chat type
- @param customMsgType        custom message type
- @param ext              message extension
- @param aCompletionBlock     send completion callback
+ @param customMsgType        The custom message type
+ @param ext                  The message extension.
+ @param aCompletionBlock     The completion block.
 */
 - (void)sendCustomMessage:(NSString*)text
                       num:(NSInteger)num
@@ -1034,17 +1046,17 @@ EaseConversationsViewControllerDelegate
                completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
 ```
 
+###### Event for sending a custom message body (other custom message body events)
 
-###### 发送用户自定义消息体事件（其他自定义消息体事件）
-```objective-c 
+```
 /*
- send user custom message (Other custom message body events)
+ Sends a custom message (other custom message body events).
  
-@param event                custom message body event
-@param customMsgBodyExt     custom message body event parameters
-@param to                   message receiver
-@param messageType          chat type
-@param aCompletionBlock     send completion callback
+@param event                The event for sending a custom message body.
+@param customMsgBodyExt     The extension parameters in the custom message body.
+@param to                   The message recipient.
+@param messageType          The message type.
+@param aCompletionBlock     The completion block.
 */
 - (void)sendUserCustomMessage:(NSString*)event
              customMsgBodyExt:(NSDictionary*)customMsgBodyExt
@@ -1053,17 +1065,18 @@ EaseConversationsViewControllerDelegate
                    completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
 ```
 
-###### 发送用户自定义消息体事件（有消息扩展参数）
-```objective-c 
+###### Event for sending a custom message body (with extension parameters)
+
+```
 /*
- send user custom message (Other custom message body events) (extension parameters)
+ Sends a custom message (Other custom message body events) (extension parameters).
  
-@param event                custom message body event
-@param customMsgBodyExt     custom message body event parameters
-@param to                   message receiver
-@param messageType          chat type
-@param ext                  message extension
-@param aCompletionBlock     send completion callback
+@param event                The event for sending a custom message body.
+@param customMsgBodyExt     The extension parameters in the custom message body.
+@param to                   The message recipient.
+@param messageType          The message type.
+@param ext                  The message extension.
+@param aCompletionBlock     The completion block.
 */
 - (void)sendUserCustomMessage:(NSString*)event
              customMsgBodyExt:(NSDictionary*)customMsgBodyExt
@@ -1071,65 +1084,66 @@ EaseConversationsViewControllerDelegate
                   messageType:(AgoraChatType)messageType
                           ext:(NSDictionary*)ext
                    completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock;
-```      
-##### 4. 获取个人信息
-###### 创建获取个人信息辅助类
-```objective-c 
+```
+
+##### 4. Get user information
+
+###### Create a user information manager helper class
+
+```
 /// create EaseUserInfoManagerHelper instance.
 + (EaseUserInfoManagerHelper *)sharedHelper;
-```    
+```
 
-###### 通过用户Ids获取个人信息
-```objective-c 
-/// fetch userInfos
-/// @param userIds userIds
-/// @param completion completion
+###### Get user information by user IDs
+
+```
+/// Gets user information.
+/// @param userIds The user IDs.
+/// @param completion The completion block.
 + (void)fetchUserInfoWithUserIds:(NSArray<NSString *> *)userIds
                       completion:(void(^)(NSDictionary *userInfoDic))completion;
+```
 
-```    
+###### Get user information by user IDs and information types
 
-###### 通过用户Ids和用户信息类型获取个人信息
-```objective-c 
-/// fetch user information by user ID and information type
-/// @param userIds userIds
-/// @param userInfoTypes userInfo types
-/// @param completion completion
+```
+/// Gets user information by user ID and information type.
+/// @param userIds The user IDs.
+/// @param userInfoTypes The user information types.
+/// @param completion The completion block.
 + (void)fetchUserInfoWithUserIds:(NSArray<NSString *> *)userIds
                    userInfoTypes:(NSArray<NSNumber *> *)userInfoTypes
                       completion:(void(^)(NSDictionary *userInfoDic))completion;
+```
 
-```    
+###### Update user information
 
-
-###### 更新个人信息
-```objective-c 
-/// Update user information
-/// @param userInfo userInfo
-/// @param completion completion
+```
+/// Updates user information.
+/// @param userInfo The user information.
+/// @param completion The completion block.
 + (void)updateUserInfo:(AgoraChatUserInfo *)userInfo
             completion:(void(^)(AgoraChatUserInfo *aUserInfo))completion;
+```
 
-```  
+###### Update user information by user ID
 
-###### 根据用户Id更新个人信息
-```objective-c 
-/// Update user information
-/// @param userId user ID
-/// @param type userInfo type
-/// @param completion completion
+```
+/// Updates user information by user ID.
+/// @param userId The user ID.
+/// @param type The user information type.
+/// @param completion The completion block.
 + (void)updateUserInfoWithUserId:(NSString *)userId
                         withType:(AgoraChatUserInfoType)type
                       completion:(void(^)(AgoraChatUserInfo *aUserInfo))completion;
-```  
+```
 
+###### Get the information of the current logged-in user
 
-###### 获取当前登录用户个人信息
-```objective-c 
-
-/// Obtain personal user information
-/// @param completion completion
+```
+/// Gets the information of the current logged-in user.
+/// @param completion The completion block.
 + (void)fetchOwnUserInfoCompletion:(void(^)(AgoraChatUserInfo *ownUserInfo))completion;
 + ``` 
-
-
+```
