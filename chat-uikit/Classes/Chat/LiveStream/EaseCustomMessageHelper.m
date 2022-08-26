@@ -61,8 +61,8 @@
                     }
                 } else if ([body.event isEqualToString:kCustomMsgChatroomGift]) {
                     
-                    NSString *giftId = [body.ext objectForKey:kGiftIdKey];
-                    NSInteger giftNum = [[body.ext objectForKey:kGiftNumKey] integerValue];
+                    NSString *giftId = [body.customExt objectForKey:kGiftIdKey];
+                    NSInteger giftNum = [[body.customExt objectForKey:kGiftNumKey] integerValue];
                     
                     if (self.delegate && [self.delegate respondsToSelector:@selector(steamerReceiveGiftId:giftNum:fromUser:)]) {
                         [self.delegate steamerReceiveGiftId:giftId giftNum:giftNum fromUser:message.from];
@@ -118,14 +118,14 @@
     NSMutableDictionary *extDic = [[NSMutableDictionary alloc]init];
     if (customMsgType == customMessageType_praise) {
         [extDic setObject:[NSString stringWithFormat:@"%ld",(long)num] forKey:@"num"];
-        body = [[AgoraChatCustomMessageBody alloc]initWithEvent:kCustomMsgChatroomPraise ext:extDic];
+        body = [[AgoraChatCustomMessageBody alloc] initWithEvent:kCustomMsgChatroomPraise customExt:extDic];
     } else if (customMsgType == customMessageType_gift){
         [extDic setObject:text forKey:kGiftIdKey];
         [extDic setObject:[@(num) stringValue] forKey:kGiftNumKey];
-        body = [[AgoraChatCustomMessageBody alloc] initWithEvent:kCustomMsgChatroomGift ext:extDic];
+        body = [[AgoraChatCustomMessageBody alloc] initWithEvent:kCustomMsgChatroomGift customExt:extDic];
     } else if (customMsgType == customMessageType_barrage) {
         [extDic setObject:text forKey:@"txt"];
-        body = [[AgoraChatCustomMessageBody alloc]initWithEvent:kCustomMsgChatroomBarrage ext:extDic];
+        body = [[AgoraChatCustomMessageBody alloc]initWithEvent:kCustomMsgChatroomBarrage customExt:extDic];
     }
     NSString *from = [[AgoraChatClient sharedClient] currentUsername];
     AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:toUser from:from to:toUser body:body ext:ext];
@@ -168,7 +168,7 @@
                   messageType:(AgoraChatType)messageType
                           ext:(NSDictionary*)ext
                    completion:(void (^)(AgoraChatMessage *message, AgoraChatError *error))aCompletionBlock {
-    AgoraChatMessageBody *customMsgBody = [[AgoraChatCustomMessageBody alloc]initWithEvent:event ext:customMsgBodyExt];
+    AgoraChatMessageBody *customMsgBody = [[AgoraChatCustomMessageBody alloc] initWithEvent:event customExt:customMsgBodyExt];
     NSString *from = [[AgoraChatClient sharedClient] currentUsername];
     AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:toUser from:from to:toUser body:customMsgBody ext:ext];
     message.chatType = messageType;

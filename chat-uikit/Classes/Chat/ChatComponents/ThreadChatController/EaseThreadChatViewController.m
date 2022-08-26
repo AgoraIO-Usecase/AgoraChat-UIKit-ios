@@ -164,9 +164,9 @@
 
 
 
-- (void)messagesInfoDidRecall:(NSArray<EMRecallMessageInfo *> *)aRecallMessagesInfo {
+- (void)messagesInfoDidRecall:(NSArray<AgoraChatRecallMessageInfo *> *)aRecallMessagesInfo {
     [aRecallMessagesInfo enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        AgoraChatMessage *msg = ((EMRecallMessageInfo *)obj).recallMessage;
+        AgoraChatMessage *msg = ((AgoraChatRecallMessageInfo *)obj).recallMessage;
         [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj isKindOfClass:[EaseMessageModel class]]) {
                 EaseMessageModel *model = (EaseMessageModel *)obj;
