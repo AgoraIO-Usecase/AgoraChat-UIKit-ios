@@ -905,11 +905,11 @@
     });
 }
 
-- (void)messagesInfoDidRecall:(NSArray<EMRecallMessageInfo *> *)aRecallMessagesInfo
+- (void)messagesInfoDidRecall:(NSArray<AgoraChatRecallMessageInfo *> *)aRecallMessagesInfo
 {
     __block NSDictionary *dic;
     [aRecallMessagesInfo enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        EMRecallMessageInfo *recallMessageInfo = (EMRecallMessageInfo *)obj;
+        AgoraChatRecallMessageInfo *recallMessageInfo = (AgoraChatRecallMessageInfo *)obj;
         [[[self.dataArray reverseObjectEnumerator] allObjects] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj isKindOfClass:[NSDictionary class]]) {
                 if ([((NSDictionary *)obj).allValues.firstObject isEqualToString:recallMessageInfo.recallMessage.messageId]) {
@@ -1204,7 +1204,7 @@
         if (self.dataArray.count <= 0) {
             self.moreMsgId = @"";
         }
-        [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:AgoraChatMessageFetchHidtoryDirectionDown pageSize:10 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
+        [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:AgoraChatMessageFetchHistoryDirectionDown pageSize:10 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
             self.loadFinished = YES;
             if (!aError) {
                 self.cursor = aResult;
