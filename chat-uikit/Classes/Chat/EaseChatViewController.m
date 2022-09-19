@@ -212,7 +212,7 @@
                     if ([model.message.from isEqualToString:weakself.currentConversation.conversationId]) {
                         model.userDataProfile = weakself.otherProfile;
                     }
-                    if ([model.message.from isEqualToString:self.currentConversation.conversationId]) {
+                    if ([model.message.from isEqualToString:weakself.currentConversation.conversationId]) {
                         model.userDataProfile = weakself.sentProfile;
                     }
                 }
@@ -259,8 +259,9 @@
 {
     _viewModel = viewModel;
     _isReloadViewWithModel = YES;
+    __weak typeof(self) weakself = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self refreshTableView:YES];
+        [weakself refreshTableView:YES];
     });
 }
 
@@ -919,9 +920,10 @@
             }
         }];
     }];
+    __weak typeof(self) weakself =self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.dataArray removeObject:dic];
-        [self.tableView reloadData];
+        [weakself.dataArray removeObject:dic];
+        [weakself.tableView reloadData];
     });
 }
 
@@ -931,14 +933,14 @@
 {
     __weak typeof(self) weakself = self;
     dispatch_async(self.msgQueue, ^{
-        NSString *conId = self.currentConversation.conversationId;
+        NSString *conId = weakself.currentConversation.conversationId;
         if (![conId isEqualToString:aMessage.conversationId]){
             return ;
         }
         
         __block NSUInteger index = NSNotFound;
         __block EaseMessageModel *reloadModel = nil;
-        [self.dataArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        [weakself.dataArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             if ([obj isKindOfClass:[EaseMessageModel class]]) {
                 EaseMessageModel *model = (EaseMessageModel *)obj;
                 if ([model.message.messageId isEqualToString:aMessage.messageId]) {
@@ -1312,7 +1314,7 @@
             [weakself.tableView endRefreshing];
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
+            [weakself.tableView reloadData];
         });
     }
 }
@@ -1419,8 +1421,8 @@
         }
         dispatch_async(dispatch_get_main_queue(), ^{
             if (error) {
-                [self.view endEditing:YES];
-                [self showHint:error.errorDescription];
+                [weakself.view endEditing:YES];
+                [weakself showHint:error.errorDescription];
             }
         });
     }];
