@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param   huanxinID        huanxin ID
  *
  */
-- (id<EaseUserProfile>)userProfile:(NSString *)userID;
+- (nullable id<EaseUserProfile>)userProfile:(NSString *)userID;
 
 /**
  * Avatar selected event
@@ -52,7 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param messageModel     Message data model
  *
  */
-- (UITableViewCell *)cellForItem:(UITableView *)tableView messageModel:(EaseMessageModel *)messageModel;
+- (nullable UITableViewCell *)cellForItem:(UITableView *)tableView messageModel:(EaseMessageModel *)messageModel;
 
 /**
  * The extension data model group of the current custom cell
@@ -81,9 +81,9 @@ NS_ASSUME_NONNULL_BEGIN
  * @param   error         Message sending Result
  *
  */
--(void)didSendMessage:(AgoraChatMessage *)message error:(AgoraChatError *)error;
+-(void)didSendMessage:(AgoraChatMessage *)message error:(nullable AgoraChatError *)error;
 
--(void)didSendMessage:(AgoraChatMessage *)message thread:(AgoraChatThread *)thread error:(AgoraChatError *)error;
+-(void)didSendMessage:(AgoraChatMessage *)message thread:(AgoraChatThread *)thread error:(nullable AgoraChatError *)error;
 
 /**
  * The current session enters the extended area data model group
