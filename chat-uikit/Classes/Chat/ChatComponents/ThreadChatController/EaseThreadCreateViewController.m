@@ -131,17 +131,6 @@
     self.inputBar.extendMenuView = moreFunction;
 }
 
-- (NSString *)getAudioOrVideoPath
-{
-    NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
-    path = [path stringByAppendingPathComponent:@"EaseChatDemoRecord"];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-    
-    return path;
-}
-
 //Sending message body
 - (void)sendMessageWithBody:(AgoraChatMessageBody *)aBody ext:(NSDictionary * __nullable)aExt
 {

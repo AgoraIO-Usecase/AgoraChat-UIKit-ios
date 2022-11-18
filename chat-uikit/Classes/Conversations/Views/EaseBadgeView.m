@@ -47,7 +47,7 @@
 
 - (void)setBagde:(int)badge badgeStyle:(EaseChatUnReadBadgeViewStyle)badgeViewStyle
 {
-    if (badge == 0) {
+    if (badge <= 0) {
         [self setHidden:YES];
         return;
     }else {
