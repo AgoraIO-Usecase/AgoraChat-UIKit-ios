@@ -53,6 +53,7 @@
         _muteState = [[UIImageView alloc]initWithFrame:CGRectMake(CGRectGetMaxX(self.threadName.frame), CGRectGetMinY(self.threadName.frame), 14, 14)];
         _muteState.center = CGPointMake(_muteState.center.x, _threadName.center.y);
         _muteState.image = [UIImage imageNamed:@"noDisturb"];
+        _muteState.hidden = YES;
     }
     return _muteState;
 }
