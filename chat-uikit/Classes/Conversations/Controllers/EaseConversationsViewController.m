@@ -54,10 +54,8 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 
 - (void)viewWillDisappear:(BOOL)animated
 {
-    __weak typeof(self) weakSelf = self;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [weakSelf endRefresh];
-    });
+    [super viewWillDisappear:animated];
+    [self endRefresh];
 }
 
 - (void)dealloc
