@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'chat-uikit'
-    s.version          = '1.0.9'
+    s.version          = '1.1.0'
     s.summary = 'agora im UIKit'
     s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
     s.description = <<-DESC
@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
                   DESC
     s.license          = { :type => 'MIT', :file => 'LICENSE' }
     s.author           = { 'agora' => 'dev@agora.com' }
-    s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.0.9'}
+    s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => 'chat-uikit_1.1.0'}
     s.frameworks = 'UIKit'
     s.libraries = 'stdc++'
     s.ios.deployment_target = '11.0'
