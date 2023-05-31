@@ -78,5 +78,6 @@ Pod::Spec.new do |s|
     s.dependency 'Agora_Chat_iOS', '>= 1.0.7'
     s.dependency 'EMVoiceConvert', '0.1.0'
     s.dependency 'MJRefresh'
+    s.dependency 'TFHpple'
 
 end

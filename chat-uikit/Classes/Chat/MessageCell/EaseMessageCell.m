@@ -23,8 +23,9 @@
 #import "EMAudioPlayerUtil.h"
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMMessageReactionView.h"
+#import "EMMsgURLPreviewBubbleView.h"
 
-@interface EaseMessageCell() <EMMaskHighlightViewDelegate>
+@interface EaseMessageCell() <EMMaskHighlightViewDelegate, EMMsgURLPreviewBubbleViewDelegate>
 
 @property (nonatomic, strong) UIImageView *avatarView;
 
@@ -100,8 +101,9 @@
         identifier = [NSString stringWithFormat:@"%@ExtGif", identifier];
     } else if (aType == AgoraChatMessageTypeCustom) {
         identifier = [NSString stringWithFormat:@"%@Custom", identifier];
+    } else if (aType == AgoraChatMessageTypeExtURLPreview) {
+        identifier = [NSString stringWithFormat:@"%@URLPreview", identifier];
     }
-    
     return identifier;
 }
 
@@ -374,6 +376,12 @@
             bubbleView = [[EaseChatMessageBubbleView alloc] initWithDirection:self.direction type:aType
                 viewModel:_viewModel];
             break;
+        case AgoraChatMessageTypeExtURLPreview: {
+            EMMsgURLPreviewBubbleView *URLPreviewBubbleView = [[EMMsgURLPreviewBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
+            URLPreviewBubbleView.delegate = self;
+            bubbleView = URLPreviewBubbleView;
+            break;
+        }
         default:
             break;
     }
@@ -522,6 +530,14 @@
 
 - (NSArray<UIView *> *)maskHighlight {
     return @[_bubbleView, _reactionView, _avatarView];
+}
+
+#pragma mark - EMMsgURLPreviewBubbleViewDelegate
+- (void)URLPreviewBubbleViewNeedLayout:(EMMsgURLPreviewBubbleView *)view
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(messageCellNeedReload:)]) {
+        [_delegate messageCellNeedReload:self];
+    }
 }
 
 @end

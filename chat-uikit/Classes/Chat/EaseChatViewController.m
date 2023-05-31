@@ -39,6 +39,7 @@
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMBottomReactionDetailView.h"
 #import "ChatUIOptions.h"
+#import "EaseURLPreviewManager.h"
 
 #define chatThreadPageSize 10
 
@@ -488,6 +489,27 @@
         cell.delegate = self;
     }
     model.isHeader = NO;
+    if (model.type == AgoraChatMessageTypeExtURLPreview) {
+        NSString *text = ((AgoraChatTextMessageBody *)model.message.body).text;
+        NSDataDetector *detector= [[NSDataDetector alloc] initWithTypes:NSTextCheckingTypeLink error:nil];
+        NSArray *checkArr = [detector matchesInString:text options:0 range:NSMakeRange(0, text.length)];
+        if (checkArr.count == 1) {
+            NSTextCheckingResult *result = checkArr.firstObject;
+            NSString *urlStr = result.URL.absoluteString;
+            NSRange range = [text rangeOfString:urlStr options:NSCaseInsensitiveSearch];
+            if (range.length > 0) {
+                NSURL *url = [NSURL URLWithString:urlStr];
+                EaseURLPreviewResult *result = [EaseURLPreviewManager.shared resultWithURL:url];
+                if (!result || result.state == EaseURLPreviewStateLoading) {
+                    [EaseURLPreviewManager.shared preview:url successHandle:^(EaseURLPreviewResult * _Nonnull result) {
+                        [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                    } faieldHandle:^{
+                        [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                    }];
+                }
+            }
+        }
+    }
     if (cell.model.message.body.type == AgoraChatMessageTypeVoice) {
         cell.model.weakMessageCell = cell;
     }
@@ -830,6 +852,14 @@
 //            }
 //        }];
     }];
+}
+
+- (void)messageCellNeedReload:(EaseMessageCell *)cell
+{
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    if (indexPath) {
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    }
 }
 
 #pragma mark -- EaseMoreFunctionViewDelegate

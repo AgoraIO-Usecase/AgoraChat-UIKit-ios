@@ -23,7 +23,8 @@ typedef NS_ENUM(NSInteger, AgoraChatMessageType) {
     AgoraChatMessageTypeExtGif,
     AgoraChatMessageTypeExtRecall,
     AgoraChatMessageTypeExtNewFriend,
-    AgoraChatMessageTypeExtAddGroup
+    AgoraChatMessageTypeExtAddGroup,
+    AgoraChatMessageTypeExtURLPreview,
 };
 
 

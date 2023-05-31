@@ -57,6 +57,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)toThreadChat:(EaseMessageModel *)model;
 - (void)messageCellDidClickReactionView:(EaseMessageModel *)model;
 
+- (void)messageCellNeedReload:(EaseMessageCell *)cell;
+
 @end
 
 NS_ASSUME_NONNULL_END
