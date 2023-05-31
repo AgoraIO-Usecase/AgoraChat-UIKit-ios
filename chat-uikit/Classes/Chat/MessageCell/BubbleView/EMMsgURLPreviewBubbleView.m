@@ -230,6 +230,8 @@
                 [_delegate URLPreviewBubbleViewNeedLayout:self];
             }
         }];
+        _titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
+        _titleLabel.textColor = UIColor.blackColor;
         _titleLabel.text = result.title;
         _descLabel.text = result.desc;
     } else {
@@ -241,12 +243,21 @@
         [_imageView Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
         [_descLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
         
+        [_contentView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(_imageView.ease_bottom);
+            make.left.right.equalTo(_imageView);
+            make.bottom.equalTo(self);
+        }];
         [_titleLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(_textView.ease_bottom).offset(8);
             make.left.equalTo(@12);
             make.right.equalTo(@-12);
             make.bottom.equalTo(@-8);
         }];
+        
+        _titleLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
+        _titleLabel.textColor = [UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1];
+        _titleLabel.text = NSLocalizedString(@"common.parsing", nil);
     }
 }
 
