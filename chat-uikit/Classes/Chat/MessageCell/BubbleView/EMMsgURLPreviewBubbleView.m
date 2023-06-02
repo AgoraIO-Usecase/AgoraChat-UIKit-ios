@@ -54,14 +54,24 @@
     maskPath.lineCapStyle = kCGLineCapRound;
     maskPath.lineJoinStyle = kCGLineJoinRound;
     [maskPath moveToPoint:CGPointMake(16, h)];
-    [maskPath addLineToPoint:CGPointMake(w - 4, h)];
-    [maskPath addQuadCurveToPoint:CGPointMake(w, h - 4) controlPoint:CGPointMake(w, h)];
+    if (self.direction == AgoraChatMessageDirectionSend) {
+        [maskPath addLineToPoint:CGPointMake(w - 4, h)];
+        [maskPath addQuadCurveToPoint:CGPointMake(w, h - 4) controlPoint:CGPointMake(w, h)];
+    } else {
+        [maskPath addLineToPoint:CGPointMake(w - 16, h)];
+        [maskPath addQuadCurveToPoint:CGPointMake(w, h - 16) controlPoint:CGPointMake(w, h)];
+    }
     [maskPath addLineToPoint:CGPointMake(w, 16)];
     [maskPath addQuadCurveToPoint:CGPointMake(w - 16, 0) controlPoint:CGPointMake(w, 0)];
     [maskPath addLineToPoint:CGPointMake(16, 0)];
     [maskPath addQuadCurveToPoint:CGPointMake(0, 16) controlPoint:CGPointMake(0, 0)];
-    [maskPath addLineToPoint:CGPointMake(0, h - 16)];
-    [maskPath addQuadCurveToPoint:CGPointMake(16, h) controlPoint:CGPointMake(0, h)];
+    if (self.direction == AgoraChatMessageDirectionSend) {
+        [maskPath addLineToPoint:CGPointMake(0, h - 16)];
+        [maskPath addQuadCurveToPoint:CGPointMake(16, h) controlPoint:CGPointMake(0, h)];
+    } else {
+        [maskPath addLineToPoint:CGPointMake(0, h - 4)];
+        [maskPath addQuadCurveToPoint:CGPointMake(4, h) controlPoint:CGPointMake(0, h)];
+    }
     _shapeLayer.path = maskPath.CGPath;
 }
 
@@ -105,7 +115,7 @@
     [self addSubview:_textView];
     
     _imageView = [[UIImageView alloc] init];
-    _imageView.backgroundColor = UIColor.whiteColor;
+    _imageView.backgroundColor = [UIColor colorWithRed:0.9 green:0.937 blue:1 alpha:1];
     _imageView.contentMode = UIViewContentModeScaleAspectFit;
     [self addSubview:_imageView];
     
@@ -180,7 +190,6 @@
         make.left.equalTo(@12);
         make.top.equalTo(@8);
         make.right.equalTo(@-12);
-        make.width.equalTo(@253);
     }];
     if (result.state == EaseURLPreviewStateSuccess) {
         _imageView.hidden = NO;
@@ -191,6 +200,7 @@
         [_imageView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(_textView.ease_bottom).offset(8);
             make.left.right.equalTo(self);
+            make.width.equalTo(self);
             make.height.equalTo(@0);
         }];
         [_contentView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
@@ -224,7 +234,8 @@
             [_imageView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
                 make.top.equalTo(_textView.ease_bottom).offset(8);
                 make.left.right.equalTo(self);
-                make.height.equalTo(@(253 / image.size.width * image.size.height));
+                make.width.equalTo(self);
+                make.height.equalTo(_imageView.ease_width).multipliedBy(image.size.height / image.size.width);
             }];
             if (_delegate && [_delegate respondsToSelector:@selector(URLPreviewBubbleViewNeedLayout:)]) {
                 [_delegate URLPreviewBubbleViewNeedLayout:self];
@@ -244,7 +255,7 @@
         [_descLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
         
         [_contentView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(_imageView.ease_bottom);
+            make.top.equalTo(_textView.ease_bottom).offset(8);
             make.left.right.equalTo(_imageView);
             make.bottom.equalTo(self);
         }];
@@ -269,10 +280,7 @@
     _descLabel.hidden = YES;
     
     [_textView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-        make.left.equalTo(@12);
-        make.top.equalTo(@8);
-        make.right.equalTo(@-12);
-        make.bottom.equalTo(@-8);
+        make.edges.equalTo(@(UIEdgeInsetsMake(8, 12, 8, 12)));
     }];
     [_contentView Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
     [_imageView Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
