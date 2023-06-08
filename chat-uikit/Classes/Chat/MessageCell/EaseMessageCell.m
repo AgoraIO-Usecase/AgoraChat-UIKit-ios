@@ -24,6 +24,7 @@
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMMessageReactionView.h"
 #import "EMMsgURLPreviewBubbleView.h"
+#import "EaseMessageQuoteView.h"
 
 @interface EaseMessageCell() <EMMaskHighlightViewDelegate, EMMsgURLPreviewBubbleViewDelegate>
 
@@ -38,6 +39,10 @@
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
 
 @property (nonatomic, strong) EMMessageReactionView *reactionView;
+
+@property (nonatomic, strong) EaseMessageQuoteView *quoteView;
+
+@property (nonatomic, assign) AgoraChatType chatType;
 
 @end
 
@@ -54,6 +59,7 @@
     if (self) {
         _direction = aDirection;
         _viewModel = viewModel;
+        _chatType = aChatType;
         if (_viewModel.msgAlignmentStyle == EaseAlignmentlAll_Left) {
             _direction = AgoraChatMessageDirectionReceive;
         }
@@ -62,18 +68,6 @@
     [self.bubbleView setupBubbleBackgroundImage];
     return self;
 }
-
-- (void)awakeFromNib {
-    [super awakeFromNib];
-    // Initialization code
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-    [super setSelected:selected animated:animated];
-
-    // Configure the view for the selected state
-}
-
 
 #pragma mark - Class Methods
 
@@ -440,21 +434,83 @@
     
     _reactionView.reactionList = model.message.reactionList;
     
-    [_bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        if (_viewModel.displayReceiverName || _viewModel.displaySentName) {
-            if (model.message.reactionList.count > 0) {
+    if (model.message.body.type == AgoraChatMessageBodyTypeText) {
+        NSDictionary *quoteInfo = model.message.ext[@"msgQuote"];
+        if (quoteInfo || _quoteView) {
+            self.quoteView.message = model.message;
+        }
+    }
+    [self updateLayout];
+}
+
+- (void)updateLayout
+{
+    [_bubbleView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+        if (_viewModel.displayReceiverName) {
+            if (_model.message.reactionList.count > 0) {
                 make.top.equalTo(self.nameLabel.ease_bottom).offset(22);
             } else {
                 make.top.equalTo(self.nameLabel.ease_bottom).offset(6);
             }
         } else {
-            if (model.message.reactionList.count > 0) {
+            if (_model.message.reactionList.count > 0) {
                 make.top.equalTo(self.contentView).offset(componentSpacing + 10);
             } else {
                 make.top.equalTo(self.contentView).offset(componentSpacing);
             }
         }
+        if (self.direction == AgoraChatMessageDirectionReceive) {
+            if (_viewModel.displayReceivedAvatar) {
+                make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
+            } else {
+                make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+            }
+        } else {
+            if (_viewModel.displaySentAvatar) {
+                make.right.equalTo(self.avatarView.ease_left).offset(-componentSpacing);
+            } else {
+                make.right.equalTo(self.contentView).offset(-2 * componentSpacing);
+            }
+        }
+                
+        if (_model.message.body.type == AgoraChatMessageTypeFile) {
+            make.width.equalTo(@(self.bubbleView.maxBubbleWidth));
+        } else {
+            make.width.lessThanOrEqualTo(@(self.bubbleView.maxBubbleWidth));
+        }
+        if (!_quoteView || !_quoteView.message) {
+            make.bottom.equalTo(self.contentView).offset(-componentSpacing);
+        }
     }];
+}
+
+- (EaseMessageQuoteView *)quoteView
+{
+    if (!_quoteView) {
+        _quoteView = [[EaseMessageQuoteView alloc] init];
+        _quoteView.delegate = self;
+        [self.contentView addSubview:_quoteView];
+        
+        if (self.direction == AgoraChatMessageDirectionReceive) {
+            [_quoteView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(_bubbleView.ease_bottom).offset(4);
+                make.left.equalTo(self.bubbleView);
+                make.right.lessThanOrEqualTo(self.contentView).offset(-70);
+                make.bottom.equalTo(self.contentView).offset(-15);
+            }];
+        } else {
+            [_quoteView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(_bubbleView.ease_bottom).offset(4);
+                make.left.greaterThanOrEqualTo(self.contentView).offset(70);
+                make.right.equalTo(self.bubbleView);
+                make.bottom.equalTo(self.contentView).offset(-15);
+            }];
+        }
+
+        [_quoteView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onQuoteViewTap)]];
+        [_quoteView addGestureRecognizer:[[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(onQuoteViewLongPress:)]];
+    }
+    return _quoteView;
 }
 
 #pragma mark - Action
@@ -537,6 +593,23 @@
 {
     if (_delegate && [_delegate respondsToSelector:@selector(messageCellNeedReload:)]) {
         [_delegate messageCellNeedReload:self];
+    }
+}
+
+#pragma mark - EaseMessageQuoteView
+- (void)onQuoteViewTap
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(messageCellDidClickQuote:)]) {
+        [_delegate messageCellDidClickQuote:self];
+    }
+}
+
+- (void)onQuoteViewLongPress:(UILongPressGestureRecognizer *)sender
+{
+    if (sender.state == UIGestureRecognizerStateBegan) {
+        if (_delegate && [_delegate respondsToSelector:@selector(messageCellDidLongPressQuote:)]) {
+            [_delegate messageCellDidLongPressQuote:self];
+        }
     }
 }
 

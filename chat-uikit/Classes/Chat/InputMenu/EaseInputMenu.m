@@ -13,6 +13,7 @@
 #import "EaseHeaders.h"
 #import "UIView+AgoraChatGradient.h"
 #import "EaseInputMenu+Private.h"
+#import "EaseInputQuoteView.h"
 
 #define kTextViewMinHeight 36
 #define kTextViewMaxHeight 80
@@ -20,7 +21,7 @@
 #define kModuleMargin 4
 #define kTopMargin 8
 
-@interface EaseInputMenu()<UITextViewDelegate>
+@interface EaseInputMenu()<UITextViewDelegate, EaseInputQuoteViewDelegate>
 
 @property (nonatomic, strong) UIView *inputView;
 @property (nonatomic, strong) EaseTextView *textView;
@@ -38,6 +39,7 @@
 //@property (nonatomic, strong) UIButton *audioDescBtn;
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
 @property (nonatomic, strong) NSMutableArray<EaseExtendMenuModel*> *attachmentModelArray;
+@property (nonatomic, strong) EaseInputQuoteView *quoteView;
 
 @end
 
@@ -298,21 +300,41 @@
 - (void)_remakeButtonsViewConstraints
 {
     if (self.currentMoreView) {
-        [self.bottomLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.textView.ease_bottom).offset(5);
-            make.left.equalTo(self);
-            make.right.equalTo(self);
-            make.height.equalTo(@1);
-            make.bottom.equalTo(self.currentMoreView.ease_top);
-        }];
+        if (!_quoteView || _quoteView.isHidden) {
+            [self.bottomLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(self.textView.ease_bottom).offset(5);
+                make.left.equalTo(self);
+                make.right.equalTo(self);
+                make.height.equalTo(@1);
+                make.bottom.equalTo(self.currentMoreView.ease_top);
+            }];
+        } else {
+            [self.bottomLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(_quoteView.ease_bottom).offset(5);
+                make.left.equalTo(self);
+                make.right.equalTo(self);
+                make.height.equalTo(@1);
+                make.bottom.equalTo(self.currentMoreView.ease_top);
+            }];
+        }
     } else {
-        [self.bottomLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
-            make.top.equalTo(self.textView.ease_bottom).offset(5);
-            make.left.equalTo(self);
-            make.right.equalTo(self);
-            make.height.equalTo(@1);
-            make.bottom.equalTo(self).offset(-EaseVIEWBOTTOMMARGIN);
-        }];
+        if (!_quoteView || _quoteView.isHidden) {
+            [self.bottomLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(self.textView.ease_bottom).offset(5);
+                make.left.equalTo(self);
+                make.right.equalTo(self);
+                make.height.equalTo(@1);
+                make.bottom.equalTo(self).offset(-EaseVIEWBOTTOMMARGIN);
+            }];
+        } else {
+            [self.bottomLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+                make.top.equalTo(_quoteView.ease_bottom).offset(5);
+                make.left.equalTo(self);
+                make.right.equalTo(self);
+                make.height.equalTo(@1);
+                make.bottom.equalTo(self).offset(-EaseVIEWBOTTOMMARGIN);
+            }];
+        }
     }
 }
 
@@ -438,6 +460,26 @@
     }
 }
 
+- (void)setQuoteMessage:(AgoraChatMessage *)quoteMessage
+{
+    _quoteMessage = quoteMessage;
+    if (quoteMessage) {
+        self.quoteView.hidden = NO;
+        _quoteView.message = quoteMessage;
+        [_quoteView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.left.right.equalTo(self);
+            make.height.equalTo(@52);
+            make.top.equalTo(_inputView.ease_bottom);
+        }];
+    } else {
+        _quoteView.hidden = YES;
+        if (_quoteView) {
+            [_quoteView Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
+        }
+    }
+    [self _remakeButtonsViewConstraints];
+}
+
 @end
 
 @implementation EaseInputMenu (Private)
@@ -446,6 +488,7 @@
 
 - (void)clearInputViewText
 {
+    self.quoteMessage = nil;
     self.textView.text = @"";
     if (self.moreEmoticonView) {
         [self emoticonChangeWithText];
@@ -509,5 +552,28 @@
     return _textView;
 }
 
+- (EaseInputQuoteView *)quoteView
+{
+    if (!_quoteView) {
+        _quoteView = [[EaseInputQuoteView alloc] init];
+        _quoteView.backgroundColor = UIColor.whiteColor;
+        _quoteView.delegate = self;
+        [self addSubview:_quoteView];
+    }
+    return _quoteView;
+}
+
+- (void)quoteViewDidClickCancel:(EaseInputQuoteView *)quoteView
+{
+    self.quoteMessage = nil;
+}
+
+- (NSString *)quoteMessage:(EaseInputQuoteView *)quoteView showContent:(AgoraChatMessage *)message
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(inputMenuQuoteMessageShowContent:)]) {
+        return [_delegate inputMenuQuoteMessageShowContent:message];
+    }
+    return nil;
+}
 
 @end

@@ -40,6 +40,7 @@
 #import "EMBottomReactionDetailView.h"
 #import "ChatUIOptions.h"
 #import "EaseURLPreviewManager.h"
+#import "AgoraChatMessage+EaseUIExt.h"
 
 #define chatThreadPageSize 10
 
@@ -587,7 +588,27 @@
 - (void)inputBarSendMsgAction:(NSString *)text
 {
     if ((text.length > 0 && ![text isEqualToString:@""])) {
-        [self sendTextAction:text ext:nil];
+        if (self.inputBar.quoteMessage) {
+            NSDictionary *msgTypeDict = @{
+                @(AgoraChatMessageBodyTypeText): @"txt",
+                @(AgoraChatMessageBodyTypeImage): @"img",
+                @(AgoraChatMessageBodyTypeVideo): @"video",
+                @(AgoraChatMessageBodyTypeVoice): @"audio",
+                @(AgoraChatMessageBodyTypeCustom): @"custom",
+                @(AgoraChatMessageBodyTypeCmd): @"cmd",
+                @(AgoraChatMessageBodyTypeFile): @"file",
+                @(AgoraChatMessageBodyTypeLocation): @"location"
+            };
+            [self sendTextAction:text ext:@{@"msgQuote": @{
+                @"msgID": self.inputBar.quoteMessage.messageId,
+                @"msgPreview": self.inputBar.quoteMessage.easeUI_quoteShowText,
+                @"msgSender": self.inputBar.quoteMessage.from,
+                @"msgType": msgTypeDict[@(self.inputBar.quoteMessage.body.type)]
+            }}];
+            self.inputBar.quoteMessage = nil;
+        } else {
+            [self sendTextAction:text ext:nil];
+        }
         [self.inputBar clearInputViewText];
     }
 }
@@ -622,6 +643,14 @@
 //    for (UIAlertAction *alertAction in alertController.actions)
 //        [alertAction setValue:[UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:1.0] forKey:@"_titleTextColor"];
     [self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (NSString *)inputMenuQuoteMessageShowContent:(AgoraChatMessage *)message
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(chatBarQuoteMessageShowContent:)]) {
+        return [_delegate chatBarQuoteMessageShowContent:message];
+    }
+    return nil;
 }
 
 #pragma mark - EaseInputMenuRecordAudioViewDelegate
@@ -715,10 +744,13 @@
         [weakself recallLongPressAction];
     }];
     
+    EaseExtendMenuModel *quoteModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"quote"] funcDesc:@"Quote" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+        EaseMessageModel *model = [weakself.dataArray objectAtIndex:weakself.longPressIndexPath.row];
+        weakself.inputBar.quoteMessage = model.message;
+    }];
     
     NSMutableArray<EaseExtendMenuModel*> *extMenuArray = [[NSMutableArray<EaseExtendMenuModel*> alloc]init];
-    
-    
+        
     BOOL isCustomCell = NO;
     if (![aCell isKindOfClass:[EaseMessageCell class]]) {
         [extMenuArray addObject:recallExtModel];
@@ -748,6 +780,7 @@
     if (_currentLongPressCell && _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
         [extMenuArray addObject:copyExtModel];
     }
+    [extMenuArray addObject:quoteModel];
     [extMenuArray addObject:deleteExtModel];
     
     if (isCustomCell) {
