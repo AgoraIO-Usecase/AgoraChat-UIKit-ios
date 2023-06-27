@@ -346,7 +346,7 @@ EaseChatViewController *chatController = [EaseChatViewController initWithConvers
 
 The following figure is an example of a chat page with default styles:
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatDefaultStyle.png)
 
 - Configuration example of a chat page with custom styles:
 
@@ -365,7 +365,7 @@ EaseChatViewController *chatController = [EaseChatViewController initWithConvers
 
 The following figure is a configuration example of some custom styles:
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatCustomStyle.png)
 
 For details on more APIs, see APIs provided by EaseChatViewController and callback APIs in the EaseChatViewControllerDelegate protocol.
 
@@ -506,7 +506,7 @@ EaseConversationsViewController *chatsVC = [[EaseConversationsViewController all
 The following figure is an example of the conversation list with default styles:
 
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatsDefault.png)
 
 - Configuration example of custom styles:
 
@@ -528,7 +528,7 @@ EaseConversationsViewController *chatsVC = [[EaseConversationsViewController all
 
 The following figure is a configuration example of some custom styles:
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatsCustom.png)
 
 For details on more APIs, see APIs provided by EaseConversationsViewController and callback APIs in the EaseConversationsViewControllerDelegate protocol.
 
