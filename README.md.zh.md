@@ -398,7 +398,7 @@ EaseChatViewController *chatController = [EaseChatViewController initWithConvers
 
 // TODO:合并之后确定地址
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatDefaultStyle.png)
 
 - 自定义样式配置示例：     Configuration example of a chat page with custom styles:
 
@@ -420,7 +420,7 @@ EaseChatViewController *chatController = [EaseChatViewController initWithConvers
 
 // TODO:合并之后确定地址
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatCustomStyle.png)
 
 关于更多 API 介绍请参考 EaseChatViewController 提供的 API，以及 EaseChatViewControllerDelegate 协议中的回调方法 API。
 For details on more APIs, see APIs provided by EaseChatViewController and callback APIs in the EaseChatViewControllerDelegate protocol.
@@ -566,7 +566,7 @@ EaseConversationsViewController *chatsVC = [[EaseConversationsViewController all
 
 // TODO:合并之后确定地址
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatsDefault.png)
 
 - 自定义样式配置示例： Configuration example of custom styles:
 
@@ -590,7 +590,7 @@ EaseConversationsViewController *chatsVC = [[EaseConversationsViewController all
 
 // TODO:合并之后确定地址
 
-[![img](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/raw/main)](https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios/blob/main)
+![img](./chatsCustom.png)
 
 关于更多 API 介绍请参考 EaseConversationsViewController 提供的 API，以及 EaseConversationsViewControllerDelegate 协议中的回调方法 API。
 For details on more APIs, see APIs provided by EaseConversationsViewController and callback APIs in the EaseConversationsViewControllerDelegate protocol.
