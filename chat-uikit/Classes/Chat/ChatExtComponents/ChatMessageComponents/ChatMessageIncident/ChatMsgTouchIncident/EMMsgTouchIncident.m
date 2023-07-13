@@ -30,21 +30,21 @@
 */
 @implementation AgoraChatMessageEventStrategyFactory
 
-+ (AgoraChatMessageEventStrategy * _Nonnull)getStratrgyImplWithMsgCell:(EaseMessageCell *)aCell
++ (AgoraChatMessageEventStrategy * _Nonnull)getStratrgyImplWithMsgCell:(AgoraChatMessageType *)type
 {
-    if (aCell.model.type == AgoraChatMessageTypeText)
+    if (type == AgoraChatMessageTypeText)
         return [[TextMsgEvent alloc]init];
-    if (aCell.model.type == AgoraChatMessageTypeImage)
+    if (type == AgoraChatMessageTypeImage)
         return [[ImageMsgEvent alloc] init];
-    if (aCell.model.type == AgoraChatMessageTypeLocation)
+    if (type == AgoraChatMessageTypeLocation)
         return [[LocationMsgEvent alloc] init];
-    if (aCell.model.type == AgoraChatMessageTypeVoice)
+    if (type == AgoraChatMessageTypeVoice)
         return [[VoiceMsgEvent alloc]init];
-    if (aCell.model.type == AgoraChatMessageTypeVideo)
+    if (type == AgoraChatMessageTypeVideo)
         return [[VideoMsgEvent alloc]init];
-    if (aCell.model.type == AgoraChatMessageTypeFile)
+    if (type == AgoraChatMessageTypeFile)
         return [[FileMsgEvent alloc]init];
-    if (aCell.model.type == AgoraChatMessageTypeExtCall)
+    if (type == AgoraChatMessageTypeExtCall)
         return [[ConferenceMsgEvent alloc]init];
     
     return [[AgoraChatMessageEventStrategy alloc]init];

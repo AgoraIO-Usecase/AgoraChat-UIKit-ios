@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface AgoraChatMessageEventStrategyFactory : NSObject
 
-+ (AgoraChatMessageEventStrategy * _Nonnull)getStratrgyImplWithMsgCell:(EaseMessageCell *)aCell;
++ (AgoraChatMessageEventStrategy * _Nonnull)getStratrgyImplWithMsgCell:(AgoraChatMessageType *)type;
 
 @end
 

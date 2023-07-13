@@ -84,7 +84,7 @@
         if (!isCustom) return;
     }
     //Message event policy classification
-    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell];
+    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell.model.type];
     eventStrategy.chatController = self;
     [eventStrategy messageCellEventOperation:aCell];
 }

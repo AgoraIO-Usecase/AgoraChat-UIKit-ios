@@ -297,6 +297,7 @@
 
 - (void)_remakeButtonsViewConstraints
 {
+
     if (self.currentMoreView) {
         [self.bottomLine Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(self.textView.ease_bottom).offset(5);

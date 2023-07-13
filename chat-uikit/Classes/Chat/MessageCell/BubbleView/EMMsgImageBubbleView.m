@@ -30,6 +30,7 @@
 {
     self = [super initWithDirection:aDirection type:aType viewModel:viewModel];
     if (self) {
+        self.backgroundColor = [UIColor blueColor];
         [self addSubview:self.photo];
         self.photo.contentMode = UIViewContentModeScaleAspectFill;
         self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
@@ -46,6 +47,7 @@
 - (UIImageView *)photo {
     if (!_photo) {
         _photo = [[UIImageView alloc]init];
+        _photo.backgroundColor = [UIColor orangeColor];
         _photo.layer.cornerRadius = 5;
         _photo.clipsToBounds = YES;
     }
