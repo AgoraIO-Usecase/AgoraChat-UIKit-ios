@@ -838,6 +838,7 @@
                 if (model.type == AgoraChatMessageTypeImage || model.type == AgoraChatMessageTypeVideo || model.type == AgoraChatMessageTypeFile || model.type == AgoraChatMessageTypeVoice) {
                     AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:model.type];
                     eventStrategy.chatController = self;
+                    aCell.quoteModel = model;
                     [eventStrategy messageCellEventOperation:aCell];
                 } else {
                     NSArray <NSIndexPath *>*indexPaths = [_tableView indexPathsForVisibleRows];

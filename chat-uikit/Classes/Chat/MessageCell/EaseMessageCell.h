@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) EaseMessageModel *model;
 
+@property (nonatomic, strong) EaseMessageModel *quoteModel;
+
 + (NSString *)cellIdentifierWithDirection:(AgoraChatMessageDirection)aDirection
                                      type:(AgoraChatMessageType)aType;
 

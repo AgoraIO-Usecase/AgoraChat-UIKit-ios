@@ -103,6 +103,9 @@
     };
     
     AgoraChatImageMessageBody *body = (AgoraChatImageMessageBody*)aCell.model.message.body;
+    if (aCell.quoteModel) {
+        body = (AgoraChatImageMessageBody*)aCell.quoteModel.message.body;
+    }
     BOOL isCustomDownload = !([AgoraChatClient sharedClient].options.isAutoTransferMessageAttachments);
     if (body.thumbnailDownloadStatus == AgoraChatDownloadStatusFailed) {
         if (!isCustomDownload) {
@@ -162,6 +165,9 @@
 - (void)messageCellEventOperation:(EaseMessageCell *)aCell
 {
     AgoraChatLocationMessageBody *body = (AgoraChatLocationMessageBody *)aCell.model.message.body;
+    if (aCell.quoteModel) {
+        body = (AgoraChatLocationMessageBody*)aCell.quoteModel.message.body;
+    }
     EMLocationViewController *controller = [[EMLocationViewController alloc] initWithLocation:CLLocationCoordinate2DMake(body.latitude, body.longitude)];
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller];
     navController.modalPresentationStyle = 0;
@@ -178,6 +184,9 @@
 - (void)messageCellEventOperation:(EaseMessageCell *)aCell
 {
     AgoraChatVoiceMessageBody *body = (AgoraChatVoiceMessageBody*)aCell.model.message.body;
+    if (aCell.quoteModel) {
+        body = (AgoraChatVoiceMessageBody*)aCell.quoteModel.message.body;
+    }
     if (body.downloadStatus == AgoraChatDownloadStatusDownloading) {
         [EaseAlertController showInfoAlert:@"Downloading voice, click later"];
         return;
@@ -285,6 +294,9 @@
     };
     
     AgoraChatVideoMessageBody *body = (AgoraChatVideoMessageBody*)aCell.model.message.body;
+    if (aCell.quoteModel) {
+        body = (AgoraChatVideoMessageBody*)aCell.quoteModel.message.body;
+    }
     if (body.downloadStatus == AgoraChatDownloadStatusDownloading) {
         [EaseAlertController showInfoAlert:@"Downloading video, click later"];
         return;
@@ -324,6 +336,9 @@
     AgoraChatFileMessageBody *body = (AgoraChatFileMessageBody *)aCell.model.message.body;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
+    if (aCell.quoteModel) {
+        body = (AgoraChatFileMessageBody*)aCell.quoteModel.message.body;
+    }
     if (body.downloadStatus == AgoraChatDownloadStatusDownloading) {
         [EaseAlertController showInfoAlert:@"Downloading file, click later"];
         return;
