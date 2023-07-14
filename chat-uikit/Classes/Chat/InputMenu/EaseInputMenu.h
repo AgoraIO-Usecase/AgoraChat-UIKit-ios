@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) EaseInputMenuRecordAudioView *recordAudioView;
 @property (nonatomic, strong) EaseInputMenuEmoticonView *moreEmoticonView;
 @property (nonatomic, strong) EaseExtendMenuView *extendMenuView;
+@property (nonatomic, strong) AgoraChatMessage *quoteMessage;
 
 - (instancetype)initWithViewModel:(EaseChatViewModel *)viewModel;
 
@@ -45,6 +46,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)inputBarSendMsgAction:(NSString *)text;
 
 - (void)didSelectExtFuncPopupView;
+
+- (NSString *)inputMenuQuoteMessageShowContent:(AgoraChatMessage *)message;
 
 @end
 

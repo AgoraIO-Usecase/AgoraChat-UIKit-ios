@@ -38,12 +38,26 @@
                 _type = AgoraChatMessageTypeExtAddGroup;
                 return self;
             }
+            
             NSString *conferenceId = [aMsg.ext objectForKey:@"conferenceId"];
             if ([conferenceId length] == 0)
                 conferenceId = [aMsg.ext objectForKey:MSG_EXT_CALLID];
             if ([conferenceId length] > 0) {
                 _type = AgoraChatMessageTypeExtCall;
                 return self;
+            }
+            
+            NSString *text = ((AgoraChatTextMessageBody *)aMsg.body).text;
+            NSDataDetector *detector= [[NSDataDetector alloc] initWithTypes:NSTextCheckingTypeLink error:nil];
+            NSArray *checkArr = [detector matchesInString:text options:0 range:NSMakeRange(0, text.length)];
+            if (checkArr.count == 1) {
+                NSTextCheckingResult *result = checkArr.firstObject;
+                NSString *urlStr = result.URL.absoluteString;
+                NSRange range = [text rangeOfString:urlStr options:NSCaseInsensitiveSearch];
+                if (range.length > 0) {
+                    _type = AgoraChatMessageTypeExtURLPreview;
+                    return self;
+                }
             }
             _type = AgoraChatMessageTypeText;
         }

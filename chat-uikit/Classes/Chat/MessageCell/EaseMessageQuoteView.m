@@ -62,9 +62,6 @@
 {
     _message = message;
     NSDictionary *quoteInfo = message.ext[@"msgQuote"];
-    if (![quoteInfo isKindOfClass:[NSDictionary class]]) {
-        return;
-    }
     if (quoteInfo) {
         NSDictionary <NSString *, NSNumber *>*msgTypeDict = @{
             @"txt": @(AgoraChatMessageBodyTypeText),
