@@ -702,7 +702,7 @@
         if (!isCustom) return;
     }
     //Message event policy classification
-    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell];
+    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell.model.type];
     eventStrategy.chatController = self;
     aCell.model.isPlaying = !aCell.model.isPlaying;
     [eventStrategy messageCellEventOperation:aCell];
@@ -744,7 +744,7 @@
         [weakself recallLongPressAction];
     }];
     
-    EaseExtendMenuModel *quoteModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"quote"] funcDesc:@"Quote" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+    EaseExtendMenuModel *quoteModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"reply"] funcDesc:@"reply" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
         EaseMessageModel *model = [weakself.dataArray objectAtIndex:weakself.longPressIndexPath.row];
         weakself.inputBar.quoteMessage = model.message;
     }];
@@ -764,7 +764,7 @@
         }
         if (_currentLongPressCell.model.type == AgoraChatMessageTypeText || _currentLongPressCell.model.type == AgoraChatMessageTypeImage || _currentLongPressCell.model.type == AgoraChatMessageTypeVideo || _currentLongPressCell.model.type == AgoraChatMessageTypeFile || _currentLongPressCell.model.type == AgoraChatMessageTypeVoice) {
             if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isChatThread && _currentLongPressCell.model.message.chatThread == nil) {
-                EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Reply" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+                EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Create Thread" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
                     if ([aCell isKindOfClass:[EaseMessageCell class]]) {
                         if (self.delegate && [self.delegate respondsToSelector:@selector(createThread:)]) {
                             [self.delegate createThread:((EaseMessageCell*)aCell).model];
@@ -815,7 +815,62 @@
     [EMBottomMoreFunctionView showMenuItems:extMenuArray showReaction:showReaction delegate:self ligheViews:nil animation:YES userInfo:userInfo];
 }
 
+- (void)messageCellDidClickQuote:(EaseMessageCell *)aCell {
+    [self hideLongPressView];
+        if (_delegate && [_delegate respondsToSelector:@selector(messageCellDidClickQuote:)]) {
+            if (![_delegate messageCellDidClickQuote:aCell.model.message]) {
+                return;
+            }
+        }
+        NSString *msgId = aCell.model.message.ext[@"msgQuote"][@"msgID"];
+        if (msgId.length <= 0) {
+            return;
+        }
+        
+//        _searchRowAction.isSearching = YES;
+//        _searchRowAction.currentSearchPage = 1;
+//        _searchRowAction.messageId = msgId;
+//        _highlightMessageId = msgId;
+        
+        for (int i = (int)_dataArray.count - 1; i >= 0; i --) {
+            EaseMessageModel *model = self.dataArray[i];
+            if ([model isKindOfClass:EaseMessageModel.class] && [model.message.messageId isEqualToString:msgId]) {
+                if (model.type == AgoraChatMessageTypeImage || model.type == AgoraChatMessageTypeVideo || model.type == AgoraChatMessageTypeFile || model.type == AgoraChatMessageTypeVoice) {
+                    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:model.type];
+                    eventStrategy.chatController = self;
+                    [eventStrategy messageCellEventOperation:aCell];
+                } else {
+                    NSArray <NSIndexPath *>*indexPaths = [_tableView indexPathsForVisibleRows];
+                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+                    for (NSIndexPath *i in indexPaths) {
+                        if ([i isEqual:indexPath]) {
+                            UITableViewCell *cell = [_tableView cellForRowAtIndexPath:indexPath];
+//                            if (cell) {
+//                                if ([cell isKindOfClass:EaseMessageCell.class]) {
+//                                    [((EaseMessageCell *)cell) showHighlight];
+//                                }
+//                                self.highlightMessageId = nil;
+//                            }
+                            break;
+                        }
+                    }
+                    [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+                }
+//                _searchRowAction.isSearching = NO;
+                return;
+            }
+        }
+        [self dropdownRefreshTableViewWithData];
+}
 
+- (void)messageCellDidLongPressQuote:(EaseMessageCell *)aCell {
+    [self hideLongPressView];
+    if (_delegate && [_delegate respondsToSelector:@selector(messageCellDidLongPressQuote:)]) {
+        if (![_delegate messageCellDidLongPressQuote:aCell.model.message]) {
+            return;
+        }
+    }
+}
 
 - (void)createThread:(EaseMessageModel *)model {
     EaseThreadCreateViewController *vc = [[EaseThreadCreateViewController alloc] initWithType:EMThreadHeaderTypeCreate viewModel:_viewModel message:model];

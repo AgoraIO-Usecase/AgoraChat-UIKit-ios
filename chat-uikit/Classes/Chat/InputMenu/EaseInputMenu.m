@@ -489,7 +489,7 @@
 
 - (void)clearInputViewText
 {
-    self.quoteMessage = nil;
+//    self.quoteMessage = nil;
     self.textView.text = @"";
     if (self.moreEmoticonView) {
         [self emoticonChangeWithText];

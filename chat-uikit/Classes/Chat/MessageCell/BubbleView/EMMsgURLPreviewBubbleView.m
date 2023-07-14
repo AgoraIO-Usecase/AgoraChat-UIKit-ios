@@ -102,6 +102,7 @@
     _textView.backgroundColor = UIColor.clearColor;
     _textView.scrollEnabled = NO;
     _textView.contentInset = UIEdgeInsetsZero;
+    _textView.editable = NO;
     if (self.direction == AgoraChatMessageDirectionSend) {
         _textView.textColor = _viewModel.sentFontColor;
     } else {
