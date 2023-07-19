@@ -5,55 +5,55 @@
 //  Created by 冯钊 on 2023/5/23.
 //
 
-#import "EaseURLPreviewManager.h"
+#import "AgoraURLPreviewManager.h"
 #import "XPathQuery.h"
 #import "TFHpple.h"
 #import "TFHppleElement.h"
 
-@implementation EaseURLPreviewResult
+@implementation AgoraURLPreviewResult
 @end
 
 @interface EaseURLPreviewCallback : NSObject
 
-@property (nonatomic, strong) EaseURLPreviewResult *result;
-@property (nonatomic, strong) NSMutableArray <EaseURLPreviewSuccessBlock>*successBlocks;
-@property (nonatomic, strong) NSMutableArray <EaseURLPreviewFailedBlock>*failedBlocks;
+@property (nonatomic, strong) AgoraURLPreviewResult *result;
+@property (nonatomic, strong) NSMutableArray <AgoraURLPreviewSuccessBlock>*successBlocks;
+@property (nonatomic, strong) NSMutableArray <AgoraURLPreviewFailedBlock>*failedBlocks;
 
 @end
 
 @implementation EaseURLPreviewCallback
 @end
 
-@interface EaseURLPreviewManager ()
+@interface AgoraURLPreviewManager ()
 
 @property (nonatomic, strong) NSMutableDictionary <NSURL *, EaseURLPreviewCallback *>*callbackDict;
 
 @end
 
-@implementation EaseURLPreviewManager
+@implementation AgoraURLPreviewManager
 
 + (instancetype)shared
 {
-    static EaseURLPreviewManager *shared;
+    static AgoraURLPreviewManager *shared;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        shared = [[EaseURLPreviewManager alloc] init];
+        shared = [[AgoraURLPreviewManager alloc] init];
         shared.callbackDict = [NSMutableDictionary dictionary];
     }); 
     return shared;
 }
 
-- (EaseURLPreviewResult *)resultWithURL:(NSURL *)url
+- (AgoraURLPreviewResult *)resultWithURL:(NSURL *)url
 {
     return _callbackDict[url].result;
 }
 
-- (void)preview:(NSURL *)url successHandle:(void (^)(EaseURLPreviewResult * _Nonnull))successHandle faieldHandle:(void (^)(void))faieldHandle
+- (void)preview:(NSURL *)url successHandle:(void (^)(AgoraURLPreviewResult * _Nonnull))successHandle faieldHandle:(void (^)(void))faieldHandle
 {
     if (!successHandle) {
         return;
     }
-    EaseURLPreviewResult *result = _callbackDict[url].result;
+    AgoraURLPreviewResult *result = _callbackDict[url].result;
     if (result) {
         if (result.state == EaseURLPreviewStateSuccess) {
             successHandle(result);
@@ -67,7 +67,7 @@
     EaseURLPreviewCallback *callback = _callbackDict[url];
     if (!callback) {
         callback = [[EaseURLPreviewCallback alloc] init];
-        result = [[EaseURLPreviewResult alloc] init];
+        result = [[AgoraURLPreviewResult alloc] init];
         result.state = EaseURLPreviewStateLoading;
         callback.result = result;
         _callbackDict[url] = callback;
@@ -89,7 +89,7 @@
         if (error || data.length <= 0) {
             result.state = EaseURLPreviewStateFaild;
             dispatch_async(dispatch_get_main_queue(), ^{
-                for (EaseURLPreviewFailedBlock block in callback.failedBlocks) {
+                for (AgoraURLPreviewFailedBlock block in callback.failedBlocks) {
                     block();
                 }
                 callback.successBlocks = nil;
@@ -102,7 +102,7 @@
             if (![((NSHTTPURLResponse *)response).allHeaderFields[@"content-type"] hasPrefix:@"text"]) {
                 result.state = EaseURLPreviewStateFaild;
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    for (EaseURLPreviewFailedBlock block in callback.failedBlocks) {
+                    for (AgoraURLPreviewFailedBlock block in callback.failedBlocks) {
                         block();
                     }
                     callback.successBlocks = nil;
@@ -150,7 +150,7 @@
         }
         result.state = EaseURLPreviewStateSuccess;
         dispatch_async(dispatch_get_main_queue(), ^{
-            for (EaseURLPreviewSuccessBlock block in callback.successBlocks) {
+            for (AgoraURLPreviewSuccessBlock block in callback.successBlocks) {
                 block(result);
             }
             callback.successBlocks = nil;

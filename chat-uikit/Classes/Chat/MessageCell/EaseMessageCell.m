@@ -23,10 +23,10 @@
 #import "EMAudioPlayerUtil.h"
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMMessageReactionView.h"
-#import "EMMsgURLPreviewBubbleView.h"
+//#import "AgoraChatURLPreviewBubbleView.h"
 #import "EaseMessageQuoteView.h"
 
-@interface EaseMessageCell() <EMMaskHighlightViewDelegate, EMMsgURLPreviewBubbleViewDelegate>
+@interface EaseMessageCell() <EMMaskHighlightViewDelegate>
 
 @property (nonatomic, strong) UIImageView *avatarView;
 
@@ -35,8 +35,6 @@
 @property (nonatomic, strong) EaseMessageStatusView *statusView;
 
 @property (nonatomic, strong) UIButton *readReceiptBtn;
-
-@property (nonatomic, strong) EaseChatViewModel *viewModel;
 
 @property (nonatomic, strong) EMMessageReactionView *reactionView;
 
@@ -245,7 +243,7 @@
 
 - (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType
 {
-    EaseChatMessageBubbleView *bubbleView = nil;
+    EaseChatMessageBubbleView *bubbleView = [EaseChatMessageBubbleView new];
     switch (aType) {
         case AgoraChatMessageTypeText:
         case AgoraChatMessageTypeExtCall:
@@ -273,12 +271,6 @@
             bubbleView = [[EaseChatMessageBubbleView alloc] initWithDirection:self.direction type:aType
                 viewModel:_viewModel];
             break;
-        case AgoraChatMessageTypeExtURLPreview: {
-            EMMsgURLPreviewBubbleView *URLPreviewBubbleView = [[EMMsgURLPreviewBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
-            URLPreviewBubbleView.delegate = self;
-            bubbleView = URLPreviewBubbleView;
-            break;
-        }
         default:
             break;
     }
@@ -564,13 +556,13 @@
     return @[_bubbleView, _reactionView, _avatarView];
 }
 
-#pragma mark - EMMsgURLPreviewBubbleViewDelegate
-- (void)URLPreviewBubbleViewNeedLayout:(EMMsgURLPreviewBubbleView *)view
-{
-    if (_delegate && [_delegate respondsToSelector:@selector(messageCellNeedReload:)]) {
-        [_delegate messageCellNeedReload:self];
-    }
-}
+//#pragma mark - EMMsgURLPreviewBubbleViewDelegate
+//- (void)URLPreviewBubbleViewNeedLayout:(AgoraChatURLPreviewBubbleView *)view
+//{
+//    if (_delegate && [_delegate respondsToSelector:@selector(messageCellNeedReload:)]) {
+//        [_delegate messageCellNeedReload:self];
+//    }
+//}
 
 #pragma mark - EaseMessageQuoteView
 - (void)onQuoteViewTap

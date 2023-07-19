@@ -39,7 +39,7 @@
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMBottomReactionDetailView.h"
 #import "ChatUIOptions.h"
-#import "EaseURLPreviewManager.h"
+#import "AgoraURLPreviewManager.h"
 #import "AgoraChatMessage+EaseUIExt.h"
 
 #define chatThreadPageSize 10
@@ -500,9 +500,9 @@
             NSRange range = [text rangeOfString:urlStr options:NSCaseInsensitiveSearch];
             if (range.length > 0) {
                 NSURL *url = [NSURL URLWithString:urlStr];
-                EaseURLPreviewResult *result = [EaseURLPreviewManager.shared resultWithURL:url];
+                AgoraURLPreviewResult *result = [AgoraURLPreviewManager.shared resultWithURL:url];
                 if (!result || result.state == EaseURLPreviewStateLoading) {
-                    [EaseURLPreviewManager.shared preview:url successHandle:^(EaseURLPreviewResult * _Nonnull result) {
+                    [AgoraURLPreviewManager.shared preview:url successHandle:^(AgoraURLPreviewResult * _Nonnull result) {
                         [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     } faieldHandle:^{
                         [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];

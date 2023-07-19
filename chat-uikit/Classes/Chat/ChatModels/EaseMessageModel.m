@@ -18,6 +18,7 @@
 {
     self = [super init];
     if (self) {
+        self.isUrl = NO;
         _message = aMsg;
         _direction = aMsg.direction;
         _type = (AgoraChatMessageType)aMsg.body.type;
@@ -50,13 +51,12 @@
             NSString *text = ((AgoraChatTextMessageBody *)aMsg.body).text;
             NSDataDetector *detector= [[NSDataDetector alloc] initWithTypes:NSTextCheckingTypeLink error:nil];
             NSArray *checkArr = [detector matchesInString:text options:0 range:NSMakeRange(0, text.length)];
-            if (checkArr.count == 1) {
+            if (checkArr.count >= 1) {
                 NSTextCheckingResult *result = checkArr.firstObject;
                 NSString *urlStr = result.URL.absoluteString;
                 NSRange range = [text rangeOfString:urlStr options:NSCaseInsensitiveSearch];
                 if (range.length > 0) {
-                    _type = AgoraChatMessageTypeExtURLPreview;
-                    return self;
+                    self.isUrl = YES;
                 }
             }
             _type = AgoraChatMessageTypeText;

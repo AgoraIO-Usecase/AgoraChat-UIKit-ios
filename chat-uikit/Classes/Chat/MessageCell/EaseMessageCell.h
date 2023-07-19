@@ -23,13 +23,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak) id<EaseMessageCellDelegate> delegate;
 
-@property (nonatomic, strong, readonly) EaseChatMessageBubbleView *bubbleView;
+@property (nonatomic, strong) EaseChatMessageBubbleView *bubbleView;
 
 @property (nonatomic) AgoraChatMessageDirection direction;
 
 @property (nonatomic, strong) EaseMessageModel *model;
 
 @property (nonatomic, strong) EaseMessageModel *quoteModel;
+
+@property (nonatomic, strong) EaseChatViewModel *viewModel;
 
 + (NSString *)cellIdentifierWithDirection:(AgoraChatMessageDirection)aDirection
                                      type:(AgoraChatMessageType)aType;
@@ -42,6 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType;
 
 - (CGFloat)maxBubbleViewWidth;
+
+- (void)updateLayout;
 
 @end
 

@@ -39,6 +39,7 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/Chat/ChatModels/EaseExtendMenuViewModel.h',
         'chat-uikit/Classes/Chat/ChatModels/EaseExtendMenuModel.h',
         'chat-uikit/Classes/Chat/ChatModels/EaseMessageModel.h',
+        'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/EaseEmojiHelper.h',
         'chat-uikit/Classes/Chat/ChatModels/EaseChatViewModel.h',
         'chat-uikit/Classes/Chat/MessageCell/EaseMessageCell.h',
         'chat-uikit/Classes/Chat/MessageCell/EaseMessageCell+Category.h',
@@ -78,6 +79,5 @@ Pod::Spec.new do |s|
     s.dependency 'Agora_Chat_iOS', '>= 1.0.7'
     s.dependency 'EMVoiceConvert', '0.1.0'
     s.dependency 'MJRefresh'
-    s.dependency 'TFHpple'
 
 end

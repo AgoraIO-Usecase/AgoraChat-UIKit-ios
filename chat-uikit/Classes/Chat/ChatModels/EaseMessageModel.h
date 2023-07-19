@@ -50,6 +50,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic) BOOL isHeader;
 
+@property (nonatomic) BOOL isUrl;
+
 - (instancetype)initWithAgoraChatMessage:(AgoraChatMessage *)aMsg;
 
 @end
