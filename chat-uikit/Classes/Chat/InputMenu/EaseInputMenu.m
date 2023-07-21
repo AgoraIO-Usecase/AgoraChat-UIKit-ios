@@ -463,21 +463,43 @@
 
 - (void)setQuoteMessage:(AgoraChatMessage *)quoteMessage
 {
-    _quoteMessage = quoteMessage;
     if (quoteMessage) {
         self.quoteView.hidden = NO;
         _quoteView.message = quoteMessage;
+        [self Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            make.height.Ease_equalTo(CGRectGetHeight(self.frame)+52);
+        }];
         [_quoteView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
             make.left.right.equalTo(self);
             make.height.equalTo(@52);
-            make.top.equalTo(_inputView.ease_bottom);
+            make.top.equalTo(self);
         }];
+        [self.inputView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self).offset(52);
+        }];
+        [self.textView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self).offset(60);
+        }];
+            
+        [self bringSubviewToFront:self.inputView];
     } else {
+        if (_quoteMessage && !quoteMessage) {
+            [self Ease_updateConstraints:^(EaseConstraintMaker *make) {
+                make.height.Ease_equalTo(CGRectGetHeight(self.frame)-52);
+            }];
+        }
         _quoteView.hidden = YES;
         if (_quoteView) {
             [_quoteView Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
         }
+        [self.inputView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self).offset(0.5);
+        }];
+        [self.textView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            make.top.equalTo(self).offset(kTopMargin);
+        }];
     }
+    _quoteMessage = quoteMessage;
     [self _remakeButtonsViewConstraints];
 }
 
@@ -557,7 +579,7 @@
 {
     if (!_quoteView) {
         _quoteView = [[EaseInputQuoteView alloc] init];
-        _quoteView.backgroundColor = UIColor.whiteColor;
+        _quoteView.backgroundColor = [UIColor colorWithRed:0.961 green:0.961 blue:0.961 alpha:1];
         _quoteView.delegate = self;
         [self addSubview:_quoteView];
     }

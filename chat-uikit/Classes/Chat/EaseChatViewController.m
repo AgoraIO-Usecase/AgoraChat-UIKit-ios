@@ -154,6 +154,7 @@
         _inputBar.delegate = self;
         //Session toolbar
         [self _setupChatBarMoreViews];
+        _inputBar.backgroundColor = [UIColor whiteColor];
     }
     return self;
 }
@@ -792,6 +793,7 @@
     }
     [EMBottomMoreFunctionView showMenuItems:extMenuArray showReaction:showReaction delegate:self ligheViews:nil animation:YES userInfo:userInfo];
 }
+
 
 - (void)messageCellDidClickQuote:(EaseMessageCell *)aCell {
     [self hideLongPressView];

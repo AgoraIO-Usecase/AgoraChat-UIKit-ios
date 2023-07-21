@@ -72,7 +72,6 @@
             @"video": @(AgoraChatMessageBodyTypeVideo),
             @"audio": @(AgoraChatMessageBodyTypeVoice),
             @"custom": @(AgoraChatMessageBodyTypeCustom),
-            @"cmd": @(AgoraChatMessageBodyTypeCmd),
             @"file": @(AgoraChatMessageBodyTypeFile),
             @"location": @(AgoraChatMessageBodyTypeLocation)
         };
@@ -103,16 +102,21 @@
                 return;
             }
         }
-        
+        if (message.chatThread) {
+            _nameLabel.attributedText = result;
+            _contentLabel.text = ((AgoraChatFileMessageBody *)quoteMessage.body).displayName;
+            _imageView.image = [UIImage easeUIImageNamed:@"groupThread"];
+            [self setupTextImageTextLayout];
+            return;
+        }
         switch (msgBodyType) {
             case AgoraChatMessageBodyTypeImage: {
-                [self setupImageLayout];
                 [_imageView Ease_setImageWithURL:[NSURL URLWithString:((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath] placeholderImage:[UIImage easeUIImageNamed:@"msg_img_broken"]];
                 _nameLabel.attributedText = result;
+                [self setupImageLayout];
                 break;
             }
             case AgoraChatMessageBodyTypeVideo: {
-                [self setupImageLayout];
                 _videoImageView.hidden = NO;
                 if ([quoteMessage.from isEqualToString:AgoraChatClient.sharedClient.currentUsername]) {
                     [_imageView Ease_setImageWithURL:[NSURL fileURLWithPath:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath] placeholderImage:[UIImage easeUIImageNamed:@"msg_img_broken"]];
@@ -120,24 +124,24 @@
                     [_imageView Ease_setImageWithURL:[NSURL URLWithString:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailRemotePath] placeholderImage:[UIImage easeUIImageNamed:@"msg_img_broken"]];
                 }
                 _nameLabel.attributedText = result;
+                [self setupImageLayout];
                 break;
             }
             case AgoraChatMessageBodyTypeFile: {
-                [self setupTextImageTextLayout];
                 _nameLabel.attributedText = result;
                 _contentLabel.text = ((AgoraChatFileMessageBody *)quoteMessage.body).displayName;
                 _imageView.image = [UIImage easeUIImageNamed:@"quote_file"];
+                [self setupTextImageTextLayout];
                 break;
             }
             case AgoraChatMessageBodyTypeVoice: {
-                [self setupTextImageTextLayout];
                 _nameLabel.attributedText = result;
                 _contentLabel.text = [NSString stringWithFormat:@"%d”", ((AgoraChatVoiceMessageBody *)quoteMessage.body).duration];
                 _imageView.image = [UIImage easeUIImageNamed:@"quote_voice"];
+                [self setupTextImageTextLayout];
                 break;
             }
             case AgoraChatMessageBodyTypeLocation: {
-                [self setupTextLayout:2];
                 NSTextAttachment *attachment = [[NSTextAttachment alloc] init];
                 attachment.image = [UIImage easeUIImageNamed:@"quote_location"];
                 attachment.bounds = CGRectMake(0, -4, attachment.image.size.width, attachment.image.size.height);
@@ -146,6 +150,7 @@
                     NSFontAttributeName: [UIFont systemFontOfSize:13 weight:UIFontWeightRegular]
                 }]];
                 _nameLabel.attributedText = result;
+                [self setupTextLayout:2];
                 break;
             }
             case AgoraChatMessageBodyTypeText: {
@@ -174,7 +179,6 @@
                     break;
                 } else {
                  */
-                    [self setupTextLayout:2];
                     NSString *showText = quoteMessage.easeUI_quoteShowText;
                     if (showText.length <= 0) {
                         showText = msgPreview;
@@ -183,19 +187,11 @@
                         NSFontAttributeName: [UIFont systemFontOfSize:13 weight:UIFontWeightRegular]
                     }]];
                     _nameLabel.attributedText = result;
+                [self setupTextLayout:2];
 //                }
                 break;
             }
             default: {
-                [self setupTextLayout:2];
-                NSString *showText = quoteMessage.easeUI_quoteShowText;
-                if (showText.length <= 0) {
-                    showText = msgPreview;
-                }
-                [result appendAttributedString:[[NSAttributedString alloc] initWithString:showText attributes:@{
-                    NSFontAttributeName: [UIFont systemFontOfSize:13 weight:UIFontWeightRegular]
-                }]];
-                _nameLabel.attributedText = result;
                 break;
             }
         }

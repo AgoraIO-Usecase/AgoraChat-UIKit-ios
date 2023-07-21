@@ -7,8 +7,9 @@
 
 #import "EaseInputQuoteView.h"
 #import <AgoraChat/AgoraChat.h>
-#import "Masonry.h"
+#import "Easeonry.h"
 #import "UIImage+EaseUI.h"
+#import <SDWebImage/SDWebImageManager.h>
 
 @interface EaseInputQuoteView()
 
@@ -46,19 +47,27 @@
         _messageLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
         [self addSubview:_messageLabel];
         
-        [_cancelButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        
+        [self addSubview:self.imageView];
+        [self.imageView Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.right.equalTo(self).offset(-12);
+            make.top.equalTo(self).offset(8);
+            make.width.height.Ease_equalTo(36);
+        }];
+        
+        [_cancelButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.top.equalTo(@8);
             make.left.equalTo(@12);
             make.size.equalTo(@18);
         }];
-        [_messageLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        [_messageLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.left.equalTo(_cancelButton);
-            make.top.equalTo(_cancelButton.mas_bottom).offset(4);
+            make.top.equalTo(_cancelButton.ease_bottom).offset(4);
             make.height.equalTo(@16);
             make.right.equalTo(_nameLabel);
         }];
-        [_replyLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.equalTo(_cancelButton.mas_right).offset(4);
+        [_replyLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            make.left.equalTo(_cancelButton.ease_right).offset(4);
             make.top.bottom.equalTo(_cancelButton);
         }];
     }
@@ -68,23 +77,23 @@
 - (void)setMessage:(AgoraChatMessage *)message
 {
     if (message.body.type == AgoraChatMessageBodyTypeText) {
-        [_nameLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
-            make.left.equalTo(_replyLabel.mas_right).offset(4);
+        [_nameLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.left.equalTo(_replyLabel.ease_right).offset(4);
             make.top.bottom.equalTo(_cancelButton);
             make.right.equalTo(@-12);
         }];
-        [_imageView mas_remakeConstraints:^(MASConstraintMaker *make) {}];
+//        [_imageView Ease_remakeConstraints:^(EaseConstraintMaker *make) {}];
     } else {
-        [_nameLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
-            make.left.equalTo(_replyLabel.mas_right).offset(4);
+        [_nameLabel Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+            make.left.equalTo(_replyLabel.ease_right).offset(4);
             make.top.bottom.equalTo(_cancelButton);
             make.right.equalTo(@-60);
         }];
-        [self.imageView mas_remakeConstraints:^(MASConstraintMaker *make) {
-            make.right.equalTo(@-12);
-            make.centerY.equalTo(self);
-            make.size.equalTo(@36);
-        }];
+//        [self.imageView Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+//            make.right.equalTo(@-12);
+//            make.centerY.equalTo(self);
+//            make.size.equalTo(@36);
+//        }];
     }
     _nameLabel.text = message.from;
     if (_delegate && [_delegate respondsToSelector:@selector(quoteMessage:showContent:)]) {
@@ -97,6 +106,77 @@
     } else {
         _messageLabel.text = [self messagePreviewText:message];
     }
+    __block UIImage *image = [UIImage easeUIImageNamed:@"msg_img_broken"];
+    if (message.chatThread) {
+        image = [UIImage easeUIImageNamed:@"groupThread"];
+    } else {
+        switch (message.body.type) {
+            case AgoraChatMessageBodyTypeImage:
+                {
+                    if ([((AgoraChatImageMessageBody *)message.body).localPath length] > 0) {
+                        image = [UIImage imageWithContentsOfFile:((AgoraChatImageMessageBody *)message.body).localPath];
+                    }
+                    if (!image) {
+                        if (((AgoraChatImageMessageBody *)message.body).thumbnailRemotePath.length) {
+                            NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)message.body).thumbnailRemotePath];
+                            __weak typeof(self) weakSelf = self;
+                            [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage *img, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                if (error == nil && image != nil) {
+                                    image = img;
+                                } else {
+                                    image = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                                }
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    weakSelf.imageView.image = image;
+                                });
+                            }];
+                        }
+                        
+                    }
+                }
+                break;
+            case AgoraChatMessageBodyTypeVideo:
+                {
+                    if ([((AgoraChatVideoMessageBody *)message.body).localPath length] > 0) {
+                        image = [UIImage imageWithContentsOfFile:((AgoraChatVideoMessageBody *)message.body).thumbnailLocalPath];
+                        if (image) {
+                            image = [self combineImage:image coverImage:[UIImage easeUIImageNamed:@"video_cover"]];
+                        }
+                    }
+                    if (!image) {
+                        if (((AgoraChatVideoMessageBody *)message.body).thumbnailRemotePath.length) {
+                            NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)message.body).thumbnailRemotePath];
+                            __weak typeof(self) weakSelf = self;
+                            [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage *img, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                if (error == nil && image != nil) {
+                                    image = img;
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        weakSelf.imageView.image = [self combineImage:image coverImage:[UIImage easeUIImageNamed:@"video_cover"]];
+                                    });
+                                }
+                            }];
+                        } else {
+                            image = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                        }
+                    }
+                }
+                break;
+            case AgoraChatMessageBodyTypeFile:
+                {
+                    image = [UIImage easeUIImageNamed:@"quote_file"];
+                }
+                break;
+            case AgoraChatMessageBodyTypeVoice:
+                {
+                    image = [UIImage easeUIImageNamed:@"quote_voice"];
+                }
+                break;
+                
+            default:
+                break;
+        }
+    }
+    _imageView.image = image;
 }
 
 - (void)cancelAction
@@ -110,27 +190,40 @@
 {
     if (!_imageView) {
         _imageView = [[UIImageView alloc] init];
-        [self addSubview:_imageView];
+        _imageView.backgroundColor = [UIColor colorWithRed:0.902 green:0.902 blue:0.902 alpha:1];
     }
     return _imageView;
 }
 
 - (NSString *)messagePreviewText:(AgoraChatMessage *)message
 {
-    switch (message.body.type) {
-        case AgoraChatMessageBodyTypeText:
-            return ((AgoraChatTextMessageBody *)message.body).text;
-        case AgoraChatMessageBodyTypeImage:
-            return @"Image";
-        case AgoraChatMessageBodyTypeVideo:
-            return @"Video";
-        case AgoraChatMessageBodyTypeVoice:
-            return [NSString stringWithFormat:@"Audio:%d”", ((AgoraChatVoiceMessageBody *)message.body).duration];
-        case AgoraChatMessageBodyTypeFile:
-            return [NSString stringWithFormat:@"Attachment:%@", ((AgoraChatFileMessageBody *)message.body).displayName];
-        default:
-            return @"unknow message";
+    if (message.chatThread && message.chatThread.threadName.length) {
+        return [NSString stringWithFormat:@"Thread:%@", message.chatThread.threadName];
+    } else {
+        switch (message.body.type) {
+            case AgoraChatMessageBodyTypeText:
+                return ((AgoraChatTextMessageBody *)message.body).text;
+            case AgoraChatMessageBodyTypeImage:
+                return @"Image";
+            case AgoraChatMessageBodyTypeVideo:
+                return @"Video";
+            case AgoraChatMessageBodyTypeVoice:
+                return [NSString stringWithFormat:@"Audio:%d”", ((AgoraChatVoiceMessageBody *)message.body).duration];
+            case AgoraChatMessageBodyTypeFile:
+                return [NSString stringWithFormat:@"Attachment:%@", ((AgoraChatFileMessageBody *)message.body).displayName];
+            default:
+                return @"unknow message";
+        }
     }
+}
+
+- (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+    [coverImage drawInRect:CGRectMake(image.size.width/2.0-75, image.size.height/2.0-100, 150, 200)];
+    UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return resultingImage;
 }
 
 @end

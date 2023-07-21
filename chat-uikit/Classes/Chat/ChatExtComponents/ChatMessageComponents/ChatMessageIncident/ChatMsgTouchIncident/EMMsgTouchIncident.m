@@ -215,7 +215,7 @@
         id model = [EMAudioPlayerUtil sharedHelper].model;
         if (model && [model isKindOfClass:[EaseMessageModel class]]) {
             EaseMessageModel *oldModel = (EaseMessageModel *)model;
-            if (oldModel == aCell.model && oldModel.isPlaying == YES) {
+            if ([oldModel.message.messageId isEqualToString:aCell.model.message.messageId] && oldModel.isPlaying == YES) {
                 [[EMAudioPlayerUtil sharedHelper] stopPlayer];
                 [EMAudioPlayerUtil sharedHelper].model = nil;
                 aCell.bubbleView.isPlaying = NO;
@@ -236,7 +236,11 @@
     };
     
     if (body.downloadStatus == AgoraChatDownloadStatusSucceed) {
-        playBlock(aCell.model);
+        if (aCell.quoteModel) {
+            playBlock(aCell.quoteModel);
+        } else {
+            playBlock(aCell.model);
+        }
         return;
     }
     
@@ -246,12 +250,16 @@
     
     __weak typeof(self.chatController) weakChatControl = self.chatController;
     [self.chatController showHudInView:self.chatController.view hint:@"Download voice..."];
-    [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+    EaseMessageModel *tmp = aCell.model;
+    if (aCell.quoteModel) {
+        tmp = aCell.quoteModel;
+    }
+    [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:tmp.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
         [weakChatControl hideHud];
         if (error) {
             [EaseAlertController showErrorAlert:@"Voice download failure"];
         } else {
-            playBlock(aCell.model);
+            playBlock(tmp);
         }
     }];
 }

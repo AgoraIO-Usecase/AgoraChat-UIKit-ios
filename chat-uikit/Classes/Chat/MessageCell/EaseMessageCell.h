@@ -14,7 +14,7 @@
 
 #define avatarLonger 28
 #define componentSpacing 8
-#define replySpace 5
+#define replySpace 2
 
 NS_ASSUME_NONNULL_BEGIN
 
