@@ -58,16 +58,7 @@
                 return self;
             }
             NSString *text = ((AgoraChatTextMessageBody *)aMsg.body).text;
-            NSDataDetector *detector= [[NSDataDetector alloc] initWithTypes:NSTextCheckingTypeLink error:nil];
-            NSArray *checkArr = [detector matchesInString:text options:0 range:NSMakeRange(0, text.length)];
-            if (checkArr.count >= 1) {
-                NSTextCheckingResult *result = checkArr.firstObject;
-                NSString *urlStr = result.URL.absoluteString;
-                NSRange range = [text rangeOfString:urlStr options:NSCaseInsensitiveSearch];
-                if (range.length > 0) {
-                    self.isUrl = YES;
-                }
-            }
+            self.isUrl = [self detectURL:text];
             _type = AgoraChatMessageTypeText;
             NSDictionary *quoteInfo = aMsg.ext[@"msgQuote"];
             if (![quoteInfo isKindOfClass:[NSDictionary class]]) {
@@ -99,13 +90,19 @@
                 [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@:", showName] attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:11 weight:UIFontWeightSemibold],NSParagraphStyleAttributeName:paragraphStyle}]];
                 if (self.message.chatThread) {
                     self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_file"]];
-                    self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                    if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
+                        self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                    }
+                    
                 } else {
                     __weak typeof(self) weakSelf = self;
                     switch (msgBodyType) {
                         case AgoraChatMessageBodyTypeText:
                         {
                             self.quoteContent = result;
+                            if ([self detectURL:msgPreview]) {
+                                self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_link"]];
+                            }
                             self.quoteContent = [self appendContent:msgPreview];
                         }
                             break;
@@ -166,13 +163,18 @@
                         case AgoraChatMessageBodyTypeVoice:
                         {
                             self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_voice"]];
-                            self.quoteContent = [self appendContent:[NSString stringWithFormat:@"%d”", ((AgoraChatVoiceMessageBody *)quoteMessage.body).duration]];
+                            if (((AgoraChatVoiceMessageBody *)quoteMessage.body).duration > 0) {
+                                self.quoteContent = [self appendContent:[NSString stringWithFormat:@"%d”", ((AgoraChatVoiceMessageBody *)quoteMessage.body).duration]];
+                            }
+                            
                         }
                             break;
                         case AgoraChatMessageTypeFile:
                         {
                             self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_file"]];
-                            self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                            if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
+                                self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                            }
                         }
                             break;
                             
@@ -190,6 +192,17 @@
 
     return self;
 }
+
+- (BOOL)detectURL:(NSString *)string {
+    NSError *error;
+    NSDataDetector *detector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:&error];
+    NSArray *matches = [detector matchesInString:string options:0 range:NSMakeRange(0, [string length])];
+    if (matches.count > 0) {
+        return YES;
+    }
+    return NO;
+}
+
 
 - (void)setMessage:(AgoraChatMessage *)message {
     _message = message;

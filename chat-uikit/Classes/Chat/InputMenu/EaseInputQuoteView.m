@@ -95,6 +95,7 @@
 //            make.size.equalTo(@36);
 //        }];
     }
+    
     _nameLabel.text = message.from;
     if (_delegate && [_delegate respondsToSelector:@selector(quoteMessage:showContent:)]) {
         NSString *text = [_delegate quoteMessage:self showContent:message];
