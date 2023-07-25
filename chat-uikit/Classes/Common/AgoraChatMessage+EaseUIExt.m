@@ -20,6 +20,8 @@
             return @"[location]";
         case AgoraChatMessageBodyTypeImage:
             return @"[image]";
+            
+        case AgoraChatMessageBodyTypeCombine:
         case AgoraChatMessageBodyTypeFile:
             return [NSString stringWithFormat:@"%@%@", @"[file]", ((AgoraChatFileMessageBody *)self.body).displayName];
         case AgoraChatMessageBodyTypeVoice:

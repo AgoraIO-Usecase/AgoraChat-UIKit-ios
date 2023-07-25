@@ -44,6 +44,8 @@
 
 @property (nonatomic, assign) AgoraChatType chatType;
 
+@property (nonatomic, strong) UILabel *editState;
+
 @end
 
 @implementation EaseMessageCell
@@ -157,7 +159,7 @@
         }
     };
     [self.contentView addSubview:self.reactionView];
-    
+    [self.contentView addSubview:self.editState];
     if (self.direction == AgoraChatMessageDirectionReceive) {
         if (_viewModel.displayReceivedAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -214,6 +216,16 @@
             make.width.Ease_equalTo(200);
             make.top.equalTo(self.bubbleView.ease_bottom).offset(-componentSpacing);
             make.height.Ease_equalTo(self.reactionView.reactionList.count >= 0 ? 28:0);
+        }];
+        [self.editState Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            if (self.reactionView.reactionList.count > 0) {
+                make.top.equalTo(self.reactionView.ease_bottom).offset(5);
+            } else {
+                make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+            }
+            make.left.equalTo(self.bubbleView.ease_left);
+            make.height.equalTo(@20);
+            make.width.equalTo(@40);
         }];
     } else {
         if (_viewModel.displaySentAvatar) {
@@ -272,6 +284,17 @@
             make.width.Ease_equalTo(200);
             make.top.equalTo(self.bubbleView.ease_bottom).offset(-componentSpacing);
             make.height.Ease_equalTo(self.reactionView.reactionList.count >= 0 ? 28:0);
+        }];
+        
+        [self.editState Ease_makeConstraints:^(EaseConstraintMaker *make) {
+            if (self.reactionView.reactionList.count > 0) {
+                make.top.equalTo(self.reactionView.ease_bottom).offset(5);
+            } else {
+                make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+            }
+            make.right.equalTo(self.bubbleView.ease_right);
+            make.height.equalTo(@20);
+            make.width.equalTo(@40);
         }];
     }
 
@@ -359,6 +382,17 @@
             make.height.equalTo(@15);
         }];
     }
+}
+
+- (UILabel *)editState {
+    if (!_editState) {
+        _editState = [[UILabel alloc]init];
+        _editState.font = [UIFont systemFontOfSize:12 weight:UIFontWeightRegular];
+        _editState.textColor = [UIColor grayColor];
+        _editState.backgroundColor = [UIColor clearColor];
+        _editState.textAlignment = 0;
+    }
+    return _editState;
 }
 
 - (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType
@@ -456,9 +490,12 @@
     
     self.bubbleView.model = model;
     _reactionView.reactionList = model.message.reactionList;
-//    if (!_quoteView && !_quoteView.message) {
-        [self updateLayout];
-//    }
+    if (model.message.body.operatorId && ![model.message.body.operatorId isEqualToString:@""]) {
+        self.editState.text = @"Edited";
+    } else {
+        self.editState.text = @"";
+    }
+    [self updateLayout];
 }
 
 - (void)updateLayout
@@ -471,15 +508,22 @@
     [self.bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.quoteView.ease_bottom).offset(replySpace);
         if (self.reactionView.reactionList.count > 0) {
-            make.bottom.equalTo(self.contentView).offset(-componentSpacing-24);
+            make.bottom.equalTo(self.contentView).offset(-componentSpacing-24-(IsStringEmpty(self.editState.text) ? 0:10));
         } else {
-            make.bottom.equalTo(self.contentView).offset(-componentSpacing*2);
+            make.bottom.equalTo(self.contentView).offset(-componentSpacing*2-(IsStringEmpty(self.editState.text) ? 0:10));
         }
     }];
     [self.reactionView Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.height.Ease_equalTo(self.reactionView.reactionList.count >= 0 ? 28:0);
     }];
     
+    [self.editState Ease_updateConstraints:^(EaseConstraintMaker *make) {
+        if (self.reactionView.reactionList.count > 0) {
+            make.top.equalTo(self.reactionView.ease_bottom).offset(5);
+        } else {
+            make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+        }
+    }];
 }
 
 - (MessageQuoteView *)quoteView

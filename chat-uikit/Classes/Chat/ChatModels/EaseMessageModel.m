@@ -170,10 +170,17 @@
                         }
                             break;
                         case AgoraChatMessageTypeFile:
+                        case AgoraChatMessageBodyTypeCombine:
                         {
                             self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_file"]];
-                            if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
-                                self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                            if (msgBodyType == AgoraChatMessageBodyTypeCombine) {
+                                if (((AgoraChatCombineMessageBody *)quoteMessage.body).title.length) {
+                                    self.quoteContent = [self appendContent:((AgoraChatCombineMessageBody *)quoteMessage.body).title];
+                                }
+                            } else {
+                                if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
+                                    self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                                }
                             }
                         }
                             break;

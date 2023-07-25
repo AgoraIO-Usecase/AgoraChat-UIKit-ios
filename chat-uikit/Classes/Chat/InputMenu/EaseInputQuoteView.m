@@ -163,6 +163,7 @@
                 }
                 break;
             case AgoraChatMessageBodyTypeFile:
+            case AgoraChatMessageBodyTypeCombine:
                 {
                     image = [UIImage easeUIImageNamed:@"quote_file"];
                 }
@@ -210,6 +211,7 @@
                 return @"Video";
             case AgoraChatMessageBodyTypeVoice:
                 return [NSString stringWithFormat:@"Audio:%d”", ((AgoraChatVoiceMessageBody *)message.body).duration];
+            case AgoraChatMessageBodyTypeCombine:
             case AgoraChatMessageBodyTypeFile:
                 return [NSString stringWithFormat:@"Attachment:%@", ((AgoraChatFileMessageBody *)message.body).displayName];
             default:
