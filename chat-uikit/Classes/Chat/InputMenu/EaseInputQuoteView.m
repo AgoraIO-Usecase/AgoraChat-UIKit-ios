@@ -163,9 +163,13 @@
                 }
                 break;
             case AgoraChatMessageBodyTypeFile:
+            {
+                image = [UIImage easeUIImageNamed:@"quote_file"];
+            }
+                break;
             case AgoraChatMessageBodyTypeCombine:
                 {
-                    image = [UIImage easeUIImageNamed:@"quote_file"];
+                    image = [UIImage easeUIImageNamed:@"quote_combine"];
                 }
                 break;
             case AgoraChatMessageBodyTypeVoice:
@@ -175,6 +179,7 @@
                 break;
                 
             default:
+                image = nil;
                 break;
         }
     }
@@ -212,6 +217,7 @@
             case AgoraChatMessageBodyTypeVoice:
                 return [NSString stringWithFormat:@"Audio:%d”", ((AgoraChatVoiceMessageBody *)message.body).duration];
             case AgoraChatMessageBodyTypeCombine:
+                return [NSString stringWithFormat:@"Chat History:%@", ((AgoraChatCombineMessageBody *)message.body).title];
             case AgoraChatMessageBodyTypeFile:
                 return [NSString stringWithFormat:@"Attachment:%@", ((AgoraChatFileMessageBody *)message.body).displayName];
             default:

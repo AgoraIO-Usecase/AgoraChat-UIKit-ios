@@ -137,6 +137,6 @@
 
 #define EaseKit_chatroom_join @"chatroom_join"
 
-#define IsStringEmpty(string) (string) == nil || [(string) isEqualToString:@""] || [(string) isKindOfClass:[NSNull class]]
+#define IsStringEmpty(string) ((string) == nil || [(string) isEqualToString:@""] || [(string) isKindOfClass:[NSNull class]])
 
 #endif /* EaseDefines_h */

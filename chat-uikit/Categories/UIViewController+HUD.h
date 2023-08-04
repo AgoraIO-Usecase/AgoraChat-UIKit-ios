@@ -22,4 +22,6 @@
 
 - (void)showHint:(NSString *)hint yOffset:(float)yOffset;
 
++ (UIViewController *)currentViewController;
+
 @end

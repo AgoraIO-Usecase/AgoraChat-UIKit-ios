@@ -17,6 +17,7 @@
 #import "EMMsgLocationBubbleView.h"
 #import "EMMsgFileBubbleView.h"
 #import "EMMsgExtGifBubbleView.h"
+#import "MessageCombineBubbleView.h"
 #import "UIImageView+EaseWebCache.h"
 #import "EaseMessageCell+Category.h"
 #define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
@@ -45,6 +46,8 @@
 @property (nonatomic, assign) AgoraChatType chatType;
 
 @property (nonatomic, strong) UILabel *editState;
+
+@property (nonatomic, strong) UIImageView *checkBox;
 
 @end
 
@@ -99,6 +102,8 @@
         identifier = [NSString stringWithFormat:@"%@Custom", identifier];
     } else if (aType == AgoraChatMessageTypeExtURLPreview) {
         identifier = [NSString stringWithFormat:@"%@URLPreview", identifier];
+    } else if (aType == AgoraChatMessageBodyTypeCombine) {
+        identifier = [NSString stringWithFormat:@"%@Combine", identifier];
     }
     return identifier;
 }
@@ -142,6 +147,7 @@
     }
     _bubbleView.userInteractionEnabled = YES;
     _bubbleView.clipsToBounds = YES;
+    [self.contentView addSubview:self.checkBox];
     [self.contentView addSubview:self.avatarView];
     [self.contentView addSubview:self.nameLabel];
     [self.contentView addSubview:self.quoteView];
@@ -160,11 +166,21 @@
     };
     [self.contentView addSubview:self.reactionView];
     [self.contentView addSubview:self.editState];
+    self.checkBox.hidden = YES;
+    [self.checkBox Ease_remakeConstraints:^(EaseConstraintMaker *make) {
+        make.width.height.Ease_equalTo(28);
+        make.bottom.equalTo(self.contentView).offset(-8);
+        make.left.equalTo(self.contentView).offset(5);
+    }];
     if (self.direction == AgoraChatMessageDirectionReceive) {
         if (_viewModel.displayReceivedAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
                 make.bottom.equalTo(self.contentView).offset(-componentSpacing);
-                make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                if (self.editMode) {
+                    make.left.equalTo(self.checkBox.ease_right).offset(5);
+                } else {
+                    make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                }
                 make.width.height.equalTo(@(avatarLonger));
             }];
         }
@@ -175,7 +191,11 @@
                 if (_viewModel.displayReceivedAvatar) {
                     make.left.equalTo(self.avatarView.ease_right).offset(2 * componentSpacing);
                 } else {
-                    make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                    if (!self.editMode) {
+                        make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                    } else {
+                        make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
+                    }
                 }
                 make.right.equalTo(self.contentView).offset(-componentSpacing);
             }];
@@ -186,8 +206,16 @@
             } else {
                 make.top.equalTo(self.contentView).offset(componentSpacing/2);
             }
-            make.left.equalTo(self.bubbleView);
-            make.width.lessThanOrEqualTo(@(self.bubbleView.maxBubbleWidth));
+            if (_viewModel.displayReceivedAvatar) {
+                make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
+            } else {
+                if (!self.editMode) {
+                    make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                } else {
+                    make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
+                }
+            }
+            make.width.lessThanOrEqualTo(@(EMScreenWidth*0.75-24));
             make.height.Ease_equalTo(self.model.quoteHeight);
         }];
         
@@ -196,7 +224,11 @@
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
             } else {
-                make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                if (!self.editMode) {
+                    make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                } else {
+                    make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
+                }
             }
             
             if (self.bubbleView.type == AgoraChatMessageTypeFile) {
@@ -219,9 +251,9 @@
         }];
         [self.editState Ease_makeConstraints:^(EaseConstraintMaker *make) {
             if (self.reactionView.reactionList.count > 0) {
-                make.top.equalTo(self.reactionView.ease_bottom).offset(5);
+                make.bottom.equalTo(self.contentView.ease_bottom).offset(-8);
             } else {
-                make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+                make.bottom.equalTo(self.contentView.ease_bottom).offset(5);
             }
             make.left.equalTo(self.bubbleView.ease_left);
             make.height.equalTo(@20);
@@ -254,8 +286,12 @@
             } else {
                 make.top.equalTo(self.contentView).offset(componentSpacing/2);
             }
-            make.left.greaterThanOrEqualTo(self.contentView).offset(70);
-            make.right.equalTo(self.bubbleView);
+            make.width.lessThanOrEqualTo(@(EMScreenWidth*0.75-24));
+            if (_viewModel.displaySentAvatar) {
+                make.right.equalTo(self.avatarView.ease_left).offset(-componentSpacing);
+            } else {
+                make.right.equalTo(self.contentView).offset(-2 * componentSpacing);
+            }
             make.height.Ease_equalTo(self.model.quoteHeight);
         }];
         [_bubbleView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -288,9 +324,9 @@
         
         [self.editState Ease_makeConstraints:^(EaseConstraintMaker *make) {
             if (self.reactionView.reactionList.count > 0) {
-                make.top.equalTo(self.reactionView.ease_bottom).offset(5);
+                make.bottom.equalTo(self.contentView.ease_bottom).offset(-8);
             } else {
-                make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+                make.bottom.equalTo(self.contentView.ease_bottom).offset(5);
             }
             make.right.equalTo(self.bubbleView.ease_right);
             make.height.equalTo(@20);
@@ -395,6 +431,14 @@
     return _editState;
 }
 
+- (UIImageView *)checkBox {
+    if (!_checkBox) {
+        _checkBox = [[UIImageView alloc] init];
+        self.checkBox.image = [UIImage easeUIImageNamed:@"multiple_select"];
+    }
+    return _checkBox;
+}
+
 - (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType
 {
     EaseChatMessageBubbleView *bubbleView = [EaseChatMessageBubbleView new];
@@ -423,6 +467,10 @@
             break;
         case AgoraChatMessageTypeCustom:
             bubbleView = [[EaseChatMessageBubbleView alloc] initWithDirection:self.direction type:aType
+                viewModel:_viewModel];
+            break;
+        case AgoraChatMessageTypeCombine:
+            bubbleView = [[MessageCombineBubbleView alloc] initWithDirection:self.direction type:aType
                 viewModel:_viewModel];
             break;
         default:
@@ -484,8 +532,10 @@
     if (model.message.body.type == AgoraChatMessageBodyTypeText && self.model.quoteContent.length ) {
         NSDictionary *quoteInfo = model.message.ext[@"msgQuote"];
         self.quoteView.content.attributedText = model.quoteContent;
+        self.quoteView.hidden = NO;
     } else {
         self.quoteView.content.attributedText = nil;
+        self.quoteView.hidden = YES;
     }
     
     self.bubbleView.model = model;
@@ -495,6 +545,16 @@
     } else {
         self.editState.text = @"";
     }
+    self.checkBox.hidden = !self.editMode;
+    NSString *imageName = @"multiple_normal";
+    if (model.selected) {
+        if (model.message.status != AgoraChatMessageStatusFailed || !model.message.chatThread) {
+            imageName = @"multiple_select";
+        } else {
+            model.selected = NO;
+        }
+    }
+    self.checkBox.image = [UIImage easeUIImageNamed:imageName];
     [self updateLayout];
 }
 
@@ -502,6 +562,48 @@
 {
     NSDictionary *quoteInfo = self.model.message.ext[@"msgQuote"];
     self.reactionView.hidden = self.reactionView.reactionList.count <= 0;
+    if (self.direction == AgoraChatMessageDirectionReceive) {
+        [_avatarView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            if (self.editMode) {
+                make.left.equalTo(self.contentView).offset(40);
+            } else {
+                make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+            }
+        }];
+        [_nameLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            if (_viewModel.displayReceivedAvatar) {
+                make.left.equalTo(self.avatarView.ease_right).offset(2 * componentSpacing);
+            } else {
+                if (!self.editMode) {
+                    make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                } else {
+                    make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
+                }
+            }
+        }];
+        [_quoteView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            if (_viewModel.displayReceivedAvatar) {
+                make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
+            } else {
+                if (!self.editMode) {
+                    make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                } else {
+                    make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
+                }
+            }
+        }];
+        [_bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+            if (_viewModel.displayReceivedAvatar) {
+                make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
+            } else {
+                if (!self.editMode) {
+                    make.left.equalTo(self.contentView).offset(2 * componentSpacing);
+                } else {
+                    make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
+                }
+            }
+        }];
+    }
     [self.quoteView Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.height.Ease_equalTo(self.model.quoteHeight);
     }];
@@ -513,17 +615,18 @@
             make.bottom.equalTo(self.contentView).offset(-componentSpacing*2-(IsStringEmpty(self.editState.text) ? 0:10));
         }
     }];
-    [self.reactionView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+    [self.reactionView Ease_updateConstraints:^(EaseConstraintMaker *make) { make.top.equalTo(self.bubbleView.ease_bottom).offset(-componentSpacing);
         make.height.Ease_equalTo(self.reactionView.reactionList.count >= 0 ? 28:0);
     }];
     
     [self.editState Ease_updateConstraints:^(EaseConstraintMaker *make) {
         if (self.reactionView.reactionList.count > 0) {
-            make.top.equalTo(self.reactionView.ease_bottom).offset(5);
+            make.bottom.equalTo(self.contentView.ease_bottom).offset(-8);
         } else {
-            make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+            make.bottom.equalTo(self.contentView.ease_bottom).offset(5);
         }
     }];
+        
 }
 
 - (MessageQuoteView *)quoteView
@@ -570,7 +673,7 @@
 //Bubble view click
 - (void)bubbleViewTapAction:(UITapGestureRecognizer *)aTap
 {
-    UIView *view = [self.bubbleView viewWithTag:666];
+    UIView *view = [self.bubbleView viewWithTag:777];
     CGPoint point = [aTap locationInView:self.contentView];
     if (view != nil && view.hidden == NO) {
         if (point.y > view.frame.origin.y) {

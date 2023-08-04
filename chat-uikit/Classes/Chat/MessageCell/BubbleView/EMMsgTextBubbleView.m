@@ -29,7 +29,7 @@
         _viewModel = viewModel;
         [self _setupSubviews];
         self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
-        self.threadBubble.tag = 666;
+        self.threadBubble.tag = 777;
         [self addSubview:self.threadBubble];
         self.threadBubble.layer.cornerRadius = 8;
         self.threadBubble.clipsToBounds = YES;

@@ -17,17 +17,17 @@
             return ((AgoraChatTextMessageBody *)self.body).text;
         }
         case AgoraChatMessageBodyTypeLocation:
-            return @"[location]";
+            return @"[Location]";
         case AgoraChatMessageBodyTypeImage:
-            return @"[image]";
-            
+            return @"[Image]";
         case AgoraChatMessageBodyTypeCombine:
+            return [NSString stringWithFormat:@"%@%@", @"[Chat History]", ((AgoraChatCombineMessageBody *)self.body).title];
         case AgoraChatMessageBodyTypeFile:
-            return [NSString stringWithFormat:@"%@%@", @"[file]", ((AgoraChatFileMessageBody *)self.body).displayName];
+            return [NSString stringWithFormat:@"%@%@", @"[File]", ((AgoraChatFileMessageBody *)self.body).displayName];
         case AgoraChatMessageBodyTypeVoice:
-            return [NSString stringWithFormat:@"%@%d”", @"[audio]", ((AgoraChatVoiceMessageBody *)self.body).duration];
+            return [NSString stringWithFormat:@"%@%d”", @"[Audio]", ((AgoraChatVoiceMessageBody *)self.body).duration];
         case AgoraChatMessageBodyTypeVideo:
-            return @"[video]";
+            return @"[Video]";
         default:
             return @"unknow message";
     }

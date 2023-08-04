@@ -28,6 +28,7 @@
     self = [super init];
     if (self) {
         self.isUrl = NO;
+        _selected = NO;
         _quoteHeight = 0;
         _message = aMsg;
         _direction = aMsg.direction;
@@ -72,7 +73,7 @@
                     @"audio": @(AgoraChatMessageBodyTypeVoice),
                     @"custom": @(AgoraChatMessageBodyTypeCustom),
                     @"file": @(AgoraChatMessageBodyTypeFile),
-                    @"location": @(AgoraChatMessageBodyTypeLocation)
+                    @"location": @(AgoraChatMessageBodyTypeLocation),@"Chat History": @(AgoraChatMessageBodyTypeCombine)
                 };
                 NSString *quoteMsgId = quoteInfo[@"msgID"];
                 AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;
@@ -88,10 +89,10 @@
                 NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
                 paragraphStyle.lineHeightMultiple = 1.07;
                 [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@:", showName] attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:11 weight:UIFontWeightSemibold],NSParagraphStyleAttributeName:paragraphStyle}]];
-                if (self.message.chatThread) {
-                    self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_file"]];
-                    if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
-                        self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                if (quoteMessage.chatThread) {
+                    self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"groupThread"]];
+                    if (!IsStringEmpty(quoteMessage.chatThread.threadName)) {
+                        self.quoteContent = [self appendContent:quoteMessage.chatThread.threadName];
                     }
                     
                 } else {
@@ -142,7 +143,7 @@
                             if (!img) {
                                 if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
                                     NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailRemotePath];
-                                    [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                    [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:0 progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                                         if (error == nil && image != nil) {
                                             img = image;
                                         } else {
@@ -169,18 +170,19 @@
                             
                         }
                             break;
-                        case AgoraChatMessageTypeFile:
-                        case AgoraChatMessageBodyTypeCombine:
+                        case AgoraChatMessageBodyTypeFile:
                         {
                             self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_file"]];
-                            if (msgBodyType == AgoraChatMessageBodyTypeCombine) {
-                                if (((AgoraChatCombineMessageBody *)quoteMessage.body).title.length) {
-                                    self.quoteContent = [self appendContent:((AgoraChatCombineMessageBody *)quoteMessage.body).title];
-                                }
-                            } else {
-                                if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
-                                    self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
-                                }
+                            if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
+                                self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                            }
+                        }
+                            break;
+                        case AgoraChatMessageBodyTypeCombine:
+                        {
+                            self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_combine"]];
+                            if (((AgoraChatCombineMessageBody *)quoteMessage.body).title.length) {
+                                self.quoteContent = [self appendContent:((AgoraChatCombineMessageBody *)quoteMessage.body).title];
                             }
                         }
                             break;
@@ -224,7 +226,7 @@
 }
 
 - (CGFloat)quoteHeight {
-    if (_quoteContent.length && _quoteHeight <= 0) {
+    if (_quoteHeight <= 0) {
         UILabel *label = [UILabel new];
         label.attributedText = _quoteContent;
         _quoteHeight = ceilf([label sizeThatFits:CGSizeMake(EMScreenWidth*0.75-24, 999)].height+16);

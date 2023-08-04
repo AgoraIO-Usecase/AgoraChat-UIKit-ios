@@ -22,6 +22,7 @@ typedef NS_ENUM(NSInteger, AgoraChatMessageType) {
     AgoraChatMessageTypeFile,
     AgoraChatMessageTypeCmd,
     AgoraChatMessageTypeCustom,
+    AgoraChatMessageTypeCombine,
     AgoraChatMessageTypeExtCall,
     AgoraChatMessageTypeExtGif,
     AgoraChatMessageTypeExtRecall,
@@ -54,6 +55,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL isHeader;
 
 @property (nonatomic) BOOL isUrl;
+
+@property (nonatomic) BOOL selected;
 
 @property (nonatomic, strong, readonly,nullable) NSAttributedString *quoteContent;
 
