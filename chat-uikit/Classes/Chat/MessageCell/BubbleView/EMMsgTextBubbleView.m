@@ -8,6 +8,7 @@
 
 #import "EMMsgTextBubbleView.h"
 #import "EaseEmojiHelper.h"
+#import "AgoraChatMessage+RemindMe.h"
 #import "EMMsgThreadPreviewBubble.h"
 #define kHorizontalPadding 12
 #define kVerticalPadding 8
@@ -156,12 +157,32 @@
     paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
     NSDictionary *attributes = @{
                                  NSFontAttributeName:[UIFont systemFontOfSize:16],
-                                 NSParagraphStyleAttributeName:paragraphStyle
-                                 ,NSForegroundColorAttributeName: color};
+                                 NSParagraphStyleAttributeName:paragraphStyle,
+                                 NSForegroundColorAttributeName: color};
    
     [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
    
-    [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
+    //[attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
+    
+    if ([model.message remindMe]) {
+        // @ALL
+        NSString* strAt = @"@ALL ";
+        NSRange range = [text rangeOfString:strAt];
+        if (range.location < 0) {
+            strAt = [NSString stringWithFormat:@"@%@ ",AgoraChatClient.sharedClient.currentUsername];
+            range = [text rangeOfString:strAt];
+//            // TODO need check group members
+//            if (range.location < 0) {
+//                strAt = [NSString stringWithFormat:@"@%@ ",model.userDataProfile.showName];
+//                range = [text rangeOfString:strAt];
+//            }
+        }
+        
+        if (range.location >= 0 && range.length > 0) {
+            //[attaStr addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHexString:@"154de"]} range:range];
+            [attaStr replaceCharactersInRange:range withAttributedString:[[NSAttributedString alloc] initWithString:strAt attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:16],NSForegroundColorAttributeName:[UIColor colorWithHexString:@"154dfe"]}]];
+        }
+    }
     self.textLabel.attributedText = attaStr;
     if (model.isHeader == NO && model.message.chatThread) {
         self.threadBubble.model = model;

@@ -25,6 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) BOOL isChatThread;
 @property (atomic) BOOL loadFinished;
 @property (nonatomic, strong, readonly) EaseChatViewModel *viewModel;
+@property (nonatomic) BOOL endScroll;
+@property (nonatomic, strong) EaseInputMenu *inputBar;
 
 + (EaseChatViewController *)initWithConversationId:(NSString *)aConversationId
                                   conversationType:(AgoraChatConversationType)aType

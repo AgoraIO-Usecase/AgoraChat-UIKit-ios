@@ -49,7 +49,6 @@
     BOOL _isReloadViewWithModel; //Refresh the session page
 }
 @property (nonatomic, strong) EMBottomMoreFunctionView *longPressView;
-@property (nonatomic, strong) EaseInputMenu *inputBar;
 @property (nonatomic, strong) dispatch_queue_t msgQueue;
 @property (nonatomic, strong) NSMutableArray<AgoraChatMessage *> *messageList;
 
@@ -144,6 +143,7 @@
         _isReloadViewWithModel = NO;
         _sentProfile = nil;
         _otherProfile = nil;
+        _endScroll = YES;
         [EaseChatKitManager.shared setConversationId:_currentConversation.conversationId];
         if (!_viewModel) {
             _viewModel = [[EaseChatViewModel alloc] init];
@@ -175,6 +175,7 @@
         _isReloadViewWithModel = NO;
         _sentProfile = nil;
         _otherProfile = nil;
+        _endScroll = YES;
         [EaseChatKitManager.shared setConversationId:_currentConversation.conversationId];
         if (!_viewModel) {
             _viewModel = [[EaseChatViewModel alloc] init];
@@ -546,20 +547,35 @@
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
+    self.endScroll = YES;
     [self.view endEditing:YES];
     [self.inputBar clearMoreViewAndSelectedButton];
     [self hideLongPressView];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+   self.endScroll = YES;
+   if (self.delegate && [self.delegate respondsToSelector:@selector(scrollViewEndScroll)]) {
+       [self.delegate scrollViewEndScroll];
+   }
 }
 
 #pragma mark - EaseInputMenuDelegate
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewShouldChangeTextInRange:replacementText:)]) {
-        BOOL isValid = [self.delegate textViewShouldChangeTextInRange:range replacementText:text];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textView:ShouldChangeTextInRange:replacementText:)]) {
+        BOOL isValid = [self.delegate textView:textView ShouldChangeTextInRange:range replacementText:text];
         return isValid;
     }
     return YES;
+}
+
+- (void)textViewDidChangeSelection:(UITextView *)textView
+{
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewDidChangeSelection:)]) {
+        [self.delegate textViewDidChangeSelection:textView];
+    }
 }
 
 - (void)inputBarSendMsgAction:(NSString *)text
@@ -800,7 +816,9 @@
 {
     [self hideLongPressView];
     if (self.delegate && [self.delegate respondsToSelector:@selector(avatarDidLongPress:)]) {
-        [self.delegate avatarDidLongPress:model.userDataProfile];
+        if (!model.userDataProfile) {
+        } else
+            [self.delegate avatarDidLongPress:model.userDataProfile];
     }
 }
 

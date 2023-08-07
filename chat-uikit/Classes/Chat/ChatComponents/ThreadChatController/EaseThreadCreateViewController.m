@@ -219,8 +219,8 @@
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewShouldChangeTextInRange:replacementText:)]) {
-        BOOL isValid = [self.delegate textViewShouldChangeTextInRange:range replacementText:text];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textView:ShouldChangeTextInRange:replacementText:)]) {
+        BOOL isValid = [self.delegate textView:textView ShouldChangeTextInRange:range replacementText:text];
         return isValid;
     }
     return YES;

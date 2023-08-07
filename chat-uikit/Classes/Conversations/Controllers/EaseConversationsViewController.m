@@ -9,6 +9,7 @@
 #import "EaseHeaders.h"
 #import "AgoraChatConversation+EaseUI.h"
 #import "UIImage+EaseUI.h"
+#import "AgoraChatMessage+RemindMe.h"
 
 static NSString *cellIdentifier = @"EaseConversationCell";
 
@@ -280,13 +281,9 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 {
     if (aMessages && [aMessages count]) {
         AgoraChatMessage *msg = aMessages[0];
-        if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThreadMessage != YES) {
+        if ([msg remindMe]) {
             AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO];
-            //群聊@“我”提醒
-            NSString *content = [NSString stringWithFormat:@"@%@",AgoraChatClient.sharedClient.currentUsername];
-            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThreadMessage != YES) {
-                [conversation setRemindMe:msg.messageId];
-            };
+            [conversation setRemindMe:msg.messageId];
         }
     }
     [self _loadAllConversationsFromDB];

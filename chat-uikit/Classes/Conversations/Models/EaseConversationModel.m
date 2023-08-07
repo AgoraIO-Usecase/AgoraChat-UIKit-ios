@@ -129,6 +129,7 @@
             break;
             
         default:
+            msgStr = @"";
             break;
     }
     
@@ -140,10 +141,10 @@
         [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:255/255.0 green:43/255.0 blue:43/255.0 alpha:1.0]} range:NSMakeRange(0, msgStr.length)];
     }*/
     if ([_conversation remindMe]) {
-        NSString *atStr = @"[someone @ me]";
+        NSString *atStr = @"[someone@You]";
         msgStr = [NSString stringWithFormat:@"%@ %@", atStr, msgStr];
         _showInfo = [[NSMutableAttributedString alloc] initWithString:msgStr];
-        [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:255/255.0 green:43/255.0 blue:43/255.0 alpha:1.0]} range:NSMakeRange(0, atStr.length)];
+        [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0/255.0 green:95/255.0 blue:255/255.0 alpha:1.0]} range:NSMakeRange(0, atStr.length)];
     }
     return _showInfo;
 }

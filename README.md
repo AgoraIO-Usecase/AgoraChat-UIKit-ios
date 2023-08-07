@@ -657,7 +657,7 @@ The data model group for the input extension area of the current conversation (U
  *
  * @brief Example of callback for a keyboard input change: @ group member
  */
-- (BOOL)textViewShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
+- (BOOL)textView:(UITextView*)textView ShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
 ```
 
 ##### Callback for the input status of the other party

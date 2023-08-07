@@ -78,7 +78,7 @@
     [self addSubview:self.inputView];
     [self.inputView Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self).offset(0.5);
-        make.left.right.width.equalTo(self); 
+        make.left.right.width.equalTo(self);
         make.height.equalTo(@(kIconwidth + kTopMargin * 2));
     }];
     
@@ -226,16 +226,23 @@
     return YES;
 }
 
+- (void)textViewDidChangeSelection:(UITextView *)textView
+{
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewDidChangeSelection:)]) {
+        [self.delegate textViewDidChangeSelection:textView];
+    }
+}
+
 - (void)textViewDidChange:(UITextView *)textView
 {
 
-    //防止输入时在中文后输入英文过长直接中文和英文换行
-    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-    paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
-    NSDictionary *attributes = @{
-                                 NSFontAttributeName:[UIFont systemFontOfSize:16],
-                                 NSParagraphStyleAttributeName:paragraphStyle
-                                 };
+//    //防止输入时在中文后输入英文过长直接中文和英文换行
+//    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+//    paragraphStyle.lineBreakMode = NSLineBreakByCharWrapping;
+//    NSDictionary *attributes = @{
+//                                 NSFontAttributeName:[UIFont systemFontOfSize:16],
+//                                 NSParagraphStyleAttributeName:paragraphStyle
+//                                 };
     
     //防止拼音输入时，文本直接获取拼音
     UITextRange *selectedRange = [textView markedTextRange];
@@ -245,7 +252,7 @@
         return;
     }
     
-    textView.attributedText = [[NSAttributedString alloc] initWithString:textView.text attributes:attributes];
+    //textView.attributedText = [[NSAttributedString alloc] initWithString:textView.text attributes:attributes];
 
     [self _updatetextViewHeight];
     if (self.moreEmoticonView) {

@@ -100,8 +100,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @brief Input area Keyboard input change callback example: @ group member
  *
  */
-- (BOOL)textViewShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
+- (BOOL)textView:(UITextView*)textView ShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
 
+/**
+ * Input area selection change callback example: @ group member
+ */
+- (void)textViewDidChangeSelection:(UITextView *)textView;
 /**
  * 1v1 single chat Peer typing
  */
@@ -158,6 +162,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (UIView *)threadChatHeader;
 
 - (BOOL)messageLongPressExtShowReaction:(AgoraChatMessage *)message;
+// table end scrolling
+- (void)scrollViewEndScroll;
 
 @end
 
