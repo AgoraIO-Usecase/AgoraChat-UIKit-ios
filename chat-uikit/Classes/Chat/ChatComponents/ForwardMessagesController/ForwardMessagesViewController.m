@@ -14,6 +14,7 @@
 #import "EMMsgTouchIncident.h"
 #import "EMAudioPlayerUtil.h"
 #import "ForwardMessageCell.h"
+#import "UIViewController+HUD.h"
 
 @interface ForwardMessagesViewController ()<UIDocumentInteractionControllerDelegate>
 
@@ -44,19 +45,22 @@
     self.view.backgroundColor = [UIColor whiteColor];
     NSString *text = ((AgoraChatCombineMessageBody *)self.combineMessage.body).title;
     self.title = IsStringEmpty(text) ? @"A Chat History":text;
+    [self showHudInView:self.view hint:@"Loading..."];
+    __weak typeof(self) weakSelf = self;
     [AgoraChatClient.sharedClient.chatManager downloadAndParseCombineMessage:self.combineMessage completion:^(NSArray<AgoraChatMessage *> * _Nullable messages, AgoraChatError * _Nullable error) {
+        [weakSelf hideHud];
         if (!error) {
-            self.attachmentMessages = messages;
-            [self.view addSubview:self.forwardList];
+            weakSelf.attachmentMessages = messages;
+            [weakSelf.view addSubview:weakSelf.forwardList];
         } else {
-            [self showHint:error.errorDescription];
+            [weakSelf showHint:error.errorDescription];
         }
     }];
 }
 
 - (ForwardList *)forwardList {
     if (!_forwardList) {
-        _forwardList = [[ForwardList alloc] initWithFrame:CGRectMake(0, 0, EMScreenWidth, EMScreenHeight) style:UITableViewStylePlain models:[self models]];
+        _forwardList = [[ForwardList alloc] initWithFrame:CGRectMake(0, 0, EMScreenWidth, EMScreenHeight-EMNavgationHeight) style:UITableViewStylePlain models:[self models]];
         __weak typeof(self) weakSelf = self;
         _forwardList.selectBlock = ^(ForwardModel * _Nonnull model,ForwardMessageCell *cell) {
             if (model.message.body.type != AgoraChatMessageBodyTypeCombine) {

@@ -605,7 +605,11 @@
         }];
     }
     [self.quoteView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        make.height.Ease_equalTo(self.model.quoteHeight);
+        if (quoteInfo) {
+            make.height.Ease_equalTo(self.model.quoteHeight);
+        } else {
+            make.height.Ease_equalTo(0);
+        }
     }];
     [self.bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.quoteView.ease_bottom).offset(replySpace);

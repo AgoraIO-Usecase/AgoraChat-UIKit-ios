@@ -10,11 +10,12 @@
 #import <SDWebImage/SDWebImageManager.h>
 #import "UIImage+EaseUI.h"
 #import "AgoraChatMessage+EaseUIExt.h"
+#import "UIViewController+HUD.h"
 
 #define kEMMsgImageDefaultSize 120
-#define kEMMsgImageMinWidth 50
+#define kEMMsgImageMinWidth 100
 #define kEMMsgImageMaxWidth 120
-#define kEMMsgImageMaxHeight 260
+#define kEMMsgImageMaxHeight 160
 
 @interface ForwardModel ()
 
@@ -165,6 +166,7 @@
 //                }
 //                
 //            } else {
+            UIViewController *container = [UIViewController currentViewController];
                 switch (forwardMessage.body.type) {
                     case AgoraChatMessageBodyTypeText:
                     {
@@ -184,24 +186,27 @@
                         if (!img) {
                             if (((AgoraChatImageMessageBody *)forwardMessage.body).thumbnailRemotePath.length) {
                                 NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)forwardMessage.body).thumbnailRemotePath];
+                                [container hideHud];
+                                [container showHudInView:container.view hint:@"loading thumbnail"];
                                 [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:0 progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                    [container hideHud];
                                     if (error == nil && image != nil) {
                                         img = image;
                                     } else {
                                         img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                     }
                                     weakSelf.contentAttributeText = [weakSelf appendImage:result image:img];
-                                    self.contentHeight += [self getImageSize:img].height;
+                                    self.contentHeight;
                                 }];
                             } else {
                                 img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                 self.contentAttributeText = [self appendImage:result image:img];
-                                self.contentHeight += [self getImageSize:img].height;
+                                self.contentHeight;
                             }
                             
                         } else {
                             self.contentAttributeText = [self appendImage:result image:img];
-                            self.contentHeight += [self getImageSize:img].height;
+                            self.contentHeight;
                         }
                     }
                         break;
@@ -215,7 +220,10 @@
                         if (!img) {
                             if (((AgoraChatImageMessageBody *)forwardMessage.body).thumbnailRemotePath.length) {
                                 NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)forwardMessage.body).thumbnailRemotePath];
+                                [container hideHud];
+                                [container showHudInView:container.view hint:@"loading thumbnail"];
                                 [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:0 progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                    [container hideHud];
                                     if (error == nil && image != nil) {
                                         img = image;
                                     } else {
@@ -351,7 +359,7 @@
 - (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
     UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
     [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    [coverImage drawInRect:CGRectMake(image.size.width/2.0-45, image.size.height/2.0-27, 90, 54)];
+    [coverImage drawInRect:CGRectMake(image.size.width/2.0-45, image.size.height/2.0-45, 90, 90)];
     UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return resultingImage;

@@ -103,12 +103,13 @@
     
     if (type == AgoraChatMessageTypeCombine) {
         AgoraChatCombineMessageBody *body = (AgoraChatCombineMessageBody *)model.message.body;
-        CGFloat summaryHeight = [body.summary boundingRectWithSize:CGSizeMake(self.maxBubbleWidth-24, 60) options:nil attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:14 weight:UIFontWeightMedium]} context:nil].size.height+15;
-        CGFloat height = 45;
+        CGFloat summaryHeight = [self summaryHeight:body.summary]+10;
+        
+        CGFloat height = 35;
         if (summaryHeight < 60) {
             height += summaryHeight;
         } else {
-            height = 110;
+            height = 100;
         }
         if (!model.isHeader) {
             if (model.message.chatThread) {
@@ -127,6 +128,16 @@
         self.title.text = IsStringEmpty(body.title) ? @"A Chat History":body.title;
         self.summary.text = IsStringEmpty(body.summary) ? @"A Chat History Summary":body.summary;
     }
+}
+
+- (CGFloat)summaryHeight:(NSString *)summary {
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+    paragraphStyle.lineHeightMultiple = 1.2;
+    NSAttributedString *text = [[NSAttributedString alloc] initWithString:summary attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:14 weight:UIFontWeightMedium],NSParagraphStyleAttributeName:paragraphStyle}];
+    UILabel *label = [UILabel new];
+    label.numberOfLines = 0;
+    label.attributedText = text;
+    return ceilf([label sizeThatFits:CGSizeMake(self.maxBubbleWidth-24, 60)].height);
 }
 
 - (void)updateThreadLayout:(CGRect)rect model:(EaseMessageModel *)model{

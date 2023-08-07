@@ -529,7 +529,7 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
     BOOL isCustomDownload = !([AgoraChatClient sharedClient].options.isAutoTransferMessageAttachments);
     if (body.thumbnailDownloadStatus == AgoraChatDownloadStatusFailed || ![fileManager fileExistsAtPath:body.thumbnailLocalPath]) {
-        [vc showHint:@"Download image thumbnails"];
+//        [vc showHint:@"Download image thumbnails"];
         if (!isCustomDownload) {
             [[AgoraChatClient sharedClient].chatManager downloadMessageThumbnail:message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
                 downloadBlock();
