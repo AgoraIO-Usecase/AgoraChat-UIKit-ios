@@ -13,9 +13,9 @@
 #import "UIViewController+HUD.h"
 
 #define kEMMsgImageDefaultSize 120
-#define kEMMsgImageMinWidth 100
-#define kEMMsgImageMaxWidth 120
-#define kEMMsgImageMaxHeight 160
+#define kEMMsgImageMinWidth 120
+#define kEMMsgImageMaxWidth 150
+#define kEMMsgImageMaxHeight 200
 
 @interface ForwardModel ()
 

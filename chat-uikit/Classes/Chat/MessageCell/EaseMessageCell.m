@@ -548,11 +548,7 @@
     self.checkBox.hidden = !self.editMode;
     NSString *imageName = @"multiple_normal";
     if (model.selected) {
-        if (model.message.status != AgoraChatMessageStatusFailed || !model.message.chatThread) {
-            imageName = @"multiple_select";
-        } else {
-            model.selected = NO;
-        }
+        imageName = @"multiple_select";
     }
     self.checkBox.image = [UIImage easeUIImageNamed:imageName];
     [self updateLayout];
