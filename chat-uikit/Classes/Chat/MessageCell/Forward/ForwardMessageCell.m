@@ -121,7 +121,7 @@
             [self.containerView updateAttribute:model.contentAttributeText];
             self.contentLabel.attributedText = nil;
         }
-    } else {AgoraChatMessage *m;m.chatType;
+    } else {
         [self.containerView stopAnimation];
         self.containerView.hidden = YES;self.containerView.frame = CGRectZero;
         self.contentLabel.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.nameLabel.frame)+5, CGRectGetWidth(self.contentView.frame)-72, model.contentHeight-CGRectGetMaxY(self.nameLabel.frame)-5);

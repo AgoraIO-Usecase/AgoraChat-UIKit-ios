@@ -78,10 +78,10 @@
         make.height.Ease_equalTo(20);
     }];
     [self.summary Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.title.ease_bottom).offset(8);
+        make.top.equalTo(self.title.ease_bottom).offset(5);
         make.left.equalTo(self.title);
         make.right.equalTo(self.title);
-        make.height.lessThanOrEqualTo(@60);
+        make.height.lessThanOrEqualTo(@65);
     }];
 }
 
@@ -105,7 +105,7 @@
         AgoraChatCombineMessageBody *body = (AgoraChatCombineMessageBody *)model.message.body;
         CGFloat summaryHeight = [self summaryHeight:body.summary]+10;
         
-        CGFloat height = 35;
+        CGFloat height = 40;
         if (summaryHeight < 60) {
             height += summaryHeight;
         } else {
@@ -126,7 +126,10 @@
         [self updateThreadLayout:rect model:model];
         
         self.title.text = IsStringEmpty(body.title) ? @"A Chat History":body.title;
-        self.summary.text = IsStringEmpty(body.summary) ? @"A Chat History Summary":body.summary;
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        paragraphStyle.lineHeightMultiple = 1.2;
+        NSAttributedString *text = [[NSAttributedString alloc] initWithString:IsStringEmpty(body.summary) ? @"A Chat History Summary":body.summary attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:14 weight:UIFontWeightMedium],NSParagraphStyleAttributeName:paragraphStyle}];
+        self.summary.attributedText = text;
     }
 }
 
