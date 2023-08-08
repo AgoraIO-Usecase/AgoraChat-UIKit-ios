@@ -271,7 +271,6 @@
             
         }
     }
-    NSLog(@"ForwardModel:%@, height:%f",self.contentAttributeText.string,self.contentHeight);
     return self;
 }
 
