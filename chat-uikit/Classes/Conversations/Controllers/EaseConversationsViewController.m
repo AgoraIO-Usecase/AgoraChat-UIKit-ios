@@ -51,7 +51,21 @@ static NSString *cellIdentifier = @"EaseConversationCell";
             });
         }
     }];
+//    UIImageView *iv = [[UIImageView alloc]initWithFrame:CGRectMake(100, 100, 100, 100)];
+//    iv.backgroundColor = [UIColor orangeColor];
+//    iv.contentMode = UIViewContentModeScaleAspectFit;
+//    iv.image = [self combineImage:[UIImage easeUIImageNamed:@"chatroom_unread_bg"] coverImage:[UIImage easeUIImageNamed:@"quote_voice"]];
+//    [self.view addSubview:iv];
 }
+
+//- (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
+//    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
+//    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+//    [coverImage drawInRect:CGRectMake(image.size.width/2.0-18, image.size.height/2.0-18, 36, 36)];
+//    UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+//    return resultingImage;
+//}
 
 - (void)viewWillDisappear:(BOOL)animated
 {

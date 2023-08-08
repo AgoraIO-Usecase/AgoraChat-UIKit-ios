@@ -10,6 +10,7 @@
 #import "EaseEmojiHelper.h"
 #import "AgoraChatMessage+RemindMe.h"
 #import "EMMsgThreadPreviewBubble.h"
+#import "EaseUserUtils.h"
 #define kHorizontalPadding 12
 #define kVerticalPadding 8
 #define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
@@ -30,7 +31,7 @@
         _viewModel = viewModel;
         [self _setupSubviews];
         self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
-        self.threadBubble.tag = 666;
+        self.threadBubble.tag = 777;
         [self addSubview:self.threadBubble];
         self.threadBubble.layer.cornerRadius = 8;
         self.threadBubble.clipsToBounds = YES;
@@ -168,14 +169,10 @@
         // @ALL
         NSString* strAt = @"@ALL ";
         NSRange range = [text rangeOfString:strAt];
-        if (range.location < 0) {
-            strAt = [NSString stringWithFormat:@"@%@ ",AgoraChatClient.sharedClient.currentUsername];
+        if (range.length == 0 && AgoraChatClient.sharedClient.currentUsername.length > 0) {
+            id<EaseUserProfile> user = [EaseUserUtils.shared getUserInfo:AgoraChatClient.sharedClient.currentUsername moduleType:EaseUserModuleTypeGroupChat];
+            strAt = [NSString stringWithFormat:@"@%@ ",user.showName];
             range = [text rangeOfString:strAt];
-//            // TODO need check group members
-//            if (range.location < 0) {
-//                strAt = [NSString stringWithFormat:@"@%@ ",model.userDataProfile.showName];
-//                range = [text rangeOfString:strAt];
-//            }
         }
         
         if (range.location >= 0 && range.length > 0) {

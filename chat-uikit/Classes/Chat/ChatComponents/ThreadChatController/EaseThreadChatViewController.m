@@ -83,10 +83,14 @@
         isCustom = [self.delegate didSelectMessageItem:aCell.model.message userProfile:aCell.model.userDataProfile];
         if (!isCustom) return;
     }
-    //Message event policy classification
-    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell];
-    eventStrategy.chatController = self;
-    [eventStrategy messageCellEventOperation:aCell];
+    if (aCell.model.message.body.type != AgoraChatMessageBodyTypeCombine) {
+        //Message event policy classification
+        AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell.model.type];
+        eventStrategy.chatController = self;
+        [eventStrategy messageCellEventOperation:aCell];
+    } else {
+        [self performSelector:@selector(lookupCombineMessage:) withObject:aCell.model.message];
+    }
 }
 
 - (void)viewDidLoad {
