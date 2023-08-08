@@ -10,6 +10,7 @@
 #import <objc/runtime.h>
 #import "EMMsgTextBubbleView.h"
 #import "EaseDateHelper.h"
+#import "EaseHeaders.h"
 
 typedef NS_ENUM(NSInteger, EaseLongPressExecute) {
     EaseLongPressExecuteCopy = 0,

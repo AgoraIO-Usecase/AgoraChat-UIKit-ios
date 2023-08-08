@@ -11,6 +11,7 @@
 #import "AgoraChatMessage+RemindMe.h"
 #import "EMMsgThreadPreviewBubble.h"
 #import "EaseUserUtils.h"
+#import "EaseHeaders.h"
 #define kHorizontalPadding 12
 #define kVerticalPadding 8
 #define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
@@ -90,6 +91,12 @@
     }
 }
 
+- (NSString*)showText
+{
+    AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)self.model.message.body;
+    return body.text;
+}
+
 #pragma mark - Setter
 
 - (void)setModel:(EaseMessageModel *)model
@@ -105,9 +112,9 @@
     } else {
         self.threadBubble.hidden = YES;
     }
-    AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)model.message.body;
     
-    NSString *text = [EaseEmojiHelper convertEmoji:body.text];
+    
+    NSString *text = [EaseEmojiHelper convertEmoji:[self showText]];
     NSMutableAttributedString *attaStr = [[NSMutableAttributedString alloc] initWithString:text];
     /*
     //glideline

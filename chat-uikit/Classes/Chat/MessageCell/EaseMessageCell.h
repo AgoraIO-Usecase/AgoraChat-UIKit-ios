@@ -10,6 +10,7 @@
 
 #import "EaseMessageModel.h"
 #import "EaseChatMessageBubbleView.h"
+#import "EMMsgTextBubbleView.h"
 #import "EaseChatViewModel.h"
 
 #define avatarLonger 28
