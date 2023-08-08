@@ -12,6 +12,8 @@
 
 @property (nonatomic, strong) id _Nullable model;
 
+@property (nonatomic) BOOL isPlaying;
+
 + (instancetype _Nonnull )sharedHelper;
 
 - (void)startPlayerWithPath:(NSString * _Nonnull)aPath

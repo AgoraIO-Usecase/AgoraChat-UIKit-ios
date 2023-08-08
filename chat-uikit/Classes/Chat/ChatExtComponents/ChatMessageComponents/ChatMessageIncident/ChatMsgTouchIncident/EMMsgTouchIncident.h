@@ -19,6 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)messageCellEventOperation:(EaseMessageCell *)aCell;
 
+- (void)messageCellEvent:(AgoraChatMessage *)message controller:(UIViewController *)vc needRefresh:(void(^)(BOOL))refresh;
+
+
 @end
 
 
@@ -27,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface AgoraChatMessageEventStrategyFactory : NSObject
 
-+ (AgoraChatMessageEventStrategy * _Nonnull)getStratrgyImplWithMsgCell:(EaseMessageCell *)aCell;
++ (AgoraChatMessageEventStrategy * _Nonnull)getStratrgyImplWithMsgCell:(AgoraChatMessageType *)type;
 
 @end
 

@@ -16,6 +16,7 @@
 #import "UIImageView+EaseWebCache.h"
 #import "EaseMessageCell+Category.h"
 #import "EMTimeConvertUtils.h"
+#import "MessageCombineBubbleView.h"
 @interface EaseThreadCreateCell ()<UITextFieldDelegate>
 
 @property (nonatomic, strong) UIImageView *threadIcon;
@@ -435,7 +436,7 @@
         make.top.equalTo(self.nameLabel.ease_bottom).offset(4);
         make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
         make.bottom.equalTo(self.contentView).offset(-28);
-        if (self.messageType == AgoraChatMessageTypeFile) {
+        if (self.messageType == AgoraChatMessageTypeFile || self.messageType == AgoraChatMessageTypeCombine) {
             make.right.equalTo(@(-16));
         } else {
             self.bubbleView.maxBubbleWidth = EMScreenWidth - 48 - 32;
@@ -476,6 +477,9 @@
             break;
         case AgoraChatMessageTypeFile:
             bubbleView = [[EMMsgFileBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
+            break;
+        case AgoraChatMessageTypeCombine:
+            bubbleView = [[MessageCombineBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
             break;
         case AgoraChatMessageTypeExtGif:
             bubbleView = [[EMMsgExtGifBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];

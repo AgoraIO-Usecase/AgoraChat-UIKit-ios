@@ -33,7 +33,6 @@
     self = [super init];
     if (self) {
         self.hidden = YES;
-        self.backgroundColor = [UIColor clearColor];
     }
     
     return self;

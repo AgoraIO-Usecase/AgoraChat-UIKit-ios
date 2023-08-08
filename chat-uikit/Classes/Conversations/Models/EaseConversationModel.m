@@ -69,7 +69,7 @@
     
     AgoraChatMessage *msg = _conversation.latestMessage;
     _latestUpdateTime = msg.timestamp;
-    NSString *msgStr = nil;
+    NSString *msgStr = @"";
     switch (msg.body.type) {
         case AgoraChatMessageBodyTypeText:
         {
@@ -115,6 +115,11 @@
         case AgoraChatMessageBodyTypeFile:
         {
             msgStr = @"[file]";
+        }
+            break;
+        case AgoraChatMessageBodyTypeCombine:
+        {
+            msgStr = @"[A Chat History]";
         }
             break;
         case AgoraChatMessageBodyTypeVoice:

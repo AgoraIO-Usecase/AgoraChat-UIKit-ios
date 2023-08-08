@@ -159,6 +159,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)messageLongPressExtShowReaction:(AgoraChatMessage *)message;
 
+- (nullable NSString *)chatBarQuoteMessageShowContent:(AgoraChatMessage *)message;
+- (NSAttributedString *)messageCellQuoteViewShowContent:(AgoraChatMessage *)message;
+- (BOOL)messageCellDidClickQuote:(AgoraChatMessage *)cell;
+- (BOOL)messageCellDidLongPressQuote:(AgoraChatMessage *)cell;
+
+- (void)messageListEntryEditMode;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -47,6 +47,10 @@ static EMAudioPlayerUtil *playerUtil = nil;
 
 #pragma mark - AVAudioPlayerDelegate
 
+- (BOOL)isPlaying {
+    return _player.isPlaying;
+}
+
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player
                        successfully:(BOOL)flag
 {
