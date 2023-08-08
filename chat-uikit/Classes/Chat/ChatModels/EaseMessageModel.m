@@ -12,7 +12,7 @@
 #import "EaseMessageCell+Category.h"
 #import <AgoraChat/NSObject+Coding.h>
 #import "EaseUserUtils.h"
-#import <SDWebImage/SDWebImageManager.h>
+#import "EaseWebImageManager.h"
 
 @interface EaseMessageModel ()
 
@@ -116,13 +116,14 @@
                             if (!img) {
                                 if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
                                     NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath];
-                                    [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                    [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
                                         if (error == nil && image != nil) {
                                             img = image;
                                         } else {
                                             img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                         }
                                         weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:true image:img];
+
                                     }];
                                 } else {
                                     img = [UIImage easeUIImageNamed:@"msg_img_broken"];
@@ -143,7 +144,7 @@
                             if (!img) {
                                 if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
                                     NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailRemotePath];
-                                    [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:0 progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                    [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
                                         if (error == nil && image != nil) {
                                             img = image;
                                         } else {

@@ -7,7 +7,7 @@
 
 #import "ForwardModel.h"
 #import "EaseUserUtils.h"
-#import <SDWebImage/SDWebImageManager.h>
+#import "EaseWebImageManager.h"
 #import "UIImage+EaseUI.h"
 #import "AgoraChatMessage+EaseUIExt.h"
 #import "UIViewController+HUD.h"
@@ -188,7 +188,7 @@
                                 NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)forwardMessage.body).thumbnailRemotePath];
                                 [container hideHud];
                                 [container showHudInView:container.view hint:@"loading thumbnail"];
-                                [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:0 progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
                                     [container hideHud];
                                     if (error == nil && image != nil) {
                                         img = image;
@@ -222,7 +222,7 @@
                                 NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)forwardMessage.body).thumbnailRemotePath];
                                 [container hideHud];
                                 [container showHudInView:container.view hint:@"loading thumbnail"];
-                                [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:0 progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
                                     [container hideHud];
                                     if (error == nil && image != nil) {
                                         img = image;
