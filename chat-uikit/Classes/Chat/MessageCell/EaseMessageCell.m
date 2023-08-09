@@ -607,18 +607,10 @@
         }];
     }
     [self.quoteView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        if (quoteInfo) {
-            make.height.Ease_equalTo(self.model.quoteHeight);
-        } else {
-            make.height.Ease_equalTo(10);
-        }
+        make.height.Ease_equalTo(self.model.quoteHeight);
     }];
     [self.bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        if (quoteInfo) {
-            make.top.equalTo(self.quoteView.ease_bottom).offset(replySpace);
-        } else {
-            make.top.equalTo(self.nameLabel.ease_bottom).offset(componentSpacing);
-        }
+        make.top.equalTo(self.nameLabel.ease_bottom).offset(quoteInfo != nil ? self.model.quoteHeight+replySpace: componentSpacing);
         if (self.reactionView.reactionList.count > 0) {
             make.bottom.equalTo(self.contentView).offset(-componentSpacing-24-(IsStringEmpty(self.editState.text) ? 0:10));
         } else {
@@ -638,7 +630,7 @@
         if (self.reactionView.reactionList.count > 0) {
             make.bottom.equalTo(self.contentView.ease_bottom).offset(-8);
         } else {
-            make.bottom.equalTo(self.contentView.ease_bottom).offset(5);
+            make.bottom.equalTo(self.contentView.ease_bottom).offset(-5);
         }
         if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0) {
             make.height.Ease_equalTo(0);
