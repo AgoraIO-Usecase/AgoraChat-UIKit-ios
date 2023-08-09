@@ -634,7 +634,11 @@
                     make.top.equalTo(self.reactionView.ease_bottom).offset(2);
                 }
             } else {
-                make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+                if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0) {
+                    make.top.equalTo(self.bubbleView.ease_bottom).offset(22);
+                } else {
+                    make.top.equalTo(self.bubbleView.ease_bottom).offset(2);
+                }
             }
         }];
         
