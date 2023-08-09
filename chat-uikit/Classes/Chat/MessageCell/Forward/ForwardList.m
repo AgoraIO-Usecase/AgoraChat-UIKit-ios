@@ -11,8 +11,6 @@
 
 @interface ForwardList ()<UITableViewDelegate,UITableViewDataSource>
 
-@property (nonatomic, strong) NSMutableArray <ForwardModel *>*forwards;
-
 @end
 
 @implementation ForwardList
@@ -24,9 +22,13 @@
         self.tableFooterView = [UIView new];
         self.separatorStyle = UITableViewCellSeparatorStyleNone;
         self.forwards = [NSMutableArray arrayWithArray:models];
-            
     }
     return self;
+}
+
+- (void)setForwards:(NSMutableArray<ForwardModel *> *)forwards {
+    _forwards = forwards;
+    [self reloadData];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -38,7 +40,8 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return self.forwards[indexPath.row].contentHeight;
+    ForwardModel *model = self.forwards[indexPath.row];
+    return model.contentHeight;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -47,6 +50,16 @@
         cell = [[ForwardMessageCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ForwardMessageCell"];
     }
     cell.model = self.forwards[indexPath.row];
+    __weak typeof(self) weakSelf = self;
+    cell.model.reloadHeight = ^(NSString * _Nonnull messageId) {
+        for (int i = 0; i < self.forwards.count; i++) {
+            ForwardModel *model = self.forwards[i];
+            if ([messageId isEqualToString:model.message.messageId]) {
+                [weakSelf reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:i inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+                break;
+            }
+        }
+    };
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }

@@ -204,7 +204,7 @@
             if (_viewModel.displayReceiverName) {
                 make.top.equalTo(self.nameLabel.ease_bottom).offset(componentSpacing / 2);
             } else {
-                make.top.equalTo(self.contentView).offset(componentSpacing/2);
+                make.top.equalTo(self.contentView).offset(componentSpacing / 2);
             }
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
@@ -271,7 +271,7 @@
         _nameLabel.textAlignment = NSTextAlignmentRight;
         if (_viewModel.displaySentName) {
             [_nameLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-                make.top.equalTo(self.contentView).offset(componentSpacing);
+                make.top.equalTo(self.contentView).offset(componentSpacing/2);
                 if (_viewModel.displaySentAvatar) {
                     make.right.equalTo(self.avatarView.ease_left).offset(-2 * componentSpacing);
                 } else {
@@ -552,6 +552,7 @@
     }
     self.checkBox.image = [UIImage easeUIImageNamed:imageName];
     [self updateLayout];
+    self.editState.hidden = [_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]]&&((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0;
 }
 
 - (void)updateLayout
@@ -569,6 +570,11 @@
         [_nameLabel Ease_updateConstraints:^(EaseConstraintMaker *make) {
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(2 * componentSpacing);
+//                if (quoteInfo) {
+//                    make.bottom.equalTo(self.quoteView.ease_top).offset(-4);
+//                } else {
+//                    make.bottom.equalTo(self.bubbleView.ease_top).offset(-4);
+//                }
             } else {
                 if (!self.editMode) {
                     make.left.equalTo(self.contentView).offset(2 * componentSpacing);
@@ -604,19 +610,28 @@
         if (quoteInfo) {
             make.height.Ease_equalTo(self.model.quoteHeight);
         } else {
-            make.height.Ease_equalTo(0);
+            make.height.Ease_equalTo(10);
         }
     }];
     [self.bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        make.top.equalTo(self.quoteView.ease_bottom).offset(replySpace);
+        if (quoteInfo) {
+            make.top.equalTo(self.quoteView.ease_bottom).offset(replySpace);
+        } else {
+            make.top.equalTo(self.nameLabel.ease_bottom).offset(componentSpacing);
+        }
         if (self.reactionView.reactionList.count > 0) {
             make.bottom.equalTo(self.contentView).offset(-componentSpacing-24-(IsStringEmpty(self.editState.text) ? 0:10));
         } else {
             make.bottom.equalTo(self.contentView).offset(-componentSpacing*2-(IsStringEmpty(self.editState.text) ? 0:10));
         }
     }];
-    [self.reactionView Ease_updateConstraints:^(EaseConstraintMaker *make) { make.top.equalTo(self.bubbleView.ease_bottom).offset(-componentSpacing);
+    [self.reactionView Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.height.Ease_equalTo(self.reactionView.reactionList.count >= 0 ? 28:0);
+        if (self.reactionView.reactionList.count > 0) {
+            make.top.equalTo(self.bubbleView.ease_bottom).offset(-componentSpacing);
+        } else {
+            make.top.equalTo(self.bubbleView.ease_bottom);
+        }
     }];
     
     [self.editState Ease_updateConstraints:^(EaseConstraintMaker *make) {
@@ -624,6 +639,11 @@
             make.bottom.equalTo(self.contentView.ease_bottom).offset(-8);
         } else {
             make.bottom.equalTo(self.contentView.ease_bottom).offset(5);
+        }
+        if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0) {
+            make.height.Ease_equalTo(0);
+        } else {
+            make.height.Ease_equalTo(20);
         }
     }];
         

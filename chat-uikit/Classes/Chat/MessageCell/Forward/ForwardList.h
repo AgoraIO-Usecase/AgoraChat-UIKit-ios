@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy) void (^selectBlock)(ForwardModel *model,ForwardMessageCell *cell);
 
+@property (nonatomic, strong) NSMutableArray <ForwardModel *>*forwards;
+
 /// Description Forward message list init method.When you wanna custom UI,can conform `self`'s delegate&dataSource.
 /// - Parameters:
 ///   - frame: Axis position
