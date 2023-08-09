@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign, readonly) CGFloat contentHeight;
 
+@property (nonatomic) void(^reloadHeight)(NSString *messageId);
+
 - (instancetype)initWithAgoraChatMessage:(AgoraChatMessage *)forwardMessage;
 
 @end

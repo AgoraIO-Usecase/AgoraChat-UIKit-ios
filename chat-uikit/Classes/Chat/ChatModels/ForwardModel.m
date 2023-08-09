@@ -196,7 +196,12 @@
                                         img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                     }
                                     weakSelf.contentAttributeText = [weakSelf appendImage:result image:img];
-                                    self.contentHeight;
+                                    weakSelf.contentHeight = [self getImageSize:img].height+35;
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        if (weakSelf.reloadHeight) {
+                                            weakSelf.reloadHeight(forwardMessage.messageId);
+                                        }
+                                    });
                                 }];
                             } else {
                                 img = [UIImage easeUIImageNamed:@"msg_img_broken"];
@@ -218,7 +223,7 @@
                             img = [UIImage imageWithContentsOfFile:((AgoraChatVideoMessageBody *)forwardMessage.body).thumbnailLocalPath];
                         }
                         if (!img) {
-                            if (((AgoraChatImageMessageBody *)forwardMessage.body).thumbnailRemotePath.length) {
+                            if (((AgoraChatVideoMessageBody *)forwardMessage.body).thumbnailRemotePath.length) {
                                 NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)forwardMessage.body).thumbnailRemotePath];
                                 [container hideHud];
                                 [container showHudInView:container.view hint:@"loading thumbnail"];
@@ -230,7 +235,10 @@
                                         img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                     }
                                     weakSelf.contentAttributeText = [weakSelf appendImage:result image:[weakSelf combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
-                                    weakSelf.contentHeight;
+                                    weakSelf.contentHeight = [self getImageSize:img].height+35;
+                                    if (weakSelf.reloadHeight) {
+                                        weakSelf.reloadHeight(forwardMessage.messageId);
+                                    }
                                 }];
                             }  else {
                                 img = [UIImage easeUIImageNamed:@"msg_img_broken"];
@@ -356,9 +364,11 @@
 }
 
 - (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
-    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
-    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    [coverImage drawInRect:CGRectMake(image.size.width/2.0-45, image.size.height/2.0-45, 90, 90)];
+    CGSize size = [self getImageSize:image];
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    CGFloat width = size.width/4.0;
+    [coverImage drawInRect:CGRectMake(size.width/2.0-(width/2.0), image.size.height/2.0-(width/2.0), width, width)];
     UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return resultingImage;
