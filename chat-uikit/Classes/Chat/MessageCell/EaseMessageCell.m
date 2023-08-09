@@ -237,11 +237,11 @@
                 make.width.lessThanOrEqualTo(@(self.bubbleView.maxBubbleWidth));
             }
             
-            if (self.reactionView.reactionList.count > 0) {
-                make.bottom.equalTo(self.contentView).offset(-componentSpacing-18);
-            } else {
-                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
-            }
+//            if (self.reactionView.reactionList.count > 0) {
+//                make.bottom.equalTo(self.contentView).offset(-componentSpacing-18);
+//            } else {
+//                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
+//            }
         }];
         [_reactionView Ease_makeConstraints:^(EaseConstraintMaker *make) {
             make.left.equalTo(self.bubbleView);
@@ -308,11 +308,11 @@
             } else {
                 make.width.lessThanOrEqualTo(@(self.bubbleView.maxBubbleWidth));
             }
-            if (self.reactionView.reactionList.count > 0) {
-                make.bottom.equalTo(self.contentView).offset(-componentSpacing-18);
-            } else {
-                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
-            }
+//            if (self.reactionView.reactionList.count > 0) {
+//                make.bottom.equalTo(self.contentView).offset(-componentSpacing-18);
+//            } else {
+//                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
+//            }
         }];
         
         [_reactionView Ease_makeConstraints:^(EaseConstraintMaker *make) {
@@ -552,7 +552,7 @@
     }
     self.checkBox.image = [UIImage easeUIImageNamed:imageName];
     [self updateLayout];
-    self.editState.hidden = [_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]]&&((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0;
+//    self.editState.hidden = [_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]]&&((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0;
 }
 
 - (void)updateLayout
@@ -611,11 +611,11 @@
     }];
     [self.bubbleView Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self.nameLabel.ease_bottom).offset(quoteInfo != nil ? self.model.quoteHeight+replySpace: componentSpacing);
-        if (self.reactionView.reactionList.count > 0) {
-            make.bottom.equalTo(self.contentView).offset(-componentSpacing-24-(IsStringEmpty(self.editState.text) ? 0:10));
-        } else {
-            make.bottom.equalTo(self.contentView).offset(-componentSpacing*2-(IsStringEmpty(self.editState.text) ? 0:10));
-        }
+//        if (self.reactionView.reactionList.count > 0) {
+//            make.bottom.equalTo(self.contentView).offset(-componentSpacing-24-(IsStringEmpty(self.editState.text) ? 0:10));
+//        } else {
+//            make.bottom.equalTo(self.contentView).offset(-componentSpacing*2-(IsStringEmpty(self.editState.text) ? 0:10));
+//        }
     }];
     [self.reactionView Ease_updateConstraints:^(EaseConstraintMaker *make) {
         make.height.Ease_equalTo(self.reactionView.reactionList.count >= 0 ? 28:0);
@@ -627,17 +627,16 @@
     }];
     
     [self.editState Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        if (self.reactionView.reactionList.count > 0) {
-            make.bottom.equalTo(self.contentView.ease_bottom).offset(-8);
-        } else {
-            make.bottom.equalTo(self.contentView.ease_bottom).offset(-5);
-        }
-        if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0) {
-            make.height.Ease_equalTo(0);
-        } else {
-            make.height.Ease_equalTo(20);
-        }
-    }];
+            if (self.reactionView.reactionList.count > 0) {
+                if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0) {
+                    make.top.equalTo(self.reactionView.ease_bottom).offset(22);
+                } else {
+                    make.top.equalTo(self.reactionView.ease_bottom).offset(2);
+                }
+            } else {
+                make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+            }
+        }];
         
 }
 
