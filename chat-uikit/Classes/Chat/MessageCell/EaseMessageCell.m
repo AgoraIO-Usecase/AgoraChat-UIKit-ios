@@ -552,6 +552,7 @@
     }
     self.checkBox.image = [UIImage easeUIImageNamed:imageName];
     [self updateLayout];
+    self.editState.hidden = [_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]]&&((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0;
 }
 
 - (void)updateLayout
@@ -635,11 +636,14 @@
     
     [self.editState Ease_updateConstraints:^(EaseConstraintMaker *make) {
         if (self.reactionView.reactionList.count > 0) {
-            make.height.Ease_equalTo(15);
             make.bottom.equalTo(self.contentView.ease_bottom).offset(-8);
         } else {
-            make.height.Ease_equalTo(0);
             make.bottom.equalTo(self.contentView.ease_bottom).offset(5);
+        }
+        if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0) {
+            make.height.Ease_equalTo(0);
+        } else {
+            make.height.Ease_equalTo(20);
         }
     }];
         
