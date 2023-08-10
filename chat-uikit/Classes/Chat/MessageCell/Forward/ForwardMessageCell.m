@@ -96,36 +96,41 @@
         }
     }
     self.dateLabel.text = model.date;
-    if (model.message.body.type == AgoraChatMessageBodyTypeFile || model.message.body.type == AgoraChatMessageBodyTypeVoice || model.message.body.type == AgoraChatMessageBodyTypeCombine) {
+    [self updateLayout];
+}
+
+- (void)updateLayout {
+    if (self.model.message.body.type == AgoraChatMessageBodyTypeFile || self.model.message.body.type == AgoraChatMessageBodyTypeVoice || self.model.message.body.type == AgoraChatMessageBodyTypeCombine) {
         self.containerView.hidden = NO;
         
         UIImage *image;
         NSString *text;
-        if (model.message.body.type == AgoraChatMessageBodyTypeFile) {
+        if (self.model.message.body.type == AgoraChatMessageBodyTypeFile) {
             image = [UIImage easeUIImageNamed:@"forward_file"];
-            text = ((AgoraChatFileMessageBody *)model.message.body).displayName;
+            text = ((AgoraChatFileMessageBody *)self.model.message.body).displayName;
         }
-        if (model.message.body.type == AgoraChatMessageBodyTypeVoice) {
+        if (self.model.message.body.type == AgoraChatMessageBodyTypeVoice) {
             image = [UIImage easeUIImageNamed:@"msg_recv_audio"];
-            text = [NSString stringWithFormat:@"%d”",((AgoraChatVoiceMessageBody *)model.message.body).duration];
+            text = [NSString stringWithFormat:@"%d”",((AgoraChatVoiceMessageBody *)self.model.message.body).duration];
         }
-        if (model.message.body.type != AgoraChatMessageBodyTypeCombine) {
-            self.containerView.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.nameLabel.frame)+5, CGRectGetWidth(self.contentView.frame)-72, 40);
-            self.contentLabel.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.containerView.frame)+5, CGRectGetWidth(self.contentView.frame)-72, model.contentHeight-CGRectGetMaxY(self.containerView.frame)-5);
+        if (self.model.message.body.type != AgoraChatMessageBodyTypeCombine) {
+            self.containerView.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.nameLabel.frame)+5, EMScreenWidth-72, 40);
+            self.contentLabel.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.containerView.frame)+5, EMScreenWidth-72, self.model.contentHeight-CGRectGetMaxY(self.containerView.frame)-5);
             [self.containerView updateContent:text image:image];
-            self.contentLabel.attributedText = model.contentAttributeText;
+            self.contentLabel.attributedText = self.model.contentAttributeText;
         } else {
             [self.containerView stopAnimation];
-            self.containerView.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.nameLabel.frame)+5, CGRectGetWidth(self.contentView.frame)-72, model.contentHeight-15-CGRectGetMinY(self.nameLabel.frame));
+            self.containerView.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.nameLabel.frame)+5, EMScreenWidth-72, self.model.contentHeight-15-CGRectGetMinY(self.nameLabel.frame));
             self.contentLabel.frame = CGRectZero;
-            [self.containerView updateAttribute:model.contentAttributeText];
+            [self.containerView updateAttribute:self.model.contentAttributeText];
             self.contentLabel.attributedText = nil;
         }
     } else {
         [self.containerView stopAnimation];
-        self.containerView.hidden = YES;self.containerView.frame = CGRectZero;
-        self.contentLabel.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.nameLabel.frame)+5, CGRectGetWidth(self.contentView.frame)-72, model.contentHeight-CGRectGetMaxY(self.nameLabel.frame)-5);
-        self.contentLabel.attributedText = model.contentAttributeText;
+        self.containerView.hidden = YES;
+        self.containerView.frame = CGRectZero;
+        self.contentLabel.frame = CGRectMake(CGRectGetMaxX(self.avatarView.frame)+12, CGRectGetMaxY(self.nameLabel.frame)+5, EMScreenWidth-72, self.model.contentHeight-CGRectGetMaxY(self.nameLabel.frame)-5);
+        self.contentLabel.attributedText = self.model.contentAttributeText;
     }
 }
 

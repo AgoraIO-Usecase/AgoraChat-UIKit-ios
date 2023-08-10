@@ -50,8 +50,7 @@
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    self.imageView.frame = CGRectMake(8,(CGRectGetHeight(self.frame)-20)/2.0, 20, 20);
-    self.content.frame = CGRectMake(CGRectGetMaxX(self.imageView.frame)+8, CGRectGetMinY(self.imageView.frame), CGRectGetWidth(self.frame)-CGRectGetMaxX(self.imageView.frame)-16, 17);
+    
 
 }
 
@@ -60,9 +59,13 @@
     self.imageView.image = image;
     self.content.hidden = NO;
     self.imageView.hidden = NO;
+    self.imageView.frame = CGRectMake(8,(CGRectGetHeight(self.frame)-20)/2.0, 20, 20);
+    self.content.frame = CGRectMake(CGRectGetMaxX(self.imageView.frame)+8, CGRectGetMinY(self.imageView.frame), CGRectGetWidth(self.frame)-CGRectGetMaxX(self.imageView.frame)-16, 17);
 }
 
 - (void)updateAttribute:(NSAttributedString *)string {
+    self.imageView.frame = CGRectZero;
+    self.content.frame = CGRectZero;
     self.imageView.image = nil;
     self.content.text = nil;
     self.content.hidden = YES;

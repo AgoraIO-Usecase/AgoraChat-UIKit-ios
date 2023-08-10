@@ -9,6 +9,7 @@
 #import "EaseUserProfile.h"
 #import "EaseMessageModel.h"
 #import "EaseExtendMenuModel.h"
+#import "EditToolBar.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -170,7 +171,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)messageCellDidClickQuote:(AgoraChatMessage *)cell;
 - (BOOL)messageCellDidLongPressQuote:(AgoraChatMessage *)cell;
 
-- (void)messageListEntryEditMode;
+- (BOOL)messageListEntryEditModeWhetherShowBottom;
+
+- (void)messageEditAction;
+
+- (void)messageListEntryEditModeThenOperation:(EditBarOperationType)type;
 
 @end
 

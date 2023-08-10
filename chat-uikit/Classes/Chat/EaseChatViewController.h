@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) EaseInputMenu *inputBar;
 @property (nonatomic) BOOL editMode;
 @property (nonatomic) NSMutableArray <id<EaseUserProfile>>*profiles;
+@property (nonatomic) EditToolBar *toolBar;
 
 + (EaseChatViewController *)initWithConversationId:(NSString *)aConversationId
                                   conversationType:(AgoraChatConversationType)aType

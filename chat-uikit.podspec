@@ -42,6 +42,7 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/Chat/ChatModels/EaseMessageModel.h',
         'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/EaseEmojiHelper.h',
         'chat-uikit/Classes/Chat/ChatModels/EaseChatViewModel.h',
+        'chat-uikit/Classes/Common/View/*',
         'chat-uikit/Classes/Chat/MessageCell/EaseMessageCell.h',
         'chat-uikit/Classes/Chat/MessageCell/EaseMessageCell+Category.h',
         'chat-uikit/Classes/Chat/MessageCell/BubbleView/EaseChatMessageBubbleView.h',

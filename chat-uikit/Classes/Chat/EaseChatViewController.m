@@ -41,6 +41,9 @@
 #import "ChatUIOptions.h"
 #import "AgoraChatMessage+EaseUIExt.h"
 #import "ForwardMessagesViewController.h"
+#import "MessageEditor.h"
+#import "EditNavigationBar.h"
+#import "EditToolBar.h"
 
 #define chatThreadPageSize 10
 
@@ -62,6 +65,7 @@
 @property (nonatomic, strong) NSMutableDictionary *messageIdsMap;
 @property (nonatomic) NSString *parentMessageId;
 @property (nonatomic) AgoraChatCursorResult *cursor;
+@property (nonatomic) MessageEditor *editor;
 @end
 
 @implementation EaseChatViewController
@@ -764,6 +768,13 @@
         }];
     }];
     EaseExtendMenuModel *selectExtModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"multiple"] funcDesc:@"Select" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(messageListEntryEditModeWhetherShowBottom)]) {
+            weakself.editMode = YES;
+            BOOL show = [self.delegate messageListEntryEditModeWhetherShowBottom];
+            if (!show) {
+                return;
+            }
+        }
         if ([aCell isKindOfClass:[EaseMessageCell class]]) {
             ((EaseMessageCell*)aCell).model.selected = YES;
         }
@@ -788,9 +799,7 @@
     } else {
         _currentLongPressCell = (EaseMessageCell*)aCell;
         long long currentTimestamp = [[NSDate new] timeIntervalSince1970] * 1000;
-        if (_currentLongPressCell.model.message.direction == AgoraChatMessageDirectionSend && (currentTimestamp - _currentLongPressCell.model.message.timestamp <= 120000)) {
-            [extMenuArray addObject:recallExtModel];
-        }
+        
         if (_currentLongPressCell.model.type == AgoraChatMessageTypeText || _currentLongPressCell.model.type == AgoraChatMessageTypeImage || _currentLongPressCell.model.type == AgoraChatMessageTypeVideo || _currentLongPressCell.model.type == AgoraChatMessageTypeFile || _currentLongPressCell.model.type == AgoraChatMessageTypeVoice || _currentLongPressCell.model.type == AgoraChatMessageTypeCombine) {
             if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isChatThread && _currentLongPressCell.model.message.chatThread == nil) {
                 EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Create Thread" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
@@ -804,14 +813,30 @@
                 }];
                 [extMenuArray addObject:creatThread];
             }
+            if (_currentLongPressCell.model.message.direction == AgoraChatMessageDirectionSend && (currentTimestamp - _currentLongPressCell.model.message.timestamp <= 120000)) {
+                [extMenuArray addObject:recallExtModel];
+            }
         }
     }
     if (_currentLongPressCell && _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
         [extMenuArray addObject:copyExtModel];
     }
+    
+    
     [extMenuArray addObject:quoteModel];
-    [extMenuArray addObject:deleteExtModel];
+    EaseMessageModel *model = _currentLongPressCell.model;
+    if (_currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
+        EaseExtendMenuModel *editItem = [[EaseExtendMenuModel alloc]initWithData:[UIImage imageNamed:@"edit"] funcDesc:@"Edit" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+            if ([weakself.delegate respondsToSelector:@selector(messageEditAction)]) {
+                [weakself.delegate messageEditAction];
+                return;
+            }
+            [weakself modifyAction:model];
+        }];
+        [extMenuArray addObject:editItem];
+    }
     [extMenuArray addObject:selectExtModel];
+    [extMenuArray addObject:deleteExtModel];
     if (isCustomCell) {
         if (self.delegate && [self.delegate respondsToSelector:@selector(customCellLongPressExtMenuItemArray:customCell:)]) {
             //自定义cell长按
@@ -844,6 +869,69 @@
     [EMBottomMoreFunctionView showMenuItems:extMenuArray showReaction:showReaction delegate:self ligheViews:nil animation:YES userInfo:userInfo];
 }
 
+- (void)modifyAction:(EaseMessageModel *)model {
+    __weak typeof(self) weakself = self;
+    self.editor = [[MessageEditor alloc] initWithFrame:self.view.window.frame message:model.message doneClosure:^(NSString * _Nonnull content) {
+        [weakself modifyMessage:content model:model];
+    }];
+    [self.view.window addSubview:self.editor];
+}
+
+- (void)modifyMessage:(NSString *)content model:(EaseMessageModel *)model {
+    AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:content];
+    [self showHudInView:self.view hint:@"Modifying message..."];
+    __weak typeof(self) weakself = self;
+    [AgoraChatClient.sharedClient.chatManager modifyMessage:model.message.messageId body:body completion:^(AgoraChatError * _Nullable error, AgoraChatMessage * _Nullable message) {
+        [weakself hideHud];
+        if (!error) {
+            [weakself.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if ([obj isKindOfClass:[EaseMessageModel class]]) {
+                    EaseMessageModel *model = (EaseMessageModel *)obj;
+                    if ( model.message &&[model.message.messageId isEqualToString:message.messageId]) {
+                        model.message = message;
+                        UITableViewCell *cell = [weakself.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:0]];
+                        if ([cell isKindOfClass:[EaseMessageCell class]]) {
+                            EaseMessageCell *messageCell = (EaseMessageCell*)cell;
+                            messageCell.model = model;
+                            if ([weakself.tableView.visibleCells containsObject:cell]) {
+                                [weakself.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:idx inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+                            }
+                            *stop = YES;
+                        }
+                    }
+                }
+            }];
+        } else {
+            [weakself showHint:error.errorDescription];
+        }
+    }];
+}
+
+//- (EditNavigationBar *)editNavigation {
+//    if (!_editNavigation) {
+//        _editNavigation = [[EditNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, EMNavgationHeight) cancel:^{
+//            
+//        }];
+//        _editNavigation.backgroundColor = [UIColor whiteColor];
+//    }
+//    return _editNavigation;
+//
+//}
+
+- (EditToolBar *)toolBar {
+    if (!_toolBar) {
+        __weak typeof(self) weakself = self;
+        _toolBar = [[EditToolBar alloc] initWithFrame:CGRectMake(0, EMScreenHeight - 54 - EaseVIEWBOTTOMMARGIN, EMScreenWidth, EaseVIEWBOTTOMMARGIN+54) operationClosure:^(enum EditBarOperationType type) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(messageListEntryEditModeThenOperation:)]) {
+                [self.delegate messageListEntryEditModeThenOperation:type];
+            }
+        }];
+        _toolBar.backgroundColor = [UIColor whiteColor];
+    }
+    return _toolBar;
+}
+
+
 - (void)setEditMode:(BOOL)editMode {
     _editMode = editMode;
     [self.tableView reloadData];
@@ -853,9 +941,21 @@
 - (void)editModeAction {
     self.editMode = YES;
     [self.tableView reloadData];
-    if (self.delegate && [self.delegate respondsToSelector:@selector(messageListEntryEditMode)]) {
-        [self.delegate messageListEntryEditMode];
+}
+
+- (UIWindow *)keyWindow {
+    if (@available(iOS 13.0, *)) {
+        for (UIWindowScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
+            if (scene.activationState == UISceneActivationStateForegroundActive) {
+                if (scene.windows.firstObject.window.isKeyWindow) {
+                    return scene.windows.firstObject.window;
+                }
+            }
+        }
+    } else {
+        return [UIApplication sharedApplication].keyWindow;
     }
+    return nil;
 }
 
 

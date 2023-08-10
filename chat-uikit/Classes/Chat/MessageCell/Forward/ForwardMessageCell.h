@@ -31,6 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)stopVoiceAnimation;
 
+- (void)updateLayout;
+
 @end
 
 NS_ASSUME_NONNULL_END
