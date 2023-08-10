@@ -1144,6 +1144,26 @@
     return self.view.frame;
 }
 
+- (void)onMessageContentChanged:(AgoraChatMessage *)message operatorId:(NSString *)operatorId operationTime:(NSUInteger)operationTime {
+    [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+       if ([obj isKindOfClass:[EaseMessageModel class]]) {
+           EaseMessageModel *model = (EaseMessageModel *)obj;
+           if ([model.message.messageId isEqualToString:message.messageId]) {
+               model.message = message;
+               UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:0]];
+               if ([cell isKindOfClass:[EaseMessageCell class]]) {
+                   EaseMessageCell *messageCell = (EaseMessageCell*)cell;
+                   messageCell.model = model;
+                   if ([self.tableView.visibleCells containsObject:cell]) {
+                       [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:idx inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+                   }
+                   *stop = YES;
+               }
+           }
+       }
+    }];
+}
+
 #pragma mark - EMChatManagerDelegate
 
 

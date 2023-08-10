@@ -175,7 +175,7 @@
     if (self.direction == AgoraChatMessageDirectionReceive) {
         if (_viewModel.displayReceivedAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
+//                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
                 if (self.editMode) {
                     make.left.equalTo(self.checkBox.ease_right).offset(5);
                 } else {
@@ -262,7 +262,7 @@
     } else {
         if (_viewModel.displaySentAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
+//                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
                 make.right.equalTo(self.contentView).offset(-2 * componentSpacing);
                 make.width.height.equalTo(@(avatarLonger));
             }];
