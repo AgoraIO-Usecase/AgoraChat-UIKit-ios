@@ -10,7 +10,7 @@
 @implementation AgoraChatMessage (RemindMe)
 - (BOOL)remindMe
 {
-    if(self.body.type == AgoraChatMessageBodyTypeText && self.isChatThreadMessage != YES) {
+    if(self.body.type == AgoraChatMessageBodyTypeText && self.isChatThreadMessage != YES && self.direction == AgoraChatMessageDirectionReceive) {
         AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:self.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO];
         
         if(conversation.type == AgoraChatConversationTypeGroupChat && self.isChatThreadMessage != YES) {
