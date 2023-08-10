@@ -627,20 +627,20 @@
     }];
     
     [self.editState Ease_updateConstraints:^(EaseConstraintMaker *make) {
-            if (self.reactionView.reactionList.count > 0) {
-                if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0  && _model.message.direction == AgoraChatMessageDirectionReceive) {
-                    make.top.equalTo(self.bubbleView.ease_bottom).offset(25 + 14);
-                } else {
-                    make.top.equalTo(self.bubbleView.ease_bottom).offset(5 + 14);
-                }
+        if (self.reactionView.reactionList.count > 0) {
+            if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0  && _model.message.direction == AgoraChatMessageDirectionReceive) {
+                make.top.equalTo(self.bubbleView.ease_bottom).offset(25 + 14);
             } else {
-                if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0 && _model.message.direction == AgoraChatMessageDirectionReceive) {
-                    make.top.equalTo(self.bubbleView.ease_bottom).offset(25);
-                } else {
-                    make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
-                }
+                make.top.equalTo(self.bubbleView.ease_bottom).offset(5 + 14);
             }
-        }];
+        } else {
+            if ([_model.message.body isKindOfClass:[AgoraChatTextMessageBody class]] && ((AgoraChatTextMessageBody *)_model.message.body).targetLanguages.count > 0 && _model.message.direction == AgoraChatMessageDirectionReceive) {
+                make.top.equalTo(self.bubbleView.ease_bottom).offset(25);
+            } else {
+                make.top.equalTo(self.bubbleView.ease_bottom).offset(5);
+            }
+        }
+    }];
         
 }
 
