@@ -46,7 +46,7 @@ Pod::Spec.new do |s|
         'chat-uikit/Classes/Chat/MessageCell/EaseMessageCell.h',
         'chat-uikit/Classes/Chat/MessageCell/EaseMessageCell+Category.h',
         'chat-uikit/Classes/Chat/MessageCell/BubbleView/EaseChatMessageBubbleView.h',
-        'chat-uikit/Classes/Chat/MessageCell/BubbleView/EMMsgTextBubbleView.h',
+        'chat-uikit/Classes/Chat/MessageCell/BubbleView/EMMsgThreadPreviewBubble.h',        'chat-uikit/Classes/Chat/MessageCell/BubbleView/EMMsgTextBubbleView.h',
         'chat-uikit/Classes/Chat/MessageCell/Forward/ForwardList.h',
         'chat-uikit/Classes/Chat/ChatComponents/ForwardMessagesController/ForwardMessagesViewController.h',        'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/Emoticon/EaseInputMenuEmoticonView.h',
         'chat-uikit/Classes/Chat/InputMenu/ChatEmojiUtil/EaseEmoticon.h',
