@@ -169,7 +169,7 @@
     self.checkBox.hidden = YES;
     [self.checkBox Ease_remakeConstraints:^(EaseConstraintMaker *make) {
         make.width.height.Ease_equalTo(28);
-        make.bottom.equalTo(self.contentView).offset(-8);
+        make.bottom.equalTo(self.bubbleView);
         make.left.equalTo(self.contentView).offset(5);
     }];
     if (self.direction == AgoraChatMessageDirectionReceive) {
