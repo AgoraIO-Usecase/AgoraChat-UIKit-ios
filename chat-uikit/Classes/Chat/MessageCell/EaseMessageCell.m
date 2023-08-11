@@ -176,7 +176,7 @@
         if (_viewModel.displayReceivedAvatar) {
             [_avatarView Ease_makeConstraints:^(EaseConstraintMaker *make) {
 //                make.bottom.equalTo(self.contentView).offset(-componentSpacing);
-                if (self.editMode) {
+                if (self.model.editMode) {
                     make.left.equalTo(self.checkBox.ease_right).offset(5);
                 } else {
                     make.left.equalTo(self.contentView).offset(2 * componentSpacing);
@@ -191,7 +191,7 @@
                 if (_viewModel.displayReceivedAvatar) {
                     make.left.equalTo(self.avatarView.ease_right).offset(2 * componentSpacing);
                 } else {
-                    if (!self.editMode) {
+                    if (!self.model.editMode) {
                         make.left.equalTo(self.contentView).offset(2 * componentSpacing);
                     } else {
                         make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
@@ -209,7 +209,7 @@
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
             } else {
-                if (!self.editMode) {
+                if (!self.model.editMode) {
                     make.left.equalTo(self.contentView).offset(2 * componentSpacing);
                 } else {
                     make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
@@ -224,7 +224,7 @@
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
             } else {
-                if (!self.editMode) {
+                if (!self.model.editMode) {
                     make.left.equalTo(self.contentView).offset(2 * componentSpacing);
                 } else {
                     make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
@@ -545,7 +545,7 @@
     } else {
         self.editState.text = @"";
     }
-    self.checkBox.hidden = !self.editMode;
+    self.checkBox.hidden = !model.editMode;
     NSString *imageName = @"multiple_normal";
     if (model.selected) {
         imageName = @"multiple_select";
@@ -567,7 +567,7 @@
     self.reactionView.hidden = self.reactionView.reactionList.count <= 0;
     if (self.direction == AgoraChatMessageDirectionReceive) {
         [_avatarView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-            if (self.editMode) {
+            if (self.model.editMode) {
                 make.left.equalTo(self.contentView).offset(40);
             } else {
                 make.left.equalTo(self.contentView).offset(2 * componentSpacing);
@@ -577,7 +577,7 @@
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(2 * componentSpacing);
             } else {
-                if (!self.editMode) {
+                if (!self.model.editMode) {
                     make.left.equalTo(self.contentView).offset(2 * componentSpacing);
                 } else {
                     make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
@@ -588,7 +588,7 @@
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
             } else {
-                if (!self.editMode) {
+                if (!self.model.editMode) {
                     make.left.equalTo(self.contentView).offset(2 * componentSpacing);
                 } else {
                     make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);
@@ -599,7 +599,7 @@
             if (_viewModel.displayReceivedAvatar) {
                 make.left.equalTo(self.avatarView.ease_right).offset(componentSpacing);
             } else {
-                if (!self.editMode) {
+                if (!self.model.editMode) {
                     make.left.equalTo(self.contentView).offset(2 * componentSpacing);
                 } else {
                     make.left.equalTo(self.checkBox.ease_right).offset(2 * componentSpacing);

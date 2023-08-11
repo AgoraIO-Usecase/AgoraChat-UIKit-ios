@@ -122,16 +122,23 @@
                                         } else {
                                             img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                         }
-                                        weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:true image:img];
-
+                                        weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:YES image:img];
+                                        NSLog(@"thread quote height:%f",weakSelf.quoteHeight);
+                                        weakSelf.quoteHeight;
                                     }];
                                 } else {
                                     img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                     self.quoteContent = [self appendImage:result imageQuote:true image:img];
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        self.quoteHeight;
+                                    });
                                 }
                                 
                             } else {
-                                self.quoteContent = [self appendImage:result imageQuote:true image:img];
+                                self.quoteContent = [self appendImage:result imageQuote:YES image:img];
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    self.quoteHeight;
+                                });
                             }
                         }
                             break;
@@ -150,14 +157,21 @@
                                         } else {
                                             img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                         }
-                                        weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:true image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                        weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:YES image:[weakSelf combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                        weakSelf.quoteHeight;
                                     }];
                                 }  else {
                                     img = [UIImage easeUIImageNamed:@"msg_img_broken"];
-                                    self.quoteContent = [self appendImage:result imageQuote:true image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                    self.quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        self.quoteHeight;
+                                    });
                                 }
                             } else {
-                                self.quoteContent = [self appendImage:result imageQuote:true image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                self.quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    self.quoteHeight;
+                                });
                             }
                             
                         }
@@ -227,12 +241,10 @@
 }
 
 - (CGFloat)quoteHeight {
-    if (_quoteHeight <= 0) {
-        UILabel *label = [UILabel new];
-        label.attributedText = _quoteContent;
-        _quoteHeight = ceilf([label sizeThatFits:CGSizeMake(EMScreenWidth*0.75-24, 999)].height+16);
-        label = nil;
-    }
+    UILabel *label = [UILabel new];
+    label.attributedText = self.quoteContent;
+    _quoteHeight = ceilf([label sizeThatFits:CGSizeMake(EMScreenWidth*0.75-24, 999)].height+16);
+    label = nil;
     return _quoteHeight;
 }
 

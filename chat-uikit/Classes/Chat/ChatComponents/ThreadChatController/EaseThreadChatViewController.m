@@ -85,6 +85,16 @@
     }
     if (aCell.model.message.body.type != AgoraChatMessageBodyTypeCombine) {
         //Message event policy classification
+        NSString *msgId = aCell.model.message.ext[@"msgQuote"][@"msgID"];
+        [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj isKindOfClass:[EaseMessageModel class]]) {
+                EaseMessageModel *model = (EaseMessageModel *)obj;
+                if ([model.message.messageId isEqualToString:msgId]) {
+                    aCell.quoteModel = model;
+                    *stop = YES;
+                }
+            }
+        }];
         AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell.model.type];
         eventStrategy.chatController = self;
         [eventStrategy messageCellEventOperation:aCell];

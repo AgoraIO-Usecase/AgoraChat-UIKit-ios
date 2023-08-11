@@ -496,7 +496,6 @@
         cell = [[EaseMessageCell alloc] initWithDirection:model.direction chatType:model.message.chatType messageType:model.type viewModel:_viewModel];
         cell.delegate = self;
     }
-    cell.editMode = self.editMode;
     model.isHeader = NO;
     if (cell.model.message.body.type == AgoraChatMessageTypeVoice) {
         cell.model.weakMessageCell = cell;
@@ -935,13 +934,18 @@
 
 - (void)setEditMode:(BOOL)editMode {
     _editMode = editMode;
+    for (id obj in self.dataArray) {
+        if ([obj isKindOfClass:[EaseMessageModel class]]) {
+            EaseMessageModel *model = (EaseMessageModel*)obj;
+            model.editMode = editMode;
+        }
+    }
     [self.tableView reloadData];
 }
 
 
 - (void)editModeAction {
     self.editMode = YES;
-    [self.tableView reloadData];
 }
 
 - (UIWindow *)keyWindow {
@@ -969,6 +973,7 @@
         }
         NSString *msgId = aCell.model.message.ext[@"msgQuote"][@"msgID"];
         if (msgId.length <= 0) {
+            [self showHint:@"Message does not exist"];
             return;
         }
         
@@ -976,10 +981,11 @@
 //        _searchRowAction.currentSearchPage = 1;
 //        _searchRowAction.messageId = msgId;
 //        _highlightMessageId = msgId;
-        
+        BOOL messageExist = NO;
         for (int i = (int)_dataArray.count - 1; i >= 0; i --) {
             EaseMessageModel *model = self.dataArray[i];
             if ([model isKindOfClass:EaseMessageModel.class] && [model.message.messageId isEqualToString:msgId]) {
+                messageExist = YES;
                 if (model.type == AgoraChatMessageTypeImage || model.type == AgoraChatMessageTypeVideo || model.type == AgoraChatMessageTypeFile || model.type == AgoraChatMessageTypeVoice) {
                     AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:model.type];
                     eventStrategy.chatController = self;
@@ -1006,6 +1012,9 @@
                 return;
             }
         }
+    if (messageExist == NO) {
+        [self showHint:@"Message does not exist"];
+    }
         [self dropdownRefreshTableViewWithData];
 }
 
