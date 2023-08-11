@@ -34,8 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
 
-@property (nonatomic) BOOL editMode;
-
 + (NSString *)cellIdentifierWithDirection:(AgoraChatMessageDirection)aDirection
                                      type:(AgoraChatMessageType)aType;
 

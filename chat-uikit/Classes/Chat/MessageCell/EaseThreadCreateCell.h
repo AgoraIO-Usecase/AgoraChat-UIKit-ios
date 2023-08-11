@@ -32,6 +32,8 @@ typedef NS_ENUM(NSUInteger, EMThreadHeaderType) {
 
 @property (nonatomic, strong) EaseMessageModel *model;
 
+@property (nonatomic, strong) EaseMessageModel *quoteModel;
+
 + (NSString *)cellIdentifierType:(AgoraChatMessageType)aType;
 
 - (instancetype)initWithMessageType:(AgoraChatMessageType)aMessageType
