@@ -163,13 +163,15 @@
             if ([obj isKindOfClass:[EaseMessageModel class]]) {
                 EaseMessageModel *model = (EaseMessageModel *)obj;
                 if ([model.message.messageId isEqualToString:message.messageId]) {
-                    model.message = message;
+                    model = [[EaseMessageModel alloc] initWithAgoraChatMessage:message];
+                    [self.dataArray replaceObjectAtIndex:[self.dataArray indexOfObject:obj] withObject:model];
+                    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:[self.dataArray indexOfObject:obj] inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
                     break;
                 }
             }
         }
     }
-    [self refreshTableView:YES];
+//    [self refreshTableView:YES];
 }
 
 @end
