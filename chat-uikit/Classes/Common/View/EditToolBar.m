@@ -57,6 +57,9 @@
     if (self.operationClosure) {
         self.operationClosure(sender.tag-10);
     }
+}
+
+- (void)dismiss {
     [self removeFromSuperview];
 }
 

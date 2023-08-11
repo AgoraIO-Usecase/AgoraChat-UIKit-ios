@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)hiddenWithOperation:(EditBarOperationType)type;
 
+- (void)dismiss;
+
 @end
 
 NS_ASSUME_NONNULL_END

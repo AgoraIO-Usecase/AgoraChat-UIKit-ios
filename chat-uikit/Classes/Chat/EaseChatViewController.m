@@ -879,6 +879,7 @@
 
 - (void)modifyMessage:(NSString *)content model:(EaseMessageModel *)model {
     AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:content];
+    body.targetLanguages = ((AgoraChatTextMessageBody *)model.message.body).targetLanguages;
     [self showHudInView:self.view hint:@"Modifying message..."];
     __weak typeof(self) weakself = self;
     [AgoraChatClient.sharedClient.chatManager modifyMessage:model.message.messageId body:body completion:^(AgoraChatError * _Nullable error, AgoraChatMessage * _Nullable message) {
