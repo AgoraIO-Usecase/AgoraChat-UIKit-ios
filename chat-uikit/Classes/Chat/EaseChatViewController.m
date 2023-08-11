@@ -799,7 +799,7 @@
         _currentLongPressCell = (EaseMessageCell*)aCell;
         long long currentTimestamp = [[NSDate new] timeIntervalSince1970] * 1000;
         
-        if (_currentLongPressCell.model.type == AgoraChatMessageTypeText || _currentLongPressCell.model.type == AgoraChatMessageTypeImage || _currentLongPressCell.model.type == AgoraChatMessageTypeVideo || _currentLongPressCell.model.type == AgoraChatMessageTypeFile || _currentLongPressCell.model.type == AgoraChatMessageTypeVoice || _currentLongPressCell.model.type == AgoraChatMessageTypeCombine) {
+        if (_currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText ||  _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeImage || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeVideo || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeFile || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeVoice || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeCombine || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeLocation) {
             if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isChatThread && _currentLongPressCell.model.message.chatThread == nil) {
                 EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Create Thread" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
                     if ([aCell isKindOfClass:[EaseMessageCell class]]) {
