@@ -461,6 +461,7 @@
     switch (aType) {
         case AgoraChatMessageTypeText:
         case AgoraChatMessageTypeExtCall:
+        case AgoraChatMessageTypeExtURLPreview:
             bubbleView = [[EMMsgTextBubbleView alloc] initWithDirection:self.direction type:aType viewModel:_viewModel];
             break;
         case AgoraChatMessageTypeImage:
