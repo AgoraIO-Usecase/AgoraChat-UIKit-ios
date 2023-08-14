@@ -1564,6 +1564,7 @@
                 }
             }
         }
+        model.editMode = self.editMode;
         [formated addObject:model];
     }
     return formated;

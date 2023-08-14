@@ -123,7 +123,6 @@
                                             img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                         }
                                         weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:YES image:img];
-                                        NSLog(@"thread quote height:%f",weakSelf.quoteHeight);
                                         weakSelf.quoteHeight;
                                     }];
                                 } else {
