@@ -11,6 +11,7 @@
 #import "UIImage+EaseUI.h"
 #import "AgoraChatMessage+EaseUIExt.h"
 #import "UIViewController+HUD.h"
+#import "EaseEmojiHelper.h"
 
 #define kEMMsgImageDefaultSize 120
 #define kEMMsgImageMinWidth 120
@@ -50,6 +51,7 @@
             AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;
             NSString *msgSender = quoteInfo[@"msgSender"];
             NSString *msgPreview = quoteInfo[@"msgPreview"];
+            msgPreview = [EaseEmojiHelper convertEmoji:msgPreview];
             AgoraChatMessage *quoteMessage = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:quoteMsgId];
             id<EaseUserProfile> userInfo = [EaseUserUtils.shared getUserInfo:msgSender moduleType:quoteMessage.chatType == AgoraChatTypeChat ? EaseUserModuleTypeChat : EaseUserModuleTypeGroupChat];
             NSString *showName = userInfo.showName.length > 0 ? userInfo.showName : msgSender;
@@ -172,6 +174,8 @@
                     {
                         self.contentAttributeText = result;
                         NSString *text = IsStringEmpty(((AgoraChatTextMessageBody *)forwardMessage.body).text) ? @"":((AgoraChatTextMessageBody *)forwardMessage.body).text;
+                        
+                        text = [EaseEmojiHelper convertEmoji:text];
                         self.contentAttributeText = [self appendQuoteContent:text];
                         
                     }
