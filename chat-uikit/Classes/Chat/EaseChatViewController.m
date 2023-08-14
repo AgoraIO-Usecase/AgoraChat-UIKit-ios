@@ -892,7 +892,7 @@
                         UITableViewCell *cell = [weakself.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:0]];
                         if ([cell isKindOfClass:[EaseMessageCell class]]) {
                             EaseMessageCell *messageCell = (EaseMessageCell*)cell;
-                            messageCell.model = model;
+                            [weakself.dataArray replaceObjectAtIndex:idx withObject:[[EaseMessageModel alloc] initWithAgoraChatMessage:model.message]];
                             if ([weakself.tableView.visibleCells containsObject:cell]) {
                                 [weakself.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:idx inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
                             }
@@ -1155,6 +1155,7 @@
 }
 
 - (void)onMessageContentChanged:(AgoraChatMessage *)message operatorId:(NSString *)operatorId operationTime:(NSUInteger)operationTime {
+    __weak typeof(self) weakSelf = self;
     [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
        if ([obj isKindOfClass:[EaseMessageModel class]]) {
            EaseMessageModel *model = (EaseMessageModel *)obj;
@@ -1163,7 +1164,8 @@
                UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:0]];
                if ([cell isKindOfClass:[EaseMessageCell class]]) {
                    EaseMessageCell *messageCell = (EaseMessageCell*)cell;
-                   messageCell.model = model;
+                   EaseMessageModel *editModel = [[EaseMessageModel alloc] initWithAgoraChatMessage:model.message];
+                   [weakSelf.dataArray replaceObjectAtIndex:idx withObject:editModel];
                    if ([self.tableView.visibleCells containsObject:cell]) {
                        [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:idx inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
                    }
