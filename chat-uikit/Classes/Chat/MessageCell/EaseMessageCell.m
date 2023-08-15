@@ -84,7 +84,8 @@
         identifier = @"EMMsgCellDirectionRecv";
     }
     
-    if (aType == AgoraChatMessageTypeText || aType == AgoraChatMessageTypeExtCall) {
+    if (aType == AgoraChatMessageTypeText || aType == AgoraChatMessageTypeExtCall ||
+        aType ==  AgoraChatMessageTypeExtURLPreview) {
         identifier = [NSString stringWithFormat:@"%@Text", identifier];
     } else if (aType == AgoraChatMessageTypeImage) {
         identifier = [NSString stringWithFormat:@"%@Image", identifier];
