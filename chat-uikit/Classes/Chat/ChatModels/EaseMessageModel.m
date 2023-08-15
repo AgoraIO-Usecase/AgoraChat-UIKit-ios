@@ -60,7 +60,6 @@
             }
             NSString *text = ((AgoraChatTextMessageBody *)aMsg.body).text;
             self.isUrl = [self detectURL:text];
-            _type = AgoraChatMessageTypeText;
             NSDictionary *quoteInfo = aMsg.ext[@"msgQuote"];
             if (![quoteInfo isKindOfClass:[NSDictionary class]]) {
                 return self;
@@ -79,11 +78,7 @@
                 AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;
                 NSString *msgSender = quoteInfo[@"msgSender"];
                 NSString *msgPreview = quoteInfo[@"msgPreview"];
-                AgoraChatMessage *quoteMessage = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:quoteMsgId];
-                if (!quoteMessage && msgPreview.length > 0 && msgSender.length > 0) {
-                    self.type = msgBodyType;
-                }
-                id<EaseUserProfile> userInfo = [EaseUserUtils.shared getUserInfo:msgSender moduleType:quoteMessage.chatType == AgoraChatTypeChat ? EaseUserModuleTypeChat : EaseUserModuleTypeGroupChat];
+                AgoraChatMessage *quoteMessage = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:quoteMsgId];                id<EaseUserProfile> userInfo = [EaseUserUtils.shared getUserInfo:msgSender moduleType:quoteMessage.chatType == AgoraChatTypeChat ? EaseUserModuleTypeChat : EaseUserModuleTypeGroupChat];
                 NSString *showName = userInfo.showName.length > 0 ? userInfo.showName : msgSender;
                 NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
                 NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
@@ -273,7 +268,7 @@
 - (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
     UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
     [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    [coverImage drawInRect:CGRectMake(image.size.width/2.0-75, image.size.height/2.0-100, 150, 200)];
+    [coverImage drawInRect:CGRectMake(image.size.width/2.0-coverImage.size.width/2.0, image.size.height/2.0-coverImage.size.height/2.0-15, coverImage.size.width, coverImage.size.height+30)];
     UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return resultingImage;
