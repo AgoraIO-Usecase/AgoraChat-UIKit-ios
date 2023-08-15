@@ -1161,13 +1161,14 @@
            EaseMessageModel *model = (EaseMessageModel *)obj;
            if ([model.message.messageId isEqualToString:message.messageId]) {
                model.message = message;
-               UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:0]];
+               NSIndexPath* indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
+               UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
                if ([cell isKindOfClass:[EaseMessageCell class]]) {
                    EaseMessageCell *messageCell = (EaseMessageCell*)cell;
                    EaseMessageModel *editModel = [[EaseMessageModel alloc] initWithAgoraChatMessage:model.message];
                    [weakSelf.dataArray replaceObjectAtIndex:idx withObject:editModel];
                    if ([self.tableView.visibleCells containsObject:cell]) {
-                       [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:idx inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+                       [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                    }
                    *stop = YES;
                }

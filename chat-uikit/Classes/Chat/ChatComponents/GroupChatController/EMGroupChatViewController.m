@@ -114,7 +114,6 @@
                     AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:from from:from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
                     message.chatType = (AgoraChatType)self.currentConversation.type;
                     message.isRead = YES;
-                    message.messageId = msg.messageId;
                     message.localTime = msg.localTime;
                     message.timestamp = msg.timestamp;
                     [self.currentConversation insertMessage:message error:nil];
