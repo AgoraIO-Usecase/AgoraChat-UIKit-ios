@@ -635,11 +635,7 @@
 
 - (void)didSelectExtFuncPopupView
 {
-//    [self inputBarDidShowToolbarAction];
-//    self.inputBar.quoteMessage = nil;
-//    [self.inputBar Ease_updateConstraints:^(EaseConstraintMaker *make) {
-//        make.height.Ease_equalTo(self.originHeight);
-//    }];
+
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     
     for (EaseExtendMenuModel *menuModel in self.inputBar.extendMenuView.extMenuModelArray) {
@@ -701,7 +697,7 @@
 
 - (void)didChatBarEmoticonViewSendAction
 {
-    [self sendTextAction:self.inputBar.text ext:nil];
+    [self inputBarSendMsgAction:self.inputBar.text];
 }
 
 #pragma mark - EaseMessageCellDelegate
@@ -1482,15 +1478,15 @@
 - (void)sendTextAction:(NSString *)aText
                     ext:(NSDictionary *)aExt
 {
-    if(![aExt objectForKey:MSG_EXT_GIF]){
-        [self.inputBar clearInputViewText];
-    }
     if ([aText length] == 0) {
         return;
     }
     
     AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:aText];
     [self sendMessageWithBody:body ext:aExt];
+    if(![aExt objectForKey:MSG_EXT_GIF]){
+        [self.inputBar clearInputViewText];
+    }
 }
 
 #pragma mark - Data

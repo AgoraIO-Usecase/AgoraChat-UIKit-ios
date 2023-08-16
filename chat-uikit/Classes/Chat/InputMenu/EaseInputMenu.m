@@ -273,6 +273,7 @@
 
 - (void)textViewDidChange:(UITextView *)textView
 {
+    self.text = textView.text;
     [self _updatetextViewHeight];
     if (self.moreEmoticonView) {
         [self emoticonChangeWithText];
@@ -352,12 +353,14 @@
         [self emoticonChangeWithText];
     }
     [self _updatetextViewHeight];
+    self.quoteMessage = nil;
 }
 
 - (void)inputViewAppendText:(NSString *)aText
 {
     if ([aText length] > 0) {
         self.textView.text = [NSString stringWithFormat:@"%@%@", self.textView.text, aText];
+        self.text = self.textView.text;
         [self _updatetextViewHeight];
     }
     if (self.moreEmoticonView) {
@@ -370,6 +373,7 @@
     if ([self.textView.text length] > 0) {
         NSRange range = [self.textView.text rangeOfComposedCharacterSequenceAtIndex:self.textView.text.length-1];
         self.textView.text = [self.textView.text substringToIndex:range.location];
+        self.text = self.textView.text;
     }
     if ([self.textView.text length] > 0) {
         return YES;
