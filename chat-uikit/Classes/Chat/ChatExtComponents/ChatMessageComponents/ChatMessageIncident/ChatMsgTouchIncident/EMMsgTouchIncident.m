@@ -123,23 +123,22 @@
 - (void)messageCellEventOperation:(EaseMessageCell *)aCell
 {
     __weak typeof(self.chatController) weakself = self.chatController;
-    void (^downloadThumbBlock)(EaseMessageModel *aModel) = ^(EaseMessageModel *aModel) {
+    AgoraChatMessage* msg = aCell.quoteModel ? aCell.quoteModel.message : aCell.model.message;
+    void (^downloadThumbBlock)(void) = ^{
         [weakself showHint:@"Fetch thumbnails..."];
-        [[AgoraChatClient sharedClient].chatManager downloadMessageThumbnail:aModel.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+        [[AgoraChatClient sharedClient].chatManager downloadMessageThumbnail:msg progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
             if (!error) {
                 [weakself.tableView reloadData];
             }
         }];
     };
     
-    AgoraChatImageMessageBody *body = (AgoraChatImageMessageBody*)aCell.model.message.body;
-    if (aCell.quoteModel) {
-        body = (AgoraChatImageMessageBody*)aCell.quoteModel.message.body;
-    }
+    AgoraChatImageMessageBody *body = msg.body;
+
     BOOL isCustomDownload = !([AgoraChatClient sharedClient].options.isAutoTransferMessageAttachments);
     if (body.thumbnailDownloadStatus == AgoraChatDownloadStatusFailed) {
         if (!isCustomDownload) {
-            downloadThumbBlock(aCell.model);
+            downloadThumbBlock();
         }
         
         return;
@@ -147,7 +146,7 @@
     
     BOOL isAutoDownloadThumbnail = [AgoraChatClient sharedClient].options.autoDownloadThumbnail;
     if (body.thumbnailDownloadStatus == AgoraChatDownloadStatusPending && !isAutoDownloadThumbnail) {
-        downloadThumbBlock(aCell.model);
+        downloadThumbBlock();
         return;
     }
     
@@ -164,7 +163,7 @@
     }
     
     [self.chatController showHudInView:self.chatController.view hint:@"Download the original image..."];
-    [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+    [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:msg progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
         [weakself hideHud];
         if (error) {
             [EaseAlertController showErrorAlert:@"Download original image fail !"];
@@ -278,10 +277,8 @@
 
 - (void)messageCellEventOperation:(EaseMessageCell *)aCell
 {
-    AgoraChatVoiceMessageBody *body = (AgoraChatVoiceMessageBody*)aCell.model.message.body;
-    if (aCell.quoteModel) {
-        body = (AgoraChatVoiceMessageBody*)aCell.quoteModel.message.body;
-    }
+    AgoraChatMessage* msg = aCell.quoteModel ? aCell.quoteModel.message : aCell.model.message;
+    AgoraChatVoiceMessageBody *body = msg.body;
     if (body.downloadStatus == AgoraChatDownloadStatusDownloading) {
         [EaseAlertController showInfoAlert:@"Downloading voice, click later"];
         return;
@@ -432,6 +429,7 @@
 - (void)messageCellEventOperation:(EaseMessageCell *)aCell
 {
     __weak typeof(self.chatController) weakChatController = self.chatController;
+    AgoraChatMessage* msg = aCell.quoteModel ? aCell.quoteModel.message : aCell.model.message;
     void (^playBlock)(NSString *aPath) = ^(NSString *aPathe) {
         NSURL *videoURL = [NSURL fileURLWithPath:aPathe];
         AVPlayerViewController *playerViewController = [[AVPlayerViewController alloc] init];
@@ -446,7 +444,7 @@
 
     void (^downloadBlock)(void) = ^ {
         [weakChatController showHudInView:self.chatController.view hint:@"Download video..."];
-        [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+        [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:msg progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
             [weakChatController hideHud];
             if (error) {
                 [EaseAlertController showErrorAlert:@"Download video failed !"];
@@ -459,10 +457,7 @@
         }];
     };
     
-    AgoraChatVideoMessageBody *body = (AgoraChatVideoMessageBody*)aCell.model.message.body;
-    if (aCell.quoteModel) {
-        body = (AgoraChatVideoMessageBody*)aCell.quoteModel.message.body;
-    }
+    AgoraChatVideoMessageBody *body = msg.body;
     if (body.downloadStatus == AgoraChatDownloadStatusDownloading) {
         [EaseAlertController showInfoAlert:@"Downloading video, click later"];
         return;
@@ -473,7 +468,7 @@
     if (body.thumbnailDownloadStatus == AgoraChatDownloadStatusFailed || ![fileManager fileExistsAtPath:body.thumbnailLocalPath]) {
         [self.chatController showHint:@"Download image thumbnails"];
         if (!isCustomDownload) {
-            [[AgoraChatClient sharedClient].chatManager downloadMessageThumbnail:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+            [[AgoraChatClient sharedClient].chatManager downloadMessageThumbnail:msg progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
                 downloadBlock();
             }];
             return;
@@ -556,12 +551,10 @@
 
 - (void)messageCellEventOperation:(EaseMessageCell *)aCell
 {
-    AgoraChatFileMessageBody *body = (AgoraChatFileMessageBody *)aCell.model.message.body;
+    AgoraChatMessage* msg = aCell.quoteModel ? aCell.quoteModel.message : aCell.model.message;
+    AgoraChatFileMessageBody *body = msg.body;
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    
-    if (aCell.quoteModel) {
-        body = (AgoraChatFileMessageBody*)aCell.quoteModel.message.body;
-    }
+
     if (body.downloadStatus == AgoraChatDownloadStatusDownloading) {
         [EaseAlertController showInfoAlert:@"Downloading file, click later"];
         return;
@@ -571,7 +564,7 @@
         [self openFile:body.localPath delegate:self.chatController];
         return;
     } else {
-        [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:aCell.model.message progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
+        [[AgoraChatClient sharedClient].chatManager downloadMessageAttachment:msg progress:nil completion:^(AgoraChatMessage *message, AgoraChatError *error) {
             [self.chatController hideHud];
             if (error) {
                 [EaseAlertController showErrorAlert:@"Download file failed !"];
