@@ -13,6 +13,7 @@
 #import <AgoraChat/NSObject+Coding.h>
 #import "EaseUserUtils.h"
 #import "EaseWebImageManager.h"
+#import "EaseEmojiHelper.h"
 
 @interface EaseMessageModel ()
 
@@ -78,6 +79,7 @@
                 AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;
                 NSString *msgSender = quoteInfo[@"msgSender"];
                 NSString *msgPreview = quoteInfo[@"msgPreview"];
+                msgPreview = [EaseEmojiHelper convertEmoji:msgPreview];
                 AgoraChatMessage *quoteMessage = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:quoteMsgId];                id<EaseUserProfile> userInfo = [EaseUserUtils.shared getUserInfo:msgSender moduleType:quoteMessage.chatType == AgoraChatTypeChat ? EaseUserModuleTypeChat : EaseUserModuleTypeGroupChat];
                 NSString *showName = userInfo.showName.length > 0 ? userInfo.showName : msgSender;
                 NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
@@ -138,24 +140,24 @@
                             break;
                         case AgoraChatMessageBodyTypeVideo:
                         {
-                            __block UIImage *img = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                            __block UIImage *img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
                             if ([((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath length] > 0) {
-                                img = [UIImage imageWithContentsOfFile:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath];
+                                img = [[UIImage imageWithContentsOfFile:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
                             }
                             if (!img) {
                                 if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
                                     NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailRemotePath];
                                     [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
                                         if (error == nil && image != nil) {
-                                            img = image;
+                                            img = [image Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
                                         } else {
-                                            img = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                                            img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
                                         }
                                         weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:YES image:[weakSelf combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
                                         weakSelf.quoteHeight;
                                     }];
                                 }  else {
-                                    img = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                                    img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
                                     self.quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
                                     dispatch_async(dispatch_get_main_queue(), ^{
                                         self.quoteHeight;
@@ -268,7 +270,7 @@
 - (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
     UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
     [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-    [coverImage drawInRect:CGRectMake(image.size.width/2.0-coverImage.size.width/2.0, image.size.height/2.0-coverImage.size.height/2.0-15, coverImage.size.width, coverImage.size.height+30)];
+    [coverImage drawInRect:CGRectMake(image.size.width/2.0-coverImage.size.width/2.0, image.size.height/2.0-coverImage.size.height/2.0, coverImage.size.width, coverImage.size.height)];
     UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return resultingImage;

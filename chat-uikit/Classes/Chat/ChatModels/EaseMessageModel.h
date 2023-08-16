@@ -60,6 +60,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic) BOOL editMode;
 
+@property (nonatomic) BOOL previewSuccess;
+
 @property (nonatomic, strong, readonly,nullable) NSAttributedString *quoteContent;
 
 @property (nonatomic, assign, readonly) CGFloat quoteHeight;
