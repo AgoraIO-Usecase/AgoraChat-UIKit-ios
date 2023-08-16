@@ -429,7 +429,7 @@
     }
     if (!self.audioButton.isSelected) {
         [self.audioButton Ease_updateConstraints:^(EaseConstraintMaker *make) {
-            make.width.Ease_equalTo(@16);
+            make.width.Ease_equalTo(kIconwidth);
         }];
     } else {
         [self.audioButton Ease_updateConstraints:^(EaseConstraintMaker *make) {
