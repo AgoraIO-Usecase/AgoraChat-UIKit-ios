@@ -101,7 +101,7 @@
     if (_delegate && [_delegate respondsToSelector:@selector(quoteMessage:showContent:)]) {
         NSString *text = [_delegate quoteMessage:self showContent:message];
         if (text.length > 0) {
-            _messageLabel.text = text;
+            _messageLabel.text = [EaseEmojiHelper convertEmoji:text];
         } else {
             _messageLabel.text = [self messagePreviewText:message];
         }
