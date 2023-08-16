@@ -10,6 +10,7 @@
 #import "Easeonry.h"
 #import "UIImage+EaseUI.h"
 #import <SDWebImage/SDWebImageManager.h>
+#import "EaseEmojiHelper.h"
 
 @interface EaseInputQuoteView()
 
@@ -209,7 +210,7 @@
     } else {
         switch (message.body.type) {
             case AgoraChatMessageBodyTypeText:
-                return ((AgoraChatTextMessageBody *)message.body).text;
+                return [EaseEmojiHelper convertEmoji:((AgoraChatTextMessageBody *)message.body).text];
             case AgoraChatMessageBodyTypeImage:
                 return @"Image";
             case AgoraChatMessageBodyTypeVideo:

@@ -547,7 +547,6 @@
     } else {
         self.editState.text = @"";
     }
-    self.checkBox.hidden = !model.editMode;
     NSString *imageName = @"multiple_normal";
     if (model.selected) {
         imageName = @"multiple_select";
@@ -642,7 +641,8 @@
             }
         }
     }];
-        
+    
+    self.checkBox.hidden = !self.model.editMode;
 }
 
 - (MessageQuoteView *)quoteView
