@@ -626,17 +626,20 @@
 - (void)inputBarDidShowToolbarAction
 {
     [self hideLongPressView];
-    [self.tableView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        make.bottom.equalTo(self.inputBar.ease_top);
-    }];
+//    [self.tableView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+//        make.bottom.equalTo(self.inputBar.ease_top);
+//    }];
     
     [self performSelector:@selector(scrollToBottomRow) withObject:nil afterDelay:0.1];
 }
 
 - (void)didSelectExtFuncPopupView
 {
-    [self inputBarDidShowToolbarAction];
-    
+//    [self inputBarDidShowToolbarAction];
+//    self.inputBar.quoteMessage = nil;
+//    [self.inputBar Ease_updateConstraints:^(EaseConstraintMaker *make) {
+//        make.height.Ease_equalTo(self.originHeight);
+//    }];
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     
     for (EaseExtendMenuModel *menuModel in self.inputBar.extendMenuView.extMenuModelArray) {
