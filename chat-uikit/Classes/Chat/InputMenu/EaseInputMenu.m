@@ -123,7 +123,7 @@
     [_quoteView addSubview:_quoteImageView];
 //    _quoteImageView.hidden = YES;
     [_quoteImageView Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.width.height.Ease_equalTo(kIconwidth);
+        make.width.height.Ease_equalTo(24);
         make.centerY.equalTo(self.quoteView);
         make.right.equalTo(self).offset(-12);
     }];
@@ -258,7 +258,7 @@
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     if ([text isEqualToString:@"\n"]) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(chatBarSendMsgAction:)]) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(inputBarSendMsgAction:)]) {
             [self.delegate inputBarSendMsgAction:self.textView.text];
         }
         return NO;
@@ -458,7 +458,7 @@
             }];
             [self _remakeButtonsViewConstraints];
             
-            if (self.delegate && [self.delegate respondsToSelector:@selector(chatBarDidShowMoreViewAction)]) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(inputBarDidShowToolbarAction)]) {
                 [self.delegate inputBarDidShowToolbarAction];
             }
         }
@@ -484,7 +484,7 @@
             }];
             [self _remakeButtonsViewConstraints];
             
-            if (self.delegate && [self.delegate respondsToSelector:@selector(chatBarDidShowMoreViewAction)]) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(inputBarDidShowToolbarAction)]) {
                 [self.delegate inputBarDidShowToolbarAction];
             }
         }
