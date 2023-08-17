@@ -80,8 +80,22 @@ static const void *HttpRequestHUDKey = &HttpRequestHUDKey;
     if (@available(iOS 13.0, *)) {
         for (UIWindowScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
             if (scene.activationState == UISceneActivationStateForegroundActive) {
-                if (scene.windows.firstObject.window.isKeyWindow) {
-                    return scene.windows.firstObject.window.rootViewController;
+                for (UIWindow* window in scene.windows) {
+                    if(window.isKeyWindow) {
+                        UIViewController* vc =  window.rootViewController;
+                        if ([vc isKindOfClass:[UINavigationController class]]) {
+                            return ((UINavigationController*)vc).visibleViewController;
+                        } else if ([vc isKindOfClass:[UITabBarController class]]) {
+                            UIViewController* selectVC = ((UITabBarController*)vc).selectedViewController;
+                            if ([selectVC isKindOfClass:[UINavigationController class]]) {
+                                return ((UINavigationController*)selectVC).visibleViewController;
+                            } else {
+                                return selectVC;
+                            }
+                        } else {
+                            return vc;
+                        }
+                    }
                 }
             }
         }

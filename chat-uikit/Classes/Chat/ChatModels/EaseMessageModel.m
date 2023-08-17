@@ -31,7 +31,7 @@
         self.isUrl = NO;
         _selected = NO;
         _quoteHeight = 0;
-        _message = aMsg;
+        self.message = aMsg;
         _direction = aMsg.direction;
         _type = (AgoraChatMessageType)aMsg.body.type;
         if (aMsg.body.type == AgoraChatMessageBodyTypeText) {
