@@ -78,7 +78,7 @@
     self.titleLabel = [[UILabel alloc] init];
     self.titleLabel.font = [UIFont systemFontOfSize:18];
     self.titleLabel.textColor = [UIColor grayColor];
-    self.titleLabel.text = @"Hold down the talk";
+    self.titleLabel.text = @"Hold to talk";
     [self addSubview:self.titleLabel];
     [self.titleLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
         make.top.equalTo(self).offset(30);
@@ -303,7 +303,7 @@
 {
     [self _stopRecord];
     
-    self.titleLabel.text = @"Hold down the talk";
+    self.titleLabel.text = @"Hold to talk";
     [self.recordButton setImage:[UIImage easeUIImageNamed:@"grayAudioBtn"] forState:UIControlStateNormal];
 }
 
@@ -325,7 +325,7 @@
 
 - (void)recordButtonTouchCancelEnd
 {
-    self.titleLabel.text = @"Hold down the talk";
+    self.titleLabel.text = @"Hold to talk";
     [self.recordButton setImage:[UIImage easeUIImageNamed:@"grayAudioBtn"] forState:UIControlStateNormal];
     
     [self _cancelRecord];

@@ -10,6 +10,7 @@
 #import "AgoraChatConversation+EaseUI.h"
 #import "UIImage+EaseUI.h"
 #import "AgoraChatMessage+RemindMe.h"
+#import "UITableView+Refresh.h"
 
 static NSString *cellIdentifier = @"EaseConversationCell";
 
@@ -39,6 +40,7 @@ static NSString *cellIdentifier = @"EaseConversationCell";
     [super viewDidLoad];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
+    [self.tableView enableRefresh:@"Refreshing conversation list" color:UIColor.systemGrayColor];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(refreshTabView)
                                                  name:CONVERSATIONLIST_UPDATE object:nil];
@@ -172,7 +174,7 @@ static NSString *cellIdentifier = @"EaseConversationCell";
     deleteAction.backgroundColor = [UIColor colorWithHexString:@"FF14CC"];
     
     UIContextualAction *topAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal
-                                                                            title:!model.isTop ? @"Sticky on Top" : @"Unsticky"
+                                                                            title:!model.isTop ? @"Pin" : @"Unpin"
                                                                           handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL))
                                      {
         AgoraChatConversation *conversation = [AgoraChatClient.sharedClient.chatManager getConversation:model.easeId

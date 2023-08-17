@@ -607,7 +607,8 @@
                 @(AgoraChatMessageBodyTypeCustom): @"custom",
                 @(AgoraChatMessageBodyTypeCmd): @"cmd",
                 @(AgoraChatMessageBodyTypeFile): @"file",
-                @(AgoraChatMessageBodyTypeLocation): @"location"
+                @(AgoraChatMessageBodyTypeLocation): @"location",
+                @(AgoraChatMessageBodyTypeCombine): @"Chat History"
             };
             [self sendTextAction:text ext:@{@"msgQuote": @{
                 @"msgID": self.inputBar.quoteMessage.messageId,
@@ -1481,7 +1482,6 @@
     if ([aText length] == 0) {
         return;
     }
-    
     AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:aText];
     [self sendMessageWithBody:body ext:aExt];
     if(![aExt objectForKey:MSG_EXT_GIF]){
