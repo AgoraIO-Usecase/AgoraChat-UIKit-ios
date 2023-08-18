@@ -288,7 +288,7 @@
 
 - (NSString *)date {
     if (!_date) {
-        NSDate *date = [NSDate dateWithTimeIntervalSince1970:self.message.timestamp];
+        NSDate *date = [NSDate dateWithTimeIntervalSince1970:self.message.timestamp/1000];
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setLocale:[NSLocale currentLocale]];
         [dateFormatter setDateFormat:@"MM-dd, HH:mm"];
