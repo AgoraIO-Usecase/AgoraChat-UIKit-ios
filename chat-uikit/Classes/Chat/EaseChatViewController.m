@@ -825,7 +825,7 @@
     [extMenuArray addObject:quoteModel];
     EaseMessageModel *model = _currentLongPressCell.model;
     if (_currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
-        EaseExtendMenuModel *editItem = [[EaseExtendMenuModel alloc]initWithData:[UIImage imageNamed:@"edit"] funcDesc:@"Edit" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+        EaseExtendMenuModel *editItem = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"edit"] funcDesc:@"Edit" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
             if ([weakself.delegate respondsToSelector:@selector(messageEditAction)]) {
                 [weakself.delegate messageEditAction];
                 return;

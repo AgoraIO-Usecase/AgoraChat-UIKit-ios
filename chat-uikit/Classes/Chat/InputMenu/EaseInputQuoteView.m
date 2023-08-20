@@ -9,7 +9,7 @@
 #import <AgoraChat/AgoraChat.h>
 #import "Easeonry.h"
 #import "UIImage+EaseUI.h"
-#import <SDWebImage/SDWebImageManager.h>
+#import "EaseWebImageDownloader.h"
 #import "EaseEmojiHelper.h"
 
 @interface EaseInputQuoteView()
@@ -122,8 +122,8 @@
                         if (((AgoraChatImageMessageBody *)message.body).thumbnailRemotePath.length) {
                             NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)message.body).thumbnailRemotePath];
                             __weak typeof(self) weakSelf = self;
-                            [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage *img, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                if (error == nil && image != nil) {
+                            [EaseWebImageDownloader.sharedDownloader downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage * _Nullable img, NSData * _Nullable data, NSError * _Nullable error, BOOL finished) {
+                                if (error == nil && img != nil) {
                                     image = img;
                                 } else {
                                     image = [UIImage easeUIImageNamed:@"msg_img_broken"];
@@ -149,13 +149,13 @@
                         if (((AgoraChatVideoMessageBody *)message.body).thumbnailRemotePath.length) {
                             NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)message.body).thumbnailRemotePath];
                             __weak typeof(self) weakSelf = self;
-                            [SDWebImageManager.sharedManager downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage *img, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                if (error == nil && image != nil) {
-                                    image = img;
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        weakSelf.imageView.image = [self combineImage:image coverImage:[UIImage easeUIImageNamed:@"video_cover"]];
-                                    });
-                                }
+                            [EaseWebImageDownloader.sharedDownloader downloadImageWithURL:imageURL options:@[] progress:nil completed:^(UIImage * _Nullable img, NSData * _Nullable data, NSError * _Nullable error, BOOL finished) {
+                                                            if (error == nil && img != nil) {
+                                                                image = img;
+                                                                dispatch_async(dispatch_get_main_queue(), ^{
+                                                                    weakSelf.imageView.image = [self combineImage:image coverImage:[UIImage easeUIImageNamed:@"video_cover"]];
+                                                                });
+                                                            }
                             }];
                         } else {
                             image = [UIImage easeUIImageNamed:@"msg_img_broken"];
