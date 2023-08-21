@@ -17,7 +17,6 @@
 
 @interface EaseMessageModel ()
 
-@property (nonatomic, strong, readwrite,nullable) NSAttributedString *quoteContent;
 
 @property (nonatomic, assign, readwrite) CGFloat quoteHeight;
 @end
