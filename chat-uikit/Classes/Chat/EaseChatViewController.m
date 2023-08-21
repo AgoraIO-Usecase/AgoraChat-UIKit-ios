@@ -1541,6 +1541,10 @@
        
         EaseMessageModel *model = nil;
         model = [[EaseMessageModel alloc] initWithAgoraChatMessage:msg];
+        if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellQuoteViewShowContent:)]) {
+            model.quoteContent = [self.delegate messageCellQuoteViewShowContent:msg];
+            model.quoteHeight;
+        }
         if (!model) {
             model = [[EaseMessageModel alloc]init];
         }
@@ -1760,6 +1764,7 @@
         }
     });
 }
+
 
 #pragma mark - getter
 - (UITableView *)tableView {
