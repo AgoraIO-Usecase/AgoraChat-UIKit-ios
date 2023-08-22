@@ -231,6 +231,10 @@
     self.quoteMessage = nil;
 }
 
+- (void)raiseKeyboard {
+    [self.textView becomeFirstResponder];
+}
+
 #pragma mark - UITextViewDelegate
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView
