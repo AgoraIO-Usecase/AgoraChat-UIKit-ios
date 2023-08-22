@@ -481,7 +481,9 @@
     
     EaseMessageModel *model = (EaseMessageModel *)obj;
     if (self.delegate && [self.delegate respondsToSelector:@selector(editedMessageContentSymbol)]) {
-        model.editSymbol = [self.delegate editedMessageContentSymbol];
+        if ([model isKindOfClass:[EaseMessageModel class]]&&!IsStringEmpty(model.message.body.operatorId)) {
+            model.editSymbol = [self.delegate editedMessageContentSymbol];
+        }
     }
     if (self.delegate && [self.delegate respondsToSelector:@selector(cellForItem:messageModel:)]) {
         UITableViewCell *customCell = [self.delegate cellForItem:tableView messageModel:model];
@@ -1077,14 +1079,14 @@
 
 - (void)messageCellDidClickReactionView:(EaseMessageModel *)model {
     [self.inputBar resignFirstResponder];
-    
+    __weak typeof(self)weakSelf = self;
     [EMBottomReactionDetailView showMenuItems:model.message animation:YES didRemoveSelfReaction:^(NSString * _Nonnull reaction) {
 //        __weak typeof(self)weakSelf = self;
 //        [AgoraChatClient.sharedClient.chatManager removeReaction:reaction fromMessage:model.message.messageId completion:^(AgoraChatError * _Nullable error) {
 //            if (error) {
 //                return;
 //            }
-            [self reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
+            [weakSelf reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
 //            __strong typeof(weakSelf)strongSelf = self;
 //            if (strongSelf) {
 //                NSArray *hightlightViews;
@@ -1508,11 +1510,11 @@
             self.moreMsgId = @"";
         }
         [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:AgoraChatMessageFetchHistoryDirectionDown pageSize:10 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
-            self.loadFinished = YES;
+            weakself.loadFinished = YES;
             if (!aError) {
-                self.cursor = aResult;
-                self.moreMsgId = self.cursor.cursor;
-                [self refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
+                weakself.cursor = aResult;
+                weakself.moreMsgId = weakself.cursor.cursor;
+                [weakself refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
             }
         }];
     } else {
