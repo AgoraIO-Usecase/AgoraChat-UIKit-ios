@@ -543,9 +543,17 @@
     self.bubbleView.model = model;
     _reactionView.reactionList = model.message.reactionList;
     if (model.message.body.operatorId && ![model.message.body.operatorId isEqualToString:@""]) {
-        self.editState.text = @"Edited";
+        if (model.editSymbol != nil && !IsStringEmpty(model.editSymbol.string)) {
+            self.editState.text = nil;
+            self.editState.attributedText = model.editSymbol;
+        } else {
+            self.editState.text = @"Edited";
+        }
     } else {
-        self.editState.text = @"";
+        self.editState.text = nil;
+        if (model.editSymbol != nil && !IsStringEmpty(model.editSymbol.string)) {
+            self.editState.attributedText = model.editSymbol;
+        }
     }
     NSString *imageName = @"multiple_normal";
     if (model.selected) {

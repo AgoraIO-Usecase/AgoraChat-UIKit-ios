@@ -202,6 +202,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// - Parameter type: EditBarOperationType contains `Delete` or `Forward`
 - (void)messageListEntryEditModeThenOperation:(EditBarOperationType)type;
 
+/// Description When you edit message content,a edited symbol will occur message bottom.you can customize it.
+- (NSAttributedString *)editedMessageContentSymbol;
+
 @end
 
 NS_ASSUME_NONNULL_END
