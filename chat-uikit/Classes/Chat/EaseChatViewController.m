@@ -481,7 +481,9 @@
     
     EaseMessageModel *model = (EaseMessageModel *)obj;
     if (self.delegate && [self.delegate respondsToSelector:@selector(editedMessageContentSymbol)]) {
-        model.editSymbol = [self.delegate editedMessageContentSymbol];
+        if ([model isKindOfClass:[EaseMessageModel class]]&&!IsStringEmpty(model.message.body.operatorId)) {
+            model.editSymbol = [self.delegate editedMessageContentSymbol];
+        }
     }
     if (self.delegate && [self.delegate respondsToSelector:@selector(cellForItem:messageModel:)]) {
         UITableViewCell *customCell = [self.delegate cellForItem:tableView messageModel:model];
