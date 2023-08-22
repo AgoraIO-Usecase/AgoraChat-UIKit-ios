@@ -25,9 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) BOOL isChatThread;
 @property (atomic) BOOL loadFinished;
 @property (nonatomic, strong, readonly) EaseChatViewModel *viewModel;
-@property (nonatomic) BOOL endScroll;
+@property (nonatomic) BOOL endScroll;//When message list end scroll,the property value is `NO`.
 @property (nonatomic, strong) EaseInputMenu *inputBar;
-@property (nonatomic) BOOL editMode;
+@property (nonatomic) BOOL editMode;//Whether to enter edit mode
 @property (nonatomic) NSMutableArray <id<EaseUserProfile>>*profiles;
 @property (nonatomic) EditToolBar *toolBar;
 
