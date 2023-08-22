@@ -544,16 +544,15 @@
     _reactionView.reactionList = model.message.reactionList;
     if (model.message.body.operatorId && ![model.message.body.operatorId isEqualToString:@""]) {
         if (model.editSymbol != nil && !IsStringEmpty(model.editSymbol.string)) {
-            self.editState.text = nil;
             self.editState.attributedText = model.editSymbol;
         } else {
-            self.editState.text = @"Edited";
+            self.editState.attributedText = [[NSAttributedString alloc] initWithString:@"Edited" attributes:@{
+                NSForegroundColorAttributeName: [UIColor grayColor],
+                NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightRegular]
+            }];
         }
     } else {
-        self.editState.text = nil;
-        if (model.editSymbol != nil && !IsStringEmpty(model.editSymbol.string)) {
-            self.editState.attributedText = model.editSymbol;
-        }
+        self.editState.attributedText = nil;
     }
     NSString *imageName = @"multiple_normal";
     if (model.selected) {
