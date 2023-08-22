@@ -1078,14 +1078,14 @@
 
 - (void)messageCellDidClickReactionView:(EaseMessageModel *)model {
     [self.inputBar resignFirstResponder];
-    
+    __weak typeof(self)weakSelf = self;
     [EMBottomReactionDetailView showMenuItems:model.message animation:YES didRemoveSelfReaction:^(NSString * _Nonnull reaction) {
 //        __weak typeof(self)weakSelf = self;
 //        [AgoraChatClient.sharedClient.chatManager removeReaction:reaction fromMessage:model.message.messageId completion:^(AgoraChatError * _Nullable error) {
 //            if (error) {
 //                return;
 //            }
-            [self reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
+            [weakSelf reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
 //            __strong typeof(weakSelf)strongSelf = self;
 //            if (strongSelf) {
 //                NSArray *hightlightViews;
