@@ -480,6 +480,9 @@
     }
     
     EaseMessageModel *model = (EaseMessageModel *)obj;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(editedMessageContentSymbol)]) {
+        model.editSymbol = [self.delegate editedMessageContentSymbol];
+    }
     if (self.delegate && [self.delegate respondsToSelector:@selector(cellForItem:messageModel:)]) {
         UITableViewCell *customCell = [self.delegate cellForItem:tableView messageModel:model];
         if (customCell) {
@@ -1543,12 +1546,14 @@
        
         EaseMessageModel *model = nil;
         model = [[EaseMessageModel alloc] initWithAgoraChatMessage:msg];
-        if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellQuoteViewShowContent:)]) {
-            model.quoteContent = [self.delegate messageCellQuoteViewShowContent:msg];
-            model.quoteHeight;
-        }
         if (!model) {
             model = [[EaseMessageModel alloc]init];
+        }
+        if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellQuoteViewShowContent:)]) {
+            if (model.quoteContent.string.length > 0) {
+                model.quoteContent = [self.delegate messageCellQuoteViewShowContent:msg];
+                model.quoteHeight;
+            }
         }
         if (model.type <= AgoraChatMessageTypeExtCall) {
             if (self.currentConversation.type == AgoraChatTypeChat) {

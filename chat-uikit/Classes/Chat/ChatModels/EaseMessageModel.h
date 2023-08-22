@@ -64,6 +64,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign, readonly) CGFloat quoteHeight;
 
+@property (nonatomic, strong) NSAttributedString *editSymbol;
+
 - (instancetype)initWithAgoraChatMessage:(AgoraChatMessage *)aMsg;
 
 @end
