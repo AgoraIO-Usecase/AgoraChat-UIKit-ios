@@ -1509,11 +1509,11 @@
             self.moreMsgId = @"";
         }
         [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:AgoraChatMessageFetchHistoryDirectionDown pageSize:10 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
-            self.loadFinished = YES;
+            weakself.loadFinished = YES;
             if (!aError) {
-                self.cursor = aResult;
-                self.moreMsgId = self.cursor.cursor;
-                [self refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
+                weakself.cursor = aResult;
+                weakself.moreMsgId = weakself.cursor.cursor;
+                [weakself refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
             }
         }];
     } else {
