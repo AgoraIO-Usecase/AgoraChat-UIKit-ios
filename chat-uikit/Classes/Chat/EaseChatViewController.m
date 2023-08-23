@@ -1786,7 +1786,7 @@
         _tableView.estimatedRowHeight = 130;
         _tableView.scrollsToTop = NO;
         if (self.isChatThread != YES) {
-            [_tableView enableRefresh:@"drop down refresh" color:UIColor.systemGrayColor];
+            [_tableView enableRefresh:@"Refreshing this conversation" color:UIColor.systemGrayColor];
             [_tableView.refreshControl addTarget:self action:@selector(dropdownRefreshTableViewWithData) forControlEvents:UIControlEventValueChanged];
         }
         _tableView.tableFooterView = [[UIView alloc] init];

@@ -40,7 +40,6 @@ static NSString *cellIdentifier = @"EaseConversationCell";
     [super viewDidLoad];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
-    [self.tableView enableRefresh:@"Refreshing conversation list" color:UIColor.systemGrayColor];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(refreshTabView)
                                                  name:CONVERSATIONLIST_UPDATE object:nil];
@@ -58,6 +57,11 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 //    iv.contentMode = UIViewContentModeScaleAspectFit;
 //    iv.image = [self combineImage:[UIImage easeUIImageNamed:@"chatroom_unread_bg"] coverImage:[UIImage easeUIImageNamed:@"quote_voice"]];
 //    [self.view addSubview:iv];
+}
+
+- (NSString*)refreshTitle
+{
+    return @"Refreshing conversation list";
 }
 
 //- (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
