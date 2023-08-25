@@ -25,8 +25,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setRemindMe:(NSString *)messageId;
 - (void)resetRemindMe;
+- (void)setRemindAll;
 
 - (BOOL)remindMe;
+- (BOOL)remindALL;
 
 - (void)setLatestUpdateTime:(long long)latestUpdateTime;
 

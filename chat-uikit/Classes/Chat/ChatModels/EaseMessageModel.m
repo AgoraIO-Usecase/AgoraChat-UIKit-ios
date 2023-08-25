@@ -237,6 +237,7 @@
 
 - (CGFloat)quoteHeight {
     UILabel *label = [UILabel new];
+    label.numberOfLines = 0;
     label.attributedText = self.quoteContent;
     _quoteHeight = ceilf([label sizeThatFits:CGSizeMake(EMScreenWidth*0.75-24, 999)].height+16);
     label = nil;

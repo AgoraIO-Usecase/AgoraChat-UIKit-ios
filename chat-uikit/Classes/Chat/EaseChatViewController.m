@@ -334,7 +334,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
     //群聊@“我”提醒
-    if(self.currentConversation.type == AgoraChatConversationTypeGroupChat && [self.currentConversation remindMe]) {
+    if(self.currentConversation.type == AgoraChatConversationTypeGroupChat && ([self.currentConversation remindMe] || [self.currentConversation remindALL])) {
         [self.currentConversation resetRemindMe];
     };
 }
@@ -828,8 +828,9 @@
     }
     
     
-    [extMenuArray addObject:quoteModel];
     EaseMessageModel *model = _currentLongPressCell.model;
+    if (model.message.status == AgoraChatMessageStatusSucceed)
+        [extMenuArray addObject:quoteModel];
     if (_currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
         EaseExtendMenuModel *editItem = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"edit"] funcDesc:@"Edit" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
             if ([weakself.delegate respondsToSelector:@selector(messageEditAction)]) {
@@ -1108,7 +1109,7 @@
 - (void)messageCellNeedReload:(EaseMessageCell *)cell
 {
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    if (indexPath) {
+    if (indexPath && indexPath.row < self.dataArray.count) {
         [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
     }
 }

@@ -303,7 +303,20 @@ static NSString *cellIdentifier = @"EaseConversationCell";
         AgoraChatMessage *msg = aMessages[0];
         if ([msg remindMe]) {
             AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO];
-            [conversation setRemindMe:msg.messageId];
+            NSDictionary* ext = msg.ext;
+            BOOL atALL = NO;
+            if (ext && [ext objectForKey:@"em_at_list"]) {
+                id atList = [ext objectForKey:@"em_at_list"];
+                if ([atList isKindOfClass:[NSString class]]) {
+                    if ([atList isEqualToString:@"ALL"]) {
+                        atALL = YES;
+                    }
+                }
+            }
+            if (atALL) {
+                [conversation setRemindAll];
+            } else
+                [conversation setRemindMe:msg.messageId];
         }
     }
     [self _loadAllConversationsFromDB];

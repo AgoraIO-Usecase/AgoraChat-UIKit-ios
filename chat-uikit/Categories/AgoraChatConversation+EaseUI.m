@@ -92,9 +92,37 @@
     return ret;
 }
 
+- (BOOL)remindALL
+{
+    //判断会话类型和消息是否包含@我
+    if (self.type != AgoraChatConversationTypeGroupChat) {
+        return NO;
+    }
+    BOOL ret = NO;
+    id remindStr = [self.ext objectForKey:EaseConversationRemindMe];
+    /*
+    for (NSString *msgId in msgIds) {
+        EaseMessage *msg = [self loadMessageWithId:msgId error:nil];
+        if (!msg.isRead && msg.body.type == EaseMessageBodyTypeText) {
+            EaseTextMessageBody *textBody = (EaseTextMessageBody*)msg.body;
+            if ([textBody.text containsString:[NSString stringWithFormat:@"@%@",EaseClient.sharedClient.currentUsername]]) {
+                ret = YES;
+                break;
+            }
+        }
+    }*/
+    if ([remindStr isKindOfClass:[NSString class]]) {
+        NSString* tmp = (NSString*)remindStr;
+        if([[tmp lowercaseString] isEqualToString:@"all"])
+            ret = YES;
+    }
+    
+    return ret;
+}
+
 - (NSMutableArray *)remindMeArray {
     NSMutableArray *dict = [(NSMutableArray *)self.ext[EaseConversationRemindMe] mutableCopy];
-    if (!dict) {
+    if (!dict || [dict isKindOfClass:[NSString class]]) {
         dict = [[NSMutableArray alloc]init];
     }
     
@@ -116,6 +144,13 @@
     [msgIdArray removeAllObjects];
     NSMutableDictionary *dict = [self mutableExt];
     [dict setObject:msgIdArray forKey:EaseConversationRemindMe];
+    [self setExt:dict];
+}
+
+- (void)setRemindAll
+{
+    NSMutableDictionary *dict = [self mutableExt];
+    [dict setObject:@"ALL" forKey:EaseConversationRemindMe];
     [self setExt:dict];
 }
 
