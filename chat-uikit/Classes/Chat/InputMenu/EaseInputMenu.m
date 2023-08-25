@@ -43,6 +43,7 @@
 @property (nonatomic, strong) UIView *bottomLine;//下划线
 //@property (nonatomic, strong) UIButton *audioDescBtn;
 @property (nonatomic, strong) EaseChatViewModel *viewModel;
+@property (nonatomic) UILabel *replyTo;
 @property (nonatomic, strong) UIView *quoteView;
 @property (nonatomic, strong) UILabel *quoteLabel;
 @property (nonatomic, strong) UIButton *quoteDeleteButton;
@@ -99,22 +100,29 @@
     [_quoteDeleteButton addTarget:self action:@selector(deleteQuoteAction) forControlEvents:UIControlEventTouchUpInside];
     [_quoteView addSubview:_quoteDeleteButton];
     [_quoteDeleteButton Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.left.Ease_equalTo(16);
-        make.centerY.equalTo(_quoteView);
-        make.size.Ease_equalTo(14);
+        make.left.Ease_equalTo(12);
+        make.top.equalTo(self).offset(8);
+        make.size.Ease_equalTo(13);
     }];
-    
+    _replyTo = [[UILabel alloc] init];
+    [_quoteView addSubview:_replyTo];
+    [_replyTo Ease_makeConstraints:^(EaseConstraintMaker *make) {
+        make.left.equalTo(self.quoteDeleteButton.ease_right).offset(4);
+        make.top.equalTo(self).offset(6);
+        make.right.equalTo(self).offset(-12);
+        make.height.Ease_equalTo(18);
+    }];
     _quoteLabel = [[UILabel alloc] init];
-    _quoteLabel.numberOfLines = 1;
+    _quoteLabel.numberOfLines = 0;
     _quoteLabel.font = [UIFont systemFontOfSize:15];
     _quoteLabel.textColor = [UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1];
     [_quoteView addSubview:_quoteLabel];
     [_quoteLabel Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.left.equalTo(_quoteDeleteButton.ease_right).offset(10);
-        make.top.equalTo(@12);
-        make.bottom.equalTo(@-12);
+        make.left.equalTo(_quoteDeleteButton);
+        make.top.equalTo(self.replyTo).offset(4);
+        make.bottom.equalTo(@-8);
         make.right.equalTo(@(-kIconwidth-12));
-        make.height.greaterThanOrEqualTo(@16);
+        make.height.lessThanOrEqualTo(@16);
     }];
     
     _quoteImageView = [[UIImageView alloc] init];
@@ -549,10 +557,14 @@
         if (!content) {
             content = quoteMessage.easeUI_quoteShowText;
         }
-        self.quoteLabel.text = [NSString stringWithFormat:@"%@:%@", nickname, [EaseEmojiHelper convertEmoji:content]];
+        NSMutableAttributedString *attributeText = [[NSMutableAttributedString alloc] initWithString:@"Reply to " attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightRegular],NSForegroundColorAttributeName:[UIColor blackColor]}];
+        [attributeText appendAttributedString:[[NSAttributedString alloc] initWithString:nickname attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightSemibold],NSForegroundColorAttributeName:[UIColor blackColor]}]];
+        self.replyTo.attributedText = attributeText;
+        self.quoteLabel.text = [NSString stringWithFormat:@"%@", [EaseEmojiHelper convertEmoji:content]];
         self.quoteView.hidden = NO;
+        CGFloat contentHeight = [self.quoteLabel sizeThatFits:CGSizeMake(EMScreenWidth*0.75-24, 999)].height;
         [self.quoteView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-            make.height.equalTo(@44);
+            make.height.equalTo(@(contentHeight+40));
         }];
     }
     [self quoteImageIcon];

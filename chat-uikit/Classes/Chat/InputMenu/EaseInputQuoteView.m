@@ -153,9 +153,10 @@
                                                             if (error == nil && img != nil) {
                                                                 image = img;
                                                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                                                    weakSelf.imageView.image = [self combineImage:image coverImage:[UIImage easeUIImageNamed:@"video_cover"]];
+                                                                    weakSelf.imageView.image = [weakSelf combineImage:image coverImage:[UIImage easeUIImageNamed:@"video_cover"]];
                                                                 });
                                                             }
+
                             }];
                         } else {
                             image = [UIImage easeUIImageNamed:@"msg_img_broken"];

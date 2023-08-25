@@ -788,7 +788,7 @@
         [weakself recallLongPressAction];
     }];
     
-    EaseExtendMenuModel *quoteModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"reply"] funcDesc:@"reply" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+    EaseExtendMenuModel *quoteModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"reply"] funcDesc:@"Reply" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
         EaseMessageModel *model = [weakself.dataArray objectAtIndex:weakself.longPressIndexPath.row];
         weakself.inputBar.quoteMessage = model.message;
         [weakself.inputBar raiseKeyboard];
