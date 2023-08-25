@@ -64,10 +64,19 @@
 //                self.contentAttributeText = result;
 //                
 //            } else {
-                [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@: %@\n------\n", showName,quoteMessage.easeUI_quoteShowText] attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightRegular],NSParagraphStyleAttributeName:paragraphStyle}]];
+                [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@: %@\n------\n", showName,msgPreview] attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightRegular],NSParagraphStyleAttributeName:paragraphStyle}]];
                 self.contentAttributeText = result;
 //            }
-            self.contentAttributeText = [self appendQuoteContent:forwardMessage.easeUI_quoteShowText];
+            
+//            if ([self detectURL:forwardMessage.easeUI_quoteShowText]) {
+//                self.contentAttributeText = [self appendQuoteContent:forwardMessage.easeUI_quoteShowText];
+//                for (NSString *url in [self urls:content]) {
+//                    [self appendQuoteLink:url];
+//                }
+//                self.contentAttributeText = [self appendQuoteLink:forwardMessage.easeUI_quoteShowText];
+//            } else {
+                self.contentAttributeText = [self appendQuoteContent:forwardMessage.easeUI_quoteShowText];
+//            }
             self.contentHeight;
         } else {
             id<EaseUserProfile> userInfo = [EaseUserUtils.shared getUserInfo:forwardMessage.from moduleType:forwardMessage.chatType == AgoraChatTypeChat ? EaseUserModuleTypeChat : EaseUserModuleTypeGroupChat];
@@ -328,7 +337,7 @@
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineHeightMultiple = 1.2;
     paragraphStyle.lineBreakMode = 1;
-    NSAttributedString *text = [[NSAttributedString alloc] initWithString:link attributes:@{NSForegroundColorAttributeName:[UIColor blackColor],NSFontAttributeName:[UIFont systemFontOfSize:14 weight:UIFontWeightMedium],NSLinkAttributeName:[UIColor systemBlueColor],NSParagraphStyleAttributeName:paragraphStyle}];
+    NSAttributedString *text = [[NSAttributedString alloc] initWithString:link attributes:@{NSForegroundColorAttributeName:[UIColor systemBlueColor],NSFontAttributeName:[UIFont systemFontOfSize:14 weight:UIFontWeightMedium],NSLinkAttributeName:[UIColor systemBlueColor],NSParagraphStyleAttributeName:paragraphStyle,NSUnderlineStyleAttributeName:@(NSUnderlineStyleSingle)}];
     [show appendAttributedString:text];
     return show;
 }
@@ -352,7 +361,20 @@
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineHeightMultiple = 1.2;
     paragraphStyle.lineBreakMode = 1;
-    NSAttributedString *text = [[NSAttributedString alloc] initWithString:content attributes:@{NSForegroundColorAttributeName:[UIColor blackColor],NSFontAttributeName:[UIFont systemFontOfSize:14 weight:UIFontWeightMedium],NSParagraphStyleAttributeName:paragraphStyle}];
+       
+    
+       
+    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:content attributes:@{NSForegroundColorAttributeName:[UIColor blackColor],NSFontAttributeName:[UIFont systemFontOfSize:14 weight:UIFontWeightMedium],NSParagraphStyleAttributeName:paragraphStyle}];
+    // 遍历匹配到的链接
+    NSError *error;
+    NSDataDetector *detector = [NSDataDetector dataDetectorWithTypes:NSTextCheckingTypeLink error:&error];
+    NSArray *matches = [detector matchesInString:content options:0 range:NSMakeRange(0, [content length])];
+    [matches enumerateObjectsUsingBlock:^(NSTextCheckingResult *  _Nonnull result, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (result.resultType == NSTextCheckingTypeLink) {
+            // 设置链接的下划线颜色为蓝色
+            [text addAttributes:@{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle), NSUnderlineColorAttributeName: [UIColor systemBlueColor],NSForegroundColorAttributeName:[UIColor systemBlueColor],NSParagraphStyleAttributeName:paragraphStyle} range:result.range];
+        }
+    }];
     [show appendAttributedString:text];
     return show;
 }

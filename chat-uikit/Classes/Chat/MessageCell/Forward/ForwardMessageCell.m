@@ -84,15 +84,18 @@
         self.nameLabel.text = model.message.from;
     }
     
-    if (model.userDataProfile && [model.userDataProfile respondsToSelector:@selector(defaultAvatar)]) {
-        if (model.userDataProfile.defaultAvatar) {
-            _avatarView.image = model.userDataProfile.defaultAvatar;
-        }
+    
+    NSString *defaultName = @"_another_style";
+    if (model.message.chatType == AgoraChatTypeGroupChat) {
+        defaultName = [NSString stringWithFormat:@"group%@",defaultName];
+    } else {
+        defaultName = [NSString stringWithFormat:@"avatar%@",defaultName];
     }
+    _avatarView.image = [UIImage easeUIImageNamed:defaultName];
     if (_model.userDataProfile && [_model.userDataProfile respondsToSelector:@selector(avatarURL)]) {
         if ([_model.userDataProfile.avatarURL length] > 0) {
             [_avatarView Ease_setImageWithURL:[NSURL URLWithString:_model.userDataProfile.avatarURL]
-                               placeholderImage:[UIImage easeUIImageNamed:@"default_avatar"]];
+                               placeholderImage:[UIImage easeUIImageNamed:defaultName]];
         }
     }
     self.dateLabel.text = model.date;
