@@ -40,7 +40,7 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     [self.content Ease_makeConstraints:^(EaseConstraintMaker *make) {
-        make.edges.Ease_equalTo(UIEdgeInsetsMake(6, 12, 6, 12));
+        make.edges.Ease_equalTo(UIEdgeInsetsMake(4, 12, 6, 12));
     }];
 }
 
