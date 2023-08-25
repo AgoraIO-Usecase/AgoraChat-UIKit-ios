@@ -48,6 +48,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)updateLayout;
 
+- (void)showHighlight;
+
 @end
 
 

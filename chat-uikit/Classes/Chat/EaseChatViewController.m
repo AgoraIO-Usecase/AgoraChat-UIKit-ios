@@ -1014,6 +1014,10 @@
                         }
                     }
                     [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+                    UITableViewCell *cell = [_tableView cellForRowAtIndexPath:indexPath];
+                    if ([cell isKindOfClass:[EaseMessageCell class]]) {
+                        [(EaseMessageCell*)cell showHighlight];
+                    }
                 }
 //                _searchRowAction.isSearching = NO;
                 return;
