@@ -66,6 +66,7 @@
 @property (nonatomic) NSString *parentMessageId;
 @property (nonatomic) AgoraChatCursorResult *cursor;
 @property (nonatomic) MessageEditor *editor;
+@property (nonatomic) NSIndexPath* highLightIndexPath;
 @end
 
 @implementation EaseChatViewController
@@ -150,6 +151,7 @@
         _sentProfile = nil;
         _otherProfile = nil;
         _endScroll = YES;
+        _highLightIndexPath = nil;
         [EaseChatKitManager.shared setConversationId:_currentConversation.conversationId];
         if (!_viewModel) {
             _viewModel = [[EaseChatViewModel alloc] init];
@@ -582,6 +584,16 @@
    }
 }
 
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
+{
+    if (self.highLightIndexPath && (self.highLightIndexPath.section == 0 && self.highLightIndexPath.row < self.dataArray.count)) {
+        EaseMessageCell* cell = [self.tableView cellForRowAtIndexPath:self.highLightIndexPath];
+        if (cell && [cell isKindOfClass:[EaseMessageCell class]]) {
+            [cell showHighlight];
+        }
+    }
+}
+
 #pragma mark - EaseInputMenuDelegate
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
@@ -987,7 +999,6 @@
 //        _searchRowAction.isSearching = YES;
 //        _searchRowAction.currentSearchPage = 1;
 //        _searchRowAction.messageId = msgId;
-//        _highlightMessageId = msgId;
         BOOL messageExist = NO;
         for (int i = (int)_dataArray.count - 1; i >= 0; i --) {
             EaseMessageModel *model = self.dataArray[i];
@@ -1001,22 +1012,23 @@
                 } else {
                     NSArray <NSIndexPath *>*indexPaths = [_tableView indexPathsForVisibleRows];
                     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+                    BOOL isVisibleCell = NO;
                     for (NSIndexPath *i in indexPaths) {
                         if ([i isEqual:indexPath]) {
                             UITableViewCell *cell = [_tableView cellForRowAtIndexPath:indexPath];
-//                            if (cell) {
-//                                if ([cell isKindOfClass:EaseMessageCell.class]) {
-//                                    [((EaseMessageCell *)cell) showHighlight];
-//                                }
-//                                self.highlightMessageId = nil;
-//                            }
+                            if (cell) {
+                                if ([cell isKindOfClass:EaseMessageCell.class]) {
+                                    [((EaseMessageCell *)cell) showHighlight];
+                                }
+                                self.highLightIndexPath = nil;
+                            }
+                            isVisibleCell = YES;
                             break;
                         }
                     }
-                    [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
-                    UITableViewCell *cell = [_tableView cellForRowAtIndexPath:indexPath];
-                    if ([cell isKindOfClass:[EaseMessageCell class]]) {
-                        [(EaseMessageCell*)cell showHighlight];
+                    if (!isVisibleCell) {
+                        self.highLightIndexPath = indexPath;
+                        [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
                     }
                 }
 //                _searchRowAction.isSearching = NO;
