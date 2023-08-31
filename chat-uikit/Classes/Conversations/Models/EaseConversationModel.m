@@ -99,37 +99,37 @@
             break;
         case AgoraChatMessageBodyTypeLocation:
         {
-            msgStr = @"[location]";
+            msgStr = @"[Location]";
         }
             break;
         case AgoraChatMessageBodyTypeCustom:
         {
-            msgStr = @"[customMessage]";
+            msgStr = @"[Custom Message]";
         }
             break;
         case AgoraChatMessageBodyTypeImage:
         {
-            msgStr = @"[picture]";
+            msgStr = @"[Image]";
         }
             break;
         case AgoraChatMessageBodyTypeFile:
         {
-            msgStr = @"[file]";
+            msgStr = @"[File]";
         }
             break;
         case AgoraChatMessageBodyTypeCombine:
         {
-            msgStr = @"[A Chat History]";
+            msgStr = @"[Chat History]";
         }
             break;
         case AgoraChatMessageBodyTypeVoice:
         {
-            msgStr = @"[audio]";
+            msgStr = @"[Audio]";
         }
             break;
         case AgoraChatMessageBodyTypeVideo:
         {
-            msgStr = @"[video]";
+            msgStr = @"[Video]";
         }
             break;
             
@@ -152,7 +152,7 @@
         [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0/255.0 green:95/255.0 blue:255/255.0 alpha:1.0]} range:NSMakeRange(0, atStr.length)];
     } else
     if ([_conversation remindMe]) {
-        NSString *atStr = @"[someone@You]";
+        NSString *atStr = @"[Someone@You]";
         msgStr = [NSString stringWithFormat:@"%@ %@", atStr, msgStr];
         _showInfo = [[NSMutableAttributedString alloc] initWithString:msgStr];
         [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0/255.0 green:95/255.0 blue:255/255.0 alpha:1.0]} range:NSMakeRange(0, atStr.length)];

@@ -442,10 +442,16 @@
     if ([obj isKindOfClass:[EaseMessageModel class]]) {
         EaseMessageModel *model = (EaseMessageModel *)obj;
         if (model.type == AgoraChatMessageTypeExtRecall) {
-            if ([model.message.from isEqualToString:self.currentConversation.conversationId]) {
-                cellString = @"The other party recall a message";
+            if ([model.message.from isEqualToString:AgoraChatClient.sharedClient.currentUsername]) {
+                cellString = @"You recalled a message";
             } else {
-                cellString = @"You recall a message";
+                NSString* msgFrom = model.message.from;
+                if (self.delegate && [self.delegate respondsToSelector:@selector(userProfile:)]) {
+                    id<EaseUserProfile> userData = [self.delegate userProfile:model.message.from];
+                    if (userData.showName.length > 0)
+                        msgFrom = userData.showName;
+                }
+                cellString = [NSString stringWithFormat:@"%@ recalled a message",msgFrom];
             }
             type = EaseChatWeakRemindSystemHint;
         }
@@ -779,6 +785,7 @@
                             weakself.moreMsgId = @"";
                         }
                     }
+                    [weakself handleMessagesRemove:@[deleteMsg]];
                 }
             }
         }];
@@ -929,7 +936,7 @@
 //- (EditNavigationBar *)editNavigation {
 //    if (!_editNavigation) {
 //        _editNavigation = [[EditNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, EMNavgationHeight) cancel:^{
-//            
+//
 //        }];
 //        _editNavigation.backgroundColor = [UIColor whiteColor];
 //    }
@@ -1004,7 +1011,7 @@
             EaseMessageModel *model = self.dataArray[i];
             if ([model isKindOfClass:EaseMessageModel.class] && [model.message.messageId isEqualToString:msgId]) {
                 messageExist = YES;
-                if (model.type == AgoraChatMessageTypeImage || model.type == AgoraChatMessageTypeVideo || model.type == AgoraChatMessageTypeFile || model.type == AgoraChatMessageTypeVoice) {
+                if (model.type == AgoraChatMessageTypeImage || model.type == AgoraChatMessageTypeVideo || model.type == AgoraChatMessageTypeFile || model.type == AgoraChatMessageTypeCombine) {
                     AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:model.type];
                     eventStrategy.chatController = self;
                     aCell.quoteModel = model;
@@ -1230,8 +1237,10 @@
 - (void)messagesInfoDidRecall:(NSArray<AgoraChatRecallMessageInfo *> *)aRecallMessagesInfo
 {
     __block NSDictionary *dic;
+    NSMutableArray<NSString*>* messageIds = [NSMutableArray array];
     [aRecallMessagesInfo enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         AgoraChatRecallMessageInfo *recallMessageInfo = (AgoraChatRecallMessageInfo *)obj;
+        [messageIds addObject:recallMessageInfo.recallMessage.messageId];
         [[[self.dataArray reverseObjectEnumerator] allObjects] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj isKindOfClass:[NSDictionary class]]) {
                 if ([((NSDictionary *)obj).allValues.firstObject isEqualToString:recallMessageInfo.recallMessage.messageId]) {
@@ -1241,11 +1250,28 @@
             }
         }];
     }];
+    
+    [self handleMessagesRemove:messageIds];
     __weak typeof(self) weakself =self;
     dispatch_async(dispatch_get_main_queue(), ^{
         [weakself.dataArray removeObject:dic];
-        [weakself.tableView reloadData];
+        [weakself refreshTableView:NO];
     });
+}
+
+- (void)handleMessagesRemove:(NSArray<NSString*>*) messageIds
+{
+    [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[EaseMessageModel class]]) {
+            NSDictionary *quoteInfo = [((EaseMessageModel*)obj).message.ext objectForKey:@"msgQuote"];
+            if (quoteInfo) {
+                NSString *quoteMsgId = quoteInfo[@"msgID"];
+                if (quoteMsgId.length > 0 && [messageIds containsObject:quoteMsgId]) {
+                    ((EaseMessageModel*)obj).quoteContent =  nil;
+                }
+            }
+        }
+    }];
 }
 
 

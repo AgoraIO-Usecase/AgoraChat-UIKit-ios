@@ -188,7 +188,7 @@
                     AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"The other party retracted a message"];
                     NSString *to = [[AgoraChatClient sharedClient] currentUsername];
                     NSString *from = self.currentConversation.conversationId;
-                    AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:from from:from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
+                    AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:model.message.conversationId from:msg.from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
                     message.chatType = (AgoraChatType)self.currentConversation.type;
                     message.isRead = YES;
                     message.messageId = msg.messageId;

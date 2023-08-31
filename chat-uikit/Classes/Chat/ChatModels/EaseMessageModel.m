@@ -60,156 +60,159 @@
             }
             NSString *text = ((AgoraChatTextMessageBody *)aMsg.body).text;
             self.isUrl = [self detectURL:text];
-            NSDictionary *quoteInfo = aMsg.ext[@"msgQuote"];
-            if (![quoteInfo isKindOfClass:[NSDictionary class]]) {
-                return self;
-            }
-            if (quoteInfo) {
-                NSDictionary <NSString *, NSNumber *>*msgTypeDict = @{
-                    @"txt": @(AgoraChatMessageBodyTypeText),
-                    @"img": @(AgoraChatMessageBodyTypeImage),
-                    @"video": @(AgoraChatMessageBodyTypeVideo),
-                    @"audio": @(AgoraChatMessageBodyTypeVoice),
-                    @"custom": @(AgoraChatMessageBodyTypeCustom),
-                    @"file": @(AgoraChatMessageBodyTypeFile),
-                    @"location": @(AgoraChatMessageBodyTypeLocation),@"Chat History": @(AgoraChatMessageBodyTypeCombine)
-                };
-                NSString *quoteMsgId = quoteInfo[@"msgID"];
-                AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;
-                NSString *msgSender = quoteInfo[@"msgSender"];
-                NSString *msgPreview = quoteInfo[@"msgPreview"];
-                msgPreview = [EaseEmojiHelper convertEmoji:msgPreview];
-                AgoraChatMessage *quoteMessage = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:quoteMsgId];                id<EaseUserProfile> userInfo = [EaseUserUtils.shared getUserInfo:msgSender moduleType:quoteMessage.chatType == AgoraChatTypeChat ? EaseUserModuleTypeChat : EaseUserModuleTypeGroupChat];
-                NSString *showName = userInfo.showName.length > 0 ? userInfo.showName : msgSender;
-                NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
-                NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-                paragraphStyle.lineHeightMultiple = 1.07;
-                [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@:", showName] attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:11 weight:UIFontWeightSemibold],NSParagraphStyleAttributeName:paragraphStyle}]];
-                if (quoteMessage.chatThread) {
-                    self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"groupThread"]];
-                    if (!IsStringEmpty(quoteMessage.chatThread.threadName)) {
-                        self.quoteContent = [self appendContent:quoteMessage.chatThread.threadName];
-                    }
-                    
-                } else {
-                    __weak typeof(self) weakSelf = self;
-                    switch (msgBodyType) {
-                        case AgoraChatMessageBodyTypeText:
-                        {
-                            self.quoteContent = result;
-                            if ([self detectURL:msgPreview]) {
-                                self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_link"]];
-                            }
-                            self.quoteContent = [self appendContent:msgPreview];
-                        }
-                            break;
-                        case AgoraChatMessageBodyTypeImage:
-                        {
-                            __block UIImage *img = [UIImage easeUIImageNamed:@"msg_img_broken"];
-                            if ([((AgoraChatImageMessageBody *)quoteMessage.body).localPath length] > 0) {
-                                img = [UIImage imageWithContentsOfFile:((AgoraChatImageMessageBody *)quoteMessage.body).localPath];
-                            }
-                            if (!img) {
-                                if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
-                                    NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath];
-                                    [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
-                                        if (error == nil && image != nil) {
-                                            img = image;
-                                        } else {
-                                            img = [UIImage easeUIImageNamed:@"msg_img_broken"];
-                                        }
-                                        weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:YES image:img];
-                                        weakSelf.quoteHeight;
-                                    }];
-                                } else {
-                                    img = [UIImage easeUIImageNamed:@"msg_img_broken"];
-                                    self.quoteContent = [self appendImage:result imageQuote:true image:img];
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        self.quoteHeight;
-                                    });
-                                }
-                                
-                            } else {
-                                self.quoteContent = [self appendImage:result imageQuote:YES image:img];
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    self.quoteHeight;
-                                });
-                            }
-                        }
-                            break;
-                        case AgoraChatMessageBodyTypeVideo:
-                        {
-                            __block UIImage *img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
-                            if ([((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath length] > 0) {
-                                img = [[UIImage imageWithContentsOfFile:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
-                            }
-                            if (!img) {
-                                if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
-                                    NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailRemotePath];
-                                    [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
-                                        if (error == nil && image != nil) {
-                                            img = [image Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
-                                        } else {
-                                            img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
-                                        }
-                                        weakSelf.quoteContent = [weakSelf appendImage:result imageQuote:YES image:[weakSelf combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
-                                        weakSelf.quoteHeight;
-                                    }];
-                                }  else {
-                                    img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
-                                    self.quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        self.quoteHeight;
-                                    });
-                                }
-                            } else {
-                                self.quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    self.quoteHeight;
-                                });
-                            }
-                            
-                        }
-                            break;
-                        case AgoraChatMessageBodyTypeVoice:
-                        {
-                            self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_voice"]];
-                            if (((AgoraChatVoiceMessageBody *)quoteMessage.body).duration > 0) {
-                                self.quoteContent = [self appendContent:[NSString stringWithFormat:@"%d”", ((AgoraChatVoiceMessageBody *)quoteMessage.body).duration]];
-                            }
-                            
-                        }
-                            break;
-                        case AgoraChatMessageBodyTypeFile:
-                        {
-                            self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_file"]];
-                            if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
-                                self.quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
-                            }
-                        }
-                            break;
-                        case AgoraChatMessageBodyTypeCombine:
-                        {
-                            self.quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_combine"]];
-                            if (((AgoraChatCombineMessageBody *)quoteMessage.body).title.length) {
-                                self.quoteContent = [self appendContent:((AgoraChatCombineMessageBody *)quoteMessage.body).title];
-                            }
-                        }
-                            break;
-                            
-                        default:
-                            break;
-                    }
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        self.quoteHeight;
-                    });
-                }
-            }
-
+            self.quoteContent;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.quoteHeight;
+            });
         }
     }
 
     return self;
+}
+
+- (NSAttributedString *)quoteContent
+{
+    if (!_quoteContent) {
+        NSDictionary *quoteInfo = self.message.ext[@"msgQuote"];
+        if (![quoteInfo isKindOfClass:[NSDictionary class]]) {
+            return nil;
+        }
+        if (quoteInfo) {
+            NSDictionary <NSString *, NSNumber *>*msgTypeDict = @{
+                @"txt": @(AgoraChatMessageBodyTypeText),
+                @"img": @(AgoraChatMessageBodyTypeImage),
+                @"video": @(AgoraChatMessageBodyTypeVideo),
+                @"audio": @(AgoraChatMessageBodyTypeVoice),
+                @"custom": @(AgoraChatMessageBodyTypeCustom),
+                @"file": @(AgoraChatMessageBodyTypeFile),
+                @"location": @(AgoraChatMessageBodyTypeLocation),@"Chat History": @(AgoraChatMessageBodyTypeCombine)
+            };
+            NSString *quoteMsgId = quoteInfo[@"msgID"];
+            AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;
+            NSString *msgSender = quoteInfo[@"msgSender"];
+            NSString *msgPreview = quoteInfo[@"msgPreview"];
+            msgPreview = [EaseEmojiHelper convertEmoji:msgPreview];
+            AgoraChatMessage *quoteMessage = [AgoraChatClient.sharedClient.chatManager getMessageWithMessageId:quoteMsgId];
+            if (!quoteMessage) {
+                _quoteContent = [[NSAttributedString alloc] initWithString:@"Quoted content does not exist" attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:11 weight:UIFontWeightSemibold]}];
+                return _quoteContent;
+            }
+            id<EaseUserProfile> userInfo = [EaseUserUtils.shared getUserInfo:msgSender moduleType:quoteMessage.chatType == AgoraChatTypeChat ? EaseUserModuleTypeChat : EaseUserModuleTypeGroupChat];
+            NSString *showName = userInfo.showName.length > 0 ? userInfo.showName : msgSender;
+            NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
+            NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+            paragraphStyle.lineHeightMultiple = 1.07;
+            if (msgBodyType == AgoraChatMessageBodyTypeText) {
+                [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@:", showName] attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:11 weight:UIFontWeightSemibold]}]];
+            } else {
+                [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@:", showName] attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:11 weight:UIFontWeightSemibold],NSParagraphStyleAttributeName:paragraphStyle}]];
+            }
+            if (quoteMessage.chatThread) {
+                _quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"groupThread"]];
+                if (!IsStringEmpty(quoteMessage.chatThread.threadName)) {
+                    _quoteContent = [self appendContent:quoteMessage.chatThread.threadName];
+                }
+                
+            } else {
+                __weak typeof(self) weakSelf = self;
+                switch (msgBodyType) {
+                    case AgoraChatMessageBodyTypeText:
+                    {
+                        _quoteContent = result;
+                        if ([self detectURL:msgPreview]) {
+                            _quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_link"]];
+                        }
+                        _quoteContent = [self appendContent:msgPreview];
+                    }
+                        break;
+                    case AgoraChatMessageBodyTypeImage:
+                    {
+                        __block UIImage *img = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                        if ([((AgoraChatImageMessageBody *)quoteMessage.body).localPath length] > 0) {
+                            img = [UIImage imageWithContentsOfFile:((AgoraChatImageMessageBody *)quoteMessage.body).localPath];
+                        }
+                        if (!img) {
+                            if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
+                                NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath];
+                                [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
+                                    if (error == nil && image != nil) {
+                                        img = image;
+                                    } else {
+                                        img = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                                    }
+                                    _quoteContent = [weakSelf appendImage:result imageQuote:YES image:img];
+                                    weakSelf.quoteHeight;
+                                }];
+                            } else {
+                                img = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                                _quoteContent = [self appendImage:result imageQuote:true image:img];
+                            }
+                            
+                        } else {
+                            _quoteContent = [self appendImage:result imageQuote:YES image:img];
+                        }
+                    }
+                        break;
+                    case AgoraChatMessageBodyTypeVideo:
+                    {
+                        __block UIImage *img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
+                        if ([((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath length] > 0) {
+                            img = [[UIImage imageWithContentsOfFile:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
+                        }
+                        if (!img) {
+                            if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
+                                NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailRemotePath];
+                                [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
+                                    if (error == nil && image != nil) {
+                                        img = [image Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
+                                    } else {
+                                        img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
+                                    }
+                                    _quoteContent = [weakSelf appendImage:result imageQuote:YES image:[weakSelf combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                }];
+                            }  else {
+                                img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
+                                _quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                            }
+                        } else {
+                            _quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                        }
+                        
+                    }
+                        break;
+                    case AgoraChatMessageBodyTypeVoice:
+                    {
+                        _quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_voice"]];
+                        if (((AgoraChatVoiceMessageBody *)quoteMessage.body).duration > 0) {
+                            _quoteContent = [self appendContent:[NSString stringWithFormat:@"%d”", ((AgoraChatVoiceMessageBody *)quoteMessage.body).duration]];
+                        }
+                        
+                    }
+                        break;
+                    case AgoraChatMessageBodyTypeFile:
+                    {
+                        _quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_file"]];
+                        if (((AgoraChatFileMessageBody *)quoteMessage.body).displayName.length) {
+                            _quoteContent = [self appendContent:((AgoraChatFileMessageBody *)quoteMessage.body).displayName];
+                        }
+                    }
+                        break;
+                    case AgoraChatMessageBodyTypeCombine:
+                    {
+                        _quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_combine"]];
+                        if (((AgoraChatCombineMessageBody *)quoteMessage.body).title.length) {
+                            _quoteContent = [self appendContent:((AgoraChatCombineMessageBody *)quoteMessage.body).title];
+                        }
+                    }
+                        break;
+                        
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    return _quoteContent;
 }
 
 - (BOOL)detectURL:(NSString *)string {
@@ -237,7 +240,7 @@
 
 - (CGFloat)quoteHeight {
     UILabel *label = [UILabel new];
-    label.numberOfLines = 0;
+    label.numberOfLines = 2;
     label.attributedText = self.quoteContent;
     _quoteHeight = ceilf([label sizeThatFits:CGSizeMake(EMScreenWidth*0.75-24, 999)].height+16);
     label = nil;
@@ -259,7 +262,7 @@
 }
 
 - (NSAttributedString *)appendContent:(NSString *_Nonnull)content {
-    NSMutableAttributedString *show = [[NSMutableAttributedString alloc] initWithAttributedString:self.quoteContent];
+    NSMutableAttributedString *show = [[NSMutableAttributedString alloc] initWithAttributedString:_quoteContent];
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.lineHeightMultiple = 1.12;
     NSAttributedString *text = [[NSAttributedString alloc] initWithString:content attributes:@{NSForegroundColorAttributeName:[UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1],NSFontAttributeName:[UIFont systemFontOfSize:12 weight:UIFontWeightRegular],NSParagraphStyleAttributeName:paragraphStyle}];

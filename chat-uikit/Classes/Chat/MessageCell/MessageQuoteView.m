@@ -32,7 +32,8 @@
     if (!_content) {
         _content = [[UILabel alloc] init];
         _content.textAlignment = 1;
-        _content.numberOfLines = 0;
+        _content.numberOfLines = 2;
+        _content.lineBreakMode = UILineBreakModeTailTruncation;
     }
     return _content;
 }

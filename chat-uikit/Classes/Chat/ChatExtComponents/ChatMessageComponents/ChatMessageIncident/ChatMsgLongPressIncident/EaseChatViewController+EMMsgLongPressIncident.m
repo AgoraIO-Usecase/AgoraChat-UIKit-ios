@@ -121,7 +121,7 @@ static const void *recallViewKey = &recallViewKey;
         if (aError) {
             [EaseAlertController showErrorAlert:aError.errorDescription];
         } else {
-            AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"You recall a message"];
+            AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"You recalled a message"];
             NSString *from = [[AgoraChatClient sharedClient] currentUsername];
             NSString *to = self.currentConversation.conversationId;
             AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:to from:from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];

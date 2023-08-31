@@ -11,6 +11,7 @@
 #import "EasePhotoBrowser.h"
 #import "EasePhotoBrowserPrivate.h"
 #import "UIImage+EasePhotoBrowser.h"
+#import "UIImage+EaseUI.h"
 
 #define PADDING                  10
 
@@ -439,7 +440,7 @@ static void * EaseVideoPlayerObservation = &EaseVideoPlayerObservation;
     navBar.shadowImage = nil;
     navBar.translucent = YES;
     navBar.barStyle = UIBarStyleBlackTranslucent;
-    [navBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+    [navBar setBackgroundImage:[UIImage easeUIImageNamed:@"photo-album"] forBarMetrics:UIBarMetricsDefault];
 }
 
 - (void)storePreviousNavBarAppearance {
