@@ -45,7 +45,7 @@
                 @"custom": @(AgoraChatMessageBodyTypeCustom),
                 @"file": @(AgoraChatMessageBodyTypeFile),
                 @"location": @(AgoraChatMessageBodyTypeLocation),
-                @"Chat History": @(AgoraChatMessageBodyTypeCombine)
+                @"combine": @(AgoraChatMessageBodyTypeCombine)
             };
             NSString *quoteMsgId = quoteInfo[@"msgID"];
             AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;

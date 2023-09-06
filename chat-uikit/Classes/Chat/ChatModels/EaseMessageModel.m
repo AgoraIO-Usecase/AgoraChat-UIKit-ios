@@ -85,7 +85,7 @@
                 @"audio": @(AgoraChatMessageBodyTypeVoice),
                 @"custom": @(AgoraChatMessageBodyTypeCustom),
                 @"file": @(AgoraChatMessageBodyTypeFile),
-                @"location": @(AgoraChatMessageBodyTypeLocation),@"Chat History": @(AgoraChatMessageBodyTypeCombine)
+                @"location": @(AgoraChatMessageBodyTypeLocation),@"combine": @(AgoraChatMessageBodyTypeCombine)
             };
             NSString *quoteMsgId = quoteInfo[@"msgID"];
             AgoraChatMessageBodyType msgBodyType = msgTypeDict[quoteInfo[@"msgType"]].intValue;

@@ -140,12 +140,14 @@ static const void *recallViewKey = &recallViewKey;
                     }
                 }
             }];
-            EaseMessageModel *model = [[EaseMessageModel alloc] initWithAgoraChatMessage:message];
-            [weakself.dataArray replaceObjectAtIndex:indexPath.row withObject:model];
+            EaseMessageModel *newModel = [[EaseMessageModel alloc] initWithAgoraChatMessage:message];
+            [weakself.dataArray replaceObjectAtIndex:indexPath.row withObject:newModel];
             if (notify) {
                 [self.dataArray removeObject:notify];
             }
-            [weakself.tableView reloadData];
+            if ([weakself respondsToSelector:@selector(handleMessagesRemove:)])
+                [weakself performSelector:@selector(handleMessagesRemove:) withObject:@[model.message.messageId]];
+            [weakself refreshTableView:NO];
         }
     }];
     

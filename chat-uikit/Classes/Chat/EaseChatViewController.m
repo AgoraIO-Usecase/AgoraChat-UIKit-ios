@@ -631,7 +631,7 @@
                 @(AgoraChatMessageBodyTypeCmd): @"cmd",
                 @(AgoraChatMessageBodyTypeFile): @"file",
                 @(AgoraChatMessageBodyTypeLocation): @"location",
-                @(AgoraChatMessageBodyTypeCombine): @"Chat History"
+                @(AgoraChatMessageBodyTypeCombine): @"combine"
             };
             [self sendTextAction:text ext:@{@"msgQuote": @{
                 @"msgID": self.inputBar.quoteMessage.messageId,
@@ -785,7 +785,8 @@
                             weakself.moreMsgId = @"";
                         }
                     }
-                    [weakself handleMessagesRemove:@[deleteMsg]];
+                    [weakself handleMessagesRemove:@[deleteMsg.messageId]];
+                    [weakself refreshTableView:NO];
                 }
             }
         }];
@@ -1012,10 +1013,14 @@
             if ([model isKindOfClass:EaseMessageModel.class] && [model.message.messageId isEqualToString:msgId]) {
                 messageExist = YES;
                 if (model.type == AgoraChatMessageTypeImage || model.type == AgoraChatMessageTypeVideo || model.type == AgoraChatMessageTypeFile || model.type == AgoraChatMessageTypeCombine) {
-                    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:model.type];
-                    eventStrategy.chatController = self;
-                    aCell.quoteModel = model;
-                    [eventStrategy messageCellEventOperation:aCell];
+                    if (model.type == AgoraChatMessageTypeCombine) {
+                        [self lookupCombineMessage:model.message];
+                    } else {
+                        AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:model.type];
+                        eventStrategy.chatController = self;
+                        aCell.quoteModel = model;
+                        [eventStrategy messageCellEventOperation:aCell];
+                    }
                 } else {
                     NSArray <NSIndexPath *>*indexPaths = [_tableView indexPathsForVisibleRows];
                     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
@@ -1043,7 +1048,7 @@
             }
         }
     if (messageExist == NO) {
-        [self showHint:@"Message does not exist"];
+        //[self showHint:@"Message does not exist"];
     }
         [self dropdownRefreshTableViewWithData];
 }

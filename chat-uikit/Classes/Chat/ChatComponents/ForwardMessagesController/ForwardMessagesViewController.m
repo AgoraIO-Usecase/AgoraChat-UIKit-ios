@@ -59,6 +59,12 @@
     
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.navigationController.navigationBar.translucent = YES;
+}
+
 - (ForwardList *)forwardList {
     if (!_forwardList) {
         _forwardList = [[ForwardList alloc] initWithFrame:CGRectMake(0, 0, EMScreenWidth, EMScreenHeight-EMNavgationHeight) style:UITableViewStylePlain models:[self models]];
