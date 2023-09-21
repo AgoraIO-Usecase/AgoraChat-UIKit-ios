@@ -174,7 +174,7 @@
     
     if ([model.message remindMe]) {
         // @ALL
-        NSString* strAt = @"@All ";
+        NSString* strAt = @"@All";
         NSRange range = [text rangeOfString:strAt options:1];
         if (range.length == 0 && AgoraChatClient.sharedClient.currentUsername.length > 0) {
             id<EaseUserProfile> user = [EaseUserUtils.shared getUserInfo:AgoraChatClient.sharedClient.currentUsername moduleType:EaseUserModuleTypeGroupChat];

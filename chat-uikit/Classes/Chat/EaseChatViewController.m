@@ -785,8 +785,6 @@
                             weakself.moreMsgId = @"";
                         }
                     }
-                    [weakself handleMessagesRemove:@[deleteMsg.messageId]];
-                    [weakself refreshTableView:NO];
                 }
             }
         }];
@@ -1598,6 +1596,14 @@
         model = [[EaseMessageModel alloc] initWithAgoraChatMessage:msg];
         if (!model) {
             model = [[EaseMessageModel alloc]init];
+        }
+        __weak typeof(self) weakself = self;
+        BOOL modelNeedReload = [model valueForKey:@"needReload"];
+        if (modelNeedReload) {
+            [model setValue:^{
+                            [weakself handleMessagesRemove:@[model.message.messageId]];
+                            [weakself refreshTableView:NO];
+            } forKey:@"loadCompleteBlock"];
         }
         if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellQuoteViewShowContent:)]) {
             if (model.quoteContent.string.length > 0) {

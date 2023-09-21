@@ -124,6 +124,8 @@
 //CMD message received
 - (void)cmdMessagesDidReceive:(NSArray *)aCmdMessages
 {
+    if (!self.editingStatusVisible)
+        return;
     NSString *conId = self.currentConversation.conversationId;
     for (AgoraChatMessage *message in aCmdMessages) {
         if (![conId isEqualToString:message.conversationId]) {

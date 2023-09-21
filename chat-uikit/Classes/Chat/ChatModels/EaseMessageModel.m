@@ -14,11 +14,16 @@
 #import "EaseUserUtils.h"
 #import "EaseWebImageManager.h"
 #import "EaseEmojiHelper.h"
+#import "AgoraChatMessage+EaseUIExt.h"
 
 @interface EaseMessageModel ()
 
 
 @property (nonatomic, assign, readwrite) CGFloat quoteHeight;
+
+@property (nonatomic, copy) void (^loadCompleteBlock)(void);
+
+@property (nonatomic, assign) BOOL needReload;
 @end
 
 @implementation EaseMessageModel
@@ -33,6 +38,7 @@
         self.message = aMsg;
         _direction = aMsg.direction;
         _type = (AgoraChatMessageType)aMsg.body.type;
+        _needReload = NO;
         if (aMsg.body.type == AgoraChatMessageBodyTypeText) {
             if ([aMsg.ext objectForKey:MSG_EXT_GIF]) {
                 _type = AgoraChatMessageTypeExtGif;
@@ -122,30 +128,38 @@
                         if ([self detectURL:msgPreview]) {
                             _quoteContent = [self appendImage:result imageQuote:NO image:[UIImage easeUIImageNamed:@"quote_link"]];
                         }
-                        _quoteContent = [self appendContent:msgPreview];
+                        _quoteContent = [self appendContent:quoteMessage.easeUI_quoteShowText];
                     }
                         break;
                     case AgoraChatMessageBodyTypeImage:
                     {
                         __block UIImage *img = [UIImage easeUIImageNamed:@"msg_img_broken"];
-                        if ([((AgoraChatImageMessageBody *)quoteMessage.body).localPath length] > 0) {
-                            img = [UIImage imageWithContentsOfFile:((AgoraChatImageMessageBody *)quoteMessage.body).localPath];
+                        NSString* imagePath = ((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailLocalPath;
+                        if (imagePath.length <= 0 && quoteMessage.direction == AgoraChatMessageDirectionSend)
+                            imagePath = ((AgoraChatImageMessageBody *)quoteMessage.body).localPath;
+                        if ([imagePath length] > 0) {
+                            img = [UIImage imageWithContentsOfFile:imagePath];
                         }
                         if (!img) {
+                            NSMutableAttributedString* currentResult = [result mutableCopy];
+                            img = [UIImage easeUIImageNamed:@"msg_img_broken"];
+                            _quoteContent = [self appendImage:result imageQuote:YES image:img];
                             if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
                                 NSURL *imageURL = [NSURL URLWithString:((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath];
+                                _needReload = YES;
                                 [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
                                     if (error == nil && image != nil) {
                                         img = image;
                                     } else {
                                         img = [UIImage easeUIImageNamed:@"msg_img_broken"];
                                     }
-                                    _quoteContent = [weakSelf appendImage:result imageQuote:YES image:img];
+                                    weakSelf.quoteContent = [weakSelf appendImage:currentResult imageQuote:YES image:img];
                                     weakSelf.quoteHeight;
+                                    if(weakSelf.loadCompleteBlock) {
+                                        weakSelf.loadCompleteBlock();
+                                        _needReload = NO;
+                                    }
                                 }];
-                            } else {
-                                img = [UIImage easeUIImageNamed:@"msg_img_broken"];
-                                _quoteContent = [self appendImage:result imageQuote:true image:img];
                             }
                             
                         } else {
@@ -156,23 +170,32 @@
                     case AgoraChatMessageBodyTypeVideo:
                     {
                         __block UIImage *img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
-                        if ([((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath length] > 0) {
-                            img = [[UIImage imageWithContentsOfFile:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailLocalPath] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
+                        
+                        NSString* imagePath = ((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailLocalPath;
+                        if (imagePath.length <= 0 && quoteMessage.direction == AgoraChatMessageDirectionSend)
+                            imagePath = ((AgoraChatImageMessageBody *)quoteMessage.body).localPath;
+                        if ([imagePath length] > 0) {
+                            img = [[UIImage imageWithContentsOfFile:imagePath] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
                         }
                         if (!img) {
+                            NSMutableAttributedString* currentResult = [result mutableCopy];
+                            img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
+                            _quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
                             if (((AgoraChatImageMessageBody *)quoteMessage.body).thumbnailRemotePath.length) {
                                 NSURL *imageURL = [NSURL URLWithString:((AgoraChatVideoMessageBody *)quoteMessage.body).thumbnailRemotePath];
+                                _needReload = YES;
                                 [EaseWebImageManager.sharedManager loadImageWithURL:imageURL options:nil progress:nil completed:^(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, EaseImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL) {
                                     if (error == nil && image != nil) {
                                         img = [image Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
                                     } else {
                                         img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];
                                     }
-                                    _quoteContent = [weakSelf appendImage:result imageQuote:YES image:[weakSelf combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                    weakSelf.quoteContent = [weakSelf appendImage:currentResult imageQuote:YES image:[weakSelf combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
+                                    if(weakSelf.loadCompleteBlock) {
+                                        weakSelf.loadCompleteBlock();
+                                        _needReload = NO;
+                                    }
                                 }];
-                            }  else {
-                                img = [[UIImage easeUIImageNamed:@"msg_img_broken"] Ease_resizedImageWithSize:CGSizeMake(80, 80) scaleMode:EaseImageScaleModeAspectFill];;
-                                _quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
                             }
                         } else {
                             _quoteContent = [self appendImage:result imageQuote:YES image:[self combineImage:img coverImage:[UIImage easeUIImageNamed:@"video_cover"]]];
@@ -242,7 +265,7 @@
     UILabel *label = [UILabel new];
     label.numberOfLines = 2;
     label.attributedText = self.quoteContent;
-    _quoteHeight = ceilf([label sizeThatFits:CGSizeMake(EMScreenWidth*0.75-24, 999)].height+16);
+    _quoteHeight = ceilf([label sizeThatFits:CGSizeMake(EMScreenWidth*0.75-48, 999)].height+16);
     label = nil;
     return _quoteHeight;
 }

@@ -70,6 +70,8 @@ static const void *recallViewKey = &recallViewKey;
             [weakself.dataArray removeObject:notify];
         }
         [weakself.dataArray removeObjectsAtIndexes:indexs];
+        if ([weakself respondsToSelector:@selector(handleMessagesRemove:)])
+            [weakself performSelector:@selector(handleMessagesRemove:) withObject:@[model.message.messageId]];
         [weakself.tableView reloadData];
         if ([weakself.dataArray count] == 0) {
             weakself.msgTimelTag = -1;
