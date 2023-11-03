@@ -44,6 +44,7 @@
 #import "MessageEditor.h"
 #import "EditNavigationBar.h"
 #import "EditToolBar.h"
+#import "EaseEmojiHelper.h"
 
 #define chatThreadPageSize 10
 
@@ -1534,7 +1535,8 @@
     if ([aText length] == 0) {
         return;
     }
-    AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:aText];
+    NSString* tmp = [EaseEmojiHelper convertFromEmoji:aText];
+    AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:tmp];
     [self sendMessageWithBody:body ext:aExt];
     if(![aExt objectForKey:MSG_EXT_GIF]){
         [self.inputBar clearInputViewText];

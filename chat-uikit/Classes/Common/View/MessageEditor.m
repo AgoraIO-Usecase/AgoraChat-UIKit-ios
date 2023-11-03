@@ -8,6 +8,7 @@
 #import "MessageEditor.h"
 #import "EaseDefines.h"
 #import "AgoraChatMessage+EaseUIExt.h"
+#import "EaseEmojiHelper.h"
 
 #define kTextViewMinHeight 80
 #define kTextViewMaxHeight EMScreenHeight/3.0
@@ -40,7 +41,8 @@
         self.textView.placeholder = message.easeUI_quoteShowText;
         self.textView.placeholderColor = [UIColor darkGrayColor];
         if (message.body.type == AgoraChatMessageBodyTypeText) {
-            self.textView.text = [message.body valueForKey:@"text"];
+            NSString* text = [message.body valueForKey:@"text"];
+            self.textView.text = [EaseEmojiHelper convertEmoji:text];
         }
         [self updateTextViewHeight];
         
@@ -144,7 +146,8 @@
     [self endEditing:YES];
     if (sender.tag == 12) {
         if (self.callback) {
-            self.callback(self.textView.text);
+            NSString* tmp = [EaseEmojiHelper convertFromEmoji:self.textView.text];
+            self.callback(tmp);
         }
     }
     [self removeFromSuperview];
