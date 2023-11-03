@@ -1,4 +1,5 @@
 # AgoraChatUIKit iOS 使用指南
+
 # Get Started with Agora Chat UIKit iOS
 
 ## 功能描述   Understand the tech
@@ -16,6 +17,23 @@ chat-uikit 源码地址：   URL of chat-uikit source code:
 使用 chat-uikit 的声网 IM App 地址：  URL of Agora IM App using chat-uikit:
 
 - https://github.com/AgoraIO-Usecase/AgoraChat-ios.git Agora IM 
+
+## 重要特性
+- 消息扩展功能
+  - 表情消息
+  - 消息子区
+  - 消息引用
+  - 群 @ 消息
+  - 消息编辑
+  - 消息撤回
+  - 消息多选&合并转发
+- 通用功能
+  - 会话列表
+  - 聊天
+  - 语音消息
+  - 正在输入通知
+  - 已发送回执
+  - 已读回执
 
 ## 前提条件  Prerequisites
 
