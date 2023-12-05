@@ -154,7 +154,9 @@ static NSString *cellIdentifier = @"EaseConversationCell";
     if (!cell) {
         cell = [[EaseConversationCell alloc]initWithConversationsViewModel:_viewModel identifier:cellIdentifier];
     }
-    
+    if (indexPath.row >= self.dataAry.count || self.dataAry.count <= 0) {
+        return cell;
+    }
     EaseConversationModel *model = self.dataAry[indexPath.row];
     cell.model = model;
     
@@ -281,6 +283,9 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row >= self.dataAry.count || self.dataAry.count <= 0) {
+        return;
+    }
     EaseConversationModel *model = [self.dataAry objectAtIndex:indexPath.row];
     if (!model.isTop) {
         [tableView deselectRowAtIndexPath:indexPath animated:YES];
