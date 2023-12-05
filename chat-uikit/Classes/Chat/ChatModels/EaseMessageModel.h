@@ -10,6 +10,9 @@
 #import "EasePublicHeaders.h"
 #import "EaseUserProfile.h"
 
+#define ImageQuoteSize CGSizeMake(36, 36)
+#define CompositeStyleSize CGSizeMake(16, 16)
+
 typedef NS_ENUM(NSInteger, AgoraChatMessageType) {
     AgoraChatMessageTypeText = 1,
     AgoraChatMessageTypeImage,
@@ -19,11 +22,13 @@ typedef NS_ENUM(NSInteger, AgoraChatMessageType) {
     AgoraChatMessageTypeFile,
     AgoraChatMessageTypeCmd,
     AgoraChatMessageTypeCustom,
+    AgoraChatMessageTypeCombine,
     AgoraChatMessageTypeExtCall,
     AgoraChatMessageTypeExtGif,
     AgoraChatMessageTypeExtRecall,
     AgoraChatMessageTypeExtNewFriend,
-    AgoraChatMessageTypeExtAddGroup
+    AgoraChatMessageTypeExtAddGroup,
+    AgoraChatMessageTypeExtURLPreview,
 };
 
 
@@ -48,6 +53,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL isPlaying;
 
 @property (nonatomic) BOOL isHeader;
+
+@property (nonatomic) BOOL isUrl;
+
+@property (nonatomic) BOOL selected;
+
+@property (nonatomic) BOOL editMode;
+
+@property (nonatomic, strong,nullable) NSAttributedString *quoteContent;
+
+@property (nonatomic, assign, readonly) CGFloat quoteHeight;
+
+@property (nonatomic, strong) NSAttributedString *editSymbol;
 
 - (instancetype)initWithAgoraChatMessage:(AgoraChatMessage *)aMsg;
 

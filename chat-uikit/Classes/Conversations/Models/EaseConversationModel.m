@@ -69,7 +69,7 @@
     
     AgoraChatMessage *msg = _conversation.latestMessage;
     _latestUpdateTime = msg.timestamp;
-    NSString *msgStr = nil;
+    NSString *msgStr = @"";
     switch (msg.body.type) {
         case AgoraChatMessageBodyTypeText:
         {
@@ -99,36 +99,42 @@
             break;
         case AgoraChatMessageBodyTypeLocation:
         {
-            msgStr = @"[location]";
+            msgStr = @"[Location]";
         }
             break;
         case AgoraChatMessageBodyTypeCustom:
         {
-            msgStr = @"[customMessage]";
+            msgStr = @"[Custom Message]";
         }
             break;
         case AgoraChatMessageBodyTypeImage:
         {
-            msgStr = @"[picture]";
+            msgStr = @"[Image]";
         }
             break;
         case AgoraChatMessageBodyTypeFile:
         {
-            msgStr = @"[file]";
+            msgStr = @"[File]";
+        }
+            break;
+        case AgoraChatMessageBodyTypeCombine:
+        {
+            msgStr = @"[Chat History]";
         }
             break;
         case AgoraChatMessageBodyTypeVoice:
         {
-            msgStr = @"[audio]";
+            msgStr = @"[Audio]";
         }
             break;
         case AgoraChatMessageBodyTypeVideo:
         {
-            msgStr = @"[video]";
+            msgStr = @"[Video]";
         }
             break;
             
         default:
+            msgStr = @"";
             break;
     }
     
@@ -139,11 +145,17 @@
         _showInfo = [[NSMutableAttributedString alloc] initWithString:msgStr];
         [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:255/255.0 green:43/255.0 blue:43/255.0 alpha:1.0]} range:NSMakeRange(0, msgStr.length)];
     }*/
-    if ([_conversation remindMe]) {
-        NSString *atStr = @"[someone @ me]";
+    if ([_conversation remindALL]) {
+        NSString *atStr = @"[@All]";
         msgStr = [NSString stringWithFormat:@"%@ %@", atStr, msgStr];
         _showInfo = [[NSMutableAttributedString alloc] initWithString:msgStr];
-        [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:255/255.0 green:43/255.0 blue:43/255.0 alpha:1.0]} range:NSMakeRange(0, atStr.length)];
+        [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0/255.0 green:95/255.0 blue:255/255.0 alpha:1.0]} range:NSMakeRange(0, atStr.length)];
+    } else
+    if ([_conversation remindMe]) {
+        NSString *atStr = @"[Someone@You]";
+        msgStr = [NSString stringWithFormat:@"%@ %@", atStr, msgStr];
+        _showInfo = [[NSMutableAttributedString alloc] initWithString:msgStr];
+        [_showInfo setAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0/255.0 green:95/255.0 blue:255/255.0 alpha:1.0]} range:NSMakeRange(0, atStr.length)];
     }
     return _showInfo;
 }

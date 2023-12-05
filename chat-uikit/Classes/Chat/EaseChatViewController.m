@@ -39,6 +39,12 @@
 #import "EMMaskHighlightViewDelegate.h"
 #import "EMBottomReactionDetailView.h"
 #import "ChatUIOptions.h"
+#import "AgoraChatMessage+EaseUIExt.h"
+#import "ForwardMessagesViewController.h"
+#import "MessageEditor.h"
+#import "EditNavigationBar.h"
+#import "EditToolBar.h"
+#import "EaseEmojiHelper.h"
 
 #define chatThreadPageSize 10
 
@@ -49,7 +55,6 @@
     BOOL _isReloadViewWithModel; //Refresh the session page
 }
 @property (nonatomic, strong) EMBottomMoreFunctionView *longPressView;
-@property (nonatomic, strong) EaseInputMenu *inputBar;
 @property (nonatomic, strong) dispatch_queue_t msgQueue;
 @property (nonatomic, strong) NSMutableArray<AgoraChatMessage *> *messageList;
 
@@ -61,6 +66,8 @@
 @property (nonatomic, strong) NSMutableDictionary *messageIdsMap;
 @property (nonatomic) NSString *parentMessageId;
 @property (nonatomic) AgoraChatCursorResult *cursor;
+@property (nonatomic) MessageEditor *editor;
+@property (nonatomic) NSIndexPath* highLightIndexPath;
 @end
 
 @implementation EaseChatViewController
@@ -144,6 +151,8 @@
         _isReloadViewWithModel = NO;
         _sentProfile = nil;
         _otherProfile = nil;
+        _endScroll = YES;
+        _highLightIndexPath = nil;
         [EaseChatKitManager.shared setConversationId:_currentConversation.conversationId];
         if (!_viewModel) {
             _viewModel = [[EaseChatViewModel alloc] init];
@@ -153,6 +162,7 @@
         _inputBar.delegate = self;
         //Session toolbar
         [self _setupChatBarMoreViews];
+        _inputBar.backgroundColor = [UIColor whiteColor];
     }
     return self;
 }
@@ -175,6 +185,7 @@
         _isReloadViewWithModel = NO;
         _sentProfile = nil;
         _otherProfile = nil;
+        _endScroll = YES;
         [EaseChatKitManager.shared setConversationId:_currentConversation.conversationId];
         if (!_viewModel) {
             _viewModel = [[EaseChatViewModel alloc] init];
@@ -190,8 +201,9 @@
 
 - (void)setUserProfiles:(NSArray<id<EaseUserProfile>> *)userProfileAry
 {
-    if (!userProfileAry || userProfileAry.count == 0) return;
     
+    if (!userProfileAry || userProfileAry.count == 0) return;
+    self.profiles = [NSMutableArray arrayWithArray:userProfileAry];
     __weak typeof(self) weakself = self;
     //single chat
     if (self.currentConversation.type == AgoraChatTypeChat) {
@@ -325,7 +337,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
     //群聊@“我”提醒
-    if(self.currentConversation.type == AgoraChatConversationTypeGroupChat && [self.currentConversation remindMe]) {
+    if(self.currentConversation.type == AgoraChatConversationTypeGroupChat && ([self.currentConversation remindMe] || [self.currentConversation remindALL])) {
         [self.currentConversation resetRemindMe];
     };
 }
@@ -431,10 +443,16 @@
     if ([obj isKindOfClass:[EaseMessageModel class]]) {
         EaseMessageModel *model = (EaseMessageModel *)obj;
         if (model.type == AgoraChatMessageTypeExtRecall) {
-            if ([model.message.from isEqualToString:self.currentConversation.conversationId]) {
-                cellString = @"The other party recall a message";
+            if ([model.message.from isEqualToString:AgoraChatClient.sharedClient.currentUsername]) {
+                cellString = @"You recalled a message";
             } else {
-                cellString = @"You recall a message";
+                NSString* msgFrom = model.message.from;
+                if (self.delegate && [self.delegate respondsToSelector:@selector(userProfile:)]) {
+                    id<EaseUserProfile> userData = [self.delegate userProfile:model.message.from];
+                    if (userData.showName.length > 0)
+                        msgFrom = userData.showName;
+                }
+                cellString = [NSString stringWithFormat:@"%@ recalled a message",msgFrom];
             }
             type = EaseChatWeakRemindSystemHint;
         }
@@ -471,6 +489,11 @@
     }
     
     EaseMessageModel *model = (EaseMessageModel *)obj;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(editedMessageContentSymbol)]) {
+        if ([model isKindOfClass:[EaseMessageModel class]]&&!IsStringEmpty(model.message.body.operatorId)) {
+            model.editSymbol = [self.delegate editedMessageContentSymbol];
+        }
+    }
     if (self.delegate && [self.delegate respondsToSelector:@selector(cellForItem:messageModel:)]) {
         UITableViewCell *customCell = [self.delegate cellForItem:tableView messageModel:model];
         if (customCell) {
@@ -498,21 +521,30 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    //NSLog(@"indexpath.row : %ld ", (long)indexPath.row);
-    id obj = [self.dataArray objectAtIndex:indexPath.row];
-    NSString *cellString = nil;
-    if ([obj isKindOfClass:[NSString class]]) {
-        cellString = (NSString *)obj;
-    }
-    NSDictionary *cellNotifyMap;
-    if ([obj isKindOfClass:[NSDictionary class]]) {
-        cellNotifyMap = (NSDictionary *)obj;
-    }
-    cellString = cellNotifyMap.allKeys.firstObject;
-    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-    if ([cell isKindOfClass:[EaseMessageTimeCell class]] && [cellString containsString:@"thread"]) {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(joinChatThreadFromNotifyMessage:)]) {
-            [self.delegate joinChatThreadFromNotifyMessage:cellNotifyMap.allValues.firstObject];
+    if (self.editMode == NO) {
+        //NSLog(@"indexpath.row : %ld ", (long)indexPath.row);
+        id obj = [self.dataArray objectAtIndex:indexPath.row];
+        NSString *cellString = nil;
+        if ([obj isKindOfClass:[NSString class]]) {
+            cellString = (NSString *)obj;
+        }
+        NSDictionary *cellNotifyMap;
+        if ([obj isKindOfClass:[NSDictionary class]]) {
+            cellNotifyMap = (NSDictionary *)obj;
+        }
+        cellString = cellNotifyMap.allKeys.firstObject;
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        if ([cell isKindOfClass:[EaseMessageTimeCell class]] && [cellString containsString:@"thread"]) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(joinChatThreadFromNotifyMessage:)]) {
+                [self.delegate joinChatThreadFromNotifyMessage:cellNotifyMap.allValues.firstObject];
+            }
+        }
+    } else {
+        id obj = [self.dataArray objectAtIndex:indexPath.row];
+        if ([obj isKindOfClass:[EaseMessageModel class]]) {
+            EaseMessageModel* model = (EaseMessageModel*)obj;
+            model.selected = !model.selected;
+            [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
         }
     }
 }
@@ -546,26 +578,72 @@
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
+    self.endScroll = YES;
     [self.view endEditing:YES];
     [self.inputBar clearMoreViewAndSelectedButton];
     [self hideLongPressView];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+   self.endScroll = YES;
+   if (self.delegate && [self.delegate respondsToSelector:@selector(scrollViewEndScroll)]) {
+       [self.delegate scrollViewEndScroll];
+   }
+}
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
+{
+    if (self.highLightIndexPath && (self.highLightIndexPath.section == 0 && self.highLightIndexPath.row < self.dataArray.count)) {
+        EaseMessageCell* cell = [self.tableView cellForRowAtIndexPath:self.highLightIndexPath];
+        if (cell && [cell isKindOfClass:[EaseMessageCell class]]) {
+            [cell showHighlight];
+        }
+    }
 }
 
 #pragma mark - EaseInputMenuDelegate
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewShouldChangeTextInRange:replacementText:)]) {
-        BOOL isValid = [self.delegate textViewShouldChangeTextInRange:range replacementText:text];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textView:ShouldChangeTextInRange:replacementText:)]) {
+        BOOL isValid = [self.delegate textView:textView ShouldChangeTextInRange:range replacementText:text];
         return isValid;
     }
     return YES;
 }
 
+- (void)textViewDidChangeSelection:(UITextView *)textView
+{
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewDidChangeSelection:)]) {
+        [self.delegate textViewDidChangeSelection:textView];
+    }
+}
+
 - (void)inputBarSendMsgAction:(NSString *)text
 {
     if ((text.length > 0 && ![text isEqualToString:@""])) {
-        [self sendTextAction:text ext:nil];
+        if (self.inputBar.quoteMessage) {
+            NSDictionary *msgTypeDict = @{
+                @(AgoraChatMessageBodyTypeText): @"txt",
+                @(AgoraChatMessageBodyTypeImage): @"img",
+                @(AgoraChatMessageBodyTypeVideo): @"video",
+                @(AgoraChatMessageBodyTypeVoice): @"audio",
+                @(AgoraChatMessageBodyTypeCustom): @"custom",
+                @(AgoraChatMessageBodyTypeCmd): @"cmd",
+                @(AgoraChatMessageBodyTypeFile): @"file",
+                @(AgoraChatMessageBodyTypeLocation): @"location",
+                @(AgoraChatMessageBodyTypeCombine): @"combine"
+            };
+            [self sendTextAction:text ext:@{@"msgQuote": @{
+                @"msgID": self.inputBar.quoteMessage.messageId,
+                @"msgPreview": self.inputBar.quoteMessage.easeUI_quoteShowText,
+                @"msgSender": self.inputBar.quoteMessage.from,
+                @"msgType": msgTypeDict[@(self.inputBar.quoteMessage.body.type)]
+            }}];
+            self.inputBar.quoteMessage = nil;
+        } else {
+            [self sendTextAction:text ext:nil];
+        }
         [self.inputBar clearInputViewText];
     }
 }
@@ -573,17 +651,16 @@
 - (void)inputBarDidShowToolbarAction
 {
     [self hideLongPressView];
-    [self.tableView Ease_updateConstraints:^(EaseConstraintMaker *make) {
-        make.bottom.equalTo(self.inputBar.ease_top);
-    }];
+//    [self.tableView Ease_updateConstraints:^(EaseConstraintMaker *make) {
+//        make.bottom.equalTo(self.inputBar.ease_top);
+//    }];
     
     [self performSelector:@selector(scrollToBottomRow) withObject:nil afterDelay:0.1];
 }
 
 - (void)didSelectExtFuncPopupView
 {
-    [self inputBarDidShowToolbarAction];
-    
+
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     
     for (EaseExtendMenuModel *menuModel in self.inputBar.extendMenuView.extMenuModelArray) {
@@ -600,6 +677,14 @@
 //    for (UIAlertAction *alertAction in alertController.actions)
 //        [alertAction setValue:[UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:1.0] forKey:@"_titleTextColor"];
     [self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (NSString *)inputMenuQuoteMessageShowContent:(AgoraChatMessage *)message
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(chatBarQuoteMessageShowContent:)]) {
+        return [_delegate chatBarQuoteMessageShowContent:message];
+    }
+    return nil;
 }
 
 #pragma mark - EaseInputMenuRecordAudioViewDelegate
@@ -637,25 +722,41 @@
 
 - (void)didChatBarEmoticonViewSendAction
 {
-    [self sendTextAction:self.inputBar.text ext:nil];
+    [self inputBarSendMsgAction:self.inputBar.text];
 }
 
 #pragma mark - EaseMessageCellDelegate
 
 - (void)messageCellDidSelected:(EaseMessageCell *)aCell
 {
+    if (self.editMode) {
+        aCell.model.selected = !aCell.model.selected;
+        [self.tableView reloadRowsAtIndexPaths:@[[self.tableView indexPathForCell:aCell]] withRowAnimation:UITableViewRowAnimationNone];
+        return;
+    }
     [self hideLongPressView];
     BOOL isCustom = NO;
     if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectMessageItem:userProfile:)]) {
         isCustom = [self.delegate didSelectMessageItem:aCell.model.message userProfile:aCell.model.userDataProfile];
         if (!isCustom) return;
     }
-    //Message event policy classification
-    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell];
-    eventStrategy.chatController = self;
-    aCell.model.isPlaying = !aCell.model.isPlaying;
-    [eventStrategy messageCellEventOperation:aCell];
+    if (aCell.model.message.body.type != AgoraChatMessageBodyTypeCombine) {
+        //Message event policy classification
+        AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell.model.type];
+        eventStrategy.chatController = self;
+        aCell.model.isPlaying = !aCell.model.isPlaying;
+        [eventStrategy messageCellEventOperation:aCell];
+    } else {
+        [self lookupCombineMessage:aCell.model.message];
+    }
 }
+
+- (void)lookupCombineMessage:(AgoraChatMessage *)message
+{
+    ForwardMessagesViewController *VC = [[ForwardMessagesViewController alloc] initWithMessage:message userProfiles:self.profiles];
+    [self.navigationController pushViewController:VC animated:YES];
+}
+
 
 //Message long press event
 - (void)messageCellDidLongPress:(UITableViewCell *)aCell cgPoint:(CGPoint)point
@@ -689,14 +790,31 @@
             }
         }];
     }];
+    EaseExtendMenuModel *selectExtModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"multiple"] funcDesc:@"Select" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+        if (self.delegate && [self.delegate respondsToSelector:@selector(messageListEntryEditModeWhetherShowBottom)]) {
+            weakself.editMode = YES;
+            BOOL show = [self.delegate messageListEntryEditModeWhetherShowBottom];
+            if (!show) {
+                return;
+            }
+        }
+        if ([aCell isKindOfClass:[EaseMessageCell class]]) {
+            ((EaseMessageCell*)aCell).model.selected = YES;
+        }
+        [weakself editModeAction];
+    }];
     EaseExtendMenuModel *recallExtModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"unsend"] funcDesc:@"Unsend" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
         [weakself recallLongPressAction];
     }];
     
+    EaseExtendMenuModel *quoteModel = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"reply"] funcDesc:@"Reply" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+        EaseMessageModel *model = [weakself.dataArray objectAtIndex:weakself.longPressIndexPath.row];
+        weakself.inputBar.quoteMessage = model.message;
+        [weakself.inputBar raiseKeyboard];
+    }];
     
     NSMutableArray<EaseExtendMenuModel*> *extMenuArray = [[NSMutableArray<EaseExtendMenuModel*> alloc]init];
-    
-    
+        
     BOOL isCustomCell = NO;
     if (![aCell isKindOfClass:[EaseMessageCell class]]) {
         [extMenuArray addObject:recallExtModel];
@@ -705,12 +823,10 @@
     } else {
         _currentLongPressCell = (EaseMessageCell*)aCell;
         long long currentTimestamp = [[NSDate new] timeIntervalSince1970] * 1000;
-        if (_currentLongPressCell.model.message.direction == AgoraChatMessageDirectionSend && (currentTimestamp - _currentLongPressCell.model.message.timestamp <= 120000)) {
-            [extMenuArray addObject:recallExtModel];
-        }
-        if (_currentLongPressCell.model.type == AgoraChatMessageTypeText || _currentLongPressCell.model.type == AgoraChatMessageTypeImage || _currentLongPressCell.model.type == AgoraChatMessageTypeVideo || _currentLongPressCell.model.type == AgoraChatMessageTypeFile || _currentLongPressCell.model.type == AgoraChatMessageTypeVoice) {
+        
+        if (_currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText ||  _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeImage || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeVideo || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeFile || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeVoice || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeCombine || _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeLocation) {
             if (self.currentConversation.type == AgoraChatConversationTypeGroupChat && !self.currentConversation.isChatThread && _currentLongPressCell.model.message.chatThread == nil) {
-                EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Reply" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+                EaseExtendMenuModel *creatThread = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"groupThread"] funcDesc:@"Create Thread" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
                     if ([aCell isKindOfClass:[EaseMessageCell class]]) {
                         if (self.delegate && [self.delegate respondsToSelector:@selector(createThread:)]) {
                             [self.delegate createThread:((EaseMessageCell*)aCell).model];
@@ -721,13 +837,31 @@
                 }];
                 [extMenuArray addObject:creatThread];
             }
+            if (_currentLongPressCell.model.message.direction == AgoraChatMessageDirectionSend && (currentTimestamp - _currentLongPressCell.model.message.timestamp <= 120000)) {
+                [extMenuArray addObject:recallExtModel];
+            }
         }
     }
     if (_currentLongPressCell && _currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
         [extMenuArray addObject:copyExtModel];
     }
-    [extMenuArray addObject:deleteExtModel];
     
+    
+    EaseMessageModel *model = _currentLongPressCell.model;
+    if (model.message.status == AgoraChatMessageStatusSucceed)
+        [extMenuArray addObject:quoteModel];
+    if (_currentLongPressCell.model.message.body.type == AgoraChatMessageBodyTypeText) {
+        EaseExtendMenuModel *editItem = [[EaseExtendMenuModel alloc]initWithData:[UIImage easeUIImageNamed:@"edit"] funcDesc:@"Edit" handle:^(NSString * _Nonnull itemDesc, BOOL isExecuted) {
+            if ([weakself.delegate respondsToSelector:@selector(messageEditAction)]) {
+                [weakself.delegate messageEditAction];
+                return;
+            }
+            [weakself modifyAction:model];
+        }];
+        [extMenuArray addObject:editItem];
+    }
+    [extMenuArray addObject:selectExtModel];
+    [extMenuArray addObject:deleteExtModel];
     if (isCustomCell) {
         if (self.delegate && [self.delegate respondsToSelector:@selector(customCellLongPressExtMenuItemArray:customCell:)]) {
             //自定义cell长按
@@ -760,7 +894,172 @@
     [EMBottomMoreFunctionView showMenuItems:extMenuArray showReaction:showReaction delegate:self ligheViews:nil animation:YES userInfo:userInfo];
 }
 
+- (void)modifyAction:(EaseMessageModel *)model {
+    __weak typeof(self) weakself = self;
+    self.editor = [[MessageEditor alloc] initWithFrame:self.view.window.frame message:model.message doneClosure:^(NSString * _Nonnull content) {
+        [weakself modifyMessage:content model:model];
+    }];
+    [self.view.window addSubview:self.editor];
+}
 
+- (void)modifyMessage:(NSString *)content model:(EaseMessageModel *)model {
+    AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:content];
+    body.targetLanguages = ((AgoraChatTextMessageBody *)model.message.body).targetLanguages;
+    [self showHudInView:self.view hint:@"Modifying message..."];
+    __weak typeof(self) weakself = self;
+    [AgoraChatClient.sharedClient.chatManager modifyMessage:model.message.messageId body:body completion:^(AgoraChatError * _Nullable error, AgoraChatMessage * _Nullable message) {
+        [weakself hideHud];
+        if (!error) {
+            [weakself.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if ([obj isKindOfClass:[EaseMessageModel class]]) {
+                    EaseMessageModel *model = (EaseMessageModel *)obj;
+                    if ( model.message &&[model.message.messageId isEqualToString:message.messageId]) {
+                        model.message = message;
+                        UITableViewCell *cell = [weakself.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:idx inSection:0]];
+                        if ([cell isKindOfClass:[EaseMessageCell class]]) {
+                            EaseMessageCell *messageCell = (EaseMessageCell*)cell;
+                            [weakself.dataArray replaceObjectAtIndex:idx withObject:[[EaseMessageModel alloc] initWithAgoraChatMessage:model.message]];
+                            if ([weakself.tableView.visibleCells containsObject:cell]) {
+                                [weakself.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:idx inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+                            }
+                            *stop = YES;
+                        }
+                    }
+                }
+            }];
+        } else {
+            [weakself showHint:error.errorDescription];
+        }
+    }];
+}
+
+//- (EditNavigationBar *)editNavigation {
+//    if (!_editNavigation) {
+//        _editNavigation = [[EditNavigationBar alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, EMNavgationHeight) cancel:^{
+//
+//        }];
+//        _editNavigation.backgroundColor = [UIColor whiteColor];
+//    }
+//    return _editNavigation;
+//
+//}
+
+- (EditToolBar *)toolBar {
+    if (!_toolBar) {
+        __weak typeof(self) weakself = self;
+        _toolBar = [[EditToolBar alloc] initWithFrame:CGRectMake(0, EMScreenHeight - 54 - EaseVIEWBOTTOMMARGIN, EMScreenWidth, EaseVIEWBOTTOMMARGIN+54) operationClosure:^(enum EditBarOperationType type) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(messageListEntryEditModeThenOperation:)]) {
+                [self.delegate messageListEntryEditModeThenOperation:type];
+            }
+        }];
+        _toolBar.backgroundColor = [UIColor whiteColor];
+    }
+    return _toolBar;
+}
+
+
+- (void)setEditMode:(BOOL)editMode {
+    _editMode = editMode;
+    for (id obj in self.dataArray) {
+        if ([obj isKindOfClass:[EaseMessageModel class]]) {
+            EaseMessageModel *model = (EaseMessageModel*)obj;
+            model.editMode = editMode;
+        }
+    }
+    [self.tableView reloadData];
+}
+
+
+- (void)editModeAction {
+    self.editMode = YES;
+}
+
+- (UIWindow *)keyWindow {
+    if (@available(iOS 13.0, *)) {
+        for (UIWindowScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
+            if (scene.activationState == UISceneActivationStateForegroundActive) {
+                if (scene.windows.firstObject.window.isKeyWindow) {
+                    return scene.windows.firstObject.window;
+                }
+            }
+        }
+    } else {
+        return [UIApplication sharedApplication].keyWindow;
+    }
+    return nil;
+}
+
+
+- (void)messageCellDidClickQuote:(EaseMessageCell *)aCell {
+    [self hideLongPressView];
+        if (_delegate && [_delegate respondsToSelector:@selector(messageCellDidClickQuote:)]) {
+            if (![_delegate messageCellDidClickQuote:aCell.model.message]) {
+                return;
+            }
+        }
+        NSString *msgId = aCell.model.message.ext[@"msgQuote"][@"msgID"];
+        if (msgId.length <= 0) {
+            [self showHint:@"Message does not exist"];
+            return;
+        }
+        
+//        _searchRowAction.isSearching = YES;
+//        _searchRowAction.currentSearchPage = 1;
+//        _searchRowAction.messageId = msgId;
+        BOOL messageExist = NO;
+        for (int i = (int)_dataArray.count - 1; i >= 0; i --) {
+            EaseMessageModel *model = self.dataArray[i];
+            if ([model isKindOfClass:EaseMessageModel.class] && [model.message.messageId isEqualToString:msgId]) {
+                messageExist = YES;
+                if (model.type == AgoraChatMessageTypeImage || model.type == AgoraChatMessageTypeVideo || model.type == AgoraChatMessageTypeFile || model.type == AgoraChatMessageTypeCombine) {
+                    if (model.type == AgoraChatMessageTypeCombine) {
+                        [self lookupCombineMessage:model.message];
+                    } else {
+                        AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:model.type];
+                        eventStrategy.chatController = self;
+                        aCell.quoteModel = model;
+                        [eventStrategy messageCellEventOperation:aCell];
+                    }
+                } else {
+                    NSArray <NSIndexPath *>*indexPaths = [_tableView indexPathsForVisibleRows];
+                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+                    BOOL isVisibleCell = NO;
+                    for (NSIndexPath *i in indexPaths) {
+                        if ([i isEqual:indexPath]) {
+                            UITableViewCell *cell = [_tableView cellForRowAtIndexPath:indexPath];
+                            if (cell) {
+                                if ([cell isKindOfClass:EaseMessageCell.class]) {
+                                    [((EaseMessageCell *)cell) showHighlight];
+                                }
+                                self.highLightIndexPath = nil;
+                            }
+                            isVisibleCell = YES;
+                            break;
+                        }
+                    }
+                    if (!isVisibleCell) {
+                        self.highLightIndexPath = indexPath;
+                        [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+                    }
+                }
+//                _searchRowAction.isSearching = NO;
+                return;
+            }
+        }
+    if (messageExist == NO) {
+        //[self showHint:@"Message does not exist"];
+    }
+        [self dropdownRefreshTableViewWithData];
+}
+
+- (void)messageCellDidLongPressQuote:(EaseMessageCell *)aCell {
+    [self hideLongPressView];
+    if (_delegate && [_delegate respondsToSelector:@selector(messageCellDidLongPressQuote:)]) {
+        if (![_delegate messageCellDidLongPressQuote:aCell.model.message]) {
+            return;
+        }
+    }
+}
 
 - (void)createThread:(EaseMessageModel *)model {
     EaseThreadCreateViewController *vc = [[EaseThreadCreateViewController alloc] initWithType:EMThreadHeaderTypeCreate viewModel:_viewModel message:model];
@@ -800,20 +1099,22 @@
 {
     [self hideLongPressView];
     if (self.delegate && [self.delegate respondsToSelector:@selector(avatarDidLongPress:)]) {
-        [self.delegate avatarDidLongPress:model.userDataProfile];
+        if (!model.userDataProfile) {
+        } else
+            [self.delegate avatarDidLongPress:model.userDataProfile];
     }
 }
 
 - (void)messageCellDidClickReactionView:(EaseMessageModel *)model {
     [self.inputBar resignFirstResponder];
-    
+    __weak typeof(self)weakSelf = self;
     [EMBottomReactionDetailView showMenuItems:model.message animation:YES didRemoveSelfReaction:^(NSString * _Nonnull reaction) {
 //        __weak typeof(self)weakSelf = self;
 //        [AgoraChatClient.sharedClient.chatManager removeReaction:reaction fromMessage:model.message.messageId completion:^(AgoraChatError * _Nullable error) {
 //            if (error) {
 //                return;
 //            }
-            [self reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
+            [weakSelf reloadVisibleRowsWithMessageIds:[NSSet setWithObject:model.message.messageId]];
 //            __strong typeof(weakSelf)strongSelf = self;
 //            if (strongSelf) {
 //                NSArray *hightlightViews;
@@ -830,6 +1131,14 @@
 //            }
 //        }];
     }];
+}
+
+- (void)messageCellNeedReload:(EaseMessageCell *)cell
+{
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    if (indexPath && indexPath.row < self.dataArray.count) {
+        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    }
 }
 
 #pragma mark -- EaseMoreFunctionViewDelegate
@@ -879,6 +1188,29 @@
     return self.view.frame;
 }
 
+- (void)onMessageContentChanged:(AgoraChatMessage *)message operatorId:(NSString *)operatorId operationTime:(NSUInteger)operationTime {
+    __weak typeof(self) weakSelf = self;
+    [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+       if ([obj isKindOfClass:[EaseMessageModel class]]) {
+           EaseMessageModel *model = (EaseMessageModel *)obj;
+           if ([model.message.messageId isEqualToString:message.messageId]) {
+               model.message = message;
+               NSIndexPath* indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
+               UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+               if ([cell isKindOfClass:[EaseMessageCell class]]) {
+                   EaseMessageCell *messageCell = (EaseMessageCell*)cell;
+                   EaseMessageModel *editModel = [[EaseMessageModel alloc] initWithAgoraChatMessage:model.message];
+                   [weakSelf.dataArray replaceObjectAtIndex:idx withObject:editModel];
+                   if ([self.tableView.visibleCells containsObject:cell]) {
+                       [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                   }
+                   *stop = YES;
+               }
+           }
+       }
+    }];
+}
+
 #pragma mark - EMChatManagerDelegate
 
 
@@ -909,8 +1241,10 @@
 - (void)messagesInfoDidRecall:(NSArray<AgoraChatRecallMessageInfo *> *)aRecallMessagesInfo
 {
     __block NSDictionary *dic;
+    NSMutableArray<NSString*>* messageIds = [NSMutableArray array];
     [aRecallMessagesInfo enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         AgoraChatRecallMessageInfo *recallMessageInfo = (AgoraChatRecallMessageInfo *)obj;
+        [messageIds addObject:recallMessageInfo.recallMessage.messageId];
         [[[self.dataArray reverseObjectEnumerator] allObjects] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj isKindOfClass:[NSDictionary class]]) {
                 if ([((NSDictionary *)obj).allValues.firstObject isEqualToString:recallMessageInfo.recallMessage.messageId]) {
@@ -920,11 +1254,28 @@
             }
         }];
     }];
+    
+    [self handleMessagesRemove:messageIds];
     __weak typeof(self) weakself =self;
     dispatch_async(dispatch_get_main_queue(), ^{
         [weakself.dataArray removeObject:dic];
-        [weakself.tableView reloadData];
+        [weakself refreshTableView:NO];
     });
+}
+
+- (void)handleMessagesRemove:(NSArray<NSString*>*) messageIds
+{
+    [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[EaseMessageModel class]]) {
+            NSDictionary *quoteInfo = [((EaseMessageModel*)obj).message.ext objectForKey:@"msgQuote"];
+            if (quoteInfo) {
+                NSString *quoteMsgId = quoteInfo[@"msgID"];
+                if (quoteMsgId.length > 0 && [messageIds containsObject:quoteMsgId]) {
+                    ((EaseMessageModel*)obj).quoteContent =  nil;
+                }
+            }
+        }
+    }];
 }
 
 
@@ -1181,15 +1532,15 @@
 - (void)sendTextAction:(NSString *)aText
                     ext:(NSDictionary *)aExt
 {
-    if(![aExt objectForKey:MSG_EXT_GIF]){
-        [self.inputBar clearInputViewText];
-    }
     if ([aText length] == 0) {
         return;
     }
-    
-    AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:aText];
+    NSString* tmp = [EaseEmojiHelper convertFromEmoji:aText];
+    AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:tmp];
     [self sendMessageWithBody:body ext:aExt];
+    if(![aExt objectForKey:MSG_EXT_GIF]){
+        [self.inputBar clearInputViewText];
+    }
 }
 
 #pragma mark - Data
@@ -1207,11 +1558,11 @@
             self.moreMsgId = @"";
         }
         [AgoraChatClient.sharedClient.chatManager asyncFetchHistoryMessagesFromServer:self.currentConversation.conversationId conversationType:self.currentConversation.type startMessageId:self.moreMsgId fetchDirection:AgoraChatMessageFetchHistoryDirectionDown pageSize:10 completion:^(AgoraChatCursorResult *aResult, AgoraChatError *aError) {
-            self.loadFinished = YES;
+            weakself.loadFinished = YES;
             if (!aError) {
-                self.cursor = aResult;
-                self.moreMsgId = self.cursor.cursor;
-                [self refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
+                weakself.cursor = aResult;
+                weakself.moreMsgId = weakself.cursor.cursor;
+                [weakself refreshTableViewWithData:aResult.list isInsertBottom:YES isScrollBottom:isScrollBottom];
             }
         }];
     } else {
@@ -1248,6 +1599,20 @@
         if (!model) {
             model = [[EaseMessageModel alloc]init];
         }
+        __weak typeof(self) weakself = self;
+        BOOL modelNeedReload = [model valueForKey:@"needReload"];
+        if (modelNeedReload) {
+            [model setValue:^{
+                            [weakself handleMessagesRemove:@[model.message.messageId]];
+                            [weakself refreshTableView:NO];
+            } forKey:@"loadCompleteBlock"];
+        }
+        if (self.delegate && [self.delegate respondsToSelector:@selector(messageCellQuoteViewShowContent:)]) {
+            if (model.quoteContent.string.length > 0) {
+                model.quoteContent = [self.delegate messageCellQuoteViewShowContent:msg];
+                model.quoteHeight;
+            }
+        }
         if (model.type <= AgoraChatMessageTypeExtCall) {
             if (self.currentConversation.type == AgoraChatTypeChat) {
                 if ([model.message.from isEqualToString:self.currentConversation.conversationId]) {
@@ -1269,6 +1634,7 @@
                 }
             }
         }
+        model.editMode = self.editMode;
         [formated addObject:model];
     }
     return formated;
@@ -1464,6 +1830,7 @@
     });
 }
 
+
 #pragma mark - getter
 - (UITableView *)tableView {
     if (!_tableView) {
@@ -1475,7 +1842,7 @@
         _tableView.estimatedRowHeight = 130;
         _tableView.scrollsToTop = NO;
         if (self.isChatThread != YES) {
-            [_tableView enableRefresh:@"drop down refresh" color:UIColor.systemGrayColor];
+            [_tableView enableRefresh:@"Refreshing this conversation" color:UIColor.systemGrayColor];
             [_tableView.refreshControl addTarget:self action:@selector(dropdownRefreshTableViewWithData) forControlEvents:UIControlEventValueChanged];
         }
         _tableView.tableFooterView = [[UIView alloc] init];

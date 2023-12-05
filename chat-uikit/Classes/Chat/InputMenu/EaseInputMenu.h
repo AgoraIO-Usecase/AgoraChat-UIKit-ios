@@ -24,10 +24,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) EaseInputMenuRecordAudioView *recordAudioView;
 @property (nonatomic, strong) EaseInputMenuEmoticonView *moreEmoticonView;
 @property (nonatomic, strong) EaseExtendMenuView *extendMenuView;
+@property (nonatomic, strong) AgoraChatMessage *quoteMessage;
 
 - (instancetype)initWithViewModel:(EaseChatViewModel *)viewModel;
 
 - (void)setGradientBackgroundWithColors:(NSArray<UIColor *> *_Nullable)colors locations:(NSArray<NSNumber *> *_Nullable)locations startPoint:(CGPoint)startPoint endPoint:(CGPoint)endPoint;
+
+- (void)raiseKeyboard;
 
 @end
 
@@ -38,6 +41,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
 
+- (void)textViewDidChangeSelection:(UITextView *)textView;
+
 - (void)inputViewDidChange:(UITextView *)textView;
 
 - (void)inputBarDidShowToolbarAction;
@@ -45,6 +50,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)inputBarSendMsgAction:(NSString *)text;
 
 - (void)didSelectExtFuncPopupView;
+
+- (NSString *)inputMenuQuoteMessageShowContent:(AgoraChatMessage *)message;
 
 @end
 

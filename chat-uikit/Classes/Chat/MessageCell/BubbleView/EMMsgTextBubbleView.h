@@ -7,7 +7,6 @@
 //
 
 #import "EaseChatMessageBubbleView.h"
-#import "EaseHeaders.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

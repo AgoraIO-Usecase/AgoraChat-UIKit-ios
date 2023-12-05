@@ -8,7 +8,10 @@
 
 #import "EMMsgTextBubbleView.h"
 #import "EaseEmojiHelper.h"
+#import "AgoraChatMessage+RemindMe.h"
 #import "EMMsgThreadPreviewBubble.h"
+#import "EaseUserUtils.h"
+#import "EaseHeaders.h"
 #define kHorizontalPadding 12
 #define kVerticalPadding 8
 #define KEMThreadBubbleWidth (EMScreenWidth*(3/5.0))
@@ -29,7 +32,7 @@
         _viewModel = viewModel;
         [self _setupSubviews];
         self.threadBubble = [[EMMsgThreadPreviewBubble alloc] initWithDirection:aDirection type:aType viewModel:viewModel];
-        self.threadBubble.tag = 666;
+        self.threadBubble.tag = 777;
         [self addSubview:self.threadBubble];
         self.threadBubble.layer.cornerRadius = 8;
         self.threadBubble.clipsToBounds = YES;
@@ -88,6 +91,12 @@
     }
 }
 
+- (NSString*)showText
+{
+    AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)self.model.message.body;
+    return body.text;
+}
+
 #pragma mark - Setter
 
 - (void)setModel:(EaseMessageModel *)model
@@ -103,9 +112,9 @@
     } else {
         self.threadBubble.hidden = YES;
     }
-    AgoraChatTextMessageBody *body = (AgoraChatTextMessageBody *)model.message.body;
     
-    NSString *text = [EaseEmojiHelper convertEmoji:body.text];
+    
+    NSString *text = [EaseEmojiHelper convertEmoji:[self showText]];
     NSMutableAttributedString *attaStr = [[NSMutableAttributedString alloc] initWithString:text];
     /*
     //glideline
@@ -156,12 +165,28 @@
     paragraphStyle.lineBreakMode = NSLineBreakByWordWrapping;
     NSDictionary *attributes = @{
                                  NSFontAttributeName:[UIFont systemFontOfSize:16],
-                                 NSParagraphStyleAttributeName:paragraphStyle
-                                 ,NSForegroundColorAttributeName: color};
+                                 NSParagraphStyleAttributeName:paragraphStyle,
+                                 NSForegroundColorAttributeName: color};
    
     [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
    
-    [attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
+    //[attaStr addAttributes:attributes range:NSMakeRange(0, text.length)];
+    
+    if ([model.message remindMe]) {
+        // @ALL
+        NSString* strAt = @"@All";
+        NSRange range = [text rangeOfString:strAt options:1];
+        if (range.length == 0 && AgoraChatClient.sharedClient.currentUsername.length > 0) {
+            id<EaseUserProfile> user = [EaseUserUtils.shared getUserInfo:AgoraChatClient.sharedClient.currentUsername moduleType:EaseUserModuleTypeGroupChat];
+            strAt = [NSString stringWithFormat:@"@%@",user.showName];
+            range = [text rangeOfString:strAt];
+        }
+        
+        if (range.location >= 0 && range.length > 0) {
+            //[attaStr addAttributes:@{NSForegroundColorAttributeName:[UIColor colorWithHexString:@"154de"]} range:range];
+            [attaStr replaceCharactersInRange:range withAttributedString:[[NSAttributedString alloc] initWithString:strAt attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:16],NSForegroundColorAttributeName:[UIColor colorWithHexString:@"154dfe"]}]];
+        }
+    }
     self.textLabel.attributedText = attaStr;
     if (model.isHeader == NO && model.message.chatThread) {
         self.threadBubble.model = model;

@@ -9,6 +9,8 @@
 #import "EaseHeaders.h"
 #import "AgoraChatConversation+EaseUI.h"
 #import "UIImage+EaseUI.h"
+#import "AgoraChatMessage+RemindMe.h"
+#import "UITableView+Refresh.h"
 
 static NSString *cellIdentifier = @"EaseConversationCell";
 
@@ -50,7 +52,26 @@ static NSString *cellIdentifier = @"EaseConversationCell";
             });
         }
     }];
+//    UIImageView *iv = [[UIImageView alloc]initWithFrame:CGRectMake(100, 100, 100, 100)];
+//    iv.backgroundColor = [UIColor orangeColor];
+//    iv.contentMode = UIViewContentModeScaleAspectFit;
+//    iv.image = [self combineImage:[UIImage easeUIImageNamed:@"chatroom_unread_bg"] coverImage:[UIImage easeUIImageNamed:@"quote_voice"]];
+//    [self.view addSubview:iv];
 }
+
+- (NSString*)refreshTitle
+{
+    return @"Refreshing conversation list";
+}
+
+//- (UIImage *)combineImage:(UIImage *)image coverImage:(UIImage *)coverImage {
+//    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0.0);
+//    [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+//    [coverImage drawInRect:CGRectMake(image.size.width/2.0-18, image.size.height/2.0-18, 36, 36)];
+//    UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+//    return resultingImage;
+//}
 
 - (void)viewWillDisappear:(BOOL)animated
 {
@@ -159,7 +180,7 @@ static NSString *cellIdentifier = @"EaseConversationCell";
     deleteAction.backgroundColor = [UIColor colorWithHexString:@"FF14CC"];
     
     UIContextualAction *topAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal
-                                                                            title:!model.isTop ? @"Sticky on Top" : @"Unsticky"
+                                                                            title:!model.isTop ? @"Pin" : @"Unpin"
                                                                           handler:^(UIContextualAction * _Nonnull action, __kindof UIView * _Nonnull sourceView, void (^ _Nonnull completionHandler)(BOOL))
                                      {
         AgoraChatConversation *conversation = [AgoraChatClient.sharedClient.chatManager getConversation:model.easeId
@@ -285,13 +306,22 @@ static NSString *cellIdentifier = @"EaseConversationCell";
 {
     if (aMessages && [aMessages count]) {
         AgoraChatMessage *msg = aMessages[0];
-        if(msg.body.type == AgoraChatMessageBodyTypeText && msg.isChatThreadMessage != YES) {
+        if ([msg remindMe]) {
             AgoraChatConversation *conversation = [[AgoraChatClient sharedClient].chatManager getConversation:msg.conversationId type:AgoraChatConversationTypeGroupChat createIfNotExist:NO];
-            //群聊@“我”提醒
-            NSString *content = [NSString stringWithFormat:@"@%@",AgoraChatClient.sharedClient.currentUsername];
-            if(conversation.type == AgoraChatConversationTypeGroupChat && [((AgoraChatTextMessageBody *)msg.body).text containsString:content] && msg.isChatThreadMessage != YES) {
+            NSDictionary* ext = msg.ext;
+            BOOL atALL = NO;
+            if (ext && [ext objectForKey:@"em_at_list"]) {
+                id atList = [ext objectForKey:@"em_at_list"];
+                if ([atList isKindOfClass:[NSString class]]) {
+                    if ([atList isEqualToString:@"ALL"]) {
+                        atALL = YES;
+                    }
+                }
+            }
+            if (atALL) {
+                [conversation setRemindAll];
+            } else
                 [conversation setRemindMe:msg.messageId];
-            };
         }
     }
     [self _loadAllConversationsFromDB];

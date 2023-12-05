@@ -219,8 +219,8 @@
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(textViewShouldChangeTextInRange:replacementText:)]) {
-        BOOL isValid = [self.delegate textViewShouldChangeTextInRange:range replacementText:text];
+    if (self.delegate && [self.delegate respondsToSelector:@selector(textView:ShouldChangeTextInRange:replacementText:)]) {
+        BOOL isValid = [self.delegate textView:textView ShouldChangeTextInRange:range replacementText:text];
         return isValid;
     }
     return YES;
@@ -417,7 +417,7 @@
         if (!isCustom) return;
     }
     //Message event policy classification
-    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell];
+    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell.model.type];
     eventStrategy.chatController = self;
     [eventStrategy messageCellEventOperation:aCell];
 }

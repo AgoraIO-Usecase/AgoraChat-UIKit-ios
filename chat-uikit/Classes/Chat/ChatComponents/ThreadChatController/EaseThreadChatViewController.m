@@ -83,10 +83,24 @@
         isCustom = [self.delegate didSelectMessageItem:aCell.model.message userProfile:aCell.model.userDataProfile];
         if (!isCustom) return;
     }
-    //Message event policy classification
-    AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell];
-    eventStrategy.chatController = self;
-    [eventStrategy messageCellEventOperation:aCell];
+    if (aCell.model.message.body.type != AgoraChatMessageBodyTypeCombine) {
+        //Message event policy classification
+        NSString *msgId = aCell.model.message.ext[@"msgQuote"][@"msgID"];
+        [self.dataArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj isKindOfClass:[EaseMessageModel class]]) {
+                EaseMessageModel *model = (EaseMessageModel *)obj;
+                if ([model.message.messageId isEqualToString:msgId]) {
+                    aCell.quoteModel = model;
+                    *stop = YES;
+                }
+            }
+        }];
+        AgoraChatMessageEventStrategy *eventStrategy = [AgoraChatMessageEventStrategyFactory getStratrgyImplWithMsgCell:aCell.model.type];
+        eventStrategy.chatController = self;
+        [eventStrategy messageCellEventOperation:aCell];
+    } else {
+        [self performSelector:@selector(lookupCombineMessage:) withObject:aCell.model.message];
+    }
 }
 
 - (void)viewDidLoad {
@@ -174,7 +188,7 @@
                     AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"The other party retracted a message"];
                     NSString *to = [[AgoraChatClient sharedClient] currentUsername];
                     NSString *from = self.currentConversation.conversationId;
-                    AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:from from:from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
+                    AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:model.message.conversationId from:msg.from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
                     message.chatType = (AgoraChatType)self.currentConversation.type;
                     message.isRead = YES;
                     message.messageId = msg.messageId;

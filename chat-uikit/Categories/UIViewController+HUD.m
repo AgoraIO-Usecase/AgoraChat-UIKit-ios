@@ -37,15 +37,20 @@ static const void *HttpRequestHUDKey = &HttpRequestHUDKey;
 
 - (void)showHint:(NSString *)hint
 {
-    UIWindow *win = [[[UIApplication sharedApplication] windows] lastObject];
+    UIWindow *win = [[[UIApplication sharedApplication] windows] firstObject];
     EaseProgressHUD *hud = [EaseProgressHUD showHUDAddedTo:win animated:YES];
     hud.userInteractionEnabled = NO;
     // Configure for text only and offset down
     hud.mode = EaseProgressHUDModeText;
     hud.label.text = hint;
-    hud.margin = 10.f;
+    hud.label.numberOfLines = 0;
+    hud.bezelView.style = EaseProgressHUDBackgroundStyleSolidColor;
+    hud.bezelView.layer.cornerRadius = 10;
+    hud.bezelView.backgroundColor = [UIColor blackColor];
+    hud.contentColor = [UIColor whiteColor];
+    hud.margin = 15.f;
     CGPoint offset = hud.offset;
-    offset.y = 180;
+    offset.y = 200;
     hud.offset = offset;
     hud.removeFromSuperViewOnHide = YES;
     [hud hideAnimated:YES afterDelay:2];
@@ -71,4 +76,32 @@ static const void *HttpRequestHUDKey = &HttpRequestHUDKey;
     [[self HUD] hideAnimated:YES];
 }
 
++ (UIViewController *)currentViewController {
+    if (@available(iOS 13.0, *)) {
+        for (UIWindowScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
+            if (scene.activationState == UISceneActivationStateForegroundActive) {
+                for (UIWindow* window in scene.windows) {
+                    if(window.isKeyWindow) {
+                        UIViewController* vc =  window.rootViewController;
+                        if ([vc isKindOfClass:[UINavigationController class]]) {
+                            return ((UINavigationController*)vc).visibleViewController;
+                        } else if ([vc isKindOfClass:[UITabBarController class]]) {
+                            UIViewController* selectVC = ((UITabBarController*)vc).selectedViewController;
+                            if ([selectVC isKindOfClass:[UINavigationController class]]) {
+                                return ((UINavigationController*)selectVC).visibleViewController;
+                            } else {
+                                return selectVC;
+                            }
+                        } else {
+                            return vc;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        return [UIApplication sharedApplication].keyWindow.rootViewController;
+    }
+    return nil;
+}
 @end

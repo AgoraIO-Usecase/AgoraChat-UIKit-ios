@@ -18,9 +18,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSArray<NSString *> *)getAllEmojis;
 
-+ (BOOL)isStringContainsEmoji:(NSString *)aString;
-
 + (NSString *)convertEmoji:(NSString *)aString;
+
++ (NSString *)convertFromEmoji:(NSString *)aString;
 
 @end
 

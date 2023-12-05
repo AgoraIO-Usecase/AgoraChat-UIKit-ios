@@ -9,6 +9,7 @@
 #import "EaseUserProfile.h"
 #import "EaseMessageModel.h"
 #import "EaseExtendMenuModel.h"
+#import "EditToolBar.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -100,8 +101,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @brief Input area Keyboard input change callback example: @ group member
  *
  */
-- (BOOL)textViewShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
+- (BOOL)textView:(UITextView*)textView ShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
 
+/**
+ * Input area selection change callback example: @ group member
+ */
+- (void)textViewDidChangeSelection:(UITextView *)textView;
 /**
  * 1v1 single chat Peer typing
  */
@@ -149,15 +154,56 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)createThread:(EaseMessageModel *)model;
 //MARK: - joined thread
+
+/// Description When you receive create thread notification message,click text join in the thread.
+/// - Parameter threadId: threadId
 - (void)joinChatThreadFromNotifyMessage:(NSString *)threadId;
 
+/// Description pop back
 - (void)popThreadChat;
 
+/// Description When owner or admin changed thread name,you'll receive it.
+/// - Parameter threadName: threadName updated
 - (void)threadNameChange:(NSString *)threadName;
 //TODO: - 增加thread对象回调
+
+/// Description thread chat header
 - (UIView *)threadChatHeader;
 
+/// Description Whether show reaction menu item,you decide.
+/// - Parameter message: AgoraChatMessage
 - (BOOL)messageLongPressExtShowReaction:(AgoraChatMessage *)message;
+// table end scrolling
+- (void)scrollViewEndScroll;
+
+/// Description when you want change input bar reply message content,you can return a string.
+/// - Parameter message: AgoraChatMessage
+- (nullable NSString *)chatBarQuoteMessageShowContent:(AgoraChatMessage *)message;
+
+/// Description When you want custom quote view,you can return a NSAttributedString.
+/// - Parameter message: AgoraChatMessage
+- (NSAttributedString *)messageCellQuoteViewShowContent:(AgoraChatMessage *)message;
+
+/// Description If you want get  on click quote events,you can implement this method.
+/// - Parameter message  AgoraChatMessage
+- (BOOL)messageCellDidClickQuote:(AgoraChatMessage *)message;
+
+/// Description If you want get  long press quote events,you can implement this method.
+/// - Parameter message: AgoraChatMessage
+- (BOOL)messageCellDidLongPressQuote:(AgoraChatMessage *)message;
+
+/// Description When you selected  a message,`EaseChatViewController` will enter edit mode,you can decide whether or not show edit bar.
+- (BOOL)messageListEntryEditModeWhetherShowBottom;
+
+/// Description If you implement this means that you want custom modify action flow.
+- (void)messageEditAction;
+
+/// Description When `self` enter edit mode,you can click edit bar button to implement some function.
+/// - Parameter type: EditBarOperationType contains `Delete` or `Forward`
+- (void)messageListEntryEditModeThenOperation:(EditBarOperationType)type;
+
+/// Description When you edit message content,a edited symbol will occur message bottom.you can customize it.
+- (NSAttributedString *)editedMessageContentSymbol;
 
 @end
 

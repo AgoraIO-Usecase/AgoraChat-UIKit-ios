@@ -199,31 +199,22 @@ EaseEmoticon *gGifGroup = nil;
 #pragma mark - UICollectionViewDataSource
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
-    if ([self.emotion.dataArray count] < 21) {
-        return 1;
-    }
-    if ([self.emotion.dataArray count] % 21 == 0) {
-        return [self.emotion.dataArray count] / 21;
-    }
-    return [self.emotion.dataArray count] / 21 + 1;
+    return 7;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if ([self.emotion.dataArray count] < 21) {
-        return [self.emotion.dataArray count];
-    }
-    return 21;
+    return 7;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     EMEmoticonCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"EMEmoticonCell" forIndexPath:indexPath];
-    long count = indexPath.section * 21 + indexPath.row;
+    long count = indexPath.section * 7 + indexPath.row;
     if (count >= [self.emotion.dataArray count]) {
         cell.model = [[EaseEmoticonModel alloc]initWithType:EMEmotionTypeEmoji];
         return cell;
     }
-    cell.model = self.emotion.dataArray[indexPath.section * 19 + indexPath.row];
+    cell.model = self.emotion.dataArray[count];
     return cell;
 }
 

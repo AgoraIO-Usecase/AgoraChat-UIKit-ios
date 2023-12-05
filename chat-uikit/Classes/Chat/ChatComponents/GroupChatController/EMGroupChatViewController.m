@@ -111,10 +111,9 @@
                     AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"The other party retracted a message"];
                     NSString *to = [[AgoraChatClient sharedClient] currentUsername];
                     NSString *from = self.currentConversation.conversationId;
-                    AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:from from:from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
+                    AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:from from:msg.from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
                     message.chatType = (AgoraChatType)self.currentConversation.type;
                     message.isRead = YES;
-                    message.messageId = msg.messageId;
                     message.localTime = msg.localTime;
                     message.timestamp = msg.timestamp;
                     [self.currentConversation insertMessage:message error:nil];
@@ -163,13 +162,15 @@
             if ([obj isKindOfClass:[EaseMessageModel class]]) {
                 EaseMessageModel *model = (EaseMessageModel *)obj;
                 if ([model.message.messageId isEqualToString:message.messageId]) {
-                    model.message = message;
+                    model = [[EaseMessageModel alloc] initWithAgoraChatMessage:message];
+                    [self.dataArray replaceObjectAtIndex:[self.dataArray indexOfObject:obj] withObject:model];
+                    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:[self.dataArray indexOfObject:obj] inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
                     break;
                 }
             }
         }
     }
-    [self refreshTableView:YES];
+//    [self refreshTableView:YES];
 }
 
 @end

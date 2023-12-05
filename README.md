@@ -1,3 +1,4 @@
+
 # Get Started with Agora Chat UIKit for iOS
 
 Agora Chat UIKit for iOS is a UI component library built on top of Agora Chat SDK. It provides a set of general UI components, such as a conversation list and chat UI, which allow developers to easily craft an Chat app to suit actual business needs. Also, this library calls methods in the Agora Chat SDK to implement Chat related logics and data processing, allowing developers to only focus on their own business and personalized extensions.
@@ -9,6 +10,23 @@ Source code URL of Agora Chat UIKit for iOS:
 URL of Agora Chat app using Agora Chat UIKit for iOS:
 
 - https://github.com/AgoraIO-Usecase/AgoraChat-ios.git
+
+# Important features
+- Message extension functions  
+    - Reactions
+    - Message threading
+    - Reply messages
+    - Chat group @ mentions
+    - Modify sent messages
+    - Recall sent messages
+    - Forward messages
+- Common functions
+    - Conversation list
+    - Chatting in a conversation
+    - Voice message
+    - Typing indicator
+    - Delivery receipt
+    - Read receipt
 
 ## Prerequisites
 
@@ -657,7 +675,7 @@ The data model group for the input extension area of the current conversation (U
  *
  * @brief Example of callback for a keyboard input change: @ group member
  */
-- (BOOL)textViewShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
+- (BOOL)textView:(UITextView*)textView ShouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text;
 ```
 
 ##### Callback for the input status of the other party

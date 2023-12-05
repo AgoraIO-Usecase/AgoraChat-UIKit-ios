@@ -10,10 +10,12 @@
 
 #import "EaseMessageModel.h"
 #import "EaseChatMessageBubbleView.h"
+#import "EMMsgTextBubbleView.h"
 #import "EaseChatViewModel.h"
 
 #define avatarLonger 28
 #define componentSpacing 8
+#define replySpace 2
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,11 +24,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak) id<EaseMessageCellDelegate> delegate;
 
-@property (nonatomic, strong, readonly) EaseChatMessageBubbleView *bubbleView;
+@property (nonatomic, strong) EaseChatMessageBubbleView *bubbleView;
 
 @property (nonatomic) AgoraChatMessageDirection direction;
 
 @property (nonatomic, strong) EaseMessageModel *model;
+
+@property (nonatomic, strong) EaseMessageModel *quoteModel;
+
+@property (nonatomic, strong) EaseChatViewModel *viewModel;
 
 + (NSString *)cellIdentifierWithDirection:(AgoraChatMessageDirection)aDirection
                                      type:(AgoraChatMessageType)aType;
@@ -39,6 +45,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (EaseChatMessageBubbleView *)getBubbleViewWithType:(AgoraChatMessageType)aType;
 
 - (CGFloat)maxBubbleViewWidth;
+
+- (void)updateLayout;
+
+- (void)showHighlight;
 
 @end
 
@@ -56,6 +66,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)toThreadChat:(EaseMessageModel *)model;
 - (void)messageCellDidClickReactionView:(EaseMessageModel *)model;
+
+- (void)messageCellNeedReload:(EaseMessageCell *)cell;
+
+- (void)messageCellDidClickQuote:(EaseMessageCell *)aCell;
+- (void)messageCellDidLongPressQuote:(EaseMessageCell *)aCell;
 
 @end
 

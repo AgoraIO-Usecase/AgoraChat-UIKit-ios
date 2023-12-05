@@ -10,6 +10,7 @@
 #import <objc/runtime.h>
 #import "EMMsgTextBubbleView.h"
 #import "EaseDateHelper.h"
+#import "EaseHeaders.h"
 
 typedef NS_ENUM(NSInteger, EaseLongPressExecute) {
     EaseLongPressExecuteCopy = 0,
@@ -69,6 +70,8 @@ static const void *recallViewKey = &recallViewKey;
             [weakself.dataArray removeObject:notify];
         }
         [weakself.dataArray removeObjectsAtIndexes:indexs];
+        if ([weakself respondsToSelector:@selector(handleMessagesRemove:)])
+            [weakself performSelector:@selector(handleMessagesRemove:) withObject:@[model.message.messageId]];
         [weakself.tableView reloadData];
         if ([weakself.dataArray count] == 0) {
             weakself.msgTimelTag = -1;
@@ -120,7 +123,7 @@ static const void *recallViewKey = &recallViewKey;
         if (aError) {
             [EaseAlertController showErrorAlert:aError.errorDescription];
         } else {
-            AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"You recall a message"];
+            AgoraChatTextMessageBody *body = [[AgoraChatTextMessageBody alloc] initWithText:@"You recalled a message"];
             NSString *from = [[AgoraChatClient sharedClient] currentUsername];
             NSString *to = self.currentConversation.conversationId;
             AgoraChatMessage *message = [[AgoraChatMessage alloc] initWithConversationID:to from:from to:to body:body ext:@{MSG_EXT_RECALL:@(YES)}];
@@ -139,12 +142,14 @@ static const void *recallViewKey = &recallViewKey;
                     }
                 }
             }];
-            EaseMessageModel *model = [[EaseMessageModel alloc] initWithAgoraChatMessage:message];
-            [weakself.dataArray replaceObjectAtIndex:indexPath.row withObject:model];
+            EaseMessageModel *newModel = [[EaseMessageModel alloc] initWithAgoraChatMessage:message];
+            [weakself.dataArray replaceObjectAtIndex:indexPath.row withObject:newModel];
             if (notify) {
                 [self.dataArray removeObject:notify];
             }
-            [weakself.tableView reloadData];
+            if ([weakself respondsToSelector:@selector(handleMessagesRemove:)])
+                [weakself performSelector:@selector(handleMessagesRemove:) withObject:@[model.message.messageId]];
+            [weakself refreshTableView:NO];
         }
     }];
     

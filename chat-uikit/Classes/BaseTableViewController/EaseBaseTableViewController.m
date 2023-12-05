@@ -88,6 +88,11 @@
     }
 }
 
+- (NSString*)refreshTitle
+{
+    return @"drop down refresh";
+}
+
 #pragma mark - getter
 - (UITableView *)tableView {
     if (!_tableView) {
@@ -96,7 +101,7 @@
         _tableView.estimatedRowHeight = 72;
         _tableView.rowHeight = UITableViewAutomaticDimension;
         _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        [_tableView enableRefresh:@"drop down refresh" color:UIColor.systemGrayColor];
+        [_tableView enableRefresh:[self refreshTitle] color:UIColor.systemGrayColor];
         [_tableView.refreshControl addTarget:self action:@selector(refreshTabView) forControlEvents:UIControlEventValueChanged];
     }
     

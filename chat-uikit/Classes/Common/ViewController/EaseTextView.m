@@ -22,7 +22,6 @@
         _contentColor = [UIColor blackColor];
         _placeholderColor = [UIColor lightGrayColor];
         _editing = NO;
-        
         super.scrollEnabled = YES;
         super.layoutManager.allowsNonContiguousLayout = NO;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startEditing:) name:UITextViewTextDidBeginEditingNotification object:self];
