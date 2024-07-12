@@ -1,6 +1,8 @@
 # Changelog
 
-## v1.2.0(Uncoming)
+## v2.0.0
+    Swift UIKit
+## v1.2.0
 
 ### Added
 * Add modify message feature in `defaultMessageLongPressExtMenu`
