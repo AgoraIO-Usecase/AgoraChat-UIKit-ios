@@ -383,21 +383,21 @@ extension MessageListController: MessageListDriverEventsListener {
     /// - Parameter messages: Array kind of the ``ChatMessage``.
     @objc open func forwardMessages(messages: [ChatMessage]) {
         if messages.isEmpty {
-            self.showToast(toast: "Please select a message to forward.")
+            UIViewController.currentController?.showToast(toast: "Please select a message to forward.")
             return
         }
         let vc = ForwardTargetViewController(messages: messages, combine: true)
-        self.present(vc, animated: true)
+        UIViewController.currentController?.present(vc, animated: true)
     }
     
     @objc open func forwardMessage(message: ChatMessage) {
         let vc = ForwardTargetViewController(messages: [message], combine: false)
-        self.present(vc, animated: true)
+        UIViewController.currentController?.present(vc, animated: true)
     }
     
     @objc open func deleteMessages(messages: [ChatMessage]) {
         if messages.isEmpty {
-            self.showToast(toast: "Please select a message to delete.")
+            UIViewController.currentController?.showToast(toast: "Please select a message to delete.")
             return
         }
         self.viewModel.deleteMessages(messages: messages)
@@ -784,7 +784,7 @@ extension MessageListController: MessageListDriverEventsListener {
         vc.mentionClosure = { [weak self] in
             self?.viewModel.updateMentionIds(profile: $0, type: .add)
         }
-        self.present(vc, animated: true)
+        UIViewController.currentController?.present(vc, animated: true)
     }
     
     /**
