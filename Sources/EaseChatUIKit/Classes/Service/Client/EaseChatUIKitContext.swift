@@ -66,7 +66,7 @@ public let cache_update_notification = "EaseChatUIKitContextUpdateCache"
             self.chatCache?.removeAll()
             self.userCache?.removeAll()
             self.groupCache?.removeAll()
-        case .chat://不需要对外暴露
+        case .chat:
             self.chatCache?.removeAll()
         case .user: self.userCache?.removeAll()
         case .group: self.groupCache?.removeAll()
