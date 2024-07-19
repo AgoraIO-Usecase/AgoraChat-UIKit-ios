@@ -74,9 +74,9 @@ import UIKit
         if Appearance.chat.bubbleStyle == .withArrow {
             self.bubbleWithArrow.addSubViews([self.content,self.edit])
             if Appearance.chat.enableTranslation {
-                self.bubbleWithArrow.addSubViews([self.separatorLine,self.translationContainer,self.translation,self.translateSymbol])
+                self.bubbleWithArrow.bubble.addSubViews([self.separatorLine,self.translationContainer,self.translation,self.translateSymbol])
                 if Appearance.chat.enableURLPreview {
-                    self.bubbleWithArrow.addSubViews([self.previewContent])
+                    self.bubbleWithArrow.bubble.addSubViews([self.previewContent])
                 }
             }
             self.addGestureTo(view: self.bubbleWithArrow, target: self)
@@ -125,7 +125,11 @@ import UIKit
         self.content.linkTextAttributes = [.underlineStyle:NSUnderlineStyle.single.rawValue,.underlineColor:color,.foregroundColor:color]
         let textSize = entity.textSize()
         let translationSize = Appearance.chat.enableTranslation ? entity.translationSize():.zero
-        self.content.frame = CGRect(x: 12, y: 7, width: entity.bubbleSize.width-24, height: textSize.height)
+        if Appearance.chat.bubbleStyle == .withArrow {
+            self.content.frame = CGRect(x: self.towards == .right ? 10:14, y: 7, width: entity.bubbleSize.width-24, height: textSize.height)
+        } else {
+            self.content.frame = CGRect(x: 12, y: 7, width: entity.bubbleSize.width-24, height: textSize.height)
+        }
         self.content.attributedText = entity.content
         self.content.parseTextAndExtractActiveElements(entity.content!)
         let stateColor: UIColor = entity.message.direction == .send ? self.sendStateColor:self.receiveStateColor
@@ -175,7 +179,7 @@ import UIKit
             let previewHeight = entity.urlPreviewHeight()
             var padding:CGFloat = Appearance.chat.bubbleStyle == .withArrow ? 5:0
             padding = entity.message.direction == .send ? 0:padding
-            self.previewContent.frame = CGRect(x: padding, y: entity.bubbleSize.height-previewHeight+4, width: entity.bubbleSize.width, height: previewHeight)
+            self.previewContent.frame = CGRect(x: padding, y: entity.bubbleSize.height-previewHeight, width: entity.bubbleSize.width, height: previewHeight)
             switch entity.previewResult {
             case .success:
                 self.previewContent.show(with: entity.urlPreview)
@@ -191,7 +195,6 @@ import UIKit
 
 
 @objc open class TranslateTextView: UITextView {
-    // 确保 UITextView 可以响应复制操作
     open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         if action == #selector(copy(_:)) {
             return true
@@ -199,7 +202,6 @@ import UIKit
         return super.canPerformAction(action, withSender: sender)
     }
     
-    // 处理复制操作
     open override func copy(_ sender: Any?) {
         if let selectedTextRange = self.selectedTextRange {
             let selectedText = self.text(in: selectedTextRange)

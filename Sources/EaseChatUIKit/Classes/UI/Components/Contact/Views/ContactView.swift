@@ -91,6 +91,8 @@ import UIKit
     
     public var selectClosure: ((EaseProfileProtocol) -> ())?
     
+    public var firstRefresh = true
+    
     public private(set) lazy var header: ContactListHeader = {
         ContactListHeader(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: CGFloat(54*(self.headerStyle == .contact ? Appearance.contact.listHeaderExtensionActions.count:0))), style: .plain).backgroundColor(.clear)
     }()
@@ -144,7 +146,6 @@ import UIKit
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
 }
 //MARK: - UITableViewDelegate&UITableViewDataSource
@@ -255,7 +256,6 @@ extension ContactView: UITableViewDelegate,UITableViewDataSource {
             }
         }
     }
-    
 }
 //MARK: - IContactListDriver
 extension ContactView: IContactListDriver {
@@ -334,8 +334,12 @@ extension ContactView: IContactListDriver {
         self.contacts.removeAll()
         self.sectionTitles.removeAll()
         self.rawData = infos
-        for eventHandle in self.eventsDelegates.allObjects {
-            eventHandle.onContactListEndScrollNeededDisplayInfos(ids: infos.map({ $0.id }))
+        
+        if self.firstRefresh {
+            self.firstRefresh = false
+            for eventHandle in self.eventsDelegates.allObjects {
+                eventHandle.onContactListEndScrollNeededDisplayInfos(ids: infos.map({ $0.id }))
+            }
         }
         let tuple = ContactSorter.sort(contacts: self.rawData)
         self.contacts.append(contentsOf: tuple.0)
