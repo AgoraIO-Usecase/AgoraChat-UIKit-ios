@@ -306,7 +306,7 @@ public let urlPreviewImageHeight = CGFloat(137)
         if self.message.edited {
             width += 44
         }
-        if Appearance.chat.bubbleStyle == .withArrow {
+        if Appearance.chat.bubbleStyle == .withArrow,self.historyMessage == false,self.message.body.type != .text {
             width += 5
         }
         if Appearance.chat.enableURLPreview {
@@ -597,13 +597,11 @@ public let urlPreviewImageHeight = CGFloat(137)
             if !Appearance.chat.enableURLPreview {
                 return text
             }
-            // 创建 NSDataDetector 实例以检测文本中的链接
             guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue ) else {
                 return text
             }
 
 
-            // 检测文本中的链接
             let matches = detector.matches(in: text.string, options: [], range: NSRange(location: 0, length: text.string.count))
             if matches.count == 1 {
                 self.containURL = true
