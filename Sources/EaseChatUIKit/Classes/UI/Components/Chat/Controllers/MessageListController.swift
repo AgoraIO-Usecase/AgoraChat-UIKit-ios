@@ -10,7 +10,7 @@ import AVFoundation
     case chatroom
 }
 
-@objcMembers open class MessageListController: UIViewController {
+@objcMembers open class MessageListController: UIViewController, UIGestureRecognizerDelegate {
     
     public var filePath = ""
     
@@ -128,7 +128,6 @@ import AVFoundation
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        self.messageContainer.inputBar.hiddenInput()
         guard let info = (self.chatType == .chat ? EaseChatUIKitContext.shared?.userCache:EaseChatUIKitContext.shared?.groupCache)?[self.profile.id] else { return }
         self.profile.remark = info.remark
         var nickname = self.profile.remark
@@ -155,7 +154,6 @@ import AVFoundation
         ChatClient.shared().chatManager?.getConversationWithConvId(self.profile.id)?.markAllMessages(asRead: nil)
         self.viewModel.notifyUnreadCountChanged()
     }
-
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -178,6 +176,7 @@ import AVFoundation
         self.switchTheme(style: Theme.style)
         self.view.addSubview(self.loadingView)
     }
+   
     
     @objc open func setupNavigation() {
         self.navigation.subtitle = nil
@@ -203,6 +202,10 @@ import AVFoundation
         self.pinContainer.isHidden = true
         if let has = EaseChatUIKitContext.shared?.pinnedCache?[self.profile.id],!has {
             self.loadingView.startAnimating()
+            DispatchQueue.main.asyncAfter(wallDeadline: .now()+2) {
+                self.loadingView.stopAnimating()
+            }
+            return
         }
         let datas = self.viewModel.showPinnedMessages()
         if datas.count > 0 {
@@ -318,7 +321,8 @@ extension MessageListController {
     @objc open func rightItemsAction(indexPath: IndexPath?) {
         guard let idx = indexPath else { return }
         switch idx.row {
-        case 0: self.viewTopicList()
+        case 0: self.showPinnedMessages()
+        case 1: self.viewTopicList()
         default:
             break
         }
@@ -367,8 +371,6 @@ extension MessageListController: MessageListDriverEventsListener {
     }
     
     public func onMessageMultiSelectBarClicked(operation: MessageMultiSelectedBottomBarOperation) {
-        self.messageContainer.editMode = false
-        self.navigation.editMode = false
         let messages = self.filterSelectedMessages()
         switch operation {
         case .delete:
@@ -387,6 +389,11 @@ extension MessageListController: MessageListDriverEventsListener {
             return
         }
         let vc = ForwardTargetViewController(messages: messages, combine: true)
+        vc.dismissClosure = { [weak self] in
+            guard let `self` = self else { return }
+            self.messageContainer.editMode = !$0
+            self.navigation.editMode = !$0
+        }
         UIViewController.currentController?.present(vc, animated: true)
     }
     
@@ -397,7 +404,7 @@ extension MessageListController: MessageListDriverEventsListener {
     
     @objc open func deleteMessages(messages: [ChatMessage]) {
         if messages.isEmpty {
-            UIViewController.currentController?.showToast(toast: "Please select a message to delete.")
+            self.showToast(toast: "Please select a message to delete.")
             return
         }
         self.viewModel.deleteMessages(messages: messages)
@@ -410,7 +417,6 @@ extension MessageListController: MessageListDriverEventsListener {
                 messages.append(message.message)
             }
         }
-        self.messageContainer.messages.forEach { $0.selected = false }
         return messages
     }
     
@@ -500,9 +506,6 @@ extension MessageListController: MessageListDriverEventsListener {
         if !Appearance.chat.contentStyle.contains(.withMessageThread) || message.message.chatType == .chat || message.message.chatThread != nil {
             messageActions.removeAll { $0.tag == "Topic" }
         }
-        if self.chatType == .chat {
-            messageActions.removeAll { $0.tag == "Pin" }
-        }
         if message.message.direction != .send {
             messageActions.removeAll { $0.tag == "Recall" }
         } else {
@@ -510,6 +513,9 @@ extension MessageListController: MessageListDriverEventsListener {
             if duration > Appearance.chat.recallExpiredTime {
                 messageActions.removeAll { $0.tag == "Recall" }
             }
+        }
+        if self.chatType == .chat {
+            messageActions.removeAll { $0.tag == "Pin" }
         }
         return messageActions
     }
@@ -625,6 +631,7 @@ extension MessageListController: MessageListDriverEventsListener {
             DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.5) {
                 editor.editor.textView.becomeFirstResponder()
             }
+            
         }
     }
     
@@ -784,7 +791,7 @@ extension MessageListController: MessageListDriverEventsListener {
         vc.mentionClosure = { [weak self] in
             self?.viewModel.updateMentionIds(profile: $0, type: .add)
         }
-        UIViewController.currentController?.present(vc, animated: true)
+        self.present(vc, animated: true)
     }
     
     /**

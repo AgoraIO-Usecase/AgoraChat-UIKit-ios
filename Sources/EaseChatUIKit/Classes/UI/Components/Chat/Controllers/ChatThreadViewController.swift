@@ -306,6 +306,11 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
             return
         }
         let vc = ForwardTargetViewController(messages: messages, combine: true)
+        vc.dismissClosure = { [weak self] in
+            guard let `self` = self else { return }
+            self.messageContainer.editMode = !$0
+            self.navigation.editMode = !$0
+        }
         self.present(vc, animated: true)
     }
     
@@ -386,7 +391,7 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
         if !Appearance.chat.contentStyle.contains(.withReply) {
             messageActions.removeAll { $0.tag == "Reply" }
         }
-        
+        messageActions.removeAll { $0.tag == "Pin" }
         messageActions.removeAll { $0.tag == "Topic" }
         if message.message.direction != .send {
             messageActions.removeAll { $0.tag == "Recall" }
@@ -396,7 +401,6 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
                 messageActions.removeAll { $0.tag == "Recall" }
             }
         }
-        messageActions.removeAll { $0.tag == "Pin" }
         messageActions.removeAll { $0.tag == "Recall" }
         messageActions.removeAll { $0.tag == "Delete" }
         return messageActions

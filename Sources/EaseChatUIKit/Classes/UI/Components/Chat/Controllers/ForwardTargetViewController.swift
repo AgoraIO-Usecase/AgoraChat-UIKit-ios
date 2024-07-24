@@ -23,7 +23,19 @@ import UIKit
     
     private var searchMode = false
         
-    private var datas = [EaseProfileProtocol]()
+    private var datas = [EaseProfileProtocol]() {
+        didSet {
+            DispatchQueue.main.async {
+                if self.datas.count <= 0 {
+                    self.targetsList.backgroundView = self.empty
+                } else {
+                    self.targetsList.backgroundView = nil
+                }
+            }
+        }
+    }
+    
+    private var forwarded = false
     
     private var searchResults = [EaseProfileProtocol]()
     
@@ -66,12 +78,10 @@ import UIKit
 
         }).backgroundColor(.clear)
     }()
+    
+    public var dismissClosure: ((Bool) -> Void)?
         
     private var noMoreGroup = false
-    
-    public lazy var loadingView: LoadingView = {
-        LoadingView(frame: self.view.bounds)
-    }()
     
     public required init(messages: [ChatMessage],combine: Bool = true) {
         self.messages = messages
@@ -83,10 +93,15 @@ import UIKit
         fatalError("init(coder:) has not been implemented")
     }
     
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.dismissClosure?(self.forwarded)
+    }
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.view.cornerRadius(.medium, [.topLeft,.topRight], .clear, 0)
-        self.view.addSubViews([self.indicator,self.toolBar,self.targetsList,self.loadingView])
+        self.view.addSubViews([self.indicator,self.toolBar,self.targetsList])
         // Do any additional setup after loading the view.
         self.targetsList.keyboardDismissMode = .onDrag
         self.fillDatas(refresh: true)
@@ -95,7 +110,6 @@ import UIKit
     }
     
     open func fillDatas(refresh: Bool) {
-        self.loadingView.stopAnimating()
         if refresh {
             if self.index == 0 {
                 self.fetchContacts()
@@ -105,7 +119,6 @@ import UIKit
                 self.fetchGroups()
             }
         } else {
-            self.loadingView.startAnimating()
             if self.index == 1 {
                 self.fetchGroups()
             }
@@ -149,31 +162,22 @@ import UIKit
     }
     
     open func fetchGroups() {
-        self.datas.removeAll()
-        self.targetsList.reloadData()
         ChatClient.shared().groupManager?.getJoinedGroupsFromServer(withPage: self.page, pageSize: self.pageSize, needMemberCount: false, needRole: false, completion: { [weak self] groups, error in
-            guard let `self` = self else { return }
-            self.loadingView.stopAnimating()
             if error == nil {
-                if let groups = groups {
-                    if groups.count < self.pageSize {
-                        self.noMoreGroup = true
+                if let groups = groups,let size = self?.pageSize {
+                    if groups.count < size {
+                        self?.noMoreGroup = true
                     }
-                    self.datas.append(contentsOf: groups.map {
+                    self?.datas.append(contentsOf: groups.map {
                         let profile = EaseProfile()
                         profile.id = $0.groupId
                         profile.nickname = $0.groupName
                         profile.avatarURL = EaseChatUIKitContext.shared?.groupCache?[$0.groupId]?.avatarURL ?? ""
                         return profile
                     })
-                    if self.datas.count <= 0 {
-                        self.targetsList.backgroundView = self.empty
-                    } else {
-                        self.targetsList.backgroundView = nil
-                        self.targetsList.reloadData()
-                    }
+                    self?.targetsList.reloadData()
                 }
-                self.page += 1
+                self?.page += 1
             } else {
                 consoleLogInfo("ForwardTargetViewController fetchGroups error:\(error?.errorDescription ?? "")", type: .error)
             }
@@ -251,6 +255,7 @@ extension ForwardTargetViewController: UITableViewDelegate,UITableViewDataSource
         ChatClient.shared().chatManager?.send(message, progress: nil, completion: { [weak self] successMessage, error in
             guard let `self` = self else { return }
             if error == nil {
+                self.forwarded = true
                 if let cell = self.targetsList.cellForRow(at: indexPath) as? ForwardTargetCell {
                     var profile = EaseProfile()
                     if self.searchMode {
