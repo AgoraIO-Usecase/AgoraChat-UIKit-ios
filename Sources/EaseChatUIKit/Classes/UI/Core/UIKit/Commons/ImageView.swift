@@ -13,6 +13,10 @@ import Combine
 
     private var cancellables = Set<AnyCancellable>()
     
+    private var isRunLoopInTrackingMode: Bool {
+        RunLoop.current.currentMode == .tracking
+    }
+    
     public override init(frame: CGRect) {
         super.init(frame: frame)
     }
@@ -40,8 +44,11 @@ import Combine
         }
         ImageLoader.shared.loadImage(from: imageURL)
             .sink(receiveValue: { [weak self] url_image in
-                if url_image != nil,url_image?.size ?? .zero != .zero {
-                    self?.image = url_image
+                guard let `self` = self else { return }
+                if url_image != nil,url_image?.size ?? .zero != .zero,!self.isRunLoopInTrackingMode {
+                    DispatchQueue.main.async {
+                        self.image = url_image
+                    }
                 }
             })
             .store(in: &self.cancellables)
@@ -59,9 +66,12 @@ import Combine
         }
         ImageLoader.shared.loadImage(from: imageURL)
             .sink(receiveValue: { [weak self] url_image in
-                if url_image != nil,url_image?.size ?? .zero != .zero  {
-                    self?.image = url_image
-                    loadFinished(url_image)
+                guard let `self` = self else { return }
+                if url_image != nil,url_image?.size ?? .zero != .zero,!self.isRunLoopInTrackingMode {
+                    DispatchQueue.main.async {
+                        self.image = url_image
+                        loadFinished(url_image)
+                    }
                 }
             })
             .store(in: &self.cancellables)
