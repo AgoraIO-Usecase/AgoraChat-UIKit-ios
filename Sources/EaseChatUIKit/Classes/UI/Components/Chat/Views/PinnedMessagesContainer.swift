@@ -77,8 +77,10 @@ let limitContainerHeight = ScreenHeight*(590/844.0)
     @objc open func dismiss() {
         UIView.animate(withDuration: 0.382) {
             self.messageList.frame = CGRect(x: 0, y: self.pinCount.frame.maxY+8, width: self.frame.width, height: 0)
+            self.container.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: 56)
             self.indicator.isHidden = true
             self.cover.alpha = 0
+            
         } completion: { finished in
             if finished {
                 self.removeFromSuperview()
@@ -87,7 +89,7 @@ let limitContainerHeight = ScreenHeight*(590/844.0)
     }
     
     @objc open func show(datas: [PinnedMessageEntity]) {
-        self.pinCount.content.text = "\(datas.count)"+"Pin Messages".chat.localize
+        self.pinCount.content.text = "\(datas.count) "+"Pin Messages".chat.localize
         self.isHidden = false
         self.cover.alpha = 1
         self.container.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: 56)
@@ -147,7 +149,6 @@ extension PinnedMessagesContainer: IPinnedMessagesContainerDriver {
     
     
     public func refresh(entities: [PinnedMessageEntity]) {
-        self.entities.removeAll()
         self.entities = entities
         var containerHeight = CGFloat(self.entities.count*60)+34+16+8
         if containerHeight > limitContainerHeight {
@@ -160,7 +161,6 @@ extension PinnedMessagesContainer: IPinnedMessagesContainerDriver {
             self.messageList.reloadData()
             self.indicator.frame = CGRect(x: self.frame.width/2.0-18, y: self.container.frame.height-10, width: 36, height: 5)
         }
-        self.pinCount.content.text = "\(self.entities.count)"+"Pin Messages".chat.localize
     }
     
     public func remove(messageId: String) {
@@ -170,7 +170,6 @@ extension PinnedMessagesContainer: IPinnedMessagesContainerDriver {
             self.messageList.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
             self.messageList.endUpdates()
         }
-        self.pinCount.content.text = "\(self.entities.count)"+"Pin Messages".chat.localize
         UIView.animate(withDuration: 0.382) {
             var containerHeight = CGFloat(self.entities.count*60)+34+16+8
             if containerHeight > limitContainerHeight {

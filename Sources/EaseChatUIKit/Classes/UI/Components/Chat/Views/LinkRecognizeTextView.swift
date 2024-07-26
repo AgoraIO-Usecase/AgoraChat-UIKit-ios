@@ -68,6 +68,24 @@ typealias ElementTuple = (range: NSRange, element: LinkTextViewActiveElement, ty
     
     fileprivate var selectedElement: ElementTuple?
     
+    public override init(frame: CGRect, textContainer: NSTextContainer?) {
+        super.init(frame: frame, textContainer: textContainer)
+        self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapAction(gesture:)))) 
+    }
+    
+    @objc open func tapAction(gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: self)
+        guard let element = element(at: location) else { return }
+        switch element.element {
+        case .url(let url, _): touchURL(urlString: url)
+        default: break
+        }
+    }
+    
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func createURLElements(from text: String, range: NSRange, maximumLength: Int?) -> ([ElementTuple], String) {
         let type = LinkTextViewActiveType.url
         var text = text
@@ -114,11 +132,11 @@ typealias ElementTuple = (range: NSRange, element: LinkTextViewActiveElement, ty
     
     
     //MARK: - Handle UI Responder touches
-    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        if onTouch(touch) { return }
-        super.touchesBegan(touches, with: event)
-    }
+//    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        guard let touch = touches.first else { return }
+//        if onTouch(touch) { return }
+//        super.touchesBegan(touches, with: event)
+//    }
     
     func onTouch(_ touch: UITouch) -> Bool {
         let location = touch.location(in: self)
