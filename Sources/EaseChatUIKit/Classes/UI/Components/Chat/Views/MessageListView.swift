@@ -736,6 +736,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
             }
         }
     }
+    
 }
 
 extension MessageListView: IMessageListViewDriver {

@@ -412,6 +412,7 @@ extension MessageListController: MessageListDriverEventsListener {
             return
         }
         self.messageContainer.editMode = false
+        self.navigation.editMode = false
         self.viewModel.deleteMessages(messages: messages)
     }
     

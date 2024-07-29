@@ -60,6 +60,7 @@ import UIKit
         self.limitCount.text = "\(self.raw.count)/\(self.textLimit())"
         Theme.registerSwitchThemeViews(view: self)
         self.switchTheme(style: Theme.style)
+        NotificationCenter.default.addObserver(self, selector: #selector(textViewTextDidChange(_:)), name: UITextView.textDidChangeNotification, object: nil)
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -144,15 +145,19 @@ extension GroupInfoEditViewController: UITextViewDelegate {
         }
     }
     
-    public func textViewDidChange(_ textView: UITextView) {
+    @objc private func textViewTextDidChange(_ notification: Notification) {
+        guard let textView = notification.object as? UITextView else { return }
         let limitCount = self.textLimit()
         let count = (textView.text ?? "").count
         if count > limitCount {
             self.showToast(toast: "Reach content character limit.".chat.localize)
-            textView.text = textView.text.chat.subStringTo(limitCount)
         }
         self.limitCount.text = "\(count)/\(limitCount)"
     }
+    
+//    public func textViewDidChange(_ textView: UITextView) {
+        
+//    }
 }
 
 extension GroupInfoEditViewController: ThemeSwitchProtocol {

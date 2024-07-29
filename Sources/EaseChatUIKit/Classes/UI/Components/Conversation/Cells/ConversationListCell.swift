@@ -205,6 +205,15 @@ extension ConversationListCell: ThemeSwitchProtocol {
     @objc open func contentAttribute() -> NSAttributedString {
         guard let message = self.lastMessage else { return NSAttributedString() }
         var text = NSMutableAttributedString()
+        let from = message.from
+        let mentionText = "Mentioned".chat.localize
+        var nickName = message.user?.remark ?? ""
+        if nickName.isEmpty {
+            nickName = message.user?.nickname ?? ""
+        }
+        if nickName.isEmpty {
+            nickName = from
+        }
         if message.body.type == .text {
             var result = message.showType
             for (key,value) in ChatEmojiConvertor.shared.oldEmojis {
@@ -222,15 +231,7 @@ extension ConversationListCell: ThemeSwitchProtocol {
                     text.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5, range: NSMakeRange(0, text.length))
                 }
             }
-            let from = message.from
-            let mentionText = "Mentioned".chat.localize
-            var nickName = message.user?.remark ?? ""
-            if nickName.isEmpty {
-                nickName = message.user?.nickname ?? ""
-            }
-            if nickName.isEmpty {
-                nickName = from
-            }
+            
             if self.mentioned {
                 let showText = NSMutableAttributedString {
                     AttributedText("[\(mentionText)] ").foregroundColor(Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5).font(Font.theme.bodyMedium)
@@ -253,7 +254,7 @@ extension ConversationListCell: ThemeSwitchProtocol {
             }
         } else {
             let showText = NSMutableAttributedString {
-                AttributedText((message.body.type == .custom ? message.showType:(nickname+":"+message.showType))).foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5).font(UIFont.theme.bodyMedium)
+                AttributedText((message.body.type == .custom ? message.showType:(nickName+":"+message.showType))).foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5).font(UIFont.theme.bodyMedium)
             }
             return showText
         }
