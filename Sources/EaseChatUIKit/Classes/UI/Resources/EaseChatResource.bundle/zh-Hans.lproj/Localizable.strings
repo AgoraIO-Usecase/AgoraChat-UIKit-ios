@@ -211,3 +211,5 @@
 "Pin Messages" = "条置顶消息";
 "succeeded" = "成功";
 "failed" = "失败";
+
+"Please select greater than one message." = "请至少选择一条消息";

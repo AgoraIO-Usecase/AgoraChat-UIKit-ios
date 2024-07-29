@@ -205,11 +205,13 @@ extension ConversationListCell: ThemeSwitchProtocol {
     @objc open func contentAttribute() -> NSAttributedString {
         guard let message = self.lastMessage else { return NSAttributedString() }
         var text = NSMutableAttributedString()
+        
         let from = message.from
         let mentionText = "Mentioned".chat.localize
-        var nickName = message.user?.remark ?? ""
+        let user = EaseChatUIKitContext.shared?.userCache?[from]
+        var nickName = user?.remark ?? ""
         if nickName.isEmpty {
-            nickName = message.user?.nickname ?? ""
+            nickName = user?.nickname ?? ""
         }
         if nickName.isEmpty {
             nickName = from
@@ -231,7 +233,6 @@ extension ConversationListCell: ThemeSwitchProtocol {
                     text.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5, range: NSMakeRange(0, text.length))
                 }
             }
-            
             if self.mentioned {
                 let showText = NSMutableAttributedString {
                     AttributedText("[\(mentionText)] ").foregroundColor(Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5).font(Font.theme.bodyMedium)
@@ -254,11 +255,12 @@ extension ConversationListCell: ThemeSwitchProtocol {
             }
         } else {
             let showText = NSMutableAttributedString {
-                AttributedText((message.body.type == .custom ? message.showType:(nickName+":"+message.showType))).foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5).font(UIFont.theme.bodyMedium)
+                AttributedText((message.chatType == .chat ? message.showType:(nickName+":"+message.showType))).foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5).font(UIFont.theme.bodyMedium)
             }
             return showText
         }
     }
+
     
     open func convertMessage(message: ChatMessage) -> MessageEntity {
         let entity = ComponentsRegister.shared.MessageRenderEntity.init()

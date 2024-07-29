@@ -284,9 +284,11 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
     }
     
     public func onMessageMultiSelectBarClicked(operation: MessageMultiSelectedBottomBarOperation) {
-        self.messageContainer.editMode = false
-        self.navigation.editMode = false
         let messages = self.filterSelectedMessages()
+        if messages.isEmpty {
+            UIViewController.currentController?.showToast(toast: "Please select greater than one message.".chat.localize)
+            return
+        }
         switch operation {
         case .delete:
             DialogManager.shared.showAlert(title: "barrage_long_press_menu_delete".chat.localize+" \(messages.count)"+" messages".chat.localize, content: "", showCancel: true, showConfirm: true) { [weak self] _ in
@@ -302,10 +304,6 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
     }
     
     @objc open func forwardMessages(messages: [ChatMessage]) {
-        if messages.isEmpty {
-            self.showToast(toast: "Please select a message to forward.")
-            return
-        }
         let vc = ForwardTargetViewController(messages: messages, combine: true)
         vc.dismissClosure = { [weak self] in
             guard let `self` = self else { return }
@@ -319,10 +317,6 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
     }
     
     @objc open func deleteMessages(messages: [ChatMessage]) {
-        if messages.isEmpty {
-            self.showToast(toast: "Please select a message to delete.")
-            return
-        }
         self.navigation.editMode = false
         self.messageContainer.editMode = false
         self.viewModel.deleteMessages(messages: messages)
