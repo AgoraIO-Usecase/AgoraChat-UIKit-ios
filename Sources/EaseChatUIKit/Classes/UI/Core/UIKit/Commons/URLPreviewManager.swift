@@ -10,18 +10,20 @@ import Foundation
 @objc public class URLPreviewManager: NSObject {
     
     @objc public static var caches: Dictionary<String,HTMLContent> = [:]
+    
 
     @objcMembers public class HTMLContent: NSObject {
         func toDictionary() -> Dictionary<String,Any> {
             return ["title":self.title ?? "","description":self.descriptionHTML ?? "","imageUrl":self.imageURL ?? ""]
         }
+        public var towards: BubbleTowards = .left
         public var title: String?
         public lazy var titleAttribute: NSAttributedString? = {
             if title != nil {
                 return NSAttributedString {
-                    AttributedText(self.title!)
+                    AttributedText(self.title ?? "")
                         .font(UIFont.theme.headlineSmall)
-                        .foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor1).lineHeight(multiple: 1.15, minimum: 16).lineBreakMode(.byTruncatingTail)
+                        .foregroundColor(self.towards == .left ? Appearance.chat.receiveTextColor:Appearance.chat.sendTextColor).lineHeight(multiple: 1.15, minimum: 16).lineBreakMode(.byTruncatingTail)
                 }
             } else {
                 return nil

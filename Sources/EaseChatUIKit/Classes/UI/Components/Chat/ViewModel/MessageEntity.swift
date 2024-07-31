@@ -354,6 +354,7 @@ public let urlPreviewImageHeight = CGFloat(137)
             guard let `self` = self else { return }
             if error == nil {
                 if let content = content {
+                    content.towards = self.message.direction == .send ? .right:.left
                     self.urlPreview = content
                     self.previewResult = .success
                     var storage = content.toDictionary()

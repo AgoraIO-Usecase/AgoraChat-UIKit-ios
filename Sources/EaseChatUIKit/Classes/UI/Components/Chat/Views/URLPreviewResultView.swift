@@ -158,7 +158,6 @@ import UIKit
 extension URLPreviewResultView: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
         self.loadingLabel.textColor = style == .dark ? UIColor.theme.neutralColor7:UIColor.theme.neutralColor6
-        self.descriptionLabel.textColor = style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor1
         self.imageView.backgroundColor = style == .dark ? UIColor.theme.neutralColor3:UIColor.theme.neutralColor9
     }
 }
