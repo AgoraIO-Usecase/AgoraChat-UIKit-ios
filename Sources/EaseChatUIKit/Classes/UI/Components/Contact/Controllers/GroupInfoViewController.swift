@@ -396,19 +396,28 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
     }
     
     private func transferConfirm(profile: EaseProfileProtocol) {
-        var nickname = profile.remark
+        var user = EaseChatUIKitContext.shared?.userCache?[profile.id]
+        if user == nil {
+            user = EaseChatUIKitContext.shared?.chatCache?[profile.id]
+        }
+        var nickname = user?.remark ?? ""
         if nickname.isEmpty {
-            nickname = profile.remark
+            nickname = user?.nickname ?? ""
         }
         if nickname.isEmpty {
             nickname = profile.id
         }
         DialogManager.shared.showAlert(title: "", content: "group_details_extend_button_transfer".chat.localize+" to ".chat.localize+"\(nickname)?", showCancel: true, showConfirm: true) { [weak self] text in
             guard let `self` = self else { return }
-            self.service.transfer(groupId: self.chatGroup.groupId, userId: profile.id, completion: { group, error in
+            self.service.transfer(groupId: self.chatGroup.groupId, userId: profile.id, completion: { [weak self] group, error in
+                guard let `self` = self else { return }
                 if error == nil {
+                    self.datas.removeLast()
+                    self.menuList.reloadData()
                     NotificationCenter.default.post(name: Notification.Name("EaseChatUIKit_leaveGroup"), object: profile.id)
-                    self.pop()
+                    DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.5) {
+                        self.pop()
+                    }
                 } else {
                     consoleLogInfo("transfer owner error:\(error?.errorDescription ?? "")", type: .error)
                 }

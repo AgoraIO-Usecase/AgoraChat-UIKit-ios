@@ -991,7 +991,7 @@ extension ChatMessage {
     @objc public var quoteMessage: ChatMessage? {
         guard let quoteInfo = self.ext?["msgQuote"] as? Dictionary<String,Any> else { return nil }
         guard let quoteMessageId = quoteInfo["msgID"] as? String else {
-            return ChatMessage()
+            return nil
         }
         return ChatClient.shared().chatManager?.getMessageWithMessageId(quoteMessageId)
     }
