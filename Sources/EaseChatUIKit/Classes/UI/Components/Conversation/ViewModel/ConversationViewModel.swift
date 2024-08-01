@@ -8,6 +8,7 @@
 import Foundation
 import AudioToolbox
 
+public let disturb_change = "EaseUIKit_do_not_disturb_changed"
 
 /// Bind service and driver
 @objc open class ConversationViewModel: NSObject {
@@ -55,8 +56,9 @@ import AudioToolbox
     
     public private(set) var service: ConversationServiceImplement? = ConversationServiceImplement()
     
-    
     public private(set) var multiService: MultiDeviceService?  = MultiDeviceServiceImplement()
+    
+    public private(set) var firstLoadConversation = false
     
     /// Bind UI driver and service
     /// - Parameters:
@@ -86,6 +88,7 @@ import AudioToolbox
     
     /// Load all sessions that exist locally. If they do not exist, load them from the server.
     @objc open func loadExistLocalDataIfEmptyFetchServer() {
+        self.firstLoadConversation = true
         self.service?.loadExistConversations()
     }
     
@@ -104,7 +107,6 @@ import AudioToolbox
                     let message = self.welcomeMessage(conversationId: info.id,text: content)
                     message.chatType = .groupChat
                     conversation.insert(message, error: nil)
-
                 }
                 self.loadExistLocalDataIfEmptyFetchServer()
                 return info
@@ -168,7 +170,7 @@ extension ConversationViewModel: ConversationListActionEventsDelegate {
         }
         if EaseChatUIKitContext.shared?.groupProfileProvider != nil {
             let groupIds = groupChats
-            Task(priority: .background) { [weak self] in 
+            Task(priority: .background) { [weak self] in
                 guard let `self` = self else { return }
                 let profiles = await EaseChatUIKitContext.shared?.groupProfileProvider?.fetchGroupProfiles(profileIds: groupIds) ?? []
                 self.cacheGroup(profiles: profiles)
@@ -429,8 +431,10 @@ extension ConversationViewModel: ConversationServiceListener {
             self.service?.notifyUnreadCount(count: count)
             self.driver?.refreshList(infos: items)
             
-            if infos.count < 7 {
-                self.requestDisplayProfiles(ids: list.map({ $0.id }))
+            if infos.count < 11 || self.firstLoadConversation {
+                let requestCount = infos.count < 11 ? (infos.count - 1):10
+                self.requestDisplayProfiles(ids: list.prefix(upTo: requestCount).map({ $0.id }))
+                self.firstLoadConversation = false
             }
         }
     }
