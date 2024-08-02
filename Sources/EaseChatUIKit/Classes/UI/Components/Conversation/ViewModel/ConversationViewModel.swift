@@ -8,7 +8,6 @@
 import Foundation
 import AudioToolbox
 
-public let disturb_change = "EaseUIKit_do_not_disturb_changed"
 
 /// Bind service and driver
 @objc open class ConversationViewModel: NSObject {
