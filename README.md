@@ -2,13 +2,22 @@
 
 This guide gives a comprehensive overview into chat_uikit (V2.0.0). The new chat_uikit is intended to provide developers with an efficient, plug-and-play, and highly customizable UI component library, helping you build complete and elegant IM applications that can easily satisfy most instant messaging scenarios. Please download the demo to try it out.
 
-# Demo
+# QuickStart
 
 In this project, there is a best-practice demonstration project in the `Example` folder for you to build your own business capabilities.
-![Conversations in chat_uikit](./Documentation/example_conversation_snapshot.png)
-![Chat in chat_uikit](./Documentation/example_chat_snapshot.png)
+<div style="width: 100%; overflow: hidden;">
+  <div style="float: left; width: 45%;">
+    <img src="./Documentation/example_conversation_snapshot.png" style="width: 100%;">
+  </div>
+  <div style="float: right; width: 45%;">
+    <img src="./Documentation/example_chat_snapshot.png" style="width: 100%;">
+  </div>
+</div>
 
-If you want to experience the functions of chat_uikit, you can scan the following QR code to try the demo.
+
+# Demo
+
+If you want to experience the full functions of chat_uikit, you can scan the following QR code to try the demo.
 
 ![Demo](./Documentation/demo.png)
 
