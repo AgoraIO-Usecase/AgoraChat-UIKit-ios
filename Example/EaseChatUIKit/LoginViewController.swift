@@ -78,11 +78,8 @@ extension LoginViewController {
             self.showToast(toast: "token is empty",duration: 3)
             return
         }
-        
-        EaseChatUIKitClient.shared.logout(unbindNotificationDeviceToken: false) { _ in
-        }
         EaseChatUIKitClient.shared.login(user: user, token: ExampleRequiredConfig.chatToken) { error in
-            if error == nil {
+            if error == nil || error?.code == .userAlreadyLoginSame {
                 UIApplication.shared.chat.keyWindow?.rootViewController = MainViewController()
             } else {
                 UIViewController.currentController?.showToast(toast: "login error:\(error?.errorDescription ?? "")",duration: 3)
