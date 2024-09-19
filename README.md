@@ -5,13 +5,11 @@ This guide gives a comprehensive overview into chat_uikit (V2.0.0). The new chat
 # QuickStart
 
 In this project, there is a best-practice demonstration project in the `Example` folder for you to build your own business capabilities.
+
 <div style="width: 100%; overflow: hidden;">
-  <div style="float: left; width: 45%;">
-    <img src="./Documentation/example_conversation_snapshot.png" style="width: 100%;">
-  </div>
-  <div style="float: right; width: 45%;">
-    <img src="./Documentation/example_chat_snapshot.png" style="width: 100%;">
-  </div>
+  <img src="./Documentation/example_conversation_snapshot.png" style="float: left; width: 40%;">
+  <img scr = "" style = "width: 10%">
+  <img src="./Documentation/example_chat_snapshot.png" style="float: right; width: 40%;">
 </div>
 
 
