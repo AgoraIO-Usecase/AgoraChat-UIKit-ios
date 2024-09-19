@@ -11,7 +11,6 @@
 		0500149F2B2AAA7E000DA9CE /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0500149E2B2AAA7E000DA9CE /* MainViewController.swift */; };
 		051BFE732C9BB00400AA0872 /* ExampleRequiredConfigs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051BFE722C9BB00400AA0872 /* ExampleRequiredConfigs.swift */; };
 		0565FBB12B4D127700F75C4A /* CustomConversationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0565FBB02B4D127700F75C4A /* CustomConversationViewController.swift */; };
-		0575E8EE2B54C29A00166BF1 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 0575E8ED2B54C29A00166BF1 /* README.md */; };
 		0598E6992B366F5D0079BF47 /* HueSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0598E6982B366F5D0079BF47 /* HueSettingViewController.swift */; };
 		05BF34412B2C2F29004639CE /* OptionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BF34402B2C2F29004639CE /* OptionsViewController.swift */; };
 		0FD976A5382D36AF6B70D22C /* Pods_EaseChatUIKit_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 93876C90F7ED383C7B3B2838 /* Pods_EaseChatUIKit_Example.framework */; };
@@ -27,13 +26,11 @@
 		0500149E2B2AAA7E000DA9CE /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		051BFE722C9BB00400AA0872 /* ExampleRequiredConfigs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleRequiredConfigs.swift; sourceTree = "<group>"; };
 		0565FBB02B4D127700F75C4A /* CustomConversationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomConversationViewController.swift; sourceTree = "<group>"; };
-		0575E8ED2B54C29A00166BF1 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		057CC2ED2B396191008E8AD8 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		057CC2EE2B396191008E8AD8 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 		0598E6982B366F5D0079BF47 /* HueSettingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HueSettingViewController.swift; sourceTree = "<group>"; };
 		059AD7A42B29A3BB0043D299 /* VoiceConvert.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = VoiceConvert.xcframework; path = ../Sources/EaseChatUIKit/Classes/UI/Core/UIKit/FrameWorks/VoiceConvert.xcframework; sourceTree = "<group>"; };
 		05BF34402B2C2F29004639CE /* OptionsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsViewController.swift; sourceTree = "<group>"; };
-		5BD01E2EA5ABF01A40AF9C88 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* EaseChatUIKit_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EaseChatUIKit_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -41,7 +38,6 @@
 		607FACDA1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		78F4175E82DA4A6D855DE068 /* EaseChatUIKit.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = EaseChatUIKit.podspec; path = ../EaseChatUIKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		836D579C8438C6D0503E712E /* Pods-EaseChatUIKit_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EaseChatUIKit_Tests.release.xcconfig"; path = "Target Support Files/Pods-EaseChatUIKit_Tests/Pods-EaseChatUIKit_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		93876C90F7ED383C7B3B2838 /* Pods_EaseChatUIKit_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_EaseChatUIKit_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9853469F2D6C33A16B517A98 /* Pods-EaseChatUIKit_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EaseChatUIKit_Example.debug.xcconfig"; path = "Target Support Files/Pods-EaseChatUIKit_Example/Pods-EaseChatUIKit_Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -65,7 +61,6 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
-				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACD21AFB9204008FA782 /* Example for EaseChatUIKit */,
 				607FACD11AFB9204008FA782 /* Products */,
 				F7DC2A3E7B5DE01BB58AC586 /* Pods */,
@@ -107,16 +102,6 @@
 				607FACD41AFB9204008FA782 /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		607FACF51AFB993E008FA782 /* Podspec Metadata */ = {
-			isa = PBXGroup;
-			children = (
-				78F4175E82DA4A6D855DE068 /* EaseChatUIKit.podspec */,
-				0575E8ED2B54C29A00166BF1 /* README.md */,
-				5BD01E2EA5ABF01A40AF9C88 /* LICENSE */,
-			);
-			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
 		699CED0682BEBBA8A5FAB93B /* Frameworks */ = {
@@ -207,7 +192,6 @@
 			files = (
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
-				0575E8EE2B54C29A00166BF1 /* README.md in Resources */,
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
