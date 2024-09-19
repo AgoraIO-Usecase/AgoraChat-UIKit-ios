@@ -410,7 +410,7 @@
 				DEVELOPMENT_TEAM = JC854K845H;
 				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
 				INFOPLIST_FILE = EaseChatUIKit/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = EaseChat;
+				INFOPLIST_KEY_CFBundleDisplayName = chatuikti;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1;
@@ -434,7 +434,7 @@
 				DEVELOPMENT_TEAM = JC854K845H;
 				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
 				INFOPLIST_FILE = EaseChatUIKit/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = EaseChat;
+				INFOPLIST_KEY_CFBundleDisplayName = chatuikti;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1;

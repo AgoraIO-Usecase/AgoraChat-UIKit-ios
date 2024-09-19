@@ -23,8 +23,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // https://docs.agora.io/en/agora-chat/get-started/enable#get-chat-project-information
         let option = ChatOptions(appkey: ExampleRequiredConfig.appKey)
         option.enableConsoleLog = true
+        option.isAutoLogin = false
         _ = EaseChatUIKitClient.shared.setup(option: option)
+        self.setupEaseChatUIKitConfig()
         return true
+    }
+    
+    private func setupEaseChatUIKitConfig() {
+        //Set the theme of the chat demo UI.
+        Appearance.avatarRadius = .large
+        Appearance.chat.inputBarCorner = .large
+        Appearance.alertStyle = .large
+        Appearance.chat.bubbleStyle = .withMultiCorner
+        
+        Appearance.chat.enableTyping = true
+        
+        Appearance.ease_chat_language = .English
+        //Whether show message topic or not.
+//        Appearance.chat.contentStyle.append(.withMessageThread)
+        //Whether show message reaction or not.
+//        Appearance.chat.contentStyle.append(.withMessageReaction)
+        //Notice: - Feature identify can't changed, it's used to identify feature action.
+        
+        //Register custom components
+        
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

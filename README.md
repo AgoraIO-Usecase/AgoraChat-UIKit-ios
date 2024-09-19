@@ -5,6 +5,8 @@ This guide gives a comprehensive overview into chat_uikit (V2.0.0). The new chat
 # Demo
 
 In this project, there is a best-practice demonstration project in the `Example` folder for you to build your own business capabilities.
+![Conversations in chat_uikit](./Documentation/example_conversation_snapshot.png)
+![Chat in chat_uikit](./Documentation/example_chat_snapshot.png)
 
 If you want to experience the functions of chat_uikit, you can scan the following QR code to try the demo.
 
@@ -76,6 +78,15 @@ Then run the `cd` command on the terminal to navigate to the folder where `podfi
 
 
 # Structure
+
+### UI design pattern
+
+#### Conversation&Contact&Chat pages are designed based on the MVVM pattern.
+
+Model–view–viewmodel (MVVM) is an architectural pattern in computer software that facilitates the separation of the development of a graphical user interface (GUI; the view)—be it via a markup language or GUI code—from the development of the business logic or back-end logic (the model) such that the view is not dependent upon any specific model platform.
+![](./Documentation/MVVMPattern.png)
+
+#### Others are designed based on the MVC pattern.
 
 ### Basic project structure of chat_uikit
 
