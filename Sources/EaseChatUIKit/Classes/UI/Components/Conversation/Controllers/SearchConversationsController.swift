@@ -122,7 +122,7 @@ extension SearchConversationsController: UITableViewDelegate,UITableViewDataSour
     }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.active ? self.searchResults.count:self.datas.count
+        self.searchResults.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -134,10 +134,6 @@ extension SearchConversationsController: UITableViewDelegate,UITableViewDataSour
             if let info = self.searchResults[safe: indexPath.row] {
                 cell?.refresh(info: info, keyword: self.searchText)
             }
-        } else {
-            if let info = self.datas[safe: indexPath.row] {
-                cell?.refresh(info: info, keyword: self.searchText)
-            }
         }
         cell?.selectionStyle = .none
         return cell ?? UITableViewCell()
@@ -147,10 +143,6 @@ extension SearchConversationsController: UITableViewDelegate,UITableViewDataSour
         tableView.deselectRow(at: indexPath, animated: true)
         if self.active {
             if let info = self.searchResults[safe: indexPath.row] {
-                self.chatClosure?(info)
-            }
-        } else {
-            if let info = self.datas[safe: indexPath.row] {
                 self.chatClosure?(info)
             }
         }
