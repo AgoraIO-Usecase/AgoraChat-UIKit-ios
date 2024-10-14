@@ -138,24 +138,95 @@ static EaseDateHelper *shared = nil;
 + (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval dateType:(EaseDateType)type
 {
     NSDate *date = [EaseDateHelper dateWithTimeIntervalInMilliSecondSince1970:aTimeInterval];
-    if (type == EaseDateTypeChat) {
-        return [EaseDateHelper formattedChatTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    
+    NSString *stringDate = @"";
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    
+    if ([[EaseDateHelper shareHelper] isHasSameComponents:NSCalendarUnitYear forDate:date asDate:[NSDate date]] == YES) {
+        formatter.dateFormat = @"d MMM";
+    } else {
+        formatter.dateFormat = @"d MMM, yyyy";
     }
-    if (type == EaseDateTypeConversastion) {
-        return [EaseDateHelper formattedConversationTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    
+    stringDate = [formatter stringFromDate:date];
+    
+    if ([NSCalendar.currentCalendar isDateInToday:date]) {
+        stringDate = [[EaseDateHelper shareHelper] setupDate:date];
     }
-    return @"";
+    if ([NSCalendar.currentCalendar isDateInYesterday:date]) {
+        stringDate = @"Yesterday";
+    }
+    
+    return stringDate;
+    
+//    if (type == EaseDateTypeChat) {
+//        return [EaseDateHelper formattedChatTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+//    }
+//    if (type == EaseDateTypeConversastion) {
+//        return [EaseDateHelper formattedConversationTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+//    }
+//    return @"";
 }
 
 + (NSString *)formattedTimeFromTimeInterval:(long long)aTimeInterval forDateFormatter:(NSDateFormatter *)formatter  dateType:(EaseDateType)type {
     NSDate *date = [EaseDateHelper dateWithTimeIntervalInMilliSecondSince1970:aTimeInterval];
-    if (type == EaseDateTypeChat) {
-        return [EaseDateHelper formattedChatTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    
+    NSString *stringDate = @"";
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    
+    if ([[EaseDateHelper shareHelper] isHasSameComponents:NSCalendarUnitYear forDate:date asDate:[NSDate date]] == YES) {
+        dateFormatter.dateFormat = @"d MMM";
+    } else {
+        dateFormatter.dateFormat = @"d MMM, yyyy";
     }
-    if (type == EaseDateTypeConversastion) {
-        return [EaseDateHelper formattedConversationTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+    
+    stringDate = [dateFormatter stringFromDate:date];
+    
+    if ([NSCalendar.currentCalendar isDateInToday:date]) {
+        stringDate = [[EaseDateHelper shareHelper] setupDate:date];
     }
-    return @"";
+    if ([NSCalendar.currentCalendar isDateInYesterday:date]) {
+        stringDate = @"Yesterday";
+    }
+    
+    return stringDate;
+    
+//    if (type == EaseDateTypeChat) {
+//        return [EaseDateHelper formattedChatTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+//    }
+//    if (type == EaseDateTypeConversastion) {
+//        return [EaseDateHelper formattedConversationTime:date forDateFormatter:[EaseDateHelper shareHelper].dfYMD];
+//    }
+//    return @"";
+}
+
+- (BOOL)isHasSameComponents:(NSCalendarUnit)unitFlags forDate:(NSDate *)date asDate:(NSDate *)asDate {
+    NSCalendar *calendar = NSCalendar.autoupdatingCurrentCalendar;
+    NSDateComponents *otherDay = [calendar components:unitFlags fromDate:asDate];
+    NSDateComponents *today = [calendar components:unitFlags fromDate:date];
+    return [otherDay isEqual:today];
+}
+
+- (NSString *)setupDate:(NSDate *)date {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    NSString *dateString = @"";
+    
+    if ([NSCalendar.currentCalendar isDateInToday:[NSDate date]]) {
+        formatter.dateFormat = @"HH:mm";
+        dateString = [formatter stringFromDate:date];
+    } else if ([NSCalendar.currentCalendar isDateInYesterday:date] == YES) {
+        dateString = @"Yesterday";
+    } else if ([self isHasSameComponents:NSCalendarUnitYear forDate:date asDate:[NSDate date]] == YES) {
+        formatter.dateFormat = @"d MMM";
+        dateString = [formatter stringFromDate:date];
+    } else {
+        formatter.dateFormat = @"d.MM.yy";
+        dateString = [formatter stringFromDate:date];
+    }
+    
+    return dateString;
 }
 
 + (NSString *)formattedConversationTime:(NSDate *)aDate forDateFormatter:(NSDateFormatter *)formatter
