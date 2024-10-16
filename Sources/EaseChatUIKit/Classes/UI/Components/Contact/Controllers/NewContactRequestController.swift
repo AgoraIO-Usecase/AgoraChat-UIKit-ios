@@ -1,6 +1,6 @@
 //
 //  NewRequestViewController.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/24.
 //
@@ -17,12 +17,12 @@ import UIKit
         self.fillDatas()
     }()
     
-    public private(set) lazy var navigation: EaseChatNavigationBar = {
+    public private(set) lazy var navigation: ChatNavigationBar = {
         self.createNavigation()
     }()
     
-    @objc open func createNavigation() -> EaseChatNavigationBar {
-        EaseChatNavigationBar( showLeftItem: true, textAlignment: .left, hiddenAvatar: true)
+    @objc open func createNavigation() -> ChatNavigationBar {
+        ChatNavigationBar( showLeftItem: true, textAlignment: .left, hiddenAvatar: true)
     }
     
     public private(set) lazy var requestList: UITableView = {
@@ -61,10 +61,10 @@ import UIKit
     }
     
     @objc open func requestProfiles() {
-        if EaseChatUIKitContext.shared?.userProfileProvider != nil {
+        if ChatUIKitContext.shared?.userProfileProvider != nil {
             let userIds = self.datas.map { $0.userId }
             Task(priority: .background) {
-                let profiles = await EaseChatUIKitContext.shared?.userProfileProvider?.fetchProfiles(profileIds: userIds) ?? []
+                let profiles = await ChatUIKitContext.shared?.userProfileProvider?.fetchProfiles(profileIds: userIds) ?? []
                 for profile in profiles {
                     if let info = self.datas.first(where: { $0.userId == profile.id }) {
                         info.nickname = profile.nickname
@@ -76,8 +76,8 @@ import UIKit
                 }
             }
         } else {
-            if EaseChatUIKitContext.shared?.userProfileProviderOC != nil {
-                EaseChatUIKitContext.shared?.userProfileProviderOC?.fetchProfiles(profileIds: self.datas.map { $0.userId }, completion: { [weak self] profiles in
+            if ChatUIKitContext.shared?.userProfileProviderOC != nil {
+                ChatUIKitContext.shared?.userProfileProviderOC?.fetchProfiles(profileIds: self.datas.map { $0.userId }, completion: { [weak self] profiles in
                     for profile in profiles {
                         if let info = self?.datas.first(where: { $0.userId == profile.id }) {
                             info.nickname = profile.nickname
@@ -92,7 +92,7 @@ import UIKit
         }
     }
     
-    @objc open func navigationClick(type: EaseChatNavigationBarClickEvent,indexPath: IndexPath?) {
+    @objc open func navigationClick(type: ChatNavigationBarClickEvent,indexPath: IndexPath?) {
         switch type {
         case .back: self.pop()
         default: break
@@ -112,8 +112,8 @@ import UIKit
             let request = NewContactRequest()
             request.userId = ($0["userId"] as? String) ?? ""
             request.time = ($0["timestamp"] as? TimeInterval) ?? 0
-            request.avatarURL = EaseChatUIKitContext.shared?.userCache?[request.userId]?.avatarURL ?? ""
-            request.nickname = EaseChatUIKitContext.shared?.userCache?[request.userId]?.nickname ?? ""
+            request.avatarURL = ChatUIKitContext.shared?.userCache?[request.userId]?.avatarURL ?? ""
+            request.nickname = ChatUIKitContext.shared?.userCache?[request.userId]?.nickname ?? ""
             return request
         } ?? []
     }
@@ -162,19 +162,19 @@ extension NewContactRequestController: UITableViewDelegate,UITableViewDataSource
             }
         }
         
-        if EaseChatUIKitContext.shared?.userProfileProvider != nil {
+        if ChatUIKitContext.shared?.userProfileProvider != nil {
             Task(priority: .background) {
-                let profiles = await EaseChatUIKitContext.shared?.userProfileProvider?.fetchProfiles(profileIds: unknownInfoIds) ?? []
+                let profiles = await ChatUIKitContext.shared?.userProfileProvider?.fetchProfiles(profileIds: unknownInfoIds) ?? []
                 self.refreshProfiles(profiles: profiles, unknownInfoMaps: unknownInfoMaps)
             }
         } else {
-            EaseChatUIKitContext.shared?.userProfileProviderOC?.fetchProfiles(profileIds: unknownInfoIds, completion: { [weak self] profiles in
+            ChatUIKitContext.shared?.userProfileProviderOC?.fetchProfiles(profileIds: unknownInfoIds, completion: { [weak self] profiles in
                 self?.refreshProfiles(profiles: profiles, unknownInfoMaps: unknownInfoMaps)
             })
         }
     }
     
-    @objc open func refreshProfiles(profiles: [EaseProfileProtocol],unknownInfoMaps: [String:IndexPath]) {
+    @objc open func refreshProfiles(profiles: [ChatUserProfileProtocol],unknownInfoMaps: [String:IndexPath]) {
         var refreshIndexPaths = [IndexPath]()
         for profile in profiles {
             if let indexPath = unknownInfoMaps[profile.id] {
@@ -233,11 +233,11 @@ extension NewContactRequestController: UITableViewDelegate,UITableViewDataSource
             if error != nil {
                 consoleLogInfo("requestFriendInfo error:\(error?.errorDescription ?? "")", type: .error)
             } else {
-                let profile = EaseProfile()
+                let profile = ChatUserProfile()
                 profile.id = userId
                 profile.nickname = infoMap?[userId]?.nickname ?? ""
                 profile.avatarURL = infoMap?[userId]?.avatarUrl ?? ""
-                EaseChatUIKitContext.shared?.userCache?[userId] = profile
+                ChatUIKitContext.shared?.userCache?[userId] = profile
             }
         })
     }

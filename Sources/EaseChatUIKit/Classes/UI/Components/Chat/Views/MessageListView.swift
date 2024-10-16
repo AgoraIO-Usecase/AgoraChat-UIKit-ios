@@ -41,11 +41,11 @@ import UIKit
     
     /// The method will call on message avatar clicked
     /// - Parameter profile: ``EaseProfileProtocol``
-    func onMessageAvatarClicked(profile: EaseProfileProtocol)
+    func onMessageAvatarClicked(profile: ChatUserProfileProtocol)
     
     /// The method will call on message avatar long pressed.
     /// - Parameter profile: ``EaseProfileProtocol``
-    func onMessageAvatarLongPressed(profile: EaseProfileProtocol)
+    func onMessageAvatarLongPressed(profile: ChatUserProfileProtocol)
     
     /// The method will call on input box event occur.
     /// - Parameter type: ``MessageInputBarActionType``
@@ -131,7 +131,7 @@ import UIKit
     
     ///  Add mention user to textfield on needed.
     /// - Parameter user: ``NSAttributedString``
-    func addMentionUserToField(user: EaseProfileProtocol)
+    func addMentionUserToField(user: ChatUserProfileProtocol)
     
     /// Update audio message  on play status changed.
     /// - Parameters:
@@ -639,7 +639,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
                 if let user = entity.message.user {
                     ComponentViewsActionHooker.shared.chat.avatarClicked?(user)
                 } else {
-                    let user = EaseProfile()
+                    let user = ChatUserProfile()
                     user.id = entity.message.from
                     ComponentViewsActionHooker.shared.chat.avatarClicked?(user)
                 }
@@ -648,7 +648,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
                     if let user = entity.message.user {
                         handler.onMessageAvatarClicked(profile: user)
                     } else {
-                        let user = EaseProfile()
+                        let user = ChatUserProfile()
                         user.id = entity.message.from
                         handler.onMessageAvatarClicked(profile: user)
                     }
@@ -718,7 +718,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
                 if let user = entity.message.user {
                     ComponentViewsActionHooker.shared.chat.avatarLongPressed?(user)
                 } else {
-                    let user = EaseProfile()
+                    let user = ChatUserProfile()
                     user.id = entity.message.from
                     ComponentViewsActionHooker.shared.chat.avatarLongPressed?(user)
                 }
@@ -727,7 +727,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
                     if let user = entity.message.user {
                         handler.onMessageAvatarLongPressed(profile: user)
                     } else {
-                        let user = EaseProfile()
+                        let user = ChatUserProfile()
                         user.id = entity.message.from
                         handler.onMessageAvatarLongPressed(profile: user)
                     }
@@ -930,7 +930,7 @@ extension MessageListView: IMessageListViewDriver {
         }
     }
     
-    public func addMentionUserToField(user: EaseProfileProtocol) {
+    public func addMentionUserToField(user: ChatUserProfileProtocol) {
         let result = NSMutableAttributedString(attributedString: self.inputBar.inputField.attributedText)
         let key = NSAttributedString.Key("mentionInfo")
         var nickName = user.remark

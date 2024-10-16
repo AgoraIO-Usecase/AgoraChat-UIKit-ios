@@ -55,16 +55,16 @@ import UIKit
         self.switchTheme(style: Theme.style)
     }
     
-    @objc open func refresh(profile: EaseProfileProtocol) {
+    @objc open func refresh(profile: ChatUserProfileProtocol) {
         self.avatar.cornerRadius(Appearance.avatarRadius)
         var avatarURL = profile.avatarURL
         if avatarURL.isEmpty {
-            avatarURL = EaseChatUIKitContext.shared?.userCache?[profile.id]?.avatarURL ?? ""
+            avatarURL = ChatUIKitContext.shared?.userCache?[profile.id]?.avatarURL ?? ""
         }
         self.avatar.image(with: avatarURL, placeHolder: Appearance.conversation.singlePlaceHolder)
-        var showName = EaseChatUIKitContext.shared?.userCache?[profile.id]?.remark ?? ""
+        var showName = ChatUIKitContext.shared?.userCache?[profile.id]?.remark ?? ""
         if showName.isEmpty {
-            showName = EaseChatUIKitContext.shared?.userCache?[profile.id]?.nickname ?? ""
+            showName = ChatUIKitContext.shared?.userCache?[profile.id]?.nickname ?? ""
         }
         if showName.isEmpty {
             showName = profile.id
@@ -76,17 +76,17 @@ import UIKit
         self.checkbox.isHidden = self.display != .withCheckBox
     }
     
-    @objc public func refresh(profile: EaseProfileProtocol,keyword: String) {
-        var showName = EaseChatUIKitContext.shared?.userCache?[profile.id]?.remark ?? ""
+    @objc public func refresh(profile: ChatUserProfileProtocol,keyword: String) {
+        var showName = ChatUIKitContext.shared?.userCache?[profile.id]?.remark ?? ""
         if showName.isEmpty {
-            showName = EaseChatUIKitContext.shared?.userCache?[profile.id]?.nickname ?? ""
+            showName = ChatUIKitContext.shared?.userCache?[profile.id]?.nickname ?? ""
         }
         if showName.isEmpty {
             showName = profile.id
         }
         var avatarURL = profile.avatarURL
         if avatarURL.isEmpty {
-            avatarURL = EaseChatUIKitContext.shared?.userCache?[profile.id]?.avatarURL ?? ""
+            avatarURL = ChatUIKitContext.shared?.userCache?[profile.id]?.avatarURL ?? ""
         }
         self.nickName.attributedText = self.highlightKeywords(keyword: keyword, in: showName)
         self.avatar.image(with: avatarURL, placeHolder: Appearance.conversation.singlePlaceHolder)

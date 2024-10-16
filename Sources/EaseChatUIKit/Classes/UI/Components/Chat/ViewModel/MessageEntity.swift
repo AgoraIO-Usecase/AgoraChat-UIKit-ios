@@ -551,13 +551,13 @@ public let urlPreviewImageHeight = CGFloat(137)
                     AttributedText(result).foregroundColor(textColor).font(self.historyMessage ? UIFont.theme.bodyMedium:UIFont.theme.bodyLarge).lineHeight(multiple: 1.15, minimum: self.historyMessage ? 16:18).lineBreakMode(.byWordWrapping)
                 })
             } else {
-                if self.message.mention == EaseChatUIKitContext.shared?.currentUserId ?? "" {
-                    let mentionUser = EaseChatUIKitContext.shared?.userCache?[EaseChatUIKitContext.shared?.currentUserId ?? ""]
+                if self.message.mention == ChatUIKitContext.shared?.currentUserId ?? "" {
+                    let mentionUser = ChatUIKitContext.shared?.userCache?[ChatUIKitContext.shared?.currentUserId ?? ""]
                     var nickname = mentionUser?.remark ?? ""
                     if nickname.isEmpty {
                         nickname = mentionUser?.nickname ?? ""
                         if nickname.isEmpty {
-                            nickname = EaseChatUIKitContext.shared?.currentUserId ?? ""
+                            nickname = ChatUIKitContext.shared?.currentUserId ?? ""
                         }
                     }
                     let content = result
@@ -813,12 +813,12 @@ public let urlPreviewImageHeight = CGFloat(137)
     
     public lazy var pinInfo: NSAttributedString? = {
         if let pinInfo = self.message.pinnedInfo {
-            var showName = EaseChatUIKitContext.shared?.chatCache?[pinInfo.operatorId]?.nickname ?? ""
+            var showName = ChatUIKitContext.shared?.chatCache?[pinInfo.operatorId]?.nickname ?? ""
             if showName.isEmpty {
-                showName = EaseChatUIKitContext.shared?.userCache?[pinInfo.operatorId]?.remark ?? ""
+                showName = ChatUIKitContext.shared?.userCache?[pinInfo.operatorId]?.remark ?? ""
             }
             if showName.isEmpty {
-                showName = EaseChatUIKitContext.shared?.userCache?[pinInfo.operatorId]?.nickname ?? ""
+                showName = ChatUIKitContext.shared?.userCache?[pinInfo.operatorId]?.nickname ?? ""
             }
             if showName.isEmpty {
                 showName = pinInfo.operatorId
@@ -839,12 +839,12 @@ public let urlPreviewImageHeight = CGFloat(137)
 extension ChatMessage {
     
     /// ``EaseProfileProtocol``
-    @objc public var user: EaseProfileProtocol? {
-        let cacheUser = EaseChatUIKitContext.shared?.userCache?[self.from]
+    @objc public var user: ChatUserProfileProtocol? {
+        let cacheUser = ChatUIKitContext.shared?.userCache?[self.from]
         if cacheUser != nil,let remark = cacheUser?.remark,!remark.isEmpty {
-            EaseChatUIKitContext.shared?.chatCache?[self.from]?.remark = remark
+            ChatUIKitContext.shared?.chatCache?[self.from]?.remark = remark
         }
-        let chatUser = EaseChatUIKitContext.shared?.chatCache?[self.from]
+        let chatUser = ChatUIKitContext.shared?.chatCache?[self.from]
         if chatUser?.nickname.isEmpty ?? true {
             chatUser?.nickname = cacheUser?.nickname ?? ""
         }
@@ -979,7 +979,7 @@ extension ChatMessage {
                         }
                     } else if let atListArray = atList as? [String] {
                         if ChatClient.shared().currentUsername?.count ?? 0 > 0 && atListArray.contains((ChatClient.shared().currentUsername ?? "").lowercased()) {
-                            return (EaseChatUIKitContext.shared?.currentUser?.id ?? self.from).lowercased()
+                            return (ChatUIKitContext.shared?.currentUser?.id ?? self.from).lowercased()
                         }
                     }
                 }

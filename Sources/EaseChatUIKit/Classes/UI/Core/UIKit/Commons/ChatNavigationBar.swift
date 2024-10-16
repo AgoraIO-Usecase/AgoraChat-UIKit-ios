@@ -1,6 +1,6 @@
 //
 //  EaseChatNavigationBar.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/16.
 //
@@ -8,7 +8,7 @@
 import UIKit
 
 
-@objc public enum EaseChatNavigationBarClickEvent: UInt {
+@objc public enum ChatNavigationBarClickEvent: UInt {
     case back
     case avatar
     case title
@@ -18,8 +18,8 @@ import UIKit
     case cancel
 }
 
-/// Navigation  bar of the EaseChatUIKit.
-@objcMembers open class EaseChatNavigationBar: UIView {
+/// Navigation  bar of the ChatUIKit.
+@objcMembers open class ChatNavigationBar: UIView {
     
     public var userState: UserState = .online {
         willSet {
@@ -32,7 +32,7 @@ import UIKit
     
     public var titleOriginFrame = CGRect.zero
     
-    public var clickClosure: ((EaseChatNavigationBarClickEvent,IndexPath?) -> ())?
+    public var clickClosure: ((ChatNavigationBarClickEvent,IndexPath?) -> ())?
     
     private let backImage = UIImage(named: "back", in: .chatBundle, with: nil)?.withTintColor(UIColor.theme.neutralColor3)
     
@@ -287,7 +287,7 @@ import UIKit
     }
 }
 
-extension EaseChatNavigationBar: UICollectionViewDataSource,UICollectionViewDelegate {
+extension ChatNavigationBar: UICollectionViewDataSource,UICollectionViewDelegate {
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         self.rightImages.count
@@ -313,7 +313,7 @@ extension EaseChatNavigationBar: UICollectionViewDataSource,UICollectionViewDele
     }
 }
 
-extension EaseChatNavigationBar: ThemeSwitchProtocol {
+extension ChatNavigationBar: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
         self.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
         switch self.userState {

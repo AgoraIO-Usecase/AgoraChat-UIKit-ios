@@ -1,6 +1,6 @@
 //
 //  ChatThreadViewController.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2024/1/24.
 //
@@ -16,14 +16,14 @@ import AVFoundation
             
     public private(set) var profile: GroupChatThread = GroupChatThread()
     
-    public private(set) lazy var navigation: EaseChatNavigationBar = {
+    public private(set) lazy var navigation: ChatNavigationBar = {
         self.createNavigation()
     }()
     
     /// Creates a navigation bar for the MessageListController.
     /// - Returns: An instance of EaseChatNavigationBar.
-    @objc open func createNavigation() -> EaseChatNavigationBar {
-        EaseChatNavigationBar(showLeftItem: true,textAlignment: .left,rightImages: [UIImage(named: "more_detail", in: .chatBundle, with: nil)!],hiddenAvatar: true).backgroundColor(.clear)
+    @objc open func createNavigation() -> ChatNavigationBar {
+        ChatNavigationBar(showLeftItem: true,textAlignment: .left,rightImages: [UIImage(named: "more_detail", in: .chatBundle, with: nil)!],hiddenAvatar: true).backgroundColor(.clear)
     }
         
     public private(set) lazy var entity: MessageEntity = {
@@ -108,7 +108,7 @@ import AVFoundation
         self.navigation.clickClosure = { [weak self] in
             self?.navigationClick(type: $0, indexPath: $1)
         }
-        EaseChatUIKitContext.shared?.onGroupNameUpdated = { [weak self] _,_ in
+        ChatUIKitContext.shared?.onGroupNameUpdated = { [weak self] _,_ in
             self?.setupTitle()
         }
         Theme.registerSwitchThemeViews(view: self)
@@ -152,7 +152,7 @@ import AVFoundation
     
     
     deinit {
-        EaseChatUIKitContext.shared?.cleanCache(type: .chat)
+        ChatUIKitContext.shared?.cleanCache(type: .chat)
     }
 }
 
@@ -176,7 +176,7 @@ extension ChatThreadViewController {
      - type: The type of navigation bar click event.
      - indexPath: The index path associated with the event (optional).
      */
-    @objc open func navigationClick(type: EaseChatNavigationBarClickEvent, indexPath: IndexPath?) {
+    @objc open func navigationClick(type: ChatNavigationBarClickEvent, indexPath: IndexPath?) {
         switch type {
         case .back: self.pop()
         case .rightItems: self.rightItemsAction(indexPath: indexPath)
@@ -203,12 +203,12 @@ extension ChatThreadViewController {
             ActionSheetItem(title: "Leave Topic", type: .destructive, tag: "LeaveTopic", image: UIImage(named: "quit", in: .chatBundle, with: nil))
         ]
         let group = ChatGroup(id: self.profile.parentId)
-        if group?.owner == EaseChatUIKitContext.shared?.currentUserId ?? "" {
+        if group?.owner == ChatUIKitContext.shared?.currentUserId ?? "" {
             items.removeLast()
             items.append(ActionSheetItem(title: "Disband Topic", type: .destructive, tag: "DisbandTopic", image: UIImage(named: "quit", in: .chatBundle, with: nil)))
 
         }
-        if group?.owner == EaseChatUIKitContext.shared?.currentUserId ?? "" || self.profile.owner == EaseChatUIKitContext.shared?.currentUserId ?? ""{
+        if group?.owner == ChatUIKitContext.shared?.currentUserId ?? "" || self.profile.owner == ChatUIKitContext.shared?.currentUserId ?? ""{
             items.insert(ActionSheetItem(title: "Edit Topic", type: .normal, tag: "EditTopic", image: UIImage(named: "message_action_edit", in: .chatBundle, with: nil)), at: 0)
         }
         return items
@@ -581,7 +581,7 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
         let avatarURL = body.customExt?["avatar"] as? String
         let nickname = body.customExt?["nickname"] as? String
         if body.event == EaseChatUIKit_user_card_message {
-            let profile = EaseProfile()
+            let profile = ChatUserProfile()
             profile.id = userId ?? ""
             profile.nickname = nickname ?? ""
             profile.avatarURL = avatarURL ?? ""
@@ -591,7 +591,7 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
         }
     }
     
-    public func onMessageAvatarClicked(user: EaseProfileProtocol) {
+    public func onMessageAvatarClicked(user: ChatUserProfileProtocol) {
         self.messageAvatarClick(user: user)
     }
     
@@ -601,8 +601,8 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
      - Parameters:
      - user: The user profile associated with the clicked avatar.
      */
-    @objc open func messageAvatarClick(user: EaseProfileProtocol) {
-        if user.id == EaseChatUIKitContext.shared?.currentUserId ?? "" {
+    @objc open func messageAvatarClick(user: ChatUserProfileProtocol) {
+        if user.id == ChatUIKitContext.shared?.currentUserId ?? "" {
             return
         }
         let vc = ComponentsRegister.shared.ContactInfoController.init(profile: user)
