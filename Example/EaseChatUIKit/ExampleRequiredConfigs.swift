@@ -17,17 +17,17 @@ public class ExampleRequiredConfig {
     // Pass in the app key.
     // Get the app key by reference to the following URL:
     // https://docs.agora.io/en/agora-chat/get-started/enable#get-chat-project-information
-    static let appKey: String = <#App Key#>
+    static let appKey: String = ""
     
     // Use the user information of the current user object that conforms to the `EaseProfileProtocol` protocol to log in to chat_uikit.
     // For token generation, refer to the URL: https://docs.agora.io/en/agora-chat/get-started/enable?platform=ios#generate-a-user-token
-    static var chatToken: String = <#chat token#>
+    static var chatToken: String = ""
     
     /// ``YourAppUser`` can be regarded as the user class in your App.
-    public final class YourAppUser: NSObject, EaseProfileProtocol {
+    public final class YourAppUser: NSObject, ChatUserProfileProtocol {
         
         /// Created user id.
-        public var id: String = <#user id#>
+        public var id: String = ""
         
         public var remark: String = ""
         

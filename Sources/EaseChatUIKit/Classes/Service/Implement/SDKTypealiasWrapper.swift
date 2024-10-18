@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 /**
  This code defines typealiases for chat client, delegates, errors, messages, message bodies, chatrooms, user info, connection state, options, recall info, and cursor result for two different chat SDKs: HyphenateChat and AgoraChat.
  

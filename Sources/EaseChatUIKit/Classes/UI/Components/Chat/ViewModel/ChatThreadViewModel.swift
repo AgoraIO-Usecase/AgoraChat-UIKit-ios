@@ -745,7 +745,7 @@ extension ChatThreadViewModel: ChatResponseListener {
     @objc open func messageDidRecalled(recallInfo: RecallInfo) {
         if let recall = self.constructMessage(text: "recalled a message".chat.localize, type: .alert, extensionInfo: [:]) {
             let timestamp = Int64(Date().timeIntervalSince1970*1000)
-            recall.messageId = recallInfo.recallMessage?.messageId ?? "\(timestamp)"
+            recall.messageId = recallInfo.recallMessage.messageId ?? "\(timestamp)"
             recall.timestamp = timestamp
             recall.from = recallInfo.recallBy
             self.driver?.processMessage(operation: .recall, message: recall)

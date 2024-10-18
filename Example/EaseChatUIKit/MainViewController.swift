@@ -57,11 +57,11 @@ final class MainViewController: UITabBarController {
     
     private func setupDataProvider() {
         //`userProfileProvider` is the provider of user data. It can't exist at the same time as userProfileProviderOC. userProfileProviderOC is implemented using closures.
-        EaseChatUIKitContext.shared?.userProfileProvider = self
-        EaseChatUIKitContext.shared?.userProfileProviderOC = nil
+        ChatUIKitContext.shared?.userProfileProvider = self
+        ChatUIKitContext.shared?.userProfileProviderOC = nil
         //`groupProvider` usage same as above
-        EaseChatUIKitContext.shared?.groupProfileProvider = self
-        EaseChatUIKitContext.shared?.groupProfileProviderOC = nil
+        ChatUIKitContext.shared?.groupProfileProvider = self
+        ChatUIKitContext.shared?.groupProfileProviderOC = nil
     }
     
 
@@ -142,15 +142,15 @@ extension MainViewController: ThemeSwitchProtocol {
     
 }
 
-//MARK: - EaseProfileProvider for conversations&contacts usage.
+//MARK: - ChatProfileProvider for conversations&contacts usage.
 //For example using conversations controller,as follows.
-extension MainViewController: EaseProfileProvider,EaseGroupProfileProvider {
-    //MARK: - EaseProfileProvider
-    func fetchProfiles(profileIds: [String]) async -> [any chat_uikit.EaseProfileProtocol] {
-        return await withTaskGroup(of: [chat_uikit.EaseProfileProtocol].self, returning: [chat_uikit.EaseProfileProtocol].self) { group in
-            var resultProfiles: [chat_uikit.EaseProfileProtocol] = []
+extension MainViewController: ChatProfileProvider,ChatGroupProfileProvider {
+    //MARK: - ChatProfileProvider
+    func fetchProfiles(profileIds: [String]) async -> [any chat_uikit.ChatUserProfileProtocol] {
+        return await withTaskGroup(of: [chat_uikit.ChatUserProfileProtocol].self, returning: [chat_uikit.ChatUserProfileProtocol].self) { group in
+            var resultProfiles: [chat_uikit.ChatUserProfileProtocol] = []
             group.addTask {
-                var resultProfiles: [chat_uikit.EaseProfileProtocol] = []
+                var resultProfiles: [chat_uikit.ChatUserProfileProtocol] = []
                 let result = await self.requestUserInfos(profileIds: profileIds)
                 if let infos = result {
                     resultProfiles.append(contentsOf: infos)
@@ -165,12 +165,12 @@ extension MainViewController: EaseProfileProvider,EaseGroupProfileProvider {
         }
     }
     //MARK: - EaseGroupProfileProvider
-    func fetchGroupProfiles(profileIds: [String]) async -> [any chat_uikit.EaseProfileProtocol] {
+    func fetchGroupProfiles(profileIds: [String]) async -> [any chat_uikit.ChatUserProfileProtocol] {
         
-        return await withTaskGroup(of: [chat_uikit.EaseProfileProtocol].self, returning: [chat_uikit.EaseProfileProtocol].self) { group in
-            var resultProfiles: [chat_uikit.EaseProfileProtocol] = []
+        return await withTaskGroup(of: [chat_uikit.ChatUserProfileProtocol].self, returning: [chat_uikit.ChatUserProfileProtocol].self) { group in
+            var resultProfiles: [chat_uikit.ChatUserProfileProtocol] = []
             group.addTask {
-                var resultProfiles: [chat_uikit.EaseProfileProtocol] = []
+                var resultProfiles: [chat_uikit.ChatUserProfileProtocol] = []
                 let result = await self.requestGroupsInfo(groupIds: profileIds)
                 if let infos = result {
                     resultProfiles.append(contentsOf: infos)
@@ -185,11 +185,11 @@ extension MainViewController: EaseProfileProvider,EaseGroupProfileProvider {
         }
     }
     
-    private func requestUserInfos(profileIds: [String]) async -> [EaseProfileProtocol]? {
+    private func requestUserInfos(profileIds: [String]) async -> [ChatUserProfileProtocol]? {
         var unknownIds = [String]()
-        var resultProfiles = [EaseProfileProtocol]()
+        var resultProfiles = [ChatUserProfileProtocol]()
         for profileId in profileIds {
-            if let profile = EaseChatUIKitContext.shared?.userCache?[profileId] {
+            if let profile = ChatUIKitContext.shared?.userCache?[profileId] {
                 if profile.nickname.isEmpty {
                     unknownIds.append(profile.id)
                 } else {
@@ -205,7 +205,7 @@ extension MainViewController: EaseProfileProvider,EaseGroupProfileProvider {
         let result = await ChatClient.shared().userInfoManager?.fetchUserInfo(byId: unknownIds)
         if result?.1 == nil,let infoMap = result?.0 {
             for (userId,info) in infoMap {
-                let profile = EaseProfile()
+                let profile = ExampleRequiredConfig.YourAppUser()
                 let nickname = info.nickname ?? ""
                 profile.id = userId
                 profile.nickname = nickname
@@ -214,24 +214,24 @@ extension MainViewController: EaseProfileProvider,EaseGroupProfileProvider {
                 }
                 profile.avatarURL = info.avatarUrl ?? ""
                 resultProfiles.append(profile)
-                EaseChatUIKitContext.shared?.userCache?[userId] = profile
+                ChatUIKitContext.shared?.userCache?[userId] = profile
             }
             return resultProfiles
         }
         return []
     }
     
-    private func requestGroupsInfo(groupIds: [String]) async -> [EaseProfileProtocol]? {
-        var resultProfiles = [EaseProfileProtocol]()
+    private func requestGroupsInfo(groupIds: [String]) async -> [ChatUserProfileProtocol]? {
+        var resultProfiles = [ChatUserProfileProtocol]()
         let groups = ChatClient.shared().groupManager?.getJoinedGroups() ?? []
         for groupId in groupIds {
             if let group = groups.first(where: { $0.groupId == groupId }) {
-                let profile = EaseProfile()
+                let profile = ExampleRequiredConfig.YourAppUser()
                 profile.id = groupId
                 profile.nickname = group.groupName
                 profile.avatarURL = group.settings.ext
                 resultProfiles.append(profile)
-                EaseChatUIKitContext.shared?.groupCache?[groupId] = profile
+                ChatUIKitContext.shared?.groupCache?[groupId] = profile
             }
 
         }

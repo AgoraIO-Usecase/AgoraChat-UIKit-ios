@@ -49,7 +49,7 @@ extension LoginViewController {
     
     @objc private func loginAction() {
 //        self.view.endEditing(true)
-//        EaseChatUIKitClient.shared.logout(unbindNotificationDeviceToken: false) { _ in
+//        ChatUIKitClient.shared.logout(unbindNotificationDeviceToken: false) { _ in
 //        }
 //        guard let userName = self.userNameField.text,let passWord = self.passWordField.text,!userName.isEmpty,!passWord.isEmpty else { return }
 //        self.userName = userName.lowercased()
@@ -58,7 +58,7 @@ extension LoginViewController {
 //        profile.id = userName.lowercased()
 //        profile.nickname = self.nickname.text ?? profile.id
 //        profile.avatarURL = "https://accktvpic.oss-cn-beijing.aliyuncs.com/pic/sample_avatar/sample_avatar_1.png"
-//        EaseChatUIKitClient.shared.login(user: profile, token: passWord) { error in
+//        ChatUIKitClient.shared.login(user: profile, token: passWord) { error in
 //            if error == nil {
 //                UIApplication.shared.chat.keyWindow?.rootViewController = MainViewController()
 //            } else {
@@ -78,7 +78,7 @@ extension LoginViewController {
             self.showToast(toast: "token is empty",duration: 3)
             return
         }
-        EaseChatUIKitClient.shared.login(user: user, token: ExampleRequiredConfig.chatToken) { error in
+        ChatUIKitClient.shared.login(user: user, token: ExampleRequiredConfig.chatToken) { error in
             if error == nil || error?.code == .userAlreadyLoginSame {
                 UIApplication.shared.chat.keyWindow?.rootViewController = MainViewController()
             } else {
