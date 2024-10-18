@@ -1,6 +1,6 @@
 //
 //  MessageInputBar.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2023/9/4.
 //
@@ -176,7 +176,7 @@ extension MessageInputBar: UITextViewDelegate {
                     let attributedString = textView.attributedText
                     
                     attributedString?.enumerateAttributes(in: NSRange(location: 0, length: attributedString?.length ?? 0), options: []) { (attributes, blockRange, stop) in
-                        if let mentionUser = attributes[NSAttributedString.Key(rawValue: "mentionInfo")] as? EaseProfileProtocol {
+                        if let mentionUser = attributes[NSAttributedString.Key(rawValue: "mentionInfo")] as? ChatUserProfileProtocol {
                             if range.location + range.length == blockRange.location + blockRange.length { mention = true
                                 let result = NSMutableAttributedString(attributedString: textView.attributedText)
                                 result.deleteCharacters(in: blockRange)
@@ -206,7 +206,7 @@ extension MessageInputBar: UITextViewDelegate {
             self.rightView.isSelected = false
         }
         textView.attributedText.enumerateAttributes(in: NSMakeRange(0, textView.text.count), options: []) { (attributes, range, stop) in
-            if attributes[NSAttributedString.Key(rawValue: "mentionInfo")] is EaseProfileProtocol {
+            if attributes[NSAttributedString.Key(rawValue: "mentionInfo")] is ChatUserProfileProtocol {
                 let min = textView.selectedRange.location
                 let max = textView.selectedRange.location + textView.selectedRange.length
                 if min > range.location && min <= range.location + range.length {

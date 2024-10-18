@@ -1,6 +1,6 @@
 //
 //  SearchHistoryMessageCell.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2024/1/15.
 //
@@ -41,7 +41,7 @@ import UIKit
         self.messageContent.frame = CGRect(x: self.avatar.frame.maxX+12, y: self.avatar.frame.maxY-20, width: self.contentView.frame.width-self.avatar.frame.maxX-12-16-50, height: 18)
     }
     
-    func refresh(message: ChatMessage,info: EaseProfileProtocol,keyword: String) {
+    func refresh(message: ChatMessage,info: ChatUserProfileProtocol,keyword: String) {
         var nickName = info.nickname.isEmpty ? info.id:info.nickname
         if !info.remark.isEmpty {
             nickName = info.remark

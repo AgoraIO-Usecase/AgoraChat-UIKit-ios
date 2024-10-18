@@ -1,6 +1,6 @@
 //
 //  GroupInfoViewController.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/24.
 //
@@ -48,7 +48,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
      */
     public var memberOptions = [ActionSheetItem(title: "group_details_extend_button_leave".chat.localize, type: .destructive, tag: "quit_group")]
     
-    public private(set) lazy var navigation: EaseChatNavigationBar = {
+    public private(set) lazy var navigation: ChatNavigationBar = {
         self.createNavigation()
     }()
     
@@ -57,8 +57,8 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
 
      - Returns: An instance of EaseChatNavigationBar.
      */
-    @objc open func createNavigation() -> EaseChatNavigationBar {
-        EaseChatNavigationBar(showLeftItem: true, textAlignment: .left, rightImages: self.chatGroup.isDisabled ? []:[UIImage(named: "more_detail", in: .chatBundle, with: nil)!] ,hiddenAvatar: true).backgroundColor(.clear)
+    @objc open func createNavigation() -> ChatNavigationBar {
+        ChatNavigationBar(showLeftItem: true, textAlignment: .left, rightImages: self.chatGroup.isDisabled ? []:[UIImage(named: "more_detail", in: .chatBundle, with: nil)!] ,hiddenAvatar: true).backgroundColor(.clear)
     }
     
     @UserDefault("EaseChatUIKit_conversation_mute_map", defaultValue: Dictionary<String,Dictionary<String,Int>>()) private var muteMap
@@ -69,7 +69,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
     
     private lazy var jsons: [[Dictionary<String,Any>]] = {
         [
-            [["title":"group_details_button_members".chat.localize,"detail":"\(self.chatGroup.occupantsCount)","withSwitch": false,"switchValue":false],["title":"contact_details_switch_donotdisturb".chat.localize,"detail":"","withSwitch": true,"switchValue":self.muteMap[EaseChatUIKitContext.shared?.currentUserId ?? ""]?[self.chatGroup.groupId] ?? 0 == 1],
+            [["title":"group_details_button_members".chat.localize,"detail":"\(self.chatGroup.occupantsCount)","withSwitch": false,"switchValue":false],["title":"contact_details_switch_donotdisturb".chat.localize,"detail":"","withSwitch": true,"switchValue":self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[self.chatGroup.groupId] ?? 0 == 1],
                 ["title":"contact_details_button_clearchathistory".chat.localize,"detail":"","withSwitch": false,"switchValue":false]
          ],
          [
@@ -149,13 +149,13 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
             self.header.userState = .offline
             self.header.detailText = groupId
             self.menuList.reloadData()
-            let profile = EaseProfile()
+            let profile = ChatUserProfile()
             profile.id = self.chatGroup.groupId
             profile.nickname = self.chatGroup.groupName
             if !self.chatGroup.groupName.isEmpty {
                 profile.avatarURL = self.chatGroup.settings.ext
             }
-            EaseChatUIKitContext.shared?.updateCache(type: .group, profile: profile)
+            ChatUIKitContext.shared?.updateCache(type: .group, profile: profile)
         }
         
         
@@ -204,7 +204,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
         self.loadingView.isHidden = true
         // Do any additional setup after loading the view.
         //click of the navigation
-        if self.chatGroup.owner != EaseChatUIKitContext.shared?.currentUserId ?? "" {
+        if self.chatGroup.owner != ChatUIKitContext.shared?.currentUserId ?? "" {
             self.datas = self.datas.dropLast()
         }
         self.navigation.clickClosure = { [weak self] in
@@ -260,7 +260,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
         - type: The type of navigation click event.
         - indexPath: The optional index path associated with the event.
      */
-    @objc open func navigationClick(type: EaseChatNavigationBarClickEvent, indexPath: IndexPath?) {
+    @objc open func navigationClick(type: ChatNavigationBarClickEvent, indexPath: IndexPath?) {
         switch type {
         case .back: self.pop()
         case .rightItems: self.rightActions(indexPath: indexPath ?? IndexPath())
@@ -395,10 +395,10 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
         ControllerStack.toDestination(vc: vc)
     }
     
-    private func transferConfirm(profile: EaseProfileProtocol) {
-        var user = EaseChatUIKitContext.shared?.userCache?[profile.id]
+    private func transferConfirm(profile: ChatUserProfileProtocol) {
+        var user = ChatUIKitContext.shared?.userCache?[profile.id]
         if user == nil {
-            user = EaseChatUIKitContext.shared?.chatCache?[profile.id]
+            user = ChatUIKitContext.shared?.chatCache?[profile.id]
         }
         var nickname = user?.remark ?? ""
         if nickname.isEmpty {
@@ -512,7 +512,7 @@ extension GroupInfoViewController: UITableViewDelegate,UITableViewDataSource {
 
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if EaseChatUIKitContext.shared?.currentUserId ?? "" == self.chatGroup.owner {
+        if ChatUIKitContext.shared?.currentUserId ?? "" == self.chatGroup.owner {
             self.didSelectRowAt(indexPath: indexPath)
         } else {
             if indexPath.section == 0 {
@@ -598,17 +598,17 @@ extension GroupInfoViewController: UITableViewDelegate,UITableViewDataSource {
     @objc open func handleEditCallback(text: String, type: GroupInfoEditType) {
         if type == .name {
             self.nameClosure?(self.chatGroup.groupId, text)
-            if let profile = EaseChatUIKitContext.shared?.groupCache?[self.chatGroup.groupId] {
+            if let profile = ChatUIKitContext.shared?.groupCache?[self.chatGroup.groupId] {
                 profile.nickname = text
-                EaseChatUIKitContext.shared?.updateCache(type: .group, profile: profile)
+                ChatUIKitContext.shared?.updateCache(type: .group, profile: profile)
             } else {
-                let profile = EaseProfile()
+                let profile = ChatUserProfile()
                 profile.id = self.chatGroup.groupId
                 profile.nickname = text
                 profile.avatarURL = self.chatGroup.settings.ext
-                EaseChatUIKitContext.shared?.updateCache(type: .group, profile: profile)
+                ChatUIKitContext.shared?.updateCache(type: .group, profile: profile)
             }
-            EaseChatUIKitContext.shared?.onGroupNameUpdated?(self.chatGroup.groupId, text)
+            ChatUIKitContext.shared?.onGroupNameUpdated?(self.chatGroup.groupId, text)
             self.header.nickName.text = text
         }
         self.datas[safe: self.editIndex.section]?[safe: self.editIndex.row]?.detail = text
@@ -648,11 +648,11 @@ extension GroupInfoViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     @objc open func processSilentMode(name: String,isOn: Bool) {
-        if var userMap = self.muteMap[EaseChatUIKitContext.shared?.currentUserId ?? ""] {
+        if var userMap = self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] {
             userMap[self.chatGroup.groupId] = isOn ? 1:0
-            self.muteMap[EaseChatUIKitContext.shared?.currentUserId ?? ""] = userMap
+            self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] = userMap
         } else {
-            self.muteMap[EaseChatUIKitContext.shared?.currentUserId ?? ""] = [self.chatGroup.groupId:isOn ? 1:0]
+            self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] = [self.chatGroup.groupId:isOn ? 1:0]
         }
         if name == "contact_details_switch_donotdisturb".chat.localize,let groupId = self.chatGroup.groupId {
             NotificationCenter.default.post(name: Notification.Name(rawValue: disturb_change), object: nil,userInfo: ["id":groupId,"value":isOn])

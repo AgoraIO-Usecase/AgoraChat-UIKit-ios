@@ -1,6 +1,6 @@
 //
 //  ContactServiceImplement.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/1.
 //
@@ -62,7 +62,7 @@ extension ContactServiceImplement: ContactServiceProtocol {
                     UserDefaults.standard.set(true, forKey: "EaseChatUIKit_contact_fetch_server_finished"+saveIdentifier)
                 }
                 completion(error,contacts ?? [])
-                self?.handleResult(error: error, type: .fetchContacts, operatorId: EaseChatUIKitContext.shared?.currentUserId ?? "")
+                self?.handleResult(error: error, type: .fetchContacts, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
             })
         } else {
             completion(nil,contacts.map({ Contact(userId: $0, remark: "") }))
@@ -73,28 +73,28 @@ extension ContactServiceImplement: ContactServiceProtocol {
         ChatClient.shared().contactManager?.addContact(userId, message: invitation, completion: { [weak self] useId, error in
             guard let `self` = self else { return }
             completion(error,userId)
-            self.handleResult(error: error, type: .add, operatorId: EaseChatUIKitContext.shared?.currentUserId ?? "")
+            self.handleResult(error: error, type: .add, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
         })
     }
     
     public func removeContact(userId: String, removeChannel: Bool = false, completion: @escaping (ChatError?, String) -> Void) {
         ChatClient.shared().contactManager?.deleteContact(userId, isDeleteConversation: removeChannel, completion: { [weak self] userId, error in
             completion(error,userId ?? "")
-            self?.handleResult(error: error, type: .remove, operatorId: EaseChatUIKitContext.shared?.currentUserId ?? "")
+            self?.handleResult(error: error, type: .remove, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
         })
     }
     
     public func agreeFriendRequest(from userId: String, completion: @escaping (ChatError?, String) -> Void) {
         ChatClient.shared().contactManager?.approveFriendRequest(fromUser: userId, completion: { [weak self] userId, error in
             completion(error,userId ?? "")
-            self?.handleResult(error: error, type: .agree, operatorId: EaseChatUIKitContext.shared?.currentUserId ?? "")
+            self?.handleResult(error: error, type: .agree, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
         })
     }
     
     public func declineFriendRequest(from userId: String, completion: @escaping (ChatError?, String) -> Void) {
         ChatClient.shared().contactManager?.declineFriendRequest(fromUser: userId, completion: { [weak self] userId, error in
             completion(error,userId ?? "")
-            self?.handleResult(error: error, type: .decline, operatorId: EaseChatUIKitContext.shared?.currentUserId ?? "")
+            self?.handleResult(error: error, type: .decline, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
         })
     }
     
@@ -125,7 +125,7 @@ extension ContactServiceImplement: ContactServiceProtocol {
     public func setRemark(userId: String, remark: String, completion: @escaping (ChatError?, Contact?) -> Void) {
         ChatClient.shared().contactManager?.setContactRemark(userId,remark: remark,completion: { [weak self] contact, error in
             completion(error,contact)
-            self?.handleResult(error: error, type: .setRemark, operatorId: EaseChatUIKitContext.shared?.currentUserId ?? "")
+            self?.handleResult(error: error, type: .setRemark, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
         })
     }
 }

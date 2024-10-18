@@ -1,20 +1,20 @@
 //
-//  DisplayProviderProtocol.swift
-//  EaseChatUIKit
+//  ChatUserProfileProtocol.swift
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/8.
 //
 
 import Foundation
 
-@objc public enum EaseProfileProviderType: UInt {
+@objc public enum ChatUserProfileProviderType: UInt {
     case chat
     case group
     case contact
 }
 
-/// Profile of the EaseChatUIKit display needed.
-@objc public protocol EaseProfileProtocol: NSObjectProtocol {
+/// Profile of the ChatUIKit display needed.
+@objc public protocol ChatUserProfileProtocol: NSObjectProtocol {
     var id: String {set get}
     var remark: String {set get}
     var selected: Bool {set get}
@@ -24,7 +24,7 @@ import Foundation
     func toJsonObject() -> Dictionary<String,Any>?
 }
 
-@objcMembers open class EaseProfile:NSObject, EaseProfileProtocol {
+@objcMembers open class ChatUserProfile:NSObject, ChatUserProfileProtocol {
     public var remark: String = ""
     
     public func toJsonObject() -> Dictionary<String, Any>? {
@@ -48,42 +48,42 @@ import Foundation
         
 }
 
-/// Profile provider of the EaseChatUIKit.Only available in Swift language.
-public protocol EaseProfileProvider {
+/// Profile provider of the ChatUIKit.Only available in Swift language.
+public protocol ChatProfileProvider {
     
     /// Coroutine obtains user information asynchronously.
     /// - Parameter profileIds: The corresponding conversation id string array.
-    /// - Returns: Array of the conform``EaseProfileProtocol`` object.
-    func fetchProfiles(profileIds: [String]) async -> [EaseProfileProtocol]
+    /// - Returns: Array of the conform``ChatUserProfileProtocol`` object.
+    func fetchProfiles(profileIds: [String]) async -> [ChatUserProfileProtocol]
 }
 
-/// /// Profile provider of the EaseChatUIKit.Only available in Objective-C language.
-@objc public protocol EaseProfileProviderOC: NSObjectProtocol {
+/// /// Profile provider of the ChatUIKit.Only available in Objective-C language.
+@objc public protocol ChatProfileProviderOC: NSObjectProtocol {
     
     /// Need to obtain the list display information on the current screen.
     /// - Parameters:
     ///   - profileIds: The corresponding conversation id string array.
-    ///   - completion: Callback,obtain Array of the ``EaseProfileProtocol`` object.
-    func fetchProfiles(profileIds: [String],completion: @escaping ([EaseProfileProtocol]) -> Void)
+    ///   - completion: Callback,obtain Array of the ``ChatUserProfileProtocol`` object.
+    func fetchProfiles(profileIds: [String],completion: @escaping ([ChatUserProfileProtocol]) -> Void)
 }
 
-public protocol EaseGroupProfileProvider {
+public protocol ChatGroupProfileProvider {
     /// Coroutine obtains user information asynchronously.
     /// - Parameter profileIds: The corresponding conversation id string array.
-    /// - Returns: Array of the conform``EaseProfileProtocol`` object.
-    func fetchGroupProfiles(profileIds: [String]) async -> [EaseProfileProtocol]
+    /// - Returns: Array of the conform``ChatUserProfileProtocol`` object.
+    func fetchGroupProfiles(profileIds: [String]) async -> [ChatUserProfileProtocol]
     
 }
 
 
 
-@objc public protocol EaseGroupProfileProviderOC: NSObjectProtocol {
+@objc public protocol ChatGroupProfileProviderOC: NSObjectProtocol {
     
     /// Need to obtain the list display information on the current screen.
     /// - Parameters:
     ///   - profileIds: The corresponding conversation id string array.
-    ///   - completion: Callback,obtain Array of the ``EaseProfileProtocol`` object.
-    func fetchGroupProfiles(profileIds: [String],completion: @escaping ([EaseProfileProtocol]) -> Void)
+    ///   - completion: Callback,obtain Array of the ``ChatUserProfileProtocol`` object.
+    func fetchGroupProfiles(profileIds: [String],completion: @escaping ([ChatUserProfileProtocol]) -> Void)
 }
 
 

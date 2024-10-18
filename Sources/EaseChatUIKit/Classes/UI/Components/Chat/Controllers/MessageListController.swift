@@ -16,20 +16,20 @@ import AVFoundation
     
     public private(set) var chatType = ChatType.chat
     
-    public private(set) var profile: EaseProfileProtocol = EaseProfile()
+    public private(set) var profile: ChatUserProfileProtocol = ChatUserProfile()
     
     private var currentTask: DispatchWorkItem?
     
     private let queue = DispatchQueue(label: "com.example.messageHandlerQueue")
     
-    public private(set) lazy var navigation: EaseChatNavigationBar = {
+    public private(set) lazy var navigation: ChatNavigationBar = {
         self.createNavigation()
     }()
     
     /// Creates a navigation bar for the MessageListController.
     /// - Returns: An instance of ``EaseChatNavigationBar``.
-    @objc open func createNavigation() -> EaseChatNavigationBar {
-        EaseChatNavigationBar(showLeftItem: true,textAlignment: .left,rightImages: self.rightImages()).backgroundColor(.clear)
+    @objc open func createNavigation() -> ChatNavigationBar {
+        ChatNavigationBar(showLeftItem: true,textAlignment: .left,rightImages: self.rightImages()).backgroundColor(.clear)
     }
     
     /// Right images of the ``EaseChatNavigationBar``.
@@ -88,20 +88,20 @@ import AVFoundation
      */
     @objc(initWithConversationId:chatType:)
     public required init(conversationId: String,chatType: ChatType = .chat) {
-        if let info = chatType == .chat ? EaseChatUIKitContext.shared?.groupCache?[conversationId]:EaseChatUIKitContext.shared?.userCache?[conversationId] {
+        if let info = chatType == .chat ? ChatUIKitContext.shared?.groupCache?[conversationId]:ChatUIKitContext.shared?.userCache?[conversationId] {
             self.profile = info
         } else {
             self.profile.id = conversationId
         }
         if chatType == .chat {
-            if let info = EaseChatUIKitContext.shared?.userCache?[conversationId] {
+            if let info = ChatUIKitContext.shared?.userCache?[conversationId] {
                 self.profile.id = conversationId
                 self.profile.nickname = info.nickname
                 self.profile.remark = info.remark
                 self.profile.avatarURL = info.avatarURL
             }
         } else {
-            if let info = EaseChatUIKitContext.shared?.groupCache?[conversationId] {
+            if let info = ChatUIKitContext.shared?.groupCache?[conversationId] {
                 self.profile.id = conversationId
                 self.profile.nickname = info.nickname
                 self.profile.remark = info.remark
@@ -128,7 +128,7 @@ import AVFoundation
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        guard let info = (self.chatType == .chat ? EaseChatUIKitContext.shared?.userCache:EaseChatUIKitContext.shared?.groupCache)?[self.profile.id] else { return }
+        guard let info = (self.chatType == .chat ? ChatUIKitContext.shared?.userCache:ChatUIKitContext.shared?.groupCache)?[self.profile.id] else { return }
         self.profile = info
         var nickname = self.profile.remark
         if nickname.isEmpty {
@@ -200,7 +200,7 @@ import AVFoundation
         }
         self.view.addSubview(self.pinContainer)
         self.pinContainer.isHidden = true
-        if let has = EaseChatUIKitContext.shared?.pinnedCache?[self.profile.id],!has {
+        if let has = ChatUIKitContext.shared?.pinnedCache?[self.profile.id],!has {
             self.loadingView.startAnimating()
             DispatchQueue.main.asyncAfter(wallDeadline: .now()+2) {
                 self.loadingView.stopAnimating()
@@ -216,7 +216,7 @@ import AVFoundation
     }
     
     deinit {
-        EaseChatUIKitContext.shared?.cleanCache(type: .chat)
+        ChatUIKitContext.shared?.cleanCache(type: .chat)
         URLPreviewManager.caches.removeAll()
     }
 }
@@ -230,7 +230,7 @@ extension MessageListController {
      - type: The type of navigation bar click event.
      - indexPath: The index path associated with the event (optional).
      */
-    @objc open func navigationClick(type: EaseChatNavigationBarClickEvent, indexPath: IndexPath?) {
+    @objc open func navigationClick(type: ChatNavigationBarClickEvent, indexPath: IndexPath?) {
         switch type {
         case .back: self.pop()
         case .avatar, .title: self.viewDetail()
@@ -726,7 +726,7 @@ extension MessageListController: MessageListDriverEventsListener {
         let avatarURL = body.customExt?["avatar"] as? String
         let nickname = body.customExt?["nickname"] as? String
         if body.event == EaseChatUIKit_user_card_message {
-            let profile = EaseProfile()
+            let profile = ChatUserProfile()
             profile.id = userId ?? ""
             profile.nickname = nickname ?? ""
             profile.avatarURL = avatarURL ?? ""
@@ -736,7 +736,7 @@ extension MessageListController: MessageListDriverEventsListener {
         }
     }
     
-    public func onMessageAvatarClicked(user: EaseProfileProtocol) {
+    public func onMessageAvatarClicked(user: ChatUserProfileProtocol) {
         self.messageAvatarClick(user: user)
     }
     
@@ -746,8 +746,8 @@ extension MessageListController: MessageListDriverEventsListener {
      - Parameters:
      - user: The user profile associated with the clicked avatar.
      */
-    @objc open func messageAvatarClick(user: EaseProfileProtocol) {
-        if user.id == EaseChatUIKitContext.shared?.currentUserId ?? "" {
+    @objc open func messageAvatarClick(user: ChatUserProfileProtocol) {
+        if user.id == ChatUIKitContext.shared?.currentUserId ?? "" {
             return
         }
         let vc = ComponentsRegister.shared.ContactInfoController.init(profile: user)

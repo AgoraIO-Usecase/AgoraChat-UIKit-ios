@@ -151,7 +151,7 @@ extension ConversationListCell: ThemeSwitchProtocol {
     
 }
 
-@objcMembers open class ConversationInfo:NSObject, EaseProfileProtocol {
+@objcMembers open class ConversationInfo:NSObject, ChatUserProfileProtocol {
     open func toJsonObject() -> Dictionary<String, Any>? {
         [:]
     }
@@ -160,7 +160,7 @@ extension ConversationListCell: ThemeSwitchProtocol {
     
     public var selected: Bool = false
     
-    public var type: EaseProfileProviderType = .chat
+    public var type: ChatUserProfileProviderType = .chat
     
     public var id: String = ""
     
@@ -208,7 +208,7 @@ extension ConversationListCell: ThemeSwitchProtocol {
         
         let from = message.from
         let mentionText = "Mentioned".chat.localize
-        let user = EaseChatUIKitContext.shared?.userCache?[from]
+        let user = ChatUIKitContext.shared?.userCache?[from]
         var nickName = user?.remark ?? ""
         if nickName.isEmpty {
             nickName = user?.nickname ?? ""

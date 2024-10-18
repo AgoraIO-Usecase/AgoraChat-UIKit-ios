@@ -256,7 +256,7 @@ extension ConversationList: IConversationListDriver {
         self.reloadData()
     }
     
-    public func refreshProfiles(infos: [EaseProfileProtocol]) {
+    public func refreshProfiles(infos: [ChatUserProfileProtocol]) {
         
         for info in infos {
             if let index = self.indexMap[info.id], let item = self.datas[safe: index] {
@@ -427,7 +427,7 @@ extension ConversationList: ThemeSwitchProtocol {
     
     /// This method can be used when you want refresh some  display info  of datas.
     /// - Parameter infos: Array of conform ``EaseProfileProtocol`` object.
-    func refreshProfiles(infos: [EaseProfileProtocol])
+    func refreshProfiles(infos: [ChatUserProfileProtocol])
     
     /// This method can be used when pulling down to refresh.
     /// - Parameter infos: Array of ConversationInfo objects.

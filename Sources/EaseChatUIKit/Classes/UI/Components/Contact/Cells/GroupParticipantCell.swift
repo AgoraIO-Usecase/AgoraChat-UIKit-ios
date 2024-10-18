@@ -1,6 +1,6 @@
 //
 //  GroupParticipantCell.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/27.
 //
@@ -43,15 +43,15 @@ import UIKit
     }
     
     
-    @objc public func refresh(profile: EaseProfileProtocol) {
+    @objc public func refresh(profile: ChatUserProfileProtocol) {
         self.avatar.image(with: profile.avatarURL, placeHolder: Appearance.avatarPlaceHolder)
         self.nickName.text = profile.nickname.isEmpty ? profile.id:profile.nickname
-        if self.display == .withCheckBox,let item = profile as? EaseProfile {
+        if self.display == .withCheckBox,let item = profile as? ChatUserProfile {
             self.checkbox.image = UIImage(named: item.selected ? "select":"unselect", in: .chatBundle, compatibleWith: nil)
         }
     }
     
-    @objc public func refresh(profile: EaseProfileProtocol,keyword: String) {
+    @objc public func refresh(profile: ChatUserProfileProtocol,keyword: String) {
         let nickName = profile.nickname.isEmpty ? profile.id:profile.nickname
         self.nickName.attributedText = self.highlightKeywords(keyword: keyword, in: nickName)
         if profile.avatarURL.lowercased() == "all" {
@@ -59,7 +59,7 @@ import UIKit
         } else {
             self.avatar.image(with: profile.avatarURL, placeHolder:Appearance.conversation.singlePlaceHolder)
         }
-        if self.display == .withCheckBox,let item = profile as? EaseProfile {
+        if self.display == .withCheckBox,let item = profile as? ChatUserProfile {
             self.checkbox.image = UIImage(named: item.selected ? "select":"unselect", in: .chatBundle, compatibleWith: nil)
         }
     }

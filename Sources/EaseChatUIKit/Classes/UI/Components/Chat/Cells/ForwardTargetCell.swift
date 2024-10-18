@@ -1,6 +1,6 @@
 //
 //  ForwardTargetCell.swift
-//  EaseChatUIKit
+//  ChatUIKit
 //
 //  Created by 朱继超 on 2024/2/19.
 //
@@ -52,7 +52,7 @@ import UIKit
         self.separateLine.frame = CGRect(x: self.nickName.frame.minX, y: self.contentView.frame.height-0.5, width: self.contentView.frame.width-self.nickName.frame.minX, height: 0.5)
     }
     
-    open func refresh(info: EaseProfileProtocol,keyword: String,forward state: ForwardTargetState) {
+    open func refresh(info: ChatUserProfileProtocol,keyword: String,forward state: ForwardTargetState) {
         let nickName = info.nickname.isEmpty ? info.id:info.nickname
         self.nickName.attributedText = self.highlightKeywords(keyword: keyword, in: nickName )
         self.avatar.image(with: info.avatarURL, placeHolder: Appearance.conversation.groupPlaceHolder)
