@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name             = 'chat-uikit'
-s.version          = '2.0.0'
+s.version          = 'chat-uikit_2.0.0RC'
 s.summary = 'agora im UIKit'
 s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
 s.description = <<-DESC
@@ -16,7 +16,7 @@ s.xcconfig = {'ENABLE_BITCODE' => 'NO'}
 
 s.source_files = [ 'Sources/EaseChatUIKit/Classes/**/*.{h,swift}' ]
 s.resources = ['Sources/EaseChatUIKit/Classes/UI/**/*.bundle','Sources/EaseChatUIKit/Classes/UI/**/*.xcprivacy']
-s.dependency 'Agora_Chat_iOS'
+s.dependency 'Agora_Chat_iOS', '1.3.0'
 s.static_framework = true
 
 s.swift_version = '5.0'

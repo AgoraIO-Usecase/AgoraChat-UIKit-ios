@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let option = ChatOptions(appkey: ExampleRequiredConfig.appKey)
         option.enableConsoleLog = true
         option.isAutoLogin = false
-        _ = EaseChatUIKitClient.shared.setup(option: option)
+        _ = ChatUIKitClient.shared.setup(option: option)
         self.setupEaseChatUIKitConfig()
         return true
     }

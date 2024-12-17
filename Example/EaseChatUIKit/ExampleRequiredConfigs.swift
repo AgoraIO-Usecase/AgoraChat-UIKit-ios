@@ -24,7 +24,7 @@ public class ExampleRequiredConfig {
     static var chatToken: String = <#chat token#>
     
     /// ``YourAppUser`` can be regarded as the user class in your App.
-    public final class YourAppUser: NSObject, EaseProfileProtocol {
+    public final class YourAppUser: NSObject, ChatUserProfileProtocol {
         
         /// Created user id.
         public var id: String = <#user id#>
