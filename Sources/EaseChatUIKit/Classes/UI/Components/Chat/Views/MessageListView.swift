@@ -496,6 +496,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
             self?.handleClick(area: $0, entity: $1)
         }
         cell?.longPressAction = { [weak self] in
+            _ = $2
             self?.handleLongPressed(area: $0, entity: $1)
         }
         cell?.reactionClicked = { [weak self] in
