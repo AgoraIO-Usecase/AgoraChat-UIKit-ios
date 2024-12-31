@@ -2,11 +2,11 @@
 
 这里以红包消息举例
 
-## 1.根据需求继承`EaseChatUIKit`中的Cell
+## 1.根据需求继承`chat_uikit`中的Cell
 
 ```Swift
 import UIKit
-import EaseChatUIKit
+import chat_uikit
 
 class RedPackageCell: CustomMessageCell {
 
@@ -34,11 +34,11 @@ class RedPackageCell: CustomMessageCell {
 
 [图示](./red_package_message.jpg)
 
-## 2.根据需求继承`EaseChatUIKit`中的Cell的渲染模型`MessageEntity`，并给定气泡大小，其中`redPackageIdentifier`为红包的自定义消息的event事件
+## 2.根据需求继承`chat_uikit`中的Cell的渲染模型`MessageEntity`，并给定气泡大小，其中`redPackageIdentifier`为红包的自定义消息的event事件
 
 ```Swift
 import UIKit
-import EaseChatUIKit
+import chat_uikit
 
 final class MineMessageEntity: MessageEntity {
     
@@ -110,7 +110,7 @@ let redPackageIdentifier = "redPackage"
 
 ```
 
-## 5.给`EaseChatUIKit`中的`MessageListViewModel`增加发送红包消息的方法
+## 5.给`chat_uikit`中的`MessageListViewModel`增加发送红包消息的方法
 
 ```Swift
 extension MessageListViewModel {
@@ -142,7 +142,7 @@ extension MessageListViewModel {
 
 ```
 
-## 6.将上述继承的对象全部注册进`EaseChatUIKit`，在其初始化后
+## 6.将上述继承的对象全部注册进`chat_uikit`，在其初始化后
 
 示例代码
 
@@ -160,7 +160,7 @@ extension MessageListViewModel {
 
 ```Swift
 import UIKit
-import EaseChatUIKit
+import chat_uikit
 
 
 final class MineConversationInfo: ConversationInfo {
