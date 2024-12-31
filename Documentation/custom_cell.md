@@ -117,7 +117,7 @@ extension MessageListViewModel {
     func sendRedPackageMessage() {
         var ext = Dictionary<String,Any>()
         ext["something"] = "发红包"
-        let json = EaseChatUIKitContext.shared?.currentUser?.toJsonObject() ?? [:]
+        let json = ChatUIKitContext.shared?.currentUser?.toJsonObject() ?? [:]
         ext.merge(json) { _, new in
             new
         }
@@ -171,7 +171,7 @@ final class MineConversationInfo: ConversationInfo {
         
         let from = message.from
         let mentionText = "Mentioned".chat.localize
-        let user = EaseChatUIKitContext.shared?.userCache?[from]
+        let user = ChatUIKitContext.shared?.userCache?[from]
         var nickName = user?.remark ?? ""
         if nickName.isEmpty {
             nickName = user?.nickname ?? ""
