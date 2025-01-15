@@ -338,7 +338,7 @@ extension MainViewController: ChatUserProfileProvider,ChatGroupProfileProvider {
         let result = await ChatClient.shared().userInfoManager?.fetchUserInfo(byId: unknownIds)
         if result?.1 == nil,let infoMap = result?.0 {
             for (userId,info) in infoMap {
-                let profile = EaseChatProfile()
+                let profile = ChatUserProfile()
                 let nickname = info.nickname ?? ""
                 profile.id = userId
                 profile.nickname = nickname
@@ -364,7 +364,7 @@ extension MainViewController: ChatUserProfileProvider,ChatGroupProfileProvider {
         let groups = ChatClient.shared().groupManager?.getJoinedGroups() ?? []
         for groupId in groupIds {
             if let group = groups.first(where: { $0.groupId == groupId }) {
-                let profile = EaseChatProfile()
+                let profile = ChatUserProfile()
                 profile.id = groupId
                 profile.nickname = group.groupName
                 profile.avatarURL = group.settings.ext

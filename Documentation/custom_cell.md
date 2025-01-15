@@ -1,12 +1,12 @@
-# 新类型自定义消息Cell
+# Fully Customizing Messages and Cells
 
-这里以红包消息举例
+Here, we use a red packet message as an example.
 
-## 1.根据需求继承`EaseChatUIKit`中的Cell
+## 1.Inherit the Cell from chat_uikit based on the requirements.
 
 ```Swift
 import UIKit
-import EaseChatUIKit
+import chat_uikit
 
 class RedPackageCell: CustomMessageCell {
 
@@ -18,7 +18,7 @@ class RedPackageCell: CustomMessageCell {
         super.refresh(entity: entity)
     }
             
-        //如果想让气泡尖角改颜色
+        //If you want to change the color of the bubble’s arrow.
         override func updateAxis(entity: MessageEntity) {
         super.updateAxis(entity: entity)
         if Appearance.chat.bubbleStyle == .withArrow {
@@ -32,13 +32,13 @@ class RedPackageCell: CustomMessageCell {
 ```
 
 
-[图示](./red_package_message.jpg)
+[Image](./red_package_message.jpg)
 
-## 2.根据需求继承`EaseChatUIKit`中的Cell的渲染模型`MessageEntity`，并给定气泡大小，其中`redPackageIdentifier`为红包的自定义消息的event事件
+## 2.Inherit the rendering model MessageEntity from chat_uikit based on the requirements, and define the bubble size. The redPackageIdentifier represents the event for the custom red packet message.
 
 ```Swift
 import UIKit
-import EaseChatUIKit
+import chat_uikit
 
 final class MineMessageEntity: MessageEntity {
     
@@ -69,12 +69,12 @@ final class MineMessageEntity: MessageEntity {
 
 ```
 
-## 3.添加发送附件消息的类型
+## 3.Add a new attachment message type for sending messages.
 
 
-[图示](./send_red_package.jpg)
+[Image](./send_red_package.jpg)
 
-示例，增加发送红包消息
+Example: Add the ability to send a red packet message.
 
 ```Swift
         
@@ -82,9 +82,9 @@ final class MineMessageEntity: MessageEntity {
         Appearance.chat.inputExtendActions.append(redPackage)
 ```
 
-## 4.在继承的`MessageListController`处理新增的附件消息类型的点击
+## 4.Handle the click of the newly added attachment message type in the inherited MessageListController.
 
-示例代码
+
 ```Swift
 class CustomMessageListController: MessageListController {
     
@@ -110,14 +110,14 @@ let redPackageIdentifier = "redPackage"
 
 ```
 
-## 5.给`EaseChatUIKit`中的`MessageListViewModel`增加发送红包消息的方法
+## 5.Add a method to send a red packet message in the MessageListViewModel of chat_uikit.
 
 ```Swift
 extension MessageListViewModel {
     func sendRedPackageMessage() {
         var ext = Dictionary<String,Any>()
         ext["something"] = "发红包"
-        let json = EaseChatUIKitContext.shared?.currentUser?.toJsonObject() ?? [:]
+        let json = ChatUIKitContext.shared?.currentUser?.toJsonObject() ?? [:]
         ext.merge(json) { _, new in
             new
         }
@@ -142,9 +142,8 @@ extension MessageListViewModel {
 
 ```
 
-## 6.将上述继承的对象全部注册进`EaseChatUIKit`，在其初始化后
+## 6.Register all the inherited objects into chat_uikit after its initialization.
 
-示例代码
 
 ```Swift
         
@@ -154,13 +153,13 @@ extension MessageListViewModel {
         ComponentsRegister.shared.registerCustomizeCellClass(cellType: RedPackageCell.self)
 ```
 
-- 这里`ComponentsRegister.shared.Conversation = MineConversationInfo.self`是为了修改自定义消息在会话列表中，会话收到新消息时显示的内容这里暂定为显示 "[红包]"，示例代码如下，主要更改在非文本消息类型的else中根据自定义消息的event显示对应的内容
+- `ComponentsRegister.shared.Conversation = MineConversationInfo.self` is used to modify the display content of custom messages in the conversation list. When a new message is received in the conversation, the content is displayed as “[Red package]” for red packet messages. The main modification is made in the else block for non-text message types, where the custom message’s event is checked to display the corresponding content.
 
-[图示](./red_package_placeholder.jpg)
+[Image](./red_package_placeholder.jpg)
 
 ```Swift
 import UIKit
-import EaseChatUIKit
+import chat_uikit
 
 
 final class MineConversationInfo: ConversationInfo {
@@ -171,7 +170,7 @@ final class MineConversationInfo: ConversationInfo {
         
         let from = message.from
         let mentionText = "Mentioned".chat.localize
-        let user = EaseChatUIKitContext.shared?.userCache?[from]
+        let user = ChatUIKitContext.shared?.userCache?[from]
         var nickName = user?.remark ?? ""
         if nickName.isEmpty {
             nickName = user?.nickname ?? ""
@@ -219,7 +218,7 @@ final class MineConversationInfo: ConversationInfo {
         } else {
             var content = message.showContent
             if let body = message.body as? ChatCustomMessageBody,body.event == redPackageIdentifier {
-                content = "[红包]"
+                content = "[Red package]"
             }
             let showText = NSMutableAttributedString {
                 AttributedText((message.chatType == .chat ? content:(nickName+":"+content))).foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5).font(UIFont.theme.bodyMedium)

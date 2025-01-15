@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name             = 'chat-uikit'
-s.version          = '2.0.0RC'
+s.version          = '2.0.0'
 s.summary = 'agora im UIKit'
 s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
 s.description = <<-DESC
