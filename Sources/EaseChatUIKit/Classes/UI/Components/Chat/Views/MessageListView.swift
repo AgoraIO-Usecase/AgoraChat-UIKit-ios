@@ -1,5 +1,8 @@
 import UIKit
 
+
+public let MessageInputBarHeight = CGFloat(52)
+
 @objc public enum MoreMessagePosition: UInt {
     case left
     case center
@@ -329,7 +332,7 @@ import UIKit
                 }
             }
         }
-        
+        self.processInputBarFirstResponder()
         self.inputBar.textViewFirstResponder = { [weak self] firstResponder in
             guard let `self` = self else { return }
             UIView.animate(withDuration: 0.22) {
@@ -388,6 +391,31 @@ import UIKit
     
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func processInputBarFirstResponder() {
+        self.inputBar.textViewFirstResponder = { [weak self] firstResponder in
+            guard let `self` = self else { return }
+            UIView.animate(withDuration: 0.25) {
+                let oldFrame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-MessageInputBarHeight)
+                self.messageList.frame = oldFrame
+                if firstResponder {
+                    self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.frame.height-self.inputBar.keyboardHeight-16-BottomBarHeight-(ScreenHeight <= 667 ? 28:0))
+                
+                } else {
+                    if self.inputBar.frame.height > MessageInputBarHeight {
+                        self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.frame.height-self.inputBar.frame.height-BottomBarHeight)
+                    } else {
+                        self.messageList.frame = oldFrame
+                    }
+                }
+                
+                let lastIndexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                if lastIndexPath.row >= 0 {
+                    self.messageList.scrollToRow(at: lastIndexPath, at: .bottom, animated: false)
+                }
+            }
+        }
     }
     
     private func bottomMultiSelectedBarEvents(operation: MessageMultiSelectedBottomBarOperation) {
