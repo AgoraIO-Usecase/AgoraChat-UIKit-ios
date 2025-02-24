@@ -46,7 +46,7 @@ public let urlPreviewImageHeight = CGFloat(137)
         super.init()
     }
     
-    public var message: ChatMessage = ChatMessage()
+    public var message: ChatMessage = ChatMessage(conversationID: "", body: ChatTextMessageBody(text: ""), ext: nil)
     
     public var urlPreview: URLPreviewManager.HTMLContent?
     
@@ -797,7 +797,7 @@ public let urlPreviewImageHeight = CGFloat(137)
         super.init()
     }
     
-    public var message: ChatMessage = ChatMessage()
+    public var message: ChatMessage = ChatMessage(conversationID: "", body: ChatTextMessageBody(text: ""), ext: nil)
     
     public var showUserName: String {
         if let remark = self.message.user?.remark,!remark.isEmpty {
@@ -838,7 +838,7 @@ public let urlPreviewImageHeight = CGFloat(137)
 
 extension ChatMessage {
     
-    /// ``EaseProfileProtocol``
+    /// ``ChatUserProfileProtocol``
     @objc public var user: ChatUserProfileProtocol? {
         let cacheUser = ChatUIKitContext.shared?.userCache?[self.from]
         if cacheUser != nil,let remark = cacheUser?.remark,!remark.isEmpty {
