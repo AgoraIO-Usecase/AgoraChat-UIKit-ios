@@ -239,7 +239,7 @@ extension ForwardTargetViewController: UITableViewDelegate,UITableViewDataSource
     }
     
     @objc open func forwardMessages(indexPath: IndexPath) {
-        var body = self.messages.first?.body ?? ChatMessageBody()
+         guard  var body = self.messages.first?.body else { return }
         if self.combineForward {
             body = ChatCombineMessageBody(title: "Chat History".chat.localize, summary: self.forwardSummary(), compatibleText: "[Chat History]", messageIdList: self.messages.filter({ChatClient.shared().chatManager?.getMessageWithMessageId($0.messageId)?.status == .succeed}).map({ $0.messageId }))
         }
