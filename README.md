@@ -83,6 +83,9 @@ Then run the `cd` command on the terminal to navigate to the folder where `podfi
 
 > Search for `ENABLE_USER_SCRIPT_SANDBOXING` in **Build Setting** and change `User Script Sandboxing` to `NO`.
 
+> 如果`pod install`失败报错 RuntimeError - `PBXGroup` attempted to initialize an object with unknown ISA `PBXFileSystemSynchronizedRootGroup` from attributes: `{"isa"=>"PBXFileSystemSynchronizedRootGroup"`，请尝试升级pod版本为1.14.3
+ Xcode16及其以下版本打开会报错 `Adjust the project format using a compatible version of Xcode to allow it to be opened by this version of Xcode.`
+
 ## Swift Package Manager 
 Add the URL of this repository to your Xcode 15+ Project.
 
