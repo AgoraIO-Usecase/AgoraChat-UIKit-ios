@@ -1,5 +1,6 @@
 import UIKit
 
+
 public let MessageInputBarHeight = CGFloat(52)
 
 @objc public enum MoreMessagePosition: UInt {
@@ -328,9 +329,44 @@ public let MessageInputBarHeight = CGFloat(52)
         self.moreMessages.layer.shadowOffset = CGSize(width: 2, height: 4)
         self.moreMessages.layer.cornerRadius = Appearance.avatarRadius == .large ? self.moreMessages.frame.height/2.0:CGFloat(Appearance.avatarRadius.rawValue)
         
-        self.processInputBarAxisYChanged()
-        
+
+        self.inputBar.axisYChanged = { [weak self] value in
+            guard let `self` = self else { return }
+            DispatchQueue.main.async {
+                UIView.animate(withDuration: 0.22) {
+                    self.replyBar.frame = CGRect(x: 0, y: self.inputBar.frame.minY-52, width: self.frame.width, height: 53)
+                    if self.replyBar.isHidden  {
+                        self.moreMessages.frame = CGRect(x: self.moreMessageAxisX, y: self.inputBar.frame.minY-44, width: 180, height: 36)
+                    } else {
+                        self.moreMessages.frame = CGRect(x: self.moreMessageAxisX, y: self.replyBar.frame.minY-44, width: 180, height: 36)
+                    }
+                }
+            }
+        }
         self.processInputBarFirstResponder()
+        self.inputBar.textViewFirstResponder = { [weak self] firstResponder in
+            guard let `self` = self else { return }
+            UIView.animate(withDuration: 0.22) {
+                let oldFrame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-52)
+                if firstResponder {
+                    if self.inputBar.keyboardHeight >= 216,self.messageList.frame.height >= oldFrame.height {
+                        if self.getLastVisibleCellCoordinate().maxY > self.inputBar.frame.height+self.inputBar.keyboardHeight {
+                            self.messageList.frame = CGRect(x: 0, y: 0-self.inputBar.keyboardHeight, width: self.messageList.frame.width, height: self.messageList.frame.height)
+                        } else {
+                            self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.messageList.frame.height-self.inputBar.keyboardHeight)
+                        }
+                        
+                        let lastIndexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                        if lastIndexPath.row >= 0 {
+                            self.messageList.scrollToRow(at: lastIndexPath, at: .bottom, animated: true)
+                        }
+                    }
+                
+                } else {
+                    self.messageList.frame = oldFrame
+                }
+            }
+        }
         
         self.editBottomBar.operationClosure = { [weak self] in
             self?.bottomMultiSelectedBarEvents(operation: $0)
@@ -408,6 +444,31 @@ public let MessageInputBarHeight = CGFloat(52)
     
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func processInputBarFirstResponder() {
+        self.inputBar.textViewFirstResponder = { [weak self] firstResponder in
+            guard let `self` = self else { return }
+            UIView.animate(withDuration: 0.25) {
+                let oldFrame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-MessageInputBarHeight)
+                self.messageList.frame = oldFrame
+                if firstResponder {
+                    self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.frame.height-self.inputBar.keyboardHeight-16-BottomBarHeight-(ScreenHeight <= 667 ? 28:0))
+                
+                } else {
+                    if self.inputBar.frame.height > MessageInputBarHeight {
+                        self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.frame.height-self.inputBar.frame.height-BottomBarHeight)
+                    } else {
+                        self.messageList.frame = oldFrame
+                    }
+                }
+                
+                let lastIndexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                if lastIndexPath.row >= 0 {
+                    self.messageList.scrollToRow(at: lastIndexPath, at: .bottom, animated: false)
+                }
+            }
+        }
     }
     
     private func bottomMultiSelectedBarEvents(operation: MessageMultiSelectedBottomBarOperation) {
