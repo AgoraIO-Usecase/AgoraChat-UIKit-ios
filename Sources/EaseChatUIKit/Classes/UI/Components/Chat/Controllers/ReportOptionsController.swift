@@ -11,7 +11,7 @@ import UIKit
     
     public private(set) var items: [Bool] = []
     
-    public private(set) var reportMessage: ChatMessage = ChatMessage()
+    public private(set) var reportMessage: ChatMessage = ChatMessage(conversationID: "", body: ChatTextMessageBody(text: ""), ext: nil)
     
     public private(set) var selectIndex = 0
     
@@ -26,7 +26,7 @@ import UIKit
     }()
     
     lazy var confirm: UIButton = {
-        UIButton(type: .custom).frame(CGRect(x: self.cancel.frame.maxX+12, y: Appearance.pageContainerConstraintsSize.height - 60 - 40  - BottomBarHeight, width: (self.view.frame.width-44)/2.0, height: 40)).title("barrage_long_press_menu_report".chat.localize, .normal).textColor(UIColor.theme.neutralColor98, .normal).backgroundColor(UIColor.theme.primaryColor5).cornerRadius(Appearance.avatarRadius).addTargetFor(self, action: #selector(report), for: .touchUpInside)
+        UIButton(type: .custom).frame(CGRect(x: self.cancel.frame.maxX+12, y: Appearance.pageContainerConstraintsSize.height - 60 - 40  - BottomBarHeight, width: (self.view.frame.width-44)/2.0, height: 40)).title("barrage_long_press_menu_report".chat.localize, .normal).textColor(UIColor.theme.neutralColor98, .normal).backgroundColor(UIColor.theme.primaryLightColor).cornerRadius(Appearance.avatarRadius).addTargetFor(self, action: #selector(report), for: .touchUpInside)
     }()
     
     /// Init method

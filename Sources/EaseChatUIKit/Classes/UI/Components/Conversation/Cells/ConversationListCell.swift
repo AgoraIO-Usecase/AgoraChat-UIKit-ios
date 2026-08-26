@@ -40,7 +40,7 @@ import UIKit
     }()
     
     @objc open func createBadge() -> UILabel {
-        UILabel(frame: CGRect(x: self.contentView.frame.width-48, y: self.nickName.frame.maxY+5, width: 32, height: 18)).cornerRadius(.large).backgroundColor(UIColor.theme.primaryColor5).textColor(UIColor.theme.neutralColor98).font(UIFont.theme.labelSmall).textAlignment(.center)
+        UILabel(frame: CGRect(x: self.contentView.frame.width-48, y: self.nickName.frame.maxY+5, width: 32, height: 18)).cornerRadius(.large).backgroundColor(UIColor.theme.primaryLightColor).textColor(UIColor.theme.neutralColor98).font(UIFont.theme.labelSmall).textAlignment(.center)
     }
     
     public private(set) lazy var dot: UIView = {
@@ -48,7 +48,7 @@ import UIKit
     }()
     
     @objc open func createDot() -> UIView {
-        UIView(frame: CGRect(x: self.contentView.frame.width-28, y: self.nickName.frame.maxY+10, width: 8, height: 8)).cornerRadius(.large).backgroundColor(UIColor.theme.primaryColor5)
+        UIView(frame: CGRect(x: self.contentView.frame.width-28, y: self.nickName.frame.maxY+10, width: 8, height: 8)).cornerRadius(.large).backgroundColor(UIColor.theme.primaryLightColor)
     }
     
     public private(set) lazy var separatorLine: UIView = {
@@ -76,7 +76,18 @@ import UIKit
         self.nickName.frame = CGRect(x: self.avatar.frame.maxX+12, y: self.avatar.frame.minX+4, width: self.contentView.frame.width-self.avatar.frame.maxX-12-16-50, height: 16)
         self.date.frame = CGRect(x: self.contentView.frame.width-66, y: self.nickName.frame.minY+2, width: 50, height: 16)
         self.content.frame = CGRect(x: self.avatar.frame.maxX+12, y: self.nickName.frame.maxY+2, width: self.contentView.frame.width-12-12-16-80, height: 20)
-//        self.badge.frame = CGRect(x: self.contentView.frame.width-48, y: self.nickName.frame.maxY+5, width: 32, height: 18)
+        var badgeWidth: CGFloat = 18
+        if let badgeText = self.badge.text {
+            if badgeText.count > 2 {
+                badgeWidth = 32
+            } else if badgeText.count > 1 {
+                badgeWidth = 24
+            }
+        }
+        self.badge.frame = CGRect(x: self.contentView.frame.width - badgeWidth - 16,
+                                  y: self.nickName.frame.maxY + 5,
+                                  width: badgeWidth,
+                                  height: 18)
         self.dot.frame =  CGRect(x: self.date.frame.maxX-12, y: self.nickName.frame.maxY+10, width: 8, height: 8)
         self.separatorLine.frame =  CGRect(x: self.nickName.frame.minX, y: self.contentView.frame.height-0.5, width: self.contentView.frame.width-self.nickName.frame.minX, height: 0.5)
     }
@@ -105,7 +116,7 @@ import UIKit
             AttributedText(nickName).font(UIFont.theme.titleMedium).foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor1)
             
         }
-        let image = UIImage(named: "bell_slash", in: .chatBundle, with: nil)
+        let image = UIImage(chatNamed: "bell_slash")
         if Theme.style == .dark {
             image?.withTintColor(UIColor.theme.neutralColor5)
         }
@@ -124,15 +135,8 @@ import UIKit
         } else {
             self.badge.isHidden = info.unreadCount <= 0
             self.dot.isHidden = true
-            var badgeWidth = 18
-            if info.unreadCount > 9 {
-                badgeWidth = 24
-                if info.unreadCount > 99 {
-                    badgeWidth = 32
-                }
-            }
-            self.badge.frame = CGRect(x: Int(ScreenWidth)-16-badgeWidth, y: Int(self.nickName.frame.maxY)+5, width: badgeWidth, height: 18)
         }
+        self.setNeedsLayout()
     }
     
    
@@ -143,8 +147,8 @@ extension ConversationListCell: ThemeSwitchProtocol {
         self.nickName.setTitleColor(style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor1, for: .normal)
 //        self.content.textColor = style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5
         self.date.textColor = style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5
-        self.badge.backgroundColor = style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5
-        self.dot.backgroundColor = style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5
+        self.badge.backgroundColor = style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor
+        self.dot.backgroundColor = style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor
         self.separatorLine.backgroundColor = style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor9
     }
     
@@ -168,7 +172,7 @@ extension ConversationListCell: ThemeSwitchProtocol {
     
     public var nickname: String = ""
     
-    public var lastMessage: ChatMessage? = ChatMessage()
+    public var lastMessage: ChatMessage? = ChatMessage(conversationID: "", body: ChatTextMessageBody(text: ""), ext: nil)
     
     public var unreadCount: UInt = 0
     
@@ -205,10 +209,23 @@ extension ConversationListCell: ThemeSwitchProtocol {
     @objc open func contentAttribute() -> NSAttributedString {
         guard let message = self.lastMessage else { return NSAttributedString() }
         var text = NSMutableAttributedString()
+        if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
+            let profile = ChatUserProfile()
+            profile.setValuesForKeys(dic)
+            profile.id = message.from
+            profile.modifyTime = message.timestamp
+            ChatUIKitContext.shared?.chatCache?[message.from] = profile
+            if ChatUIKitContext.shared?.userCache?[message.from] == nil {
+                ChatUIKitContext.shared?.userCache?[message.from] = profile
+            } else {
+                ChatUIKitContext.shared?.userCache?[message.from]?.nickname = profile.nickname
+                ChatUIKitContext.shared?.userCache?[message.from]?.avatarURL = profile.avatarURL
+            }
+        }
         
         let from = message.from
         let mentionText = "Mentioned".chat.localize
-        let user = ChatUIKitContext.shared?.userCache?[from]
+        var user = ChatUIKitContext.shared?.userCache?[from]
         var nickName = user?.remark ?? ""
         if nickName.isEmpty {
             nickName = user?.nickname ?? ""
@@ -235,7 +252,7 @@ extension ConversationListCell: ThemeSwitchProtocol {
             }
             if self.mentioned {
                 let showText = NSMutableAttributedString {
-                    AttributedText("[\(mentionText)] ").foregroundColor(Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5).font(Font.theme.bodyMedium)
+                    AttributedText("[\(mentionText)] ").foregroundColor(Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor).font(Font.theme.bodyMedium)
                     AttributedText(nickName + ": ").foregroundColor(Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5)
                 }
                 
@@ -260,7 +277,6 @@ extension ConversationListCell: ThemeSwitchProtocol {
             return showText
         }
     }
-
     
     open func convertMessage(message: ChatMessage) -> MessageEntity {
         let entity = ComponentsRegister.shared.MessageRenderEntity.init()

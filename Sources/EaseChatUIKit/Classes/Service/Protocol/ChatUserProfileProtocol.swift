@@ -1,5 +1,5 @@
 //
-//  ChatUserProfileProtocol.swift
+//  DisplayProviderProtocol.swift
 //  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/8.
@@ -49,7 +49,7 @@ import Foundation
 }
 
 /// Profile provider of the ChatUIKit.Only available in Swift language.
-public protocol ChatProfileProvider {
+public protocol ChatUserProfileProvider {
     
     /// Coroutine obtains user information asynchronously.
     /// - Parameter profileIds: The corresponding conversation id string array.
@@ -58,7 +58,7 @@ public protocol ChatProfileProvider {
 }
 
 /// /// Profile provider of the ChatUIKit.Only available in Objective-C language.
-@objc public protocol ChatProfileProviderOC: NSObjectProtocol {
+@objc public protocol ChatUserProfileProviderOC: NSObjectProtocol {
     
     /// Need to obtain the list display information on the current screen.
     /// - Parameters:

@@ -10,7 +10,6 @@ import Foundation
 @objc public class URLPreviewManager: NSObject {
     
     @objc public static var caches: Dictionary<String,HTMLContent> = [:]
-    
 
     @objcMembers public class HTMLContent: NSObject {
         func toDictionary() -> Dictionary<String,Any> {
@@ -23,7 +22,7 @@ import Foundation
                 return NSAttributedString {
                     AttributedText(self.title ?? "")
                         .font(UIFont.theme.headlineSmall)
-                        .foregroundColor(self.towards == .left ? Appearance.chat.receiveTextColor:Appearance.chat.sendTextColor).lineHeight(multiple: 1.15, minimum: 16).lineBreakMode(.byTruncatingTail)
+                        .foregroundColor(self.towards == .left ? Appearance.chat.receiveTextColor:Appearance.chat.sendTextColor).lineHeight(multiple: 1.15, minimum: 1.15).lineBreakMode(.byTruncatingTail)
                 }
             } else {
                 return nil

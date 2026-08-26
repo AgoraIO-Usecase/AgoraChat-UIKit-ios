@@ -10,9 +10,6 @@ import Foundation
 
 /**
  A class that converts emojis in a given NSMutableAttributedString to their corresponding UIImage.
- 
- - Author: ChatroomUIKit
- - Version: 1.0.0
  */
 @objc final public class ChatEmojiConvertor: NSObject {
 
@@ -146,7 +143,7 @@ import Foundation
         let text = NSMutableAttributedString(attributedString: input)
         for range in ranges.reversed() {
             if range.location != NSNotFound, range.length != NSNotFound {
-                let value = self.emojiMap.isEmpty ? UIImage(named: symbol, in: .chatBundle, with: nil):self.emojiMap[symbol]
+                let value = self.emojiMap.isEmpty ? UIImage(chatNamed: symbol):self.emojiMap[symbol]
                 let attachment = NSTextAttachment()
                 attachment.image = value
                 attachment.bounds = imageBounds

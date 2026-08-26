@@ -27,7 +27,7 @@ import UIKit
     /// The method'll called on contact list cell clicked.
     /// - Parameters:
     ///   - indexPath: ``IndexPath``
-    ///   - profile: Conform to ``EaseProfileProtocol`` object.
+    ///   - profile: Conform to ``ChatUserProfileProtocol`` object.
     func didSelected(indexPath: IndexPath,profile: ChatUserProfileProtocol)
 }
 
@@ -47,11 +47,11 @@ import UIKit
     func occurError()
     
     /// This method can be used when you want refresh some  display info  of datas.
-    /// - Parameter infos: Array of conform to``EaseProfileProtocol`` object.
+    /// - Parameter infos: Array of conform to``ChatUserProfileProtocol`` object.
     func refreshProfiles(infos: [ChatUserProfileProtocol])
     
     /// This method can be used when pulling down to refresh.
-    /// - Parameter infos: Array of conform to``EaseProfileProtocol`` objects.
+    /// - Parameter infos: Array of conform to``ChatUserProfileProtocol`` objects.
     func refreshList(infos: [ChatUserProfileProtocol])
     
     /// The method can be used when you want to refresh header of the contact list.
@@ -59,11 +59,11 @@ import UIKit
     func refreshHeader(info: ContactListHeaderItemProtocol)
     
     /// The method can be used when you want to remove a contact.
-    /// - Parameter info: ``EaseProfileProtocol``
+    /// - Parameter info: ``ChatUserProfileProtocol``
     func remove(info: ChatUserProfileProtocol)
     
     /// The method can be user when you want to add someone to contact list.
-    /// - Parameter info: ``EaseProfileProtocol``
+    /// - Parameter info: ``ChatUserProfileProtocol``
     func appendThenRefresh(info: ChatUserProfileProtocol)
 }
 
@@ -94,11 +94,11 @@ import UIKit
     public var firstRefresh = true
     
     public private(set) lazy var header: ContactListHeader = {
-        ContactListHeader(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: CGFloat(Appearance.contact.headerRowHeight*CGFloat((self.headerStyle == .contact ? Appearance.contact.listHeaderExtensionActions.count:0)))), style: .plain).backgroundColor(.clear)
+        ContactListHeader(frame: CGRect(x: 0, y: 0, width: ScreenWidth, height: CGFloat(Appearance.contact.headerRowHeight*CGFloat((self.headerStyle == .contact ? Appearance.contact.listHeaderExtensionActions.count:0)))), style: .plain).backgroundColor(.clear)
     }()
     
     public private(set) lazy var empty: EmptyStateView = {
-        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height),emptyImage: UIImage(named: "empty",in: .chatBundle, with: nil), onRetry: { [weak self] in
+        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height),emptyImage: UIImage(chatNamed: "empty"), onRetry: { [weak self] in
             guard let `self` = self else { return }
             for listener in self.eventsDelegates.allObjects {
                 listener.onContactListOccurErrorWhenFetchServer()
@@ -215,7 +215,9 @@ extension ContactView: UITableViewDelegate,UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        
+        if !self.firstRefresh {
+            self.requestDisplayInfo()
+        }
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -244,7 +246,7 @@ extension ContactView: UITableViewDelegate,UITableViewDataSource {
         if let visiblePaths = self.contactList.indexPathsForVisibleRows {
             for indexPath in visiblePaths {
                 if let item = self.contacts[safe: indexPath.section]?[safe: indexPath.row] {
-                    if item.nickname.isEmpty || item.avatarURL.isEmpty {
+                    if item.nickname.isEmpty, item.avatarURL.isEmpty {
                         unknownInfoIds.append(item.id)
                     }
                 }
@@ -319,14 +321,16 @@ extension ContactView: IContactListDriver {
     }
     
     public func refreshProfiles(infos: [ChatUserProfileProtocol]) {
-        for info in infos {
-            if let profile = self.rawData.first(where: { $0.id == info.id }) {
-                profile.nickname =  info.nickname.isEmpty ? info.id:info.nickname
-                profile.avatarURL = info.avatarURL
-                profile.remark = info.remark
+        for sectionData in self.contacts {
+            for item in sectionData {
+                if let profile = infos.first(where: { $0.id == item.id }) {
+                    item.nickname = profile.nickname.isEmpty ? profile.id:profile.nickname
+                    item.avatarURL = profile.avatarURL
+                    item.remark = profile.remark
+                    item.selected = profile.selected
+                }
             }
         }
-        self.refreshList(infos: self.rawData)
     }
     
     public func refreshList(infos: [ChatUserProfileProtocol]) {
@@ -337,8 +341,14 @@ extension ContactView: IContactListDriver {
         
         if self.firstRefresh {
             self.firstRefresh = false
+            var unknownInfoIds = [String]()
+            for info in infos {
+                if info.nickname.isEmpty || info.avatarURL.isEmpty {
+                    unknownInfoIds.append(info.id)
+                }
+            }
             for eventHandle in self.eventsDelegates.allObjects {
-                eventHandle.onContactListEndScrollNeededDisplayInfos(ids: infos.map({ $0.id }))
+                eventHandle.onContactListEndScrollNeededDisplayInfos(ids: unknownInfoIds)
             }
         }
         let tuple = ContactSorter.sort(contacts: self.rawData)

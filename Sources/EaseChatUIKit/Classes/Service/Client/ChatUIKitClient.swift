@@ -1,6 +1,8 @@
 import Foundation
 
-public let ChatUIKit_VERSION = "2.0.0"
+public let ChatUIKit_VERSION = "4.15.0"
+
+public let cache_update_notification = "ChatUIKitContextUpdateCache"
 
 @objcMembers public class ChatUIKitOptions: NSObject {
     
@@ -50,29 +52,40 @@ public let ChatUIKit_VERSION = "2.0.0"
     /// Returns the initialization success or an error that includes the description of the cause of the failure.
     @objc(setupWithAppKey:option:)
     public func setup(appKey: String? = nil,option: ChatOptions? = nil) -> ChatError? {
+        var error: ChatError?
         if let options = option {
-            return ChatClient.shared().initializeSDK(with: options)
+            options.uiKitVersion = ChatUIKit_VERSION
+            error = ChatClient.shared().initializeSDK(with: options)
         } else {
             if let key = appKey {
-                return ChatClient.shared().initializeSDK(with: ChatOptions(appkey: key))
+                let options = ChatOptions(appkey: key)
+                options.uiKitVersion = ChatUIKit_VERSION
+                error = ChatClient.shared().initializeSDK(with: options)
             }
-            return ChatError(description: "App key can't nil", code: .invalidAppkey)
+            error = ChatError(description: "App key can't be nil", code: .invalidAppkey)
         }
+        if ChatUIKitClient.shared.option.option_UI.enableContact {
+            ChatClient.shared().contactManager?.add(self, delegateQueue: nil)
+        }
+        return error
     }
     
     /// Login user.
     /// - Parameters:
-    ///   - user: An instance that conforms to ``EaseProfileProtocol``.
+    ///   - user: An instance that conforms to ``ChatUserProfileProtocol``.
     ///   - token: The user chat token.
     @objc(loginWithUser:token:completion:)
     public func login(user: ChatUserProfileProtocol,token: String,completion: @escaping (ChatError?) -> Void) {
-        if ChatUIKitClient.shared.option.option_UI.enableContact {
-            ChatClient.shared().contactManager?.add(self, delegateQueue: nil)
-        }
         ChatUIKitContext.shared?.currentUser = user
         ChatUIKitContext.shared?.chatCache?[user.id] = user
         ChatUIKitContext.shared?.userCache?[user.id] = user
-        self.userService = UserServiceImplement(userInfo: user, token: token, completion: completion)
+        if self.userService != nil {
+            self.userService?.login(userId: user.id, token: token, completion: { success, error in
+                completion(error)
+            })
+        } else {
+            self.userService = UserServiceImplement(userInfo: user, token: token, completion: completion)
+        }
     }
     
     /// Logout user
@@ -106,10 +119,10 @@ public let ChatUIKit_VERSION = "2.0.0"
     
 //    /// Updates user information that is used for login with the `login(with user: UserInfoProtocol,token: String,use userProperties: Bool = true,completion: @escaping (ChatError?) -> Void)` method.
 //    /// - Parameters:
-//    ///   - info: An instance that conforms to ``EaseProfileProtocol``.
+//    ///   - info: An instance that conforms to ``ChatUserProfileProtocol``.
 //    ///   - completion: Callback.
 //    @objc(updateWithUserInfo:completion:)
-//    public func updateUserInfo(info: EaseProfileProtocol,completion: @escaping (ChatError?) -> Void) {
+//    public func updateUserInfo(info: ChatUserProfileProtocol,completion: @escaping (ChatError?) -> Void) {
 //        self.userService?.updateUserInfo(userInfo: info, completion: { success, error in
 //            completion(error)
 //        })
@@ -145,11 +158,9 @@ extension ChatUIKitClient: ContactEventsListener {
     }
     
     public func friendRequestDidApprove(byUser aUsername: String) {
-        if aUsername != ChatUIKitContext.shared?.currentUserId ?? "" {
-            let conversation = ChatClient.shared().chatManager?.getConversation(aUsername, type: .chat, createIfNotExist: true)
-            let ext = ["something":("You have added".chat.localize+" "+aUsername+" "+"to say hello".chat.localize)]
-            let message = ChatMessage(conversationID: aUsername, body: ChatCustomMessageBody(event: EaseChatUIKit_alert_message, customExt: nil), ext: ext)
-            conversation?.insert(message, error: nil)
-        }
+        let conversation = ChatClient.shared().chatManager?.getConversation(aUsername, type: .chat, createIfNotExist: true)
+        let ext = ["something":("You have added".chat.localize+" "+aUsername+" "+"to say hello".chat.localize)]
+        let message = ChatMessage(conversationID: aUsername, body: ChatCustomMessageBody(event: EaseChatUIKit_alert_message, customExt: nil), ext: ext)
+        conversation?.insert(message, error: nil)
     }
 }

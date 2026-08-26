@@ -1,13 +1,33 @@
+//
+//  VoiceRoomAlertViewController.swift
+//  VoiceRoomBaseUIKit
+//
+//  Created by 朱继超 on 2022/8/30.
+//
+
+import Foundation
+
+
+/**
+ A custom presentation controller that manages the transition animations and layout of the presented view controller's view.
+ 
+ - Note: This class is a subclass of `UIPresentationController`.
+ 
+ - Author: FILEPATH
+ 
+ - Version: 1.0
+ */
 public final class PresentationController: UIPresentationController {
-    /// present配置
+    /// present config
     private let component: PresentedViewComponent
 
-    /// 背景蒙层
+    /// background
     private lazy var backgroundView: UIView = {
         let containerbounds = containerView?.bounds ?? UIScreen.main.bounds
         let backgroundView = UIView(frame: containerbounds)
-        backgroundView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
+        backgroundView.backgroundColor = UIColor.theme.barrageLightColor2
         backgroundView.alpha = 0.0
+        backgroundView.isUserInteractionEnabled = true
         if component.canTapBGDismiss {
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(backgroundViewDidTapped))
             backgroundView.addGestureRecognizer(tapGesture)
@@ -239,11 +259,16 @@ extension PresentationController {
             let inputViewBottom = inputViewFrame.maxY + component.keyboardPadding
             let offset = inputViewBottom - keyboardTop
             newFrame.origin.y -= offset
+        case .noTreatment:
+            break
         }
         return newFrame
     }
 
     private func handleKeyboardAdjustAnimation() {
+        if self.component.keyboardTranslationType == .noTreatment {
+            return
+        }
         guard let keyboardFrame = keyboardFrame,
               let keyboardAnimationDuration = keyboardAnimationDuration else { return }
         if let textInputView = textInputView {
@@ -251,7 +276,7 @@ extension PresentationController {
             let inputViewFrame = textInputView.convert(textInputView.bounds, to: nil)
             let translatedFrame = translateFrame(keyboardFrame: keyboardFrame, presentedViewFrame: presentedViewFrame, inputViewFrame: inputViewFrame)
             if translatedFrame != presentedViewFrame {
-                UIView.setAnimationBeginsFromCurrentState(true)
+//                UIView.setAnimationBeginsFromCurrentState(true)
                 UIView.animate(withDuration: keyboardAnimationDuration, animations: {
                     self.presentedView?.frame = translatedFrame
                 })
@@ -259,7 +284,7 @@ extension PresentationController {
         } else {
             let presentedViewFrame = frameOfPresentedViewInContainerView
             if presentedView?.frame != presentedViewFrame {
-                UIView.setAnimationBeginsFromCurrentState(true)
+//                UIView.setAnimationBeginsFromCurrentState(true)
                 UIView.animate(withDuration: keyboardAnimationDuration, animations: {
                     self.presentedView?.frame = presentedViewFrame
                 })

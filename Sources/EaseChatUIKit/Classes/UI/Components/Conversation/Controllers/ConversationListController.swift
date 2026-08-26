@@ -30,11 +30,11 @@ import UIKit
     }
     
     @objc open func createNavigationBar() -> ChatNavigationBar {
-        ChatNavigationBar( showLeftItem: false,rightImages: [UIImage(named: "add", in: .chatBundle, with: nil)!])
+        ChatNavigationBar( showLeftItem: false,rightImages: [UIImage(chatNamed: "add")!])
     }
     
     @objc open func createSearchBar() -> UIButton {
-        UIButton(type: .custom).frame(CGRect(x: 16, y: self.navigation.frame.maxY+5, width: self.view.frame.width-32, height: 36)).backgroundColor(UIColor.theme.neutralColor95).textColor(UIColor.theme.neutralColor6, .normal).title("Search".chat.localize, .normal).image(UIImage(named: "search", in: .chatBundle, with: nil), .normal).addTargetFor(self, action: #selector(searchAction), for: .touchUpInside).cornerRadius(Appearance.avatarRadius)
+        UIButton(type: .custom).frame(CGRect(x: 16, y: self.navigation.frame.maxY+5, width: self.view.frame.width-32, height: 36)).backgroundColor(UIColor.theme.neutralColor95).textColor(UIColor.theme.neutralColor6, .normal).title("Search".chat.localize, .normal).image(UIImage(chatNamed: "search"), .normal).addTargetFor(self, action: #selector(searchAction), for: .touchUpInside).cornerRadius(Appearance.avatarRadius)
     }
     
     @objc open func createList() -> ConversationList {
@@ -144,7 +144,9 @@ extension ConversationListController {
             self.toChat(indexPath: IndexPath(), info: $0)
         }
         if let vc = search {
-            vc.modalPresentationStyle = .fullScreen
+            if vc.navigationController == nil {
+                vc.modalPresentationStyle = .fullScreen
+            }
             ControllerStack.toDestination(vc: vc)
         }
     }
@@ -254,7 +256,7 @@ extension ConversationListController {
      Creates a group conversation with the given profiles.
      
      - Parameters:
-        - profiles: An array of `EaseProfileProtocol` objects representing the selected profiles for the group conversation.
+        - profiles: An array of `ChatUserProfileProtocol` objects representing the selected profiles for the group conversation.
      
      This method creates a group conversation with the given profiles. It constructs the group name based on the profiles' nicknames or IDs, and then uses the `ChatGroupOption` to configure the group settings. Finally, it calls the `createGroup` method of the `ChatGroupManager` to create the group.
      */
@@ -295,7 +297,7 @@ extension ConversationListController {
 }
 
 extension ConversationListController: ThemeSwitchProtocol {
-    public func switchTheme(style: ThemeStyle) {
+    open func switchTheme(style: ThemeStyle) {
         self.view.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
         self.search.backgroundColor = style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor95
         self.navigation.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98

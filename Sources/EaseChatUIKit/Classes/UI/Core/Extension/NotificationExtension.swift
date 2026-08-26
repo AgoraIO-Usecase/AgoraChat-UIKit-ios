@@ -1,6 +1,6 @@
 //
 //  NotificationExtension.swift
-//  ChatUIKit_Example
+//  EaseChatUIKit_Example
 //
 //  Created by 朱继超 on 2020/12/31.
 //  Copyright © 2020 CocoaPods. All rights reserved.

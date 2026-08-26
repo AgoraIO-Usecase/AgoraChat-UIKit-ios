@@ -52,20 +52,18 @@ extension ContactServiceImplement: ContactServiceProtocol {
     }
     
     public func contacts(completion: @escaping (ChatError?, [Contact]) -> Void) {
-        let contacts = ChatClient.shared().contactManager?.getContacts() ?? []
+        let contacts = ChatClient.shared().contactManager?.getAllContacts()
         let loadFinish = UserDefaults.standard.bool(forKey: "EaseChatUIKit_contact_fetch_server_finished"+saveIdentifier)
-        if !loadFinish,contacts.count <= 0 {
-            ChatClient.shared().contactManager?.getContactsFromServer(completion: { [weak self] users, error in
-                var contacts: [Contact]?
+        if !loadFinish,contacts?.count ?? 0 <= 0 {
+            ChatClient.shared().contactManager?.getAllContactsFromServer(completion: { [weak self] contacts, error in
                 if error == nil {
-                    contacts = users!.map({ Contact(userId: $0, remark: "") })
                     UserDefaults.standard.set(true, forKey: "EaseChatUIKit_contact_fetch_server_finished"+saveIdentifier)
                 }
                 completion(error,contacts ?? [])
                 self?.handleResult(error: error, type: .fetchContacts, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
             })
         } else {
-            completion(nil,contacts.map({ Contact(userId: $0, remark: "") }))
+            completion(nil,contacts ?? [])
         }
     }
     

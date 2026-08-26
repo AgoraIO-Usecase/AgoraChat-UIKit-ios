@@ -1,5 +1,7 @@
 import UIKit
 
+public let MessageInputBarHeight = CGFloat(52)
+
 @objc public enum MoreMessagePosition: UInt {
     case left
     case center
@@ -36,15 +38,15 @@ import UIKit
     func onMessageContentClicked(message: MessageEntity)
     
     /// The method will call on message content long pressed.
-    /// - Parameter message: ``MessageEntity``
-    func onMessageContentLongPressed(message: MessageEntity)
+    /// - Parameter message: ``MessageCell``
+    func onMessageContentLongPressed(cell: MessageCell)
     
     /// The method will call on message avatar clicked
-    /// - Parameter profile: ``EaseProfileProtocol``
+    /// - Parameter profile: ``ChatUserProfileProtocol``
     func onMessageAvatarClicked(profile: ChatUserProfileProtocol)
     
     /// The method will call on message avatar long pressed.
-    /// - Parameter profile: ``EaseProfileProtocol``
+    /// - Parameter profile: ``ChatUserProfileProtocol``
     func onMessageAvatarLongPressed(profile: ChatUserProfileProtocol)
     
     /// The method will call on input box event occur.
@@ -198,6 +200,16 @@ import UIKit
     
     public private(set) var canMention = false
     
+    open override var frame: CGRect {
+        didSet {
+            self.oldFrame = self.frame
+            self.messageList.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-MessageInputBarHeight)
+            self.inputBar.resetFrame(newFrame: CGRect(x: 0, y: self.frame.height-MessageInputBarHeight-BottomBarHeight, width: self.frame.width, height: MessageInputBarHeight))
+            self.editBottomBar.frame = CGRect(x: 0, y: self.frame.height-MessageInputBarHeight-BottomBarHeight, width: self.frame.width, height: 52)
+            self.replyBar.frame = CGRect(x: 0, y: self.inputBar.frame.minY-MessageInputBarHeight, width: self.frame.width, height: 53)
+        }
+    }
+    
     public var editMode = false {
         didSet {
             DispatchQueue.main.async {
@@ -214,22 +226,24 @@ import UIKit
     
     private var replyId = ""
     
+    private var CellTypes: [MessageCell.Type] = []
+    
     public private(set) lazy var messageList: UITableView = {
-        UITableView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-52), style: .plain).delegate(self).dataSource(self).tableFooterView(UIView()).separatorStyle(.none).backgroundColor(.clear)
+        UITableView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-MessageInputBarHeight), style: .plain).delegate(self).dataSource(self).tableFooterView(UIView()).separatorStyle(.none).backgroundColor(.clear).tag(111)
     }()
     
     private var oldFrame = CGRect.zero
         
     public private(set) lazy var inputBar: MessageInputBar = {
-        MessageInputBar(frame: CGRect(x: 0, y: self.frame.height-52-BottomBarHeight, width: self.frame.width, height: 52), text: "", placeHolder: "Aa")
+        MessageInputBar(frame: CGRect(x: 0, y: self.frame.height-MessageInputBarHeight-BottomBarHeight, width: self.frame.width, height: MessageInputBarHeight), text: "", placeHolder: Appearance.chat.inputPlaceHolder)
     }()
     
     public private(set) lazy var editBottomBar: MessageMultiSelectedBottomBar = {
-        MessageMultiSelectedBottomBar(frame: CGRect(x: 0, y: self.frame.height-52-BottomBarHeight, width: self.frame.width, height: 52))
+        MessageMultiSelectedBottomBar(frame: CGRect(x: 0, y: self.frame.height-MessageInputBarHeight-BottomBarHeight, width: self.frame.width, height: 52))
     }()
         
     public private(set) lazy var replyBar: MessageInputReplyView = {
-        MessageInputReplyView(frame: CGRect(x: 0, y: self.inputBar.frame.minY-52, width: self.frame.width, height: 53))
+        MessageInputReplyView(frame: CGRect(x: 0, y: self.inputBar.frame.minY-MessageInputBarHeight, width: self.frame.width, height: 53))
     }()
     
     private var moreMessagesCount = 0  {
@@ -277,6 +291,7 @@ import UIKit
     ///   - historyResult: Whether to enable the history result.
     @objc required public init(frame: CGRect,mention: Bool,showType: MessageListType = .normal) {
         super.init(frame: frame)
+        self.CellTypes.append(contentsOf: ComponentsRegister.shared.customCellClasses)
         self.oldFrame = frame
         self.canMention = mention
         self.showType = showType
@@ -306,53 +321,16 @@ import UIKit
         
         self.moreMessages.layer.masksToBounds = false
         let shadowPath0 = UIBezierPath(roundedRect: self.moreMessages.bounds, cornerRadius: 4)
-        let layer0 = CALayer()
-        layer0.shadowPath = shadowPath0.cgPath
-        layer0.shadowColor = UIColor(red: 0.275, green: 0.306, blue: 0.325, alpha: 0.15).cgColor
-        layer0.shadowOpacity = 1
-        layer0.shadowRadius = 8
-        layer0.shadowOffset = CGSize(width: 2, height: 4)
-        layer0.bounds = self.moreMessages.bounds
-        layer0.position = self.moreMessages.center
-        self.moreMessages.layer.addSublayer(layer0)
+        self.moreMessages.layer.shadowPath = shadowPath0.cgPath
+        self.moreMessages.layer.shadowColor = UIColor(red: 0.275, green: 0.306, blue: 0.325, alpha: 0.15).cgColor
+        self.moreMessages.layer.shadowOpacity = 1
+        self.moreMessages.layer.shadowRadius = 8
+        self.moreMessages.layer.shadowOffset = CGSize(width: 2, height: 4)
+        self.moreMessages.layer.cornerRadius = Appearance.avatarRadius == .large ? self.moreMessages.frame.height/2.0:CGFloat(Appearance.avatarRadius.rawValue)
         
-        self.inputBar.axisYChanged = { [weak self] value in
-            guard let `self` = self else { return }
-            DispatchQueue.main.async {
-                UIView.animate(withDuration: 0.22) {
-                    self.replyBar.frame = CGRect(x: 0, y: self.inputBar.frame.minY-52, width: self.frame.width, height: 53)
-                    if self.replyBar.isHidden  {
-                        self.moreMessages.frame = CGRect(x: self.moreMessageAxisX, y: self.inputBar.frame.minY-44, width: 180, height: 36)
-                    } else {
-                        self.moreMessages.frame = CGRect(x: self.moreMessageAxisX, y: self.replyBar.frame.minY-44, width: 180, height: 36)
-                    }
-                }
-            }
-        }
+        self.processInputBarAxisYChanged()
         
-        self.inputBar.textViewFirstResponder = { [weak self] firstResponder in
-            guard let `self` = self else { return }
-            UIView.animate(withDuration: 0.22) {
-                let oldFrame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-52)
-                if firstResponder {
-                    if self.inputBar.keyboardHeight >= 216,self.messageList.frame.height >= oldFrame.height {
-                        if self.getLastVisibleCellCoordinate().maxY > self.inputBar.frame.height+self.inputBar.keyboardHeight {
-                            self.messageList.frame = CGRect(x: 0, y: 0-self.inputBar.keyboardHeight, width: self.messageList.frame.width, height: self.messageList.frame.height)
-                        } else {
-                            self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.messageList.frame.height-self.inputBar.keyboardHeight)
-                        }
-                        
-                        let lastIndexPath = IndexPath(row: self.messages.count - 1, section: 0)
-                        if lastIndexPath.row >= 0 {
-                            self.messageList.scrollToRow(at: lastIndexPath, at: .bottom, animated: true)
-                        }
-                    }
-                
-                } else {
-                    self.messageList.frame = oldFrame
-                }
-            }
-        }
+        self.processInputBarFirstResponder()
         
         self.editBottomBar.operationClosure = { [weak self] in
             self?.bottomMultiSelectedBarEvents(operation: $0)
@@ -380,10 +358,52 @@ import UIKit
         guard let visibleIndexPaths = self.messageList.indexPathsForVisibleRows else { return .zero }
         if let lastIndexPath = visibleIndexPaths.last {
             let cellRect = self.messageList.rectForRow(at: lastIndexPath)
-            let cellCoordinate = self.messageList.convert(cellRect.origin, to: self.messageList)
+            let cellCoordinate = self.messageList.convert(cellRect.origin, to: self)
             return CGRect(origin: cellCoordinate, size: cellRect.size)
         }
         return .zero
+    }
+    
+    private func processInputBarAxisYChanged() {
+        self.inputBar.axisYChanged = { [weak self] value in
+            guard let `self` = self else { return }
+            DispatchQueue.main.async {
+                UIView.animate(withDuration: 0.25) {
+                    self.replyBar.frame = CGRect(x: 0, y: self.inputBar.frame.minY-MessageInputBarHeight, width: self.frame.width, height: 53)
+                    if self.replyBar.isHidden  {
+                        self.moreMessages.frame = CGRect(x: self.moreMessageAxisX, y: self.inputBar.frame.minY-44, width: 180, height: 36)
+                    } else {
+                        self.moreMessages.frame = CGRect(x: self.moreMessageAxisX, y: self.replyBar.frame.minY-44, width: 180, height: 36)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func processInputBarFirstResponder() {
+        self.inputBar.textViewFirstResponder = { [weak self] firstResponder in
+            guard let `self` = self else { return }
+            UIView.animate(withDuration: 0.25) {
+                let oldFrame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-MessageInputBarHeight)
+                self.messageList.frame = oldFrame
+                let space = -((ScreenHeight <= CGFloat(667) ? CGFloat(28):CGFloat(0))-(self.inputBar.extensionMenus.isHidden ? 0:(self.inputBar.extensionMenus.frame.height <= CGFloat(132) ? CGFloat(20):CGFloat(-60))))
+                if firstResponder {
+                    self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.frame.height-self.inputBar.keyboardHeight-16-BottomBarHeight-CGFloat(space))
+                
+                } else {
+                    if self.inputBar.frame.height > MessageInputBarHeight {
+                        self.messageList.frame = CGRect(x: 0, y: 0, width: self.messageList.frame.width, height: self.frame.height-self.inputBar.frame.height-BottomBarHeight)
+                    } else {
+                        self.messageList.frame = oldFrame
+                    }
+                }
+                
+                let lastIndexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                if lastIndexPath.row >= 0 {
+                    self.messageList.scrollToRow(at: lastIndexPath, at: .bottom, animated: false)
+                }
+            }
+        }
     }
     
     required public init?(coder: NSCoder) {
@@ -455,16 +475,30 @@ import UIKit
                 handler.onMoreMessagesClicked()
             }
         }
+        if self.inputBar.collapsedState == false {
+            self.inputBar.hiddenInput()
+        }
     }
     
+    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if self.inputBar.collapsedState == false {
+            self.inputBar.hiddenInput()
+        }
+    }
+    
+    public func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
+        if self.inputBar.collapsedState == false {
+            self.inputBar.hiddenInput()
+        }
+    }
 }
 
 extension MessageListView: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
         self.moreMessages.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
         self.moreMessages.layerProperties(style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor9, 0.5)
-        self.moreMessages.setTitleColor(style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5, for: .normal)
-        self.moreMessages.image(UIImage(named: "more_messages", in: .chatBundle, with: nil)?.withTintColor(style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5), .normal)
+        self.moreMessages.setTitleColor(style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor, for: .normal)
+        self.moreMessages.image(UIImage(chatNamed: "more_messages")?.withTintColor(style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor), .normal)
         self.messageList.reloadData()
     }
     
@@ -485,6 +519,9 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = self.registerMessageCell(tableView: tableView, indexPath: indexPath)
+        if self.CellTypes.count > 0 {
+            self.CellTypes.removeFirst()
+        }
         if let info = self.messages[safe: indexPath.row] {
             cell?.editMode = self.editMode
             cell?.refresh(entity: info)
@@ -496,8 +533,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
             self?.handleClick(area: $0, entity: $1)
         }
         cell?.longPressAction = { [weak self] in
-            _ = $2
-            self?.handleLongPressed(area: $0, entity: $1)
+            self?.handleLongPressed(area: $0, entity: $1, cell: $2)
         }
         cell?.reactionClicked = { [weak self] in
             self?.processReactionEmojiClick(reaction: $0, entity: $1)
@@ -531,95 +567,63 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
         
     }
     
+    private func getMessageCell<T: MessageCell>(
+        cellClass: T.Type,
+        towards: BubbleTowards,
+        identifier: String
+    ) -> T? {
+        var cell = self.messageList.dequeueReusableCell(with: cellClass, reuseIdentifier: identifier)
+        if cell == nil {
+            cell = cellClass.init(towards: towards, reuseIdentifier: identifier)
+        }
+        return cell
+    }
+    
     private func registerMessageCell(tableView: UITableView,indexPath: IndexPath) -> MessageCell? {
         if let message = self.messages[safe: indexPath.row]?.message {
             let towards: BubbleTowards = message.direction.rawValue == 0 ? .right:.left
             switch message.body.type {
             case .text:
-                var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatTextMessageCell, reuseIdentifier: "EaseChatUIKit.ChatTextMessageCell")
-                if cell == nil {
-                    cell = ComponentsRegister.shared.ChatTextMessageCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatTextMessageCell")
-                }
-                return cell
+                return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatTextMessageCell, towards: towards, identifier: "EaseChatUIKit.ChatTextMessageCell")
             case .image:
-                var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatImageMessageCell, reuseIdentifier: "EaseChatUIKit.ChatImageMessageCell")
-                if cell == nil {
-                    cell = ComponentsRegister.shared.ChatImageMessageCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatImageMessageCell")
+                if let body = message.body as? ChatImageMessageBody, body.isGif {
+                    return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatGIFMessageCell, towards: towards, identifier: "EaseChatUIKit.ChatGIFMessageCell")
+                } else {
+                    return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatImageMessageCell, towards: towards, identifier: "EaseChatUIKit.ChatImageMessageCell")
                 }
-                return cell
             case .video:
-                var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatVideoMessageCell, reuseIdentifier: "EaseChatUIKit.ChatVideoMessageCell")
-                if cell == nil {
-                    cell = ComponentsRegister.shared.ChatVideoMessageCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatVideoMessageCell")
-                }
-                return cell
+                return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatVideoMessageCell, towards: towards, identifier: "EaseChatUIKit.ChatVideoMessageCell")
             case .voice:
-                var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatAudioMessageCell, reuseIdentifier: "EaseChatUIKit.ChatAudioMessageCell")
-                if cell == nil {
-                    cell = ComponentsRegister.shared.ChatAudioMessageCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatAudioMessageCell")
-                }
-                return cell
+                return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatAudioMessageCell, towards: towards, identifier: "EaseChatUIKit.ChatAudioMessageCell")
             case .file:
-                var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatFileMessageCell, reuseIdentifier: "EaseChatUIKit.ChatFileMessageCell")
-                if cell == nil {
-                    cell = ComponentsRegister.shared.ChatFileMessageCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatFileMessageCell")
-                }
-                return cell
+                return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatFileMessageCell, towards: towards, identifier: "EaseChatUIKit.ChatFileMessageCell")
             case .combine:
-                var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatCombineCell, reuseIdentifier: "EaseChatUIKit.ChatCombineCell")
-                if cell == nil {
-                    cell = ComponentsRegister.shared.ChatCombineCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatCombineCell")
-                }
-                return cell
+                return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatCombineCell, towards: towards, identifier: "EaseChatUIKit.ChatCombineCell")
             case .location:
-                var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatLocationCell, reuseIdentifier: "EaseChatUIKit.ChatLocationCell")
-                if cell == nil {
-                    cell = ComponentsRegister.shared.ChatLocationCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatLocationCell")
-                }
-                return cell
+                return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatLocationCell, towards: towards, identifier: "EaseChatUIKit.ChatLocationCell")
             case .custom:
                 if let body = message.body as? ChatCustomMessageBody {
                     switch body.event {
                     case EaseChatUIKit_user_card_message:
-                        var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatContactMessageCell, reuseIdentifier: "EaseChatUIKit.ChatContactMessageCell")
-                        if cell == nil {
-                            cell = ComponentsRegister.shared.ChatContactMessageCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatContactMessageCell")
-                        }
-                        return cell
+                        return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatContactMessageCell, towards: towards, identifier: "EaseChatUIKit.ChatContactMessageCell")
                     case EaseChatUIKit_alert_message:
-                        var cell = tableView.dequeueReusableCell(with: ComponentsRegister.shared.ChatAlertCell, reuseIdentifier: "EaseChatUIKit.ChatAlertCell")
-                        if cell == nil {
-                            cell = ComponentsRegister.shared.ChatAlertCell.init(towards: towards, reuseIdentifier: "EaseChatUIKit.ChatAlertCell")
-                        }
-                        return cell
+                        return self.getMessageCell(cellClass: ComponentsRegister.shared.ChatAlertCell, towards: towards, identifier: "EaseChatUIKit.ChatAlertCell")
                     default:
-                        var cell: MessageCell?
-                        for Class in ComponentsRegister.shared.customCellClasses {
-                            let identifier = String(describing: Class.self)
-                            cell = tableView.dequeueReusableCell(with: Class, reuseIdentifier: identifier)
-                            if cell == nil {
-                                cell = ComponentsRegister.shared.ChatCustomMessageCell.init(towards: towards, reuseIdentifier: identifier)
-                            }
-                            break
+                        if let cellClass = ComponentsRegister.shared.customCellMaps[body.event] {
+                            let identifier = String(describing: body.event)
+                            return self.getMessageCell(cellClass: cellClass, towards: towards, identifier: identifier)
                         }
-                        
-                        return cell
+                        return nil
                     }
                 } else {
                     return nil
                 }
             default:
-                var cell: MessageCell?
-                for Class in ComponentsRegister.shared.customCellClasses {
-                    let identifier = String(describing: Class.self)
-                    cell = tableView.dequeueReusableCell(with: Class, reuseIdentifier: identifier)
-                    if cell == nil {
-                        cell = ComponentsRegister.shared.ChatCustomMessageCell.init(towards: towards, reuseIdentifier: identifier)
-                    }
-                    break
+                if let cellClass = self.CellTypes.first {
+                    let identifier = String(describing: cellClass.self)
+                    return self.getMessageCell(cellClass: cellClass, towards: towards, identifier: identifier)
                 }
-                
-                return cell
+                return nil
             }
         } else {
             return nil
@@ -636,7 +640,7 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
         }
         switch area {
         case .avatar:
-            if ComponentViewsActionHooker.shared.chat.bubbleClicked != nil {
+            if ComponentViewsActionHooker.shared.chat.avatarClicked != nil {
                 if let user = entity.message.user {
                     ComponentViewsActionHooker.shared.chat.avatarClicked?(user)
                 } else {
@@ -690,6 +694,17 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
             for handler in self.eventHandlers.allObjects {
                 handler.onMessageReactionClicked(reaction: nil, entity: entity)
             }
+        case .cell:
+            if entity.message.body.type == .custom {
+                if ComponentViewsActionHooker.shared.chat.bubbleClicked != nil {
+                    ComponentViewsActionHooker.shared.chat.bubbleClicked?(entity)
+                } else {
+                    for handler in self.eventHandlers.allObjects {
+                        handler.onMessageContentClicked(message: entity)
+                    }
+                    
+                }
+            }
         default:
             break
         }
@@ -705,13 +720,13 @@ extension MessageListView: UITableViewDelegate,UITableViewDataSource {
         }
     }
         
-    private func handleLongPressed(area: MessageCellClickArea,entity: MessageEntity) {
+    private func handleLongPressed(area: MessageCellClickArea,entity: MessageEntity,cell: MessageCell) {
         if area == .bubble {
             if ComponentViewsActionHooker.shared.chat.bubbleLongPressed != nil {
                 ComponentViewsActionHooker.shared.chat.bubbleLongPressed?(entity)
             } else {
                 for handler in self.eventHandlers.allObjects {
-                    handler.onMessageContentLongPressed(message: entity)
+                    handler.onMessageContentLongPressed(cell: cell)
                 }
             }
         } else {
@@ -808,7 +823,7 @@ extension MessageListView: IMessageListViewDriver {
     
     public func reloadReaction(message: ChatMessage) {
         if let index = self.messages.firstIndex(where: { $0.message.messageId == message.messageId }) {
-            if let indexPath = self.messageList.indexPathsForVisibleRows?.first(where: { $0.row == index }),indexPath.row > 0 {
+            if let indexPath = self.messageList.indexPathsForVisibleRows?.first(where: { $0.row == index }),indexPath.row >= 0 {
                 let entity = self.convertMessage(message: message)
                 let reactionWidth = entity.reactionMenuWidth()
                 if reactionWidth < reactionMaxWidth-30 {
@@ -837,10 +852,18 @@ extension MessageListView: IMessageListViewDriver {
     
     public func reloadTopic(message: ChatMessage) {
         if let index = self.messages.firstIndex(where: { $0.message.messageId == message.messageId }) {
-            if let indexPath = self.messageList.indexPathsForVisibleRows?.first(where: { $0.row == index }),indexPath.row > 0 {
+            if let indexPath = self.messageList.indexPathsForVisibleRows?.first(where: { $0.row == index }),indexPath.row >= 0 {
                 self.messages.replaceSubrange(index...index, with: [self.convertMessage(message: message)])
                 self.messageList.reloadData()
             }
+        }
+    }
+    
+    public func reloadCallMessage(message: ChatMessage) {
+        if let index = self.messages.firstIndex(where: { $0.message.messageId == message.messageId }) {
+            self.messages.replaceSubrange(index...index, with: [self.convertMessage(message: message)])
+            self.messageList.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+            self.messageList.scrollToRow(at: IndexPath(row: index, section: 0), at: .bottom, animated: true)
         }
     }
     
@@ -1078,7 +1101,7 @@ extension MessageListView: IMessageListViewDriver {
     }
     
     @objc open func scrollToBottom() {
-        let bottomOffset = CGPoint(x: 0, y: self.messageList.contentSize.height - self.messageList.bounds.size.height + self.messageList.contentInset.bottom + 52)
+        let bottomOffset = CGPoint(x: 0, y: self.messageList.contentSize.height - self.messageList.bounds.size.height + self.messageList.contentInset.bottom + MessageInputBarHeight)
         self.messageList.setContentOffset(bottomOffset, animated: true)
     }
     
@@ -1206,5 +1229,6 @@ extension MessageListView: IMessageListViewDriver {
     
     
 }
+
 
 

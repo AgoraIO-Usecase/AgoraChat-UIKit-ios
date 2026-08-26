@@ -7,8 +7,6 @@
 
 import UIKit
 
-public let disturb_change = "EaseUIKit_do_not_disturb_changed"
-
 @objc open class GroupInfoViewController: UIViewController {
     
     /**
@@ -58,14 +56,10 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
      - Returns: An instance of EaseChatNavigationBar.
      */
     @objc open func createNavigation() -> ChatNavigationBar {
-        ChatNavigationBar(showLeftItem: true, textAlignment: .left, rightImages: self.chatGroup.isDisabled ? []:[UIImage(named: "more_detail", in: .chatBundle, with: nil)!] ,hiddenAvatar: true).backgroundColor(.clear)
+        ChatNavigationBar(showLeftItem: true, textAlignment: .left, rightImages: self.chatGroup.isDisabled ? []:[UIImage(chatNamed: "more_detail")!] ,hiddenAvatar: true).backgroundColor(.clear)
     }
     
     @UserDefault("EaseChatUIKit_conversation_mute_map", defaultValue: Dictionary<String,Dictionary<String,Int>>()) private var muteMap
-    
-    public private(set) lazy var loadingView: LoadingView = {
-        LoadingView(frame: self.view.bounds)
-    }()
     
     private lazy var jsons: [[Dictionary<String,Any>]] = {
         [
@@ -105,7 +99,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
     /// Creates a detail header view for the group info.
     /// - Returns: A `DetailInfoHeader` instance.
     @objc open func createDetailHeader() -> DetailInfoHeader {
-        DetailInfoHeader(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 284), showMenu: true, placeHolder: UIImage(named: "group", in: .chatBundle, with: nil)).backgroundColor(.clear)
+        DetailInfoHeader(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 284), showMenu: true, placeHolder: UIImage(chatNamed: "group")).backgroundColor(.clear)
     }
     
     public private(set) lazy var menuList: UITableView = {
@@ -135,10 +129,8 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
      */
     @objc open func fetchGroupInfo(groupId: String) {
         // Fetch group information from the service
-        self.loadingView.startAnimating()
         self.service.fetchGroupInfo(groupId: groupId) { [weak self] group, error in
             guard let `self` = self else { return }
-            self.loadingView.stopAnimating()
             if error == nil, let group = group {
                 self.chatGroup = group
             } else {
@@ -200,8 +192,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.theme.neutralColor98
-        self.view.addSubViews([self.navigation,self.menuList,self.loadingView])
-        self.loadingView.isHidden = true
+        self.view.addSubViews([self.navigation,self.menuList])
         // Do any additional setup after loading the view.
         //click of the navigation
         if self.chatGroup.owner != ChatUIKitContext.shared?.currentUserId ?? "" {
@@ -370,7 +361,8 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
     }
     
     @objc open func disbandRequest() {
-        self.service.disband(groupId: self.chatGroup.groupId) { error in
+        self.service.disband(groupId: self.chatGroup.groupId) { [weak self] error in
+            guard let `self` = self else { return }
             if error == nil {
                 NotificationCenter.default.post(name: Notification.Name("EaseChatUIKit_leaveGroup"), object: self.chatGroup.groupId)
                 self.pop()
@@ -387,7 +379,8 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
         let vc =
         ComponentsRegister.shared.GroupParticipantController.init(groupId: self.chatGroup.groupId, operation: .transferOwner)
         vc.mentionClosure = { [weak self] in
-            self?.transferConfirm(profile: $0)
+            guard let `self` = self else { return }
+            self.transferConfirm(profile: $0)
         }
         if vc.presentingViewController != nil {
             vc.modalPresentationStyle = .fullScreen
@@ -492,15 +485,6 @@ extension GroupInfoViewController: UITableViewDelegate,UITableViewDataSource {
         }
         cell?.indexPath = indexPath
         if let info = self.datas[safe: indexPath.section]?[safe: indexPath.row] {
-//            if EaseChatUIKitContext.shared?.currentUserId ?? "" == self.chatGroup.owner {
-//                cell?.accessoryType = info.withSwitch ? .none:.disclosureIndicator
-//            } else {
-//                if indexPath.section == 1 {
-//                    cell?.accessoryType = .none
-//                } else {
-//                    cell?.accessoryType = info.withSwitch ? .none:.disclosureIndicator
-//                }
-//            }
             cell?.refresh(info: info)
         }
         cell?.switchMenu.isEnabled = !self.chatGroup.isDisabled

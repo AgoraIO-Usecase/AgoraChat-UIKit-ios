@@ -73,8 +73,8 @@ extension UIViewController {
         toastView.contentView.addSubview(label)
         
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: toastView.leadingAnchor, constant: 10),
-            label.trailingAnchor.constraint(equalTo: toastView.trailingAnchor, constant: -10),
+            label.leadingAnchor.constraint(equalTo: toastView.leadingAnchor, constant: 16),
+            label.trailingAnchor.constraint(equalTo: toastView.trailingAnchor, constant: -16),
             label.topAnchor.constraint(equalTo: toastView.topAnchor, constant: 8),
             label.bottomAnchor.constraint(equalTo: toastView.bottomAnchor, constant: -8)
         ])
@@ -82,10 +82,8 @@ extension UIViewController {
         UIView.animate(withDuration: 0.3, delay: delay, options: .curveEaseOut, animations: {
             toastView.alpha = 1
         }, completion: { (finished) in
-            if finished {
-                DispatchQueue.main.asyncAfter(deadline: .now()+duration) {
-                    toastView.removeFromSuperview()
-                }
+            DispatchQueue.main.asyncAfter(deadline: .now()+duration) {
+                toastView.removeFromSuperview()
             }
         })
     }

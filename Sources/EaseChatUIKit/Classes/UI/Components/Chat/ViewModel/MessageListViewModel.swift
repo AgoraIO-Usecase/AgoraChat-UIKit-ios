@@ -19,7 +19,7 @@ import UIKit
     
     func onMessageBubbleClicked(message: MessageEntity)
     
-    func onMessageBubbleLongPressed(message: MessageEntity)
+    func onMessageBubbleLongPressed(cell: MessageCell)
     
     /// When you click a attachment message,we'll download the attachment,the method also called.
     /// - Parameter loading: Whether downloaded or not.
@@ -171,7 +171,7 @@ import UIKit
     ///   - type: ``MessageCellStyle``
     ///   - extensionInfo: Extended information to be carried in the message.
     @objc(sendMessageWithText:type:extensionInfo:)
-    public func sendMessage(text: String,type: MessageCellStyle,extensionInfo: Dictionary<String,Any> = [:]) {
+    open func sendMessage(text: String,type: MessageCellStyle,extensionInfo: Dictionary<String,Any> = [:]) {
         if let message = self.constructMessage(text: text, type: type,extensionInfo: extensionInfo) {
             self.driver?.showMessage(message: message)
             self.chatService?.send(message: message) { [weak self] error, message in
@@ -200,9 +200,12 @@ import UIKit
         switch type {
         case .text:
             chatMessage = ChatMessage(conversationID: self.to, body: ChatTextMessageBody(text: text), ext: ext)
-        case .image:
-            let displayName = text.components(separatedBy: "/").last ?? "\(Date().timeIntervalSince1970).jpeg"
+        case .image,.gif:
+            let displayName = text.components(separatedBy: "/").last ?? "\(Date().timeIntervalSince1970)" + (type == .gif ? ".gif" : ".jpeg")
             let imageBody = ChatImageMessageBody(localPath: text, displayName:  displayName.components(separatedBy: ".").count < 1 ? displayName+"jpeg":displayName)
+            if type == .gif {
+                imageBody.isGif = true
+            }
             imageBody.size = UIImage(contentsOfFile: text)?.size ?? .zero
             chatMessage = ChatMessage(conversationID: self.to, body: imageBody, ext: ext)
         case .voice:
@@ -270,7 +273,7 @@ import UIKit
     
     /// When you mention somebody update mention user id array.
     /// - Parameters:
-    ///   - profile: ``EaseProfileProtocol``
+    ///   - profile: ``ChatUserProfileProtocol``
     @objc(updateMentionIdsWithProfile:type:)
     open func updateMentionIds(profile: ChatUserProfileProtocol,type: MentionUpdate) {
         if type == .add {
@@ -300,7 +303,7 @@ import UIKit
     }
     
     @objc open func fetchPinnedMessages() {
-        if Appearance.chat.enablePinMessage,self.chatType != .chat {
+        if Appearance.chat.enablePinMessage {
             self.chatService?.pinnedMessages(conversationId: self.to, completion: { [weak self]  messages,error in
                 guard let `self` = self else { return }
                 if error == nil {
@@ -409,17 +412,20 @@ import UIKit
     }
     
     @objc open func deleteMessage(message: ChatMessage) {
-        if ChatUIKitClient.shared.option.option_UI.loadLocalHistoryMessages {
-            self.chatService?.removeLocalMessage(messageId: message.messageId)
-            self.driver?.processMessage(operation: .delete, message: message)
-        } else {
-            ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.removeMessages(fromServerMessageIds: [message.messageId], completion: { error in
-                if error == nil {
-                    self.driver?.processMessage(operation: .delete, message: message)
-                } else {
-                    consoleLogInfo("delete message error:\(error?.errorDescription ?? "")", type: .error)
-                }
-            })
+        DialogManager.shared.showAlert(title: "Delete Message Alert".chat.localize, content: "Delete warning".chat.localize, showCancel: true, showConfirm: true) { [weak self] _ in
+            guard let `self` = self else { return }
+            if ChatUIKitClient.shared.option.option_UI.loadLocalHistoryMessages {
+                self.chatService?.removeLocalMessage(messageId: message.messageId)
+                self.driver?.processMessage(operation: .delete, message: message)
+            } else {
+                ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.removeMessages(fromServerMessageIds: [message.messageId], completion: { [weak self] error in
+                    if error == nil {
+                        self?.driver?.processMessage(operation: .delete, message: message)
+                    } else {
+                        consoleLogInfo("delete message error:\(error?.errorDescription ?? "")", type: .error)
+                    }
+                })
+            }
         }
     }
     
@@ -717,9 +723,9 @@ extension MessageListViewModel: MessageListViewActionEventsDelegate {
         }
     }
     
-    public func onMessageContentLongPressed(message: MessageEntity) {
+    public func onMessageContentLongPressed(cell: MessageCell) {
         for handler in self.handlers.allObjects {
-            handler.onMessageBubbleLongPressed(message: message)
+            handler.onMessageBubbleLongPressed(cell: cell)
         }
     }
     
@@ -885,9 +891,8 @@ extension MessageListViewModel: ChatResponseListener {
      */
     @objc open func messageDidRecalled(recallInfo: RecallInfo) {
         if let recall = self.constructMessage(text: "recalled a message".chat.localize, type: .alert, extensionInfo: [:]) {
-            let timestamp = Int64(Date().timeIntervalSince1970*1000)
-            recall.messageId = recallInfo.recallMessage.messageId ?? "\(timestamp)"
-            recall.timestamp = timestamp
+            recall.messageId = recallInfo.recallMessageId
+            recall.timestamp = Int64(Date().timeIntervalSince1970*1000)
             recall.from = recallInfo.recallBy
             self.driver?.processMessage(operation: .recall, message: recall)
         }

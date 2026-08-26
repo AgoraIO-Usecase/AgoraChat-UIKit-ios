@@ -17,9 +17,9 @@ import UIKit
     /// Action button click callback
     public var operationClosure: ((MessageMultiSelectedBottomBarOperation) -> Void)?
     
-    private let trashIcon = UIImage(named: "trash", in: .chatBundle, with: nil)
+    private let trashIcon = UIImage(chatNamed: "trash")
     
-    private let forwardIcon = UIImage(named: "message_select_bottom_forward", in: .chatBundle, with: nil)
+    private let forwardIcon = UIImage(chatNamed: "message_select_bottom_forward")
     
     public private(set) lazy var trash: UIButton = {
         UIButton(type: .custom).frame(CGRect(x: 12, y: 4, width: 36, height: 36)).backgroundColor(.clear).cornerRadius(.large).addTargetFor(self, action: #selector(removeAction), for: .touchUpInside)
@@ -66,7 +66,7 @@ extension MessageMultiSelectedBottomBar: ThemeSwitchProtocol {
         
         let disable_forward = self.forwardIcon?.withTintColor(style == .dark ? UIColor.theme.neutralColor7:UIColor.theme.neutralColor6)
         self.forward.setImage(disable_forward, for: .disabled)
-        let enable_forward = self.forwardIcon?.withTintColor(style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5)
+        let enable_forward = self.forwardIcon?.withTintColor(style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor)
         self.forward.setImage(enable_forward, for: .normal)
     }
 }

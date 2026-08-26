@@ -3,7 +3,7 @@ import UIKit
 @objcMembers open class ContactViewController: UIViewController {
     
     /// A closure that is called when the user confirms the selection of profiles.
-    /// - Parameter profiles: An array of `EaseProfileProtocol` objects representing the selected profiles.
+    /// - Parameter profiles: An array of `ChatUserProfileProtocol` objects representing the selected profiles.
     public var confirmClosure: (([ChatUserProfileProtocol]) -> ())?
     
     public private(set) var style = ContactListHeaderStyle.contact
@@ -19,12 +19,12 @@ import UIKit
      */
     @objc open func createNavigation() -> ChatNavigationBar {
         if self.style == .newGroup  || self.style == .shareContact || self.style == .newChat {
-            return ChatNavigationBar(frame: CGRect(x: 0, y: 0, width: ScreenWidth, height: 44),textAlignment: .left,rightTitle: "").backgroundColor(.clear)
+            return ChatNavigationBar(show: CGRect(x: 0, y: 0, width: ScreenWidth, height: 44),textAlignment: .left,rightTitle: "").backgroundColor(.clear)
         } else {
             if style == .addGroupParticipant {
-                return ChatNavigationBar(frame: CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),textAlignment: .left,rightTitle: "Add".chat.localize).backgroundColor(.clear)
+                return ChatNavigationBar(show: CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),textAlignment: .left,rightTitle: "Add".chat.localize).backgroundColor(.clear)
             } else {
-                return ChatNavigationBar(frame: CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: self.style != .contact, rightImages: self.style == .newChat ? []:[UIImage(named: "person_add", in: .chatBundle, with: nil)!],hiddenAvatar: self.style == .contact ? false:true).backgroundColor(.clear)
+                return ChatNavigationBar(show: CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: self.style != .contact, rightImages: self.style == .newChat ? []:[UIImage(chatNamed: "person_add")!],hiddenAvatar: self.style == .contact ? false:true).backgroundColor(.clear)
             }
         }
     }
@@ -39,7 +39,7 @@ import UIKit
      - Returns: The created search button.
      */
     @objc open func createSearch() -> UIButton {
-        UIButton(type: .custom).frame(CGRect(x: 16, y: self.navigation.frame.maxY + 5, width: self.view.frame.width-32, height: 36)).backgroundColor(UIColor.theme.neutralColor95).textColor(UIColor.theme.neutralColor6, .normal).title("Search".chat.localize, .normal).image(UIImage(named: "search", in: .chatBundle, with: nil), .normal).addTargetFor(self, action: #selector(searchAction), for: .touchUpInside).cornerRadius(Appearance.avatarRadius)
+        UIButton(type: .custom).frame(CGRect(x: 16, y: self.navigation.frame.maxY + 5, width: self.view.frame.width-32, height: 36)).backgroundColor(UIColor.theme.neutralColor95).textColor(UIColor.theme.neutralColor6, .normal).title("Search".chat.localize, .normal).image(UIImage(chatNamed: "search"), .normal).addTargetFor(self, action: #selector(searchAction), for: .touchUpInside).cornerRadius(Appearance.avatarRadius)
     }
     
     public private(set) lazy var contactList: ContactView = {
@@ -141,7 +141,7 @@ import UIKit
         case .newChat:
             text = "new_chat_button_click_menu_selectcontacts".chat.localize
         case .contact:
-            text = "Contact".chat.localize
+            text = "Contact"
         case .shareContact:
             text = "Share Contact".chat.localize
         case .addGroupParticipant:
@@ -157,7 +157,7 @@ import UIKit
      Handles the action when the contact header is tapped.
      
      This method checks for the presence of specific extension actions in the `Appearance.contact.listExtensionActions` array and assigns corresponding action closures to them. If an extension action with the feature identifier "NewFriendRequest" is found, the closure will call the `viewNewFriendRequest()` method. If an extension action with the feature identifier "GroupChats" is found, the closure will call the `viewJoinedGroups()` method.
-     */
+     */    
     @objc open func receiveContactHeaderAction() {
         if let item = Appearance.contact.listHeaderExtensionActions.first(where: { $0.featureIdentify == "NewFriendRequest" }) {
             item.actionClosure = { [weak self] _ in
@@ -342,7 +342,7 @@ extension ContactViewController: ThemeSwitchProtocol {
         
         
         self.navigation.rightItem.textColor(style == .dark ? UIColor.theme.neutralColor3:UIColor.theme.neutralColor7, .disabled)
-        self.navigation.rightItem.textColor(style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5, .normal)
+        self.navigation.rightItem.textColor(style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor, .normal)
     }
     
 }

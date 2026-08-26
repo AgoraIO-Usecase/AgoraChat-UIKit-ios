@@ -8,7 +8,7 @@
 import UIKit
 
 public var saveIdentifier: String {
-    ChatClient.shared().options.appkey+(ChatUIKitContext.shared?.currentUserId ?? "")
+    (ChatClient.shared().options.appId ?? "")+(ChatUIKitContext.shared?.currentUserId ?? "")
 }
 
 @objc public final class UserServiceImplement: NSObject {
@@ -17,7 +17,7 @@ public var saveIdentifier: String {
     
     /// Init method
     /// - Parameters:
-    ///   - userInfo: ``EaseProfileProtocol``
+    ///   - userInfo: ``ChatUserProfileProtocol``
     ///   - token: Chat token
     ///   - completion: Callback,login successful or failure.
     @objc public init(userInfo: ChatUserProfileProtocol,token: String,completion: @escaping (ChatError?) -> Void) {
@@ -89,17 +89,19 @@ extension UserServiceImplement:UserServiceProtocol {
     }
     
     public func updateUserInfo(userInfo: ChatUserProfileProtocol, completion: @escaping (Bool, ChatError?) -> Void) {
+//        if userInfo.id == ChatUIKitContext.shared?.currentUserId ?? "" {
+//            ChatUIKitContext.shared?.currentUser = userInfo
+//            ChatUIKitContext.shared?.userCache?[userInfo.id] = userInfo
+//        } else {
+//            ChatUIKitContext.shared?.updateCache(type: .chat, profile: userInfo)
+//            ChatUIKitContext.shared?.updateCache(type: .user, profile: userInfo)
+//            ChatUIKitContext.shared?.updateCache(type: .group, profile: userInfo)
+//        }
     }
     
     public func login(userId: String, token: String, completion: @escaping (Bool, ChatError?) -> Void) {
-        if token.hasPrefix("00") {
-            ChatClient.shared().login(withUsername: userId, agoraToken: token) { user_id, error in
-                completion(error == nil,error)
-            }
-        } else {
-            ChatClient.shared().login(withUsername: userId, token: token) { user_id, error in
-                completion(error == nil,error)
-            }
+        ChatClient.shared().login(withUsername: userId, token: token) { user_id, error in
+            completion(error == nil,error)
         }
     }
     

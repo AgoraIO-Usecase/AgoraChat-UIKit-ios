@@ -19,7 +19,7 @@ public enum LanguageType: Equatable {
     case Japanese
     case Korean
     case Auto(String)
-    
+
     public var rawValue: String {
         switch self {
         case .Chinese: return "zh-Hans"
@@ -33,7 +33,7 @@ public enum LanguageType: Equatable {
         case .Auto(let value): return value
         }
     }
-    
+
     public init?(rawValue: String) {
         switch rawValue.lowercased() {
         case "zh-hans":
@@ -56,7 +56,7 @@ public enum LanguageType: Equatable {
             self = .Auto(rawValue)
         }
     }
-    
+
     public static func == (lhs: LanguageType, rhs: LanguageType) -> Bool {
         switch (lhs, rhs) {
         case (.Auto(let lhsValue), .Auto(let rhsValue)):
@@ -66,6 +66,7 @@ public enum LanguageType: Equatable {
         }
     }
 }
+
 
 /**
  A utility class for converting language keys to localized strings.
@@ -98,8 +99,24 @@ public enum LanguageType: Equatable {
         
         let path = Bundle.chatBundle.path(forResource: lang, ofType: "lproj") ?? ""
         let pathBundle = Bundle(path: path) ?? .main
-        let value = pathBundle.localizedString(forKey: key, value: nil, table: nil)
-        return value
+        let defaultValue = pathBundle.localizedString(forKey: key, value: nil, table: nil)
+        if let value = self.string(forKey: key, language: lang, in: .main),!value.isEmpty,value != key,value != defaultValue {
+            return value
+        }
+        return defaultValue
+    }
+    
+    // 辅助方法：在指定 Bundle 中查找特定语言的字符串
+    private func string(forKey key: String, language: String, in bundle: Bundle) -> String? {
+        // 寻找 .lproj 路径
+        guard let path = bundle.path(forResource: language, ofType: "lproj"),
+              let bundleWithLang = Bundle(path: path) else {
+            return nil
+        }
+        
+        // value 传 nil，如果没找到 key，系统默认返回 key 本身
+        let result = bundleWithLang.localizedString(forKey: key, value: nil, table: nil)
+        return result
     }
 
     static func chineseLanguage() -> Bool {

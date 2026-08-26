@@ -36,11 +36,11 @@ import UIKit
     
     @UserDefault("EaseChatUIKit_contact_block_list_exist", defaultValue: Dictionary<String,Bool>()) public private(set) var blockListExist
     
-    public private(set) lazy var datas: [DetailInfo] = {
+    public lazy var datas: [DetailInfo] = {
         self.dataSource()
     }()
     
-    /// Can override 
+    /// Can override
     /// - Returns: Array<DetailInfo> instance.
     @objc open func dataSource() -> [DetailInfo] {
         (Appearance.contact.enableBlock ? [
@@ -86,7 +86,7 @@ import UIKit
      - Returns: An instance of EaseChatNavigationBar.
      */
     @objc open func createNavigation() -> ChatNavigationBar {
-        ChatNavigationBar(showLeftItem: true, rightImages: self.showMenu ? [UIImage(named: "more_detail", in: .chatBundle, with: nil)!] : [], hiddenAvatar: true)
+        ChatNavigationBar(showLeftItem: true, rightImages: self.showMenu ? [UIImage(chatNamed: "more_detail")!] : [], hiddenAvatar: true)
     }
     
     public private(set) lazy var header: DetailInfoHeader = {
@@ -99,10 +99,10 @@ import UIKit
      - Returns: An instance of DetailInfoHeader.
      */
     @objc open func createHeader() -> DetailInfoHeader {
-        DetailInfoHeader(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 284), showMenu: self.showMenu, placeHolder: UIImage(named: "single", in: .chatBundle, with: nil)).backgroundColor(.clear)
+        DetailInfoHeader(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 284), showMenu: self.showMenu, placeHolder: UIImage(chatNamed: "single")).backgroundColor(.clear)
     }
     
-    lazy var showMenu: Bool = {
+    public lazy var showMenu: Bool = {
         self.showMenuCondition()
     }()
     
@@ -148,10 +148,6 @@ import UIKit
         UITableView(frame: CGRect(x: 0, y: NavigationHeight, width: self.view.frame.width, height: self.view.frame.height), style: .plain).delegate(self).dataSource(self).tableFooterView(UIView()).rowHeight(54).tableHeaderView(self.header).backgroundColor(.clear).separatorStyle(.none)
     }
     
-    public private(set) lazy var loadingView: LoadingView = {
-        LoadingView(frame: self.view.bounds)
-    }()
-    
     /**
      Initializes a ContactInfoViewController with the given profile.
      
@@ -179,7 +175,6 @@ import UIKit
         if let exist = self.blockListExist[ChatUIKitContext.shared?.currentUserId ?? ""],!exist {
             ChatClient.shared().contactManager?.getBlackListFromServer(completion: { [weak self] users, error in
                 guard let `self` = self else { return }
-                self.loadingView.stopAnimating()
                 if error != nil {
                     consoleLogInfo("fetchBlockList error:\(error?.errorDescription ?? "")", type: .error)
                 } else {
@@ -189,7 +184,6 @@ import UIKit
                 }
             })
         } else {
-            self.loadingView.stopAnimating()
             let blocked = ChatClient.shared().contactManager?.getBlackList()?.contains(self.profile.id) ?? false
             self.blockUserRefresh(blocked: blocked)
             self.datas.first?.switchValue = blocked
@@ -251,14 +245,11 @@ import UIKit
                 self.setup()
                 self.fetchBlockList()
             } else {
-                self.loadingView.startAnimating()
                 ChatClient.shared().contactManager?.getContactsFromServer(completion: { [weak self] contacts, error in
                     if error == nil {
                         self?.contacts = contacts ?? []
                         self?.setup()
                         self?.fetchBlockList()
-                    } else {
-                        self?.loadingView.stopAnimating()
                     }
                 })
             }
@@ -280,8 +271,7 @@ import UIKit
      If `showMenu` is false, it also configures the menu list and adds a footer view with an "Add Contact" button.
      */
     @objc open func setup() {
-        self.view.addSubViews([self.navigation,self.menuList,self.loadingView])
-        self.loadingView.isHidden = true
+        self.view.addSubViews([self.navigation,self.menuList])
         if !self.profile.avatarURL.isEmpty {
             self.header.avatarURL = self.profile.avatarURL
         }
@@ -630,6 +620,6 @@ extension ContactInfoViewController: UITableViewDelegate,UITableViewDataSource {
 extension ContactInfoViewController: ThemeSwitchProtocol {
     open func switchTheme(style: ThemeStyle) {
         self.view.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
-        self.addContact.backgroundColor = style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5
+        self.addContact.backgroundColor = style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor
     }
 }

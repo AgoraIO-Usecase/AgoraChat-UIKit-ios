@@ -29,7 +29,7 @@
 "barrage_long_press_menu_recall" = "撤回";
 "barrage_long_press_menu_reply" = "回复";
 "barrage_long_press_menu_report" = "举报";
-"barrage_long_press_menu_show_original_text" = "显示原文";
+"barrage_long_press_menu_show_original_text" = "隐藏译文";
 "barrage_long_press_menu_multi_select" = "多选";
 "barrage_long_press_menu_topic" = "创建话题";
 "Topic" = "话题";
@@ -81,7 +81,7 @@
 "Groups" = "群聊";
 "NewRequest" = "新请求";
 
-"contactID" = "联系人ID";
+"contactID" = "通过ID添加联系人";
 
 "new_chat_button_click_menu_addcontacts" = "添加联系人";
 "new_chat_button_click_menu_creategroup" = "创建群组";
@@ -211,5 +211,13 @@
 "Pin Messages" = "条置顶消息";
 "succeeded" = "成功";
 "failed" = "失败";
-
+"No pinned messages" = "暂无置顶消息";
 "Please select greater than one message." = "请至少选择一条消息";
+
+
+
+"Delete Conversation Alert" = "删除此会话?";
+
+"Delete Message Alert" = "删除此消息?";
+
+"Delete warning" = "删除后不可恢复";

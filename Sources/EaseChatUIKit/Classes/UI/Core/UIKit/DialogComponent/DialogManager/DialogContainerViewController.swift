@@ -14,9 +14,9 @@ import UIKit
 @objc final public class DialogContainerViewController:  UIViewController, PresentedViewType {
     
    
-    public var presentedViewComponent: PresentedViewComponent? 
+    public var presentedViewComponent: PresentedViewComponent? = PresentedViewComponent(contentSize: Appearance.pageContainerConstraintsSize,destination: .bottomBaseline,canTapBGDismiss: true)
 
-    var customView: UIView?
+    public var customView: UIView?
 
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -37,7 +37,8 @@ import UIKit
      */
     @objc public init(custom: UIView,constraintsSize:CGSize = .zero,canPanDismiss: Bool = true) {
         if constraintsSize != .zero {
-            self.presentedViewComponent = PresentedViewComponent(contentSize: constraintsSize,destination: .bottomBaseline)
+            self.presentedViewComponent?.contentSize = constraintsSize
+            self.presentedViewComponent?.canTapBGDismiss = canPanDismiss
         }
         self.customView = custom
         super.init(nibName: nil, bundle: nil)

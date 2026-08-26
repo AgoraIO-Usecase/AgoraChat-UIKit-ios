@@ -1,5 +1,5 @@
 //
-//  EaseChatNavigationBar.swift
+//  ChatNavigationBar.swift
 //  ChatUIKit
 //
 //  Created by 朱继超 on 2023/11/16.
@@ -34,11 +34,11 @@ import UIKit
     
     public var clickClosure: ((ChatNavigationBarClickEvent,IndexPath?) -> ())?
     
-    private let backImage = UIImage(named: "back", in: .chatBundle, with: nil)?.withTintColor(UIColor.theme.neutralColor3)
+    public let backImage = UIImage(chatNamed: "back")?.withTintColor(UIColor.theme.neutralColor3)
     
-    private var rightImages = [UIImage]()
+    public var rightImages = [UIImage]()
     
-    private var showLeft = false
+    public var showLeft = false
     
     /// Title kind of the ``NSAttributedString``.
     public var titleAttribute: NSAttributedString? {
@@ -104,13 +104,13 @@ import UIKit
     open func createAvatarStatus() -> UIImageView {
         let r = self.avatar.frame.width / 2.0
         let length = CGFloat(sqrtf(Float(r)))
-        let x = (Appearance.avatarRadius == .large ? (r + length + 3):(self.avatar.frame.width-10))
-        let y = (Appearance.avatarRadius == .large ? (r + length + 3):(self.avatar.frame.height-10))
-        return UIImageView(frame: CGRect(x: self.avatar.frame.minX+x, y: self.avatar.frame.minY+y, width: 12, height: 12)).backgroundColor(UIColor.theme.secondaryColor5).cornerRadius(.large).layerProperties(UIColor.theme.neutralColor98, 2).contentMode(.scaleAspectFit)
+        let x = (Appearance.avatarRadius == .large ? (r + length + 1):(self.avatar.frame.width-12))
+        let y = (Appearance.avatarRadius == .large ? (r + length + 1):(self.avatar.frame.height-12))
+        return UIImageView(frame: CGRect(x: self.avatar.frame.minX+x, y: self.avatar.frame.minY+y, width: 14, height: 14)).backgroundColor(UIColor.theme.secondaryColor5).cornerRadius(.large).layerProperties(UIColor.theme.neutralColor98, 2).contentMode(.scaleAspectFit)
     }
     
     public private(set) lazy var titleLabel: UILabel = {
-        UILabel(frame: CGRect(x: self.avatar.frame.maxX+4, y: StatusBarHeight+2, width: ScreenWidth-self.avatar.frame.maxX*2-8*3, height: 22)).font(UIFont.theme.headlineSmall).textColor(UIColor.theme.neutralColor1).backgroundColor(.clear).tag(2)
+        UILabel(frame: CGRect(x: self.avatar.frame.maxX+4, y: (nearStatusBar ? StatusBarHeight:0)+2, width: ScreenWidth-self.avatar.frame.maxX*2-8*3, height: 22)).font(UIFont.theme.headlineSmall).textColor(UIColor.theme.neutralColor1).backgroundColor(.clear).tag(2)
     }()
     
     public private(set) lazy var detail: UILabel = {
@@ -139,10 +139,14 @@ import UIKit
     }()
     
     public private(set) lazy var cancel: UIButton = {
-        UIButton(type: .custom).frame(CGRect(x: ScreenWidth-58, y: self.frame.height-36, width: 50, height: 28)).backgroundColor(.clear).title("barrage_long_press_menu_cancel".chat.localize, .normal).font(UIFont.theme.labelMedium).textColor(UIColor.theme.primaryColor5, .normal).tag(4).addTargetFor(self, action: #selector(buttonAction(sender:)), for: .touchUpInside)
+        UIButton(type: .custom).frame(CGRect(x: ScreenWidth-58, y: self.frame.height-36, width: 50, height: 28)).backgroundColor(.clear).title("barrage_long_press_menu_cancel".chat.localize, .normal).font(UIFont.theme.labelMedium).textColor(UIColor.theme.primaryLightColor, .normal).tag(4).addTargetFor(self, action: #selector(buttonAction(sender:)), for: .touchUpInside)
     }()
+    
+    public var originalRenderRightImage = false
+    
+    public var nearStatusBar = true
 
-    internal override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
     }
     
@@ -154,9 +158,10 @@ import UIKit
     ///   - avatarURL: Avatar url.
     ///   - rightImages: Right buttons kind of `[UIImage]`.
     ///   - hiddenAvatar: Whether hide avatar or not.
-    @objc required public convenience init(frame: CGRect = CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: Bool, textAlignment: NSTextAlignment = .center, placeHolder: UIImage? = nil,avatarURL: String? = nil,rightImages: [UIImage] = [],hiddenAvatar: Bool = false) {
+    @objc public convenience init(show frame: CGRect = CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: Bool, textAlignment: NSTextAlignment = .center, placeHolder: UIImage? = nil,avatarURL: String? = nil,rightImages: [UIImage] = [],hiddenAvatar: Bool = false,nearStatusBar: Bool = true) {
         self.init(frame: frame)
         self.showLeft = showLeftItem
+        self.nearStatusBar = nearStatusBar
         if showLeftItem {
             var width = CGFloat(self.rightImages.count*36)
             if self.avatar.frame.maxX+4 > width {
@@ -167,7 +172,7 @@ import UIKit
             } else {
                 self.addSubViews([self.leftItem,self.avatar,self.status,self.titleLabel,self.detail,self.rightItems,self.separateLine,self.cancel])
             }
-            self.titleLabel.frame = CGRect(x: (hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8, y: StatusBarHeight+4, width: ScreenWidth - width*2 - 4, height: 22)
+            self.titleLabel.frame = CGRect(x: (hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8, y: (nearStatusBar ? StatusBarHeight:0)+4, width: ScreenWidth - width*2 - 4, height: 22)
             if textAlignment == .center {
                 self.titleLabel.center = CGPoint(x: self.center.x, y: self.titleLabel.center.y)
             }
@@ -180,7 +185,7 @@ import UIKit
             }
             self.bringSubviewToFront(self.avatar)
             self.bringSubviewToFront(self.status)
-            self.titleLabel.frame = CGRect(x: (hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8, y: StatusBarHeight+4, width: ScreenWidth - CGFloat(self.rightImages.count*36)*2, height: 22)
+            self.titleLabel.frame = CGRect(x: (hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8, y: (nearStatusBar ? StatusBarHeight:0), width: ScreenWidth - CGFloat(self.rightImages.count*36)*2, height: 22)
             if textAlignment == .center {
                 self.titleLabel.center = CGPoint(x: self.center.x, y: self.titleLabel.center.y)
             }
@@ -198,8 +203,9 @@ import UIKit
         self.addGesture()
         self.cancel.isHidden = true
         self.leftItem.center = CGPoint(x: self.leftItem.center.x, y: self.leftItem.center.y-2)
+        self.avatar.frame = CGRect(x: self.showLeft ? self.leftItem.frame.maxX:CGFloat(10), y: self.frame.height-38, width: 32, height: 32)
         self.updateRightItems(images: rightImages)
-        self.titleLabel.frame = CGRect(x: (hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8, y: StatusBarHeight+4, width: ScreenWidth - self.rightItems.frame.width - 8 - ((hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8), height: 22)
+        self.titleLabel.frame = CGRect(x: (hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8, y: (nearStatusBar ? StatusBarHeight:0)+4, width: ScreenWidth - self.rightItems.frame.width - 8 - ((hiddenAvatar ? self.leftItem.frame.maxX:self.avatar.frame.maxX)+8), height: 22)
         self.detail.frame = CGRect(x: self.titleLabel.frame.minX, y: self.titleLabel.frame.maxY, width: self.titleLabel.frame.width, height: 14)
         self.status.isHidden = Appearance.hiddenPresence
         Theme.registerSwitchThemeViews(view: self)
@@ -210,7 +216,7 @@ import UIKit
     /// - Parameters:
     ///   - textAlignment: ``NSTextAlignment``
     ///   - rightTitle: Title of the right item.
-    @objc required public convenience init(frame: CGRect = CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),textAlignment: NSTextAlignment = .center,rightTitle: String? = nil) {
+    @objc public convenience init(show frame: CGRect = CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),textAlignment: NSTextAlignment = .center,rightTitle: String? = nil) {
         self.init(frame: frame)
         self.addSubViews([self.leftItem,self.titleLabel,self.detail,self.rightItem,self.separateLine,self.cancel])
         self.leftItem.setHitTestEdgeInsets(UIEdgeInsets(top: -10, left: -10, bottom: -10, right: -10))
@@ -236,7 +242,7 @@ import UIKit
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func addGesture() {
+    public func addGesture() {
         let gesture = UITapGestureRecognizer(target: self, action: #selector(clickAction(gesture:)))
         self.titleLabel.isUserInteractionEnabled = true
         self.avatar.isUserInteractionEnabled = true
@@ -269,46 +275,39 @@ import UIKit
         }
     }
     
-    @objc public func updateRightItems(images: [UIImage]) {
+    @objc public func updateRightItems(images: [UIImage],original: Bool = false) {
+        self.originalRenderRightImage = original
         self.rightImages.removeAll()
         if images.count > 3 {
             self.rightImages = Array(images.prefix(3))
         } else {
             self.rightImages.append(contentsOf: images)
         }
-        self.rightItems.frame = CGRect(x: ScreenWidth-CGFloat(images.count*36)-8, y: StatusBarHeight+8, width: CGFloat(images.count*36), height: 36)
+        self.rightItems.frame = CGRect(x: ScreenWidth-CGFloat(images.count*36)-8, y: (nearStatusBar ? StatusBarHeight:0)+6, width: CGFloat(images.count*36), height: 36)
+        self.rightItems.center = CGPoint(x: self.rightItems.center.x, y: self.avatar.center.y)
         self.rightItems.reloadData()
     }
-    
-    open override func layoutSubviews() {
-        super.layoutSubviews()
-        //设计不要分割线
-        self.separateLine.isHidden = true
-    }
+
 }
 
 extension ChatNavigationBar: UICollectionViewDataSource,UICollectionViewDelegate {
-    
+     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         self.rightImages.count
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EaseChatNavigationBarRightCell", for: indexPath) as? EaseChatNavigationBarRightCell
-        cell?.imageView.image = self.rightImages[safe: indexPath.row]?.withTintColor(Theme.style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor3)
+        if self.originalRenderRightImage {
+            cell?.imageView.image = self.rightImages[safe: indexPath.row]
+        } else {
+            cell?.imageView.image = self.rightImages[safe: indexPath.row]?.withTintColor(Theme.style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor3)
+        }
         return cell ?? UICollectionViewCell()
     }
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        let cell = collectionView.cellForItem(at: indexPath)
-        UIView.animate(withDuration: 0.382, delay: 0) {
-            cell?.backgroundColor = Theme.style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor95
-            cell?.contentView.backgroundColor = Theme.style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor95
-        } completion: { finished in
-            cell?.backgroundColor = .clear
-            cell?.contentView.backgroundColor = .clear
-        }
         self.clickClosure?(.rightItems,indexPath)
     }
 }
@@ -326,9 +325,9 @@ extension ChatNavigationBar: ThemeSwitchProtocol {
         self.detail.textColor = style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5
         self.leftItem.setImage(self.backImage?.withTintColor(Theme.style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor3), for: .normal)
         self.rightItem.setTitleColor(style == .dark ? UIColor.theme.neutralColor3:UIColor.theme.neutralColor7, for: .disabled)
-        self.rightItem.setTitleColor(style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5, for: .normal)
+        self.rightItem.setTitleColor(style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor, for: .normal)
         self.separateLine.backgroundColor = style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor9
-        self.cancel.textColor(style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5, .normal)
+        self.cancel.textColor(style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor, .normal)
         self.status.layerProperties(style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98, 2)
         self.rightItems.reloadData()
     }
@@ -347,6 +346,7 @@ extension ChatNavigationBar: ThemeSwitchProtocol {
         self.contentView.backgroundColor = .clear
         self.backgroundColor = .clear
         self.addSubview(self.imageView)
+        self.imageView.center = self.contentView.center
     }
     
     required public init?(coder: NSCoder) {

@@ -31,7 +31,7 @@ public extension ChatWrapper where Base == Data {
         do {
             dic = try JSONSerialization.jsonObject(with: base, options: .allowFragments) as? Dictionary<String,Any>
         } catch {
-            consoleLogInfo("\(error)", type: .error)
+            consoleLogInfo("parser failed: \(error.localizedDescription)", type: .error)
         }
         return dic
     }

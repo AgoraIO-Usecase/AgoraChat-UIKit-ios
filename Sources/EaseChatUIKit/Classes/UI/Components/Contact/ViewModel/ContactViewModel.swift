@@ -74,44 +74,48 @@ import UIKit
     }
     
     @objc open func addFriendRefreshList() {
-        self.service?.contacts(completion: { [weak self] error, contacts in
-            if error == nil {
-                if let infos = self?.filterContacts(contacts: contacts) {
-                    self?.driver?.refreshList(infos: infos)
-                    if infos.count < 7 {
-                        self?.requestDisplayInfos(ids: infos.map({ $0.id }))
+        DispatchQueue.main.async {
+            self.service?.contacts(completion: { [weak self] error, contacts in
+                if error == nil {
+                    if let infos = self?.filterContacts(contacts: contacts) {
+                        self?.driver?.refreshList(infos: infos)
+                        if infos.count < 7 {
+                            self?.requestDisplayInfos(ids: infos.map({ $0.id }))
+                        }
+                        DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.3) {
+                            self?.notifySelf = false
+                        }
                     }
-                    DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.3) {
-                        self?.notifySelf = false
-                    }
+                } else {
+                    self?.driver?.occurError()
+                    consoleLogInfo("loadAllContacts error:\(error?.errorDescription ?? "")", type: .error)
                 }
-            } else {
-                self?.driver?.occurError()
-                consoleLogInfo("loadAllContacts error:\(error?.errorDescription ?? "")", type: .error)
-            }
-        })
+            })
+        }
     }
     
     @objc open func loadAllContacts() {
-        if self.notifySelf {
-            return
-        }
-        self.service?.contacts(completion: { [weak self] error, contacts in
-            if error == nil {
-                if let infos = self?.filterContacts(contacts: contacts) {
-                    self?.driver?.refreshList(infos: infos)
-                    if infos.count < 7 {
-                        self?.requestDisplayInfos(ids: infos.map({ $0.id }))
-                    }
-                    DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.3) {
-                        self?.notifySelf = false
-                    }
-                }
-            } else {
-                self?.driver?.occurError()
-                consoleLogInfo("loadAllContacts error:\(error?.errorDescription ?? "")", type: .error)
+        DispatchQueue.main.async {
+            if self.notifySelf {
+                return
             }
-        })
+            self.service?.contacts(completion: { [weak self] error, contacts in
+                if error == nil {
+                    if let infos = self?.filterContacts(contacts: contacts) {
+                        self?.driver?.refreshList(infos: infos)
+                        if infos.count < 7 {
+                            self?.requestDisplayInfos(ids: infos.map({ $0.id }))
+                        }
+                        DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.3) {
+                            self?.notifySelf = false
+                        }
+                    }
+                } else {
+                    self?.driver?.occurError()
+                    consoleLogInfo("loadAllContacts error:\(error?.errorDescription ?? "")", type: .error)
+                }
+            })
+        }
     }
     
     @objc open func filterContacts(contacts: [Contact]) -> [ChatUserProfileProtocol] {
@@ -288,9 +292,11 @@ extension ContactViewModel: ContactListActionEventsDelegate {
     
     @objc open func cacheProfiles(profiles: [ChatUserProfileProtocol]) {
         for profile in profiles {
-            ChatUIKitContext.shared?.userCache?[profile.id]?.nickname = profile.nickname
-            ChatUIKitContext.shared?.userCache?[profile.id]?.remark = profile.remark
-            ChatUIKitContext.shared?.userCache?[profile.id]?.avatarURL = profile.avatarURL
+            if let user = ChatUIKitContext.shared?.userCache?[profile.id] {
+                user.nickname = profile.nickname
+                user.remark = profile.remark
+                user.avatarURL = profile.avatarURL
+            }
         }
     }
     
