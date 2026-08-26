@@ -24,7 +24,7 @@ import UIKit
     private var indexMap: [String:Int] = [:]
         
     private lazy var empty: EmptyStateView = {
-        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height),emptyImage: UIImage(named: "empty",in: .chatBundle, with: nil), onRetry: { [weak self] in
+        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height),emptyImage: UIImage(chatNamed: "empty"), onRetry: { [weak self] in
             guard let `self` = self else { return }
             for listener in self.eventHandlers.allObjects {
                 listener.onConversationListOccurErrorWhenFetchServer()
@@ -35,7 +35,6 @@ import UIKit
     @objc required public override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: style)
         self.delegate(self).dataSource(self).tableFooterView(UIView()).separatorStyle(.none).registerCell(ComponentsRegister.shared.ConversationCell.self , forCellReuseIdentifier: "EaseChatUIKit.ConversationCell").rowHeight(Appearance.conversation.rowHeight).backgroundColor(.clear)
-        self.showsHorizontalScrollIndicator = false
         Theme.registerSwitchThemeViews(view: self)
         self.switchTheme(style: Theme.style)
         
@@ -95,7 +94,7 @@ extension ConversationList: UITableViewDelegate,UITableViewDataSource {
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard let info = self.datas[safe: indexPath.row] else { return }
-        if let hooker = ComponentViewsActionHooker.shared.conversation.longPressed {
+        if let hooker = ComponentViewsActionHooker.shared.conversation.didSelected {
             hooker(indexPath,info)
         } else {
             for listener in self.eventHandlers.allObjects {
@@ -161,35 +160,35 @@ extension ConversationList: UITableViewDelegate,UITableViewDataSource {
                         listener.onConversationSwipe(type: .more, info: info)
                     }
                     completion(true)
-                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5).icon(image: UIImage(named: "more", in: .chatBundle, with: nil))
+                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5).icon(image: UIImage(chatNamed: "more"))
             case .read:
                 return UIContextualActionChatUIKit(title: "conversation_right_slide_menu_read".chat.localize, style: .normal, actionType: $0) { (action, view, completion) in
                     for listener in self.eventHandlers.allObjects {
                         listener.onConversationSwipe(type: .read, info: info)
                     }
                     completion(true)
-                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralSpecialColor6:UIColor.theme.neutralSpecialColor5).icon(image: UIImage(named: "read", in: .chatBundle, with: nil))
+                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralSpecialColor6:UIColor.theme.neutralSpecialColor5).icon(image: UIImage(chatNamed: "read"))
             case .delete:
                 return UIContextualActionChatUIKit(title: "conversation_right_slide_menu_delete".chat.localize, style: .normal, actionType: $0) { (action, view, completion) in
                     for listener in self.eventHandlers.allObjects {
                         listener.onConversationSwipe(type: .delete, info: info)
                     }
                     completion(true)
-                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.errorColor6:UIColor.theme.errorColor5).icon(image: UIImage(named: "trash", in: .chatBundle, with: nil))
+                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.errorColor6:UIColor.theme.errorColor5).icon(image: UIImage(chatNamed: "trash"))
             case .mute:
                 return UIContextualActionChatUIKit(title: "conversation_right_slide_menu_mute".chat.localize, style: .normal, actionType: $0) { (action, view, completion) in
                     for listener in self.eventHandlers.allObjects {
                         listener.onConversationSwipe(type: .mute, info: info)
                     }
                     completion(true)
-                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralSpecialColor6:UIColor.theme.neutralSpecialColor5).icon(image: UIImage(named: "mute", in: .chatBundle, with: nil))
+                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralSpecialColor6:UIColor.theme.neutralSpecialColor5).icon(image: UIImage(chatNamed: "mute"))
             case .pin:
                 return UIContextualActionChatUIKit(title: "conversation_left_slide_menu_pin".chat.localize, style: .normal, actionType: $0) { (action, view, completion) in
                     for listener in self.eventHandlers.allObjects {
                         listener.onConversationSwipe(type: .pin, info: info)
                     }
                     completion(true)
-                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5).icon(image: UIImage(named: "pin", in: .chatBundle, with: nil))
+                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor).icon(image: UIImage(chatNamed: "pin"))
             case .unpin:
                 return UIContextualActionChatUIKit(title: "conversation_left_slide_menu_unpin".chat.localize, style: .normal, actionType: $0) { (action, view, completion) in
                     if let hooker = ComponentViewsActionHooker.shared.conversation.swipeAction {
@@ -200,14 +199,14 @@ extension ConversationList: UITableViewDelegate,UITableViewDataSource {
                         }
                     }
                     completion(true)
-                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5).icon(image: UIImage(named: "unpin", in: .chatBundle, with: nil))
+                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor).icon(image: UIImage(chatNamed: "unpin"))
             case .unmute:
                 return UIContextualActionChatUIKit(title: "conversation_left_slide_menu_unmute".chat.localize, style: .normal, actionType: $0) { (action, view, completion) in
                     for listener in self.eventHandlers.allObjects {
                         listener.onConversationSwipe(type: .unmute, info: info)
                     }
                     completion(true)
-                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralSpecialColor6:UIColor.theme.neutralSpecialColor5).icon(image: UIImage(named: "unmute", in: .chatBundle, with: nil))
+                }.backgroundColor(color: Theme.style == .dark ? UIColor.theme.neutralSpecialColor6:UIColor.theme.neutralSpecialColor5).icon(image: UIImage(chatNamed: "unmute"))
             }
         }
     }
@@ -237,7 +236,6 @@ extension ConversationList: UITableViewDelegate,UITableViewDataSource {
             }
         }
     }
-    
 }
 
 //MARK: - IConversationListDriver Implement
@@ -251,7 +249,7 @@ extension ConversationList: IConversationListDriver {
 //        self.refreshControl?.endRefreshing()
         self.empty.state = .empty
         self.datas.removeAll()
-        self.datas = infos
+        self.datas.append(contentsOf: infos)
         self.updateIndexMap()
         self.reloadData()
     }
@@ -282,7 +280,6 @@ extension ConversationList: IConversationListDriver {
         case .delete: self.delete(info: info)
         default: break
         }
-        
     }
     
     
@@ -426,7 +423,7 @@ extension ConversationList: ThemeSwitchProtocol {
     func showNew(info: ConversationInfo)
     
     /// This method can be used when you want refresh some  display info  of datas.
-    /// - Parameter infos: Array of conform ``EaseProfileProtocol`` object.
+    /// - Parameter infos: Array of conform ``ChatUserProfileProtocol`` object.
     func refreshProfiles(infos: [ChatUserProfileProtocol])
     
     /// This method can be used when pulling down to refresh.

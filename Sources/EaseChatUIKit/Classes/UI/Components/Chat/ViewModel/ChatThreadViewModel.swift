@@ -127,7 +127,7 @@ import UIKit
     ///   - type: ``MessageCellStyle``
     ///   - extensionInfo: Extended information to be carried in the message.
     @objc(sendMessageWithText:type:extensionInfo:)
-    public func sendMessage(text: String,type: MessageCellStyle,extensionInfo: Dictionary<String,Any> = [:]) {
+    open func sendMessage(text: String,type: MessageCellStyle,extensionInfo: Dictionary<String,Any> = [:]) {
         if let message = self.constructMessage(text: text, type: type,extensionInfo: extensionInfo) {
             self.driver?.showMessage(message: message)
             self.chatService?.send(message: message) { [weak self] error, message in
@@ -168,13 +168,16 @@ import UIKit
         ext.merge(json) { _, new in
             new
         }
-        var chatMessage:ChatMessage?
+        var chatMessage: ChatMessage?
         switch type {
         case .text:
             chatMessage = ChatMessage(conversationID: self.to, body: ChatTextMessageBody(text: text), ext: ext)
-        case .image:
-            let displayName = text.components(separatedBy: "/").last ?? "\(Date().timeIntervalSince1970).jpeg"
+        case .image,.gif:
+            let displayName = text.components(separatedBy: "/").last ?? "\(Date().timeIntervalSince1970)" + (type == .gif ? ".gif" : ".jpeg")
             let imageBody = ChatImageMessageBody(localPath: text, displayName:  displayName.components(separatedBy: ".").count < 1 ? displayName+"jpeg":displayName)
+            if type == .gif {
+                imageBody.isGif = true
+            }
             imageBody.size = UIImage(contentsOfFile: text)?.size ?? .zero
             chatMessage = ChatMessage(conversationID: self.to, body: imageBody, ext: ext)
         case .voice:
@@ -307,14 +310,17 @@ import UIKit
     }
     
     @objc open func deleteMessage(message: ChatMessage) {
-        if let conversation = ChatClient.shared().chatManager?.getConversation(self.to, type: .groupChat, createIfNotExist: true, isThread: true) {
-            ChatClient.shared().chatManager?.removeMessagesFromServer(with: conversation, messageIds: [message.messageId], completion: { [weak self] error in
-                if error != nil {
-                    consoleLogInfo("delete message error:\(error?.errorDescription ?? "")", type: .error)
-                } else {
-                    self?.driver?.processMessage(operation: .delete, message: message)
-                }
-            })
+        DialogManager.shared.showAlert(title: "Delete Message Alert".chat.localize, content: "Delete warning".chat.localize, showCancel: true, showConfirm: true) { [weak self] _ in
+            guard let `self` = self else { return }
+            if let conversation = ChatClient.shared().chatManager?.getConversation(self.to, type: .groupChat, createIfNotExist: true, isThread: true) {
+                ChatClient.shared().chatManager?.removeMessagesFromServer(with: conversation, messageIds: [message.messageId], completion: { [weak self] error in
+                    if error != nil {
+                        consoleLogInfo("delete message error:\(error?.errorDescription ?? "")", type: .error)
+                    } else {
+                        self?.driver?.processMessage(operation: .delete, message: message)
+                    }
+                })
+            }
         }
         
     }
@@ -597,9 +603,9 @@ extension ChatThreadViewModel: MessageListViewActionEventsDelegate {
         }
     }
     
-    public func onMessageContentLongPressed(message: MessageEntity) {
+    public func onMessageContentLongPressed(cell: MessageCell) {
         for handler in self.handlers.allObjects {
-            handler.onMessageBubbleLongPressed(message: message)
+            handler.onMessageBubbleLongPressed(cell: cell)
         }
     }
     
@@ -743,12 +749,16 @@ extension ChatThreadViewModel: ChatResponseListener {
         - recallInfo: The recall information containing the recalled message.
      */
     @objc open func messageDidRecalled(recallInfo: RecallInfo) {
-        if let recall = self.constructMessage(text: "recalled a message".chat.localize, type: .alert, extensionInfo: [:]) {
-            let timestamp = Int64(Date().timeIntervalSince1970*1000)
-            recall.messageId = recallInfo.recallMessage.messageId ?? "\(timestamp)"
-            recall.timestamp = timestamp
-            recall.from = recallInfo.recallBy
-            self.driver?.processMessage(operation: .recall, message: recall)
+        if let recallMessage = recallInfo.recallMessage,recallMessage.conversationId == self.to {
+            recallMessage.from = recallInfo.recallBy
+            self.recallAction(message: recallMessage)
+        } else {
+            if let recall = self.constructMessage(text: "recalled a message".chat.localize, type: .alert, extensionInfo: [:]) {
+                recall.messageId = recallInfo.recallMessageId
+                recall.timestamp = Int64(Date().timeIntervalSince1970*1000)
+                recall.from = recallInfo.recallBy
+                self.driver?.processMessage(operation: .recall, message: recall)
+            }
         }
     }
     

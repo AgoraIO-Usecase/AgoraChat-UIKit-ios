@@ -22,7 +22,7 @@ fileprivate let space = Int((ScreenWidth-10-CGFloat((Appearance.chat.commonReact
         let flow = UICollectionViewFlowLayout()
         flow.itemSize = CGSize(width: 36, height: 36)
         flow.minimumLineSpacing = 0
-        flow.minimumInteritemSpacing = CGFloat(space)
+        flow.minimumInteritemSpacing = CGFloat(19)
         return flow
     }()
     
@@ -74,7 +74,7 @@ fileprivate let space = Int((ScreenWidth-10-CGFloat((Appearance.chat.commonReact
 
 extension CommonReactionView: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
-        var image = UIImage(named: "reaction_all", in: .chatBundle, with: nil)
+        var image = UIImage(chatNamed: "reaction_all")
         if style == .dark {
             image = image?.withTintColor(UIColor.theme.neutralColor9)
         }

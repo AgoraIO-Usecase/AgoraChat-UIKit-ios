@@ -63,6 +63,9 @@ public extension UIView {
         var radius = CGFloat(value.rawValue)
         if value == .large {
             radius = self.frame.height/2.0
+            if radius == 0 {
+                radius = (self.heightAnchor as? NSLayoutConstraint)?.constant ?? 0
+            }
         }
         view.clipsToBounds = true
         view.layer.cornerRadius = radius

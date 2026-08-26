@@ -32,7 +32,7 @@ import UIKit
     }()
     
     public private(set) lazy var empty: EmptyStateView = {
-        EmptyStateView(frame: self.topicList.bounds,emptyImage: UIImage(named: "empty",in: .chatBundle, with: nil), onRetry: { [weak self] in
+        EmptyStateView(frame: self.topicList.bounds,emptyImage: UIImage(chatNamed: "empty"), onRetry: { [weak self] in
 
         }).backgroundColor(.clear)
     }()
@@ -191,14 +191,14 @@ extension ChatThreadListController: UITableViewDelegate,UITableViewDataSource {
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        var unknownInfoIds = [String]()
-        if let visiblePaths = self.topicList.indexPathsForVisibleRows {
-            for indexPath in visiblePaths {
-                if let lastMessage = self.threads[safe: indexPath.row]?.lastMessage {
-                    unknownInfoIds.append(self.threads[safe: indexPath.row]?.thread.threadId ?? "")
-                }
-            }
-        }
+//        var unknownInfoIds = [String]()
+//        if let visiblePaths = self.topicList.indexPathsForVisibleRows {
+//            for indexPath in visiblePaths {
+//                if let lastMessage = self.threads[safe: indexPath.row]?.lastMessage {
+//                    unknownInfoIds.append(self.threads[safe: indexPath.row]?.thread.threadId ?? "")
+//                }
+//            }
+//        }
     }
 }
 

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name             = 'chat-uikit'
-s.version          = '2.0.0'
+s.version          = '2.2.0'
 s.summary = 'agora im UIKit'
 s.homepage = 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios'
 s.description = <<-DESC
@@ -9,14 +9,15 @@ DESC
 s.license          = { :type => 'MIT', :file => 'LICENSE' }
 s.author           = { 'agora' => 'dev@agora.com' }
 s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => s.version.to_s}
-s.ios.deployment_target = '13.0'
+s.ios.deployment_target = '15.0'
 
 s.xcconfig = {'ENABLE_BITCODE' => 'NO'}
 
 
 s.source_files = [ 'Sources/EaseChatUIKit/Classes/**/*.{h,swift}' ]
 s.resources = ['Sources/EaseChatUIKit/Classes/UI/**/*.bundle','Sources/EaseChatUIKit/Classes/UI/**/*.xcprivacy']
-s.dependency 'Agora_Chat_iOS', '1.3.0'
+s.dependency 'Agora_Chat_iOS', '1.4.0'
+s.dependency 'FLAnimatedImage', '~> 1.0'
 s.static_framework = true
 
 s.swift_version = '5.0'

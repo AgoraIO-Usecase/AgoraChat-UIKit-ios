@@ -9,6 +9,7 @@ import UIKit
 import MobileCoreServices
 import QuickLook
 import AVFoundation
+import PhotosUI
 
 @objcMembers open class ChatThreadViewController: UIViewController {
     
@@ -23,7 +24,7 @@ import AVFoundation
     /// Creates a navigation bar for the MessageListController.
     /// - Returns: An instance of EaseChatNavigationBar.
     @objc open func createNavigation() -> ChatNavigationBar {
-        ChatNavigationBar(showLeftItem: true,textAlignment: .left,rightImages: [UIImage(named: "more_detail", in: .chatBundle, with: nil)!],hiddenAvatar: true).backgroundColor(.clear)
+        ChatNavigationBar(showLeftItem: true,textAlignment: .left,rightImages: [UIImage(chatNamed: "more_detail")!],hiddenAvatar: true).backgroundColor(.clear)
     }
         
     public private(set) lazy var entity: MessageEntity = {
@@ -64,8 +65,8 @@ import AVFoundation
         LoadingView(frame: self.view.bounds)
     }
     
-    public private(set) lazy var viewModel: ChatThreadViewModel = {
-        ChatThreadViewModel(chatThread: self.profile)
+    public private(set) lazy var viewModel: ChatThreadViewModel  = {
+        ComponentsRegister.shared.ThreadViewModel.init(chatThread: self.profile)
     }()
     
     public private(set) var firstMessage: ChatMessage?
@@ -102,9 +103,6 @@ import AVFoundation
         self.view.backgroundColor = UIColor.theme.neutralColor98
         self.view.addSubViews([self.messageContainer,self.navigation])
         self.setupTitle()
-//        if self.parentMessage != nil {
-//            self.messageContainer.messageList.tableHeaderView = self.messageHeader
-//        }
         self.navigation.clickClosure = { [weak self] in
             self?.navigationClick(type: $0, indexPath: $1)
         }
@@ -114,6 +112,33 @@ import AVFoundation
         Theme.registerSwitchThemeViews(view: self)
         self.switchTheme(style: Theme.style)
         self.view.addSubview(self.loadingView)
+        self.processFollowInputAttachmentAction()
+    }
+    
+    @objc open func processFollowInputAttachmentAction() {
+        if Appearance.chat.messageAttachmentMenuStyle == .followInput {
+            if let fileItem = Appearance.chat.inputExtendActions.first(where: { $0.tag == "File" }) {
+                fileItem.action = { [weak self] item,object in
+                    self?.handleAttachmentAction(item: item)
+                }
+            }
+            if let photoItem = Appearance.chat.inputExtendActions.first(where: { $0.tag == "Photo" }) {
+                photoItem.action = { [weak self] item,object in
+                    self?.handleAttachmentAction(item: item)
+                }
+            }
+            if let cameraItem = Appearance.chat.inputExtendActions.first(where: { $0.tag == "Camera" }) {
+                cameraItem.action = { [weak self] item,object in
+                    self?.handleAttachmentAction(item: item)
+                }
+            }
+            if let contactItem = Appearance.chat.inputExtendActions.first(where: { $0.tag == "Contact" }) {
+                contactItem.action = { [weak self] item,object in
+                    self?.handleAttachmentAction(item: item)
+                }
+            }
+            
+        }
     }
     
     open func setupTitle() {
@@ -199,17 +224,17 @@ extension ChatThreadViewController {
     
     open func filterActions() -> [ActionSheetItemProtocol] {
         var items = [
-            ActionSheetItem(title: "Topic Members", type: .normal, tag: "TopicMembers", image: UIImage(named: "create_group", in: .chatBundle, with: nil)),
-            ActionSheetItem(title: "Leave Topic", type: .destructive, tag: "LeaveTopic", image: UIImage(named: "quit", in: .chatBundle, with: nil))
+            ActionSheetItem(title: "Topic Members", type: .normal, tag: "TopicMembers", image: UIImage(chatNamed: "create_group")),
+            ActionSheetItem(title: "Leave Topic", type: .destructive, tag: "LeaveTopic", image: UIImage(chatNamed: "quit"))
         ]
         let group = ChatGroup(id: self.profile.parentId)
         if group?.owner == ChatUIKitContext.shared?.currentUserId ?? "" {
             items.removeLast()
-            items.append(ActionSheetItem(title: "Disband Topic", type: .destructive, tag: "DisbandTopic", image: UIImage(named: "quit", in: .chatBundle, with: nil)))
+            items.append(ActionSheetItem(title: "Disband Topic", type: .destructive, tag: "DisbandTopic", image: UIImage(chatNamed: "quit")))
 
         }
         if group?.owner == ChatUIKitContext.shared?.currentUserId ?? "" || self.profile.owner == ChatUIKitContext.shared?.currentUserId ?? ""{
-            items.insert(ActionSheetItem(title: "Edit Topic", type: .normal, tag: "EditTopic", image: UIImage(named: "message_action_edit", in: .chatBundle, with: nil)), at: 0)
+            items.insert(ActionSheetItem(title: "Edit Topic", type: .normal, tag: "EditTopic", image: UIImage(chatNamed: "message_action_edit")), at: 0)
         }
         return items
     }
@@ -304,6 +329,10 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
     }
     
     @objc open func forwardMessages(messages: [ChatMessage]) {
+        if messages.isEmpty {
+            self.showToast(toast: "Please select a message to forward.")
+            return
+        }
         let vc = ForwardTargetViewController(messages: messages, combine: true)
         vc.dismissClosure = { [weak self] in
             guard let `self` = self else { return }
@@ -317,8 +346,12 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
     }
     
     @objc open func deleteMessages(messages: [ChatMessage]) {
-        self.navigation.editMode = false
+        if messages.isEmpty {
+            self.showToast(toast: "Please select a message to delete.")
+            return
+        }
         self.messageContainer.editMode = false
+        self.navigation.editMode = false
         self.viewModel.deleteMessages(messages: messages)
     }
     
@@ -401,13 +434,13 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
                 messageActions.removeAll { $0.tag == "Recall" }
             }
         }
-        messageActions.removeAll { $0.tag == "Recall" }
+//        messageActions.removeAll { $0.tag == "Recall" }
         messageActions.removeAll { $0.tag == "Delete" }
         return messageActions
     }
     
-    public func onMessageBubbleLongPressed(message: MessageEntity) {
-        self.showMessageLongPressedDialog(message: message)
+    public func onMessageBubbleLongPressed(cell: MessageCell) {
+        self.showMessageLongPressedDialog(cell: cell)
     }
     
     /**
@@ -416,24 +449,70 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
      - Parameters:
      - message: The chat message for which the dialog is shown.
      */
-    @objc open func showMessageLongPressedDialog(message: MessageEntity) {
+    @objc open func showMessageLongPressedDialog(cell: MessageCell) {
         if self.messageContainer.editMode {
             return
         }
-        let header =  CommonReactionView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44), message: message.message).backgroundColor(.clear)
+        let items = self.filterMessageActions(message: cell.entity)
+        
+        var width = ScreenWidth
+        if Appearance.chat.messageLongPressMenuStyle == .withArrow {
+            width = (items.count < 5 ? 5:CGFloat(min(items.count, 5))) * PopItemWidth - PopLeftRightMargin * 4
+        }
+        
+        let header =  CommonReactionView(frame: CGRect(x: 0, y: 0, width: width, height: 44), message: cell.entity.message).backgroundColor(.clear)
         header.reactionClosure = { [weak self] emoji,rawMessage in
+            if Appearance.chat.messageLongPressMenuStyle == .withArrow {
+                MessageLongPressMenu.shared.hiddenMenu()
+            }
             UIViewController.currentController?.dismiss(animated: true) {
                 if emoji.isEmpty {
                     //more reaction
-                    self?.showAllReactionsController(message: message)
+                    self?.showAllReactionsController(message: cell.entity)
                 } else {
                     self?.viewModel.operationReaction(emoji: emoji, message: rawMessage)
                 }
             }
         }
-        DialogManager.shared.showMessageActions(actions: self.filterMessageActions(message: message),withHeader: Appearance.chat.contentStyle.contains(.withMessageReaction) ? header:nil) { [weak self] item in
-            self?.processMessage(item: item, message: message.message)
+        switch Appearance.chat.messageLongPressMenuStyle {
+        case .withArrow:
+            self.showMessageLongPressedMenuWithArrow(cell: cell, items: items,header: Appearance.chat.contentStyle.contains(.withMessageReaction) ? header:nil)
+        case .actionSheet:
+            self.showMessageLongPressedMenuActionSheet(cell: cell, items: items,header: Appearance.chat.contentStyle.contains(.withMessageReaction) ? header:nil)
+        default:
+            break
         }
+        self.feedback(with: .medium)
+        
+    }
+    
+    @objc open func showMessageLongPressedMenuWithArrow(cell: MessageCell,items: [ActionSheetItemProtocol],header: UIView? = nil) {
+        if cell is ImageMessageCell || cell is VideoMessageCell {
+            if let content = cell.contentViewIfPresent() {
+                MessageLongPressMenu.shared.showMenu(items: items, targetView: content, header: header) { [weak self] item, _ in
+                    self?.processMessage(item: item, message: cell.entity.message)
+                }
+            }
+        } else {
+            MessageLongPressMenu.shared.showMenu(items: items, targetView: Appearance.chat.bubbleStyle == .withArrow ? cell.bubbleWithArrow:cell.bubbleMultiCorners, header: header){ [weak self] item, _ in
+                self?.processMessage(item: item, message: cell.entity.message)
+            }
+        }
+    }
+    
+    @objc open func showMessageLongPressedMenuActionSheet(cell: MessageCell,items: [ActionSheetItemProtocol],header: UIView? = nil) {
+        if UIViewController.currentController is DialogContainerViewController {
+            return
+        }
+        DialogManager.shared.showMessageActions(actions: items,withHeader: header) { [weak self] item in
+            self?.processMessage(item: item, message: cell.entity.message)
+        }
+    }
+    
+    @objc open func feedback(with style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let feedbackGenerator = UIImpactFeedbackGenerator(style: style)
+        feedbackGenerator.prepare()
+        feedbackGenerator.impactOccurred()
     }
     
     @objc open func showAllReactionsController(message: MessageEntity) {
@@ -651,11 +730,46 @@ extension ChatThreadViewController: MessageListDriverEventsListener {
     @objc open func handleAttachmentAction(item: ActionSheetItemProtocol) {
         switch item.tag {
         case "File": self.selectFile()
-        case "Photo": self.selectPhoto()
+        case "Photo": self.selectPhotoWithPHPicker()
         case "Camera": self.openCamera()
         case "Contact": self.selectContact()
         default:
             break
+        }
+    }
+    
+    @objc open func selectPhotoWithPHPicker() {
+        let processPHPicker = {
+            var config = PHPickerConfiguration()
+            config.selectionLimit = 1
+            config.preferredAssetRepresentationMode = .current // origin file
+            
+            let picker = PHPickerViewController(configuration: config)
+            picker.delegate = self
+            self.present(picker, animated: true)
+        }
+        let status = PHPhotoLibrary.authorizationStatus()
+        switch status {
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization { status in
+                DispatchQueue.main.async {
+                    if status == .denied {
+                        DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "photo_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
+                            
+                        }
+                    } else {
+                        processPHPicker()
+                        return
+                    }
+                }
+            }
+        case .denied:
+            DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "photo_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
+                
+            }
+            return
+            
+        default: processPHPicker()
         }
     }
     
@@ -864,11 +978,83 @@ extension ChatThreadViewController: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
         self.navigation.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
         self.view.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
-        var images = [UIImage(named: "more_detail", in: .chatBundle, with: nil)!]
+        var images = [UIImage(chatNamed: "more_detail")!]
         if style == .light {
             images = images.map({ $0.withTintColor(UIColor.theme.neutralColor3) })
         }
         self.navigation.updateRightItems(images: images)
     }
     
+}
+
+extension ChatThreadViewController: PHPickerViewControllerDelegate {
+    public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        // Dismiss picker first to improve UX
+        picker.dismiss(animated: true, completion: nil)
+        
+        // Handle case when no results are selected
+        guard !results.isEmpty else { return }
+        
+        // Process each selected item
+        for result in results {
+            let itemProvider = result.itemProvider
+            
+            // Determine file type and appropriate extension
+            var type: MessageCellStyle = .image
+            var fileExtension = "jpeg"
+            var typeIdentifier = UTType.image.identifier
+            var extensionInfo: [String: Any] = [:]
+            
+            // Check for GIF
+            if itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
+                type = .gif
+                fileExtension = "gif"
+                typeIdentifier = UTType.gif.identifier
+            }
+            // Check for Video
+            else if itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                type = .video
+                fileExtension = "mp4"
+                typeIdentifier = UTType.movie.identifier
+            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.mpeg4Movie.identifier) {
+                type = .video
+                fileExtension = "mp4"
+                typeIdentifier = UTType.mpeg4Movie.identifier
+            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.quickTimeMovie.identifier) {
+                type = .video
+                fileExtension = "mov"
+                typeIdentifier = UTType.quickTimeMovie.identifier
+            }
+            
+            // Generate a unique filename with appropriate extension
+            let timestamp = Int(Date().timeIntervalSince1970 * 1000)
+            let fileName = "\(itemProvider.suggestedName ?? "media_\(timestamp)").\(fileExtension)"
+            
+            // Load the data representation for the selected item
+            itemProvider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { [weak self] data, error in
+                guard let self = self, let data = data else {
+                    if let error = error {
+                        consoleLogInfo("Error loading media: \(error.localizedDescription)", type: .error)
+                    }
+                    return
+                }
+                
+                // Create file path and save the data
+                let fileURL = URL(fileURLWithPath: MediaConvertor.filePath() + "/\(fileName)")
+                FileManager.default.createFile(atPath: fileURL.path, contents: data)
+                
+                // For video, get duration if possible
+                if type == .video {
+                    let asset = AVURLAsset(url: fileURL)
+                    let duration = asset.duration.value
+                    extensionInfo["duration"] = duration
+                }
+                
+                // Send the message on the main thread
+                DispatchQueue.main.async {
+                    self.viewModel.sendMessage(text: fileURL.path, type: type, extensionInfo: extensionInfo)
+                }
+            }
+        }
+    }
 }

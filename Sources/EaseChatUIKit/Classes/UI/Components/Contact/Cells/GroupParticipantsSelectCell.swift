@@ -48,7 +48,7 @@ import UIKit
         let nickName = profile.nickname.isEmpty ? profile.id:profile.nickname
         self.nickName.attributedText = self.highlightKeywords(keyword: keyword, in: nickName)
         self.avatar.image(with: profile.avatarURL, placeHolder: Appearance.avatarPlaceHolder)
-        self.checkbox.image = UIImage(named: profile.selected ? "select":"unselect", in: .chatBundle, compatibleWith: nil)
+        self.checkbox.image = UIImage(chatNamed: profile.selected ? "select":"unselect")
         self.separatorLine.backgroundColor = Theme.style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor9
     }
     
@@ -59,7 +59,7 @@ import UIKit
         if !keyword.isEmpty {
             var range = (string as NSString).range(of: keyword, options: .caseInsensitive)
             while range.location != NSNotFound {
-                attributedString.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5, range: range)
+                attributedString.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor, range: range)
                 let remainingRange = NSRange(location: range.location + range.length, length: string.count - (range.location + range.length))
                 range = (string as NSString).range(of: keyword, options: .caseInsensitive, range: remainingRange)
             }

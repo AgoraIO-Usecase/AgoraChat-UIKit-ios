@@ -28,7 +28,7 @@ import UIKit
     /// Creates and returns a navigation bar for the ChatThreadParticipantsController.
     /// - Returns: An instance of EaseChatNavigationBar.
     @objc open func createNavigation() -> ChatNavigationBar {
-        ChatNavigationBar(frame: CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: true, textAlignment: .left ,hiddenAvatar: true).backgroundColor(.clear)
+        ChatNavigationBar(show: CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: true, textAlignment: .left ,hiddenAvatar: true).backgroundColor(.clear)
     }
 
     
@@ -163,14 +163,14 @@ extension ChatThreadParticipantsController: UITableViewDelegate,UITableViewDataS
     }
     
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        var unknownInfoIds = [String]()
-        if let visiblePaths = self.participantsList.indexPathsForVisibleRows {
-            for indexPath in visiblePaths {
-                if let nickName = self.participants[safe: indexPath.row]?.nickname,nickName.isEmpty {
-                    unknownInfoIds.append(self.participants[safe: indexPath.row]?.id ?? "")
-                }
-            }
-        }
+//        var unknownInfoIds = [String]()
+//        if let visiblePaths = self.participantsList.indexPathsForVisibleRows {
+//            for indexPath in visiblePaths {
+//                if let nickName = self.participants[safe: indexPath.row]?.nickname,nickName.isEmpty {
+//                    unknownInfoIds.append(self.participants[safe: indexPath.row]?.id ?? "")
+//                }
+//            }
+//        }
 
         
     }

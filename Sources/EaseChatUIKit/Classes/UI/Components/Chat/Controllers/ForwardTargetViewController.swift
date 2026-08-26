@@ -74,7 +74,7 @@ import UIKit
     }()
     
     public private(set) lazy var empty: EmptyStateView = {
-        EmptyStateView(frame: self.targetsList.bounds,emptyImage: UIImage(named: "empty",in: .chatBundle, with: nil), onRetry: { [weak self] in
+        EmptyStateView(frame: self.targetsList.bounds,emptyImage: UIImage(chatNamed: "empty"), onRetry: { [weak self] in
 
         }).backgroundColor(.clear)
     }()
@@ -264,9 +264,27 @@ extension ForwardTargetViewController: UITableViewDelegate,UITableViewDataSource
                     cell.refresh(info: profile, keyword: self.searchKeyWord, forward: .forwarded)
                 }
             } else {
-                consoleLogInfo("ForwardTargetViewController forwardMessages error:\(error?.errorDescription ?? "")", type: .error)
+                conversationId = self.datas[indexPath.row].id
             }
-        })
+            let message =  ChatMessage(conversationID: conversationId, body: body, ext: ChatUIKitContext.shared?.currentUser?.toJsonObject())
+            message.chatType = self.index == 0 ? .chat:.groupChat
+            ChatClient.shared().chatManager?.send(message, progress: nil, completion: { [weak self] successMessage, error in
+                guard let `self` = self else { return }
+                if error == nil {
+                    self.forwarded = true
+                    if let cell = self.targetsList.cellForRow(at: indexPath) as? ForwardTargetCell {
+                        var profile = ChatUserProfile()
+                        if let user = (self.searchMode ? self.searchResults:self.datas)[safe: indexPath.row] as? ChatUserProfile {
+                            profile = user
+                        }
+                        cell.refresh(info: profile, keyword: self.searchKeyWord, forward: .forwarded)
+                    }
+                } else {
+                    self.showToast(toast: error?.errorDescription ?? "Failed to forward message")
+                    consoleLogInfo("ForwardTargetViewController forwardMessages error:\(error?.errorDescription ?? "")", type: .error)
+                }
+            })
+        }
     }
     
     @objc open func forwardSummary() -> String {

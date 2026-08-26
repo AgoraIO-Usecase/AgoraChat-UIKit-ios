@@ -17,7 +17,7 @@ import UIKit
 
     public lazy var flowLayout: UICollectionViewFlowLayout = {
         let layout = UICollectionViewFlowLayout()
-        layout.itemSize = CGSize(width: (ScreenWidth - 20 - 60) / 7.0, height: (ScreenWidth - 20 - 60) / 7.0)
+        layout.itemSize = CGSize(width: (self.frame.width - 20 - 60) / 7.0, height: (self.frame.width - 20 - 60) / 7.0)
         layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 10
@@ -37,11 +37,11 @@ import UIKit
     }()
     
     public lazy var sendEmoji: UIButton = {
-        UIButton(type: .custom).frame(CGRect(x: self.frame.width - 56, y: self.frame.height - 56, width: 44, height: 44)).addTargetFor(self, action: #selector(sendAction), for: .touchUpInside).isEnabled(true).cornerRadius(.large).backgroundColor(.clear)
+        UIButton(type: .custom).frame(CGRect(x: self.frame.width - 56, y: self.frame.height - 56, width: 44, height: 44)).addTargetFor(self, action: #selector(sendAction), for: .touchUpInside).isEnabled(true).cornerRadius(.large).backgroundColor(.clear).image(UIImage(chatNamed: "airplane"), .normal)
     }()
     
     lazy var gradient: GradientEmojiView = {
-        GradientEmojiView(frame: CGRect(x: 0, y: self.frame.height-BottomBarHeight-32, width: self.frame.width, height: 32)).image(UIImage(named: "gradient_light", in: .chatBundle, with: nil))
+        GradientEmojiView(frame: CGRect(x: 0, y: self.frame.height-BottomBarHeight-31, width: self.frame.width, height: 32)).image(UIImage(chatNamed: "gradient_light"))
     }()
 
     @objc required override public init(frame: CGRect) {
@@ -70,7 +70,7 @@ import UIKit
     
     open override func layoutSubviews() {
         super.layoutSubviews()
-        self.gradient.frame = CGRect(x: 0, y: self.frame.height-BottomBarHeight-32, width: self.frame.width, height: 32)
+        self.gradient.frame = CGRect(x: 0, y: self.frame.height-BottomBarHeight-31, width: self.frame.width, height: 31)
         self.deleteEmoji.frame = CGRect(x: self.frame.width - 112, y: self.frame.height - 56 - BottomBarHeight, width: 44, height: 44)
         self.sendEmoji.frame = CGRect(x: self.frame.width - 56, y: self.frame.height - 56 - BottomBarHeight, width: 44, height: 44)
         self.deleteEmoji.cornerRadius(Appearance.avatarRadius)
@@ -100,7 +100,7 @@ extension MessageInputEmojiView: UICollectionViewDelegate, UICollectionViewDataS
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ChatEmojiCell", for: indexPath) as? ChatEmojiCell
-        cell?.icon.image = ChatEmojiConvertor.shared.emojiMap.isEmpty ? UIImage(named: ChatEmojiConvertor.shared.emojis[indexPath.row], in: .chatBundle, with: nil):ChatEmojiConvertor.shared.emojiMap[ChatEmojiConvertor.shared.emojis[indexPath.row]]
+        cell?.icon.image = ChatEmojiConvertor.shared.emojiMap.isEmpty ? UIImage(chatNamed: ChatEmojiConvertor.shared.emojis[indexPath.row]):ChatEmojiConvertor.shared.emojiMap[ChatEmojiConvertor.shared.emojis[indexPath.row]]
         return cell ?? ChatEmojiCell()
     }
 
@@ -112,13 +112,12 @@ extension MessageInputEmojiView: UICollectionViewDelegate, UICollectionViewDataS
 
 extension MessageInputEmojiView: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
-        self.deleteEmoji.setImage(UIImage(named: style == .dark ? "delete_emoji_dark":"delete_emoji_light", in: .chatBundle, with: nil), for: .normal)
-        if style == .dark {
-            self.sendEmoji.setImage(UIImage(named: "airplane", in: .chatBundle, with: nil)?.withTintColor(UIColor.theme.primaryColor6), for: .normal)
-        } else {
-            self.sendEmoji.setImage(UIImage(named: "airplane", in: .chatBundle, with: nil)?.withTintColor(UIColor.theme.primaryColor5), for: .normal)
-        }
-        self.gradient.image = UIImage(named: style == .dark ? "gradient_dark":"gradient_light", in: .chatBundle, with: nil)
+        let image = UIImage(chatNamed: "arrow_left_thick")
+        
+        self.deleteEmoji.setImage(style == .dark ? image?.withTintColor(UIColor.theme.neutralColor98):image?.withTintColor(UIColor.theme.neutralColor3), for: .normal)
+        self.deleteEmoji.backgroundColor = style == .dark ? UIColor.theme.neutralColor2:UIColor.theme.neutralColor95
+        self.sendEmoji.backgroundColor = style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor
+        self.gradient.image = UIImage(chatNamed: style == .dark ? "gradient_dark":"gradient_light")
     }
 }
 

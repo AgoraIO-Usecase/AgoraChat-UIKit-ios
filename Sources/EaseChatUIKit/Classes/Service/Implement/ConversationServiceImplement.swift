@@ -15,6 +15,8 @@ import UIKit
     
     private var cursor = ""
     
+    var aa = ""
+    
     @UserDefault("EaseChatUIKit_conversation_load_more_finished", defaultValue: [(ChatClient.shared().currentUsername ?? ""):false]) private var loadFinished
     
     @UserDefault("EaseChatUIKit_conversation_mute_map", defaultValue: Dictionary<String,Dictionary<String,Int>>()) private var muteMap
@@ -376,7 +378,7 @@ extension ConversationServiceImplement: ChatEventsListener {
     
     public func messagesInfoDidRecall(_ aRecallMessagesInfo: [RecallInfo]) {
         for info in aRecallMessagesInfo {
-            if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(info.recallMessage.conversationId) {
+            if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(info.recallMessage?.conversationId ?? "") {
                 let alertMessage = ChatMessage(conversationID: conversation.conversationId, body: ChatCustomMessageBody(event: EaseChatUIKit_alert_message, customExt: nil), ext: ["something":"recalled a message".chat.localize])
                 alertMessage.timestamp = Int64(Date().timeIntervalSince1970*1000)
                 alertMessage.localTime = Int64(Date().timeIntervalSince1970*1000)
@@ -451,7 +453,7 @@ extension ConversationServiceImplement: ChatEventsListener {
     }
     
     @objc open func onConversationReadCallback(conversation: ChatConversation ) {
-        conversation.markAllMessages(asRead: nil)
+//        conversation.markAllMessages(asRead: nil)
         if let info = self.mapper(objects: [conversation]).first{
             info.unreadCount = 0
             for listener in self.responseDelegates.allObjects {

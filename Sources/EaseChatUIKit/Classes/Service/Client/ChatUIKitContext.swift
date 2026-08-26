@@ -7,9 +7,7 @@
 
 import UIKit
 
-public let cache_update_notification = "EaseChatUIKitContextUpdateCache"
-
-@objc public enum ChatUIKitCacheType: UInt {
+@objc public enum EaseChatUIKitCacheType: UInt {
     case all
     case chat
     case user
@@ -30,27 +28,23 @@ public let cache_update_notification = "EaseChatUIKitContextUpdateCache"
         ChatClient.shared().currentUsername ?? ""
     }
     
-    /// The cache of user information on the side of the message in the chat page. The key is the user ID and the value is an object that complies with the ``EaseProfileProtocol`` protocol.Display the info on chat page.
+    /// The cache of user information on the side of the message in the chat page. The key is the user ID and the value is an object that complies with the ``ChatUserProfileProtocol`` protocol.Display the info on chat page.
     public var chatCache: Dictionary<String,ChatUserProfileProtocol>? = Dictionary<String,ChatUserProfileProtocol>()
     
     /// The cache of user information on user. Display the info on contact-list&single-chat-conversation-item&user-profile page .
-    public var userCache: Dictionary<String,ChatUserProfileProtocol>? = Dictionary<String,ChatUserProfileProtocol>()
+    @AtomicUnfairLock public var userCache: Dictionary<String,ChatUserProfileProtocol>? = Dictionary<String,ChatUserProfileProtocol>()
     
-    /// The cache of user information on group-conversation-item. The key is the user ID and the value is an object that complies with the ``EaseProfileProtocol`` protocol.
+    /// The cache of user information on group-conversation-item. The key is the user ID and the value is an object that complies with the ``ChatUserProfileProtocol`` protocol.
     public var groupCache: Dictionary<String,ChatUserProfileProtocol>? = Dictionary<String,ChatUserProfileProtocol>()
     
     public var pinnedCache: Dictionary<String,Bool>? = Dictionary<String,Bool>()
     
-    /// Conversation&Chat page user display data provider.Using ``Async``&``Await`` to get user info.
-    public var userProfileProvider: ChatProfileProvider?
+    public var userProfileProvider: ChatUserProfileProvider?
     
-    /// Conversation&Chat page user display data provider.Using callback to get user info.
-    public var userProfileProviderOC: ChatProfileProviderOC?
+    public var userProfileProviderOC: ChatUserProfileProviderOC?
     
-    /// Conversation page group profile data provider.Using ``Async``&``Await`` to get group info.
     public var groupProfileProvider: ChatGroupProfileProvider?
     
-    /// Conversation page group profile data provider.Using callback to get group info.
     public var groupProfileProviderOC: ChatGroupProfileProviderOC?
     
     /// The first parameter is the group id and the second parameter is the group name.
@@ -60,13 +54,13 @@ public let cache_update_notification = "EaseChatUIKitContextUpdateCache"
     /// Clean the cache of ``EaseChatUIKitCacheType`` type
     /// - Parameter type: ``EaseChatUIKitCacheType``
     @objc(cleanCacheWithType:)
-    public func cleanCache(type: ChatUIKitCacheType) {
+    public func cleanCache(type: EaseChatUIKitCacheType) {
         switch type {
         case .all:
             self.chatCache?.removeAll()
             self.userCache?.removeAll()
             self.groupCache?.removeAll()
-        case .chat:
+        case .chat://不需要对外暴露
             self.chatCache?.removeAll()
         case .user: self.userCache?.removeAll()
         case .group: self.groupCache?.removeAll()
@@ -78,9 +72,9 @@ public let cache_update_notification = "EaseChatUIKitContextUpdateCache"
     /// Update the cache of ``EaseChatUIKitCacheType`` type
     /// - Parameters:
     ///   - type: ``EaseChatUIKitCacheType``
-    ///   - profile: The object conform to ``EaseProfileProtocol``.
+    ///   - profile: The object conform to ``ChatUserProfileProtocol``.
     @objc(updateCacheWithType:profile:)
-    public func updateCache(type: ChatUIKitCacheType,profile: ChatUserProfileProtocol) {
+    public func updateCache(type: EaseChatUIKitCacheType,profile: ChatUserProfileProtocol) {
         switch type {
         case .chat:
             self.chatCache?[profile.id] = profile
@@ -94,11 +88,7 @@ public let cache_update_notification = "EaseChatUIKitContextUpdateCache"
         NotificationCenter.default.post(name: Notification.Name(rawValue: cache_update_notification), object: nil, userInfo: nil)
     }
     
-    /// Update the cache of ``EaseChatUIKitCacheType`` type
-    /// - Parameters:
-    ///   - type: ``EaseChatUIKitCacheType``
-    ///   - profiles: The object conform to ``EaseProfileProtocol``.
-    public func updateCaches(type: ChatUIKitCacheType,profiles: [ChatUserProfileProtocol]) {
+    public func updateCaches(type: EaseChatUIKitCacheType,profiles: [ChatUserProfileProtocol]) {
         switch type {
         case .chat:
             profiles.forEach { profile in

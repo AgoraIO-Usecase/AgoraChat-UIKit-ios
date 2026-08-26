@@ -12,6 +12,8 @@ import UIKit
  A FontTheme extension to provide custom fonts for different text styles.
  
  - Author: The author of this code file.
+ - Version: 1.0
+ - Since: iOS 10.0
  
  - Note: This extension provides custom fonts for different text styles such as headline, title, label, and body. It also provides a custom font for gift number.
  */
@@ -19,8 +21,9 @@ public extension UIFont {
     
     @objc static let theme: FontTheme = FontTheme()
         
-        
 }
+
+
 
 @objcMembers public class FontTheme: NSObject {
     
@@ -57,3 +60,4 @@ public extension UIFont {
     public var giftNumberFont = UIFont(name: "HelveticaNeue-BoldItalic", size: 18) ?? UIFont.systemFont(ofSize: 18, weight: .bold)
 
 }
+    

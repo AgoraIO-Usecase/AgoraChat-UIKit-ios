@@ -78,12 +78,12 @@ import UIKit
         } else {
             self.indicator.isHidden = info.withSwitch
         }
+        
         if !info.withSwitch {
             self.detailLabel.frame = CGRect(x: self.frame.width/2.0, y: 16, width: (self.frame.width/2.0-36), height: 22)
         } else {
             self.detailLabel.frame = CGRect(x: self.frame.width-116, y: 16, width: 100, height: 22)
         }
-        self.separatorLine.frame = CGRect(x: 16, y: 53.5, width: self.frame.width, height: 0.5)
         self.switchMenu.isOn = info.switchValue
     }
     
@@ -98,9 +98,9 @@ extension DetailInfoListCell: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
         self.titleLabel.textColor = style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor1
         self.detailLabel.textColor = style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor5
-        self.switchMenu.onTintColor = style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5
+        self.switchMenu.onTintColor = style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor
         
-        let image = UIImage(named: "chevron_right", in: .chatBundle, with: nil)?.withTintColor(style == .dark ? UIColor.theme.neutralColor5:UIColor.theme.neutralColor3)
+        let image = UIImage(chatNamed: "chevron_right")?.withTintColor(style == .dark ? UIColor.theme.neutralColor5:UIColor.theme.neutralColor3)
         self.indicator.image = image
         
         

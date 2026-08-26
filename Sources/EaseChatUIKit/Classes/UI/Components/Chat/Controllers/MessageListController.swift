@@ -2,6 +2,7 @@ import UIKit
 import MobileCoreServices
 import QuickLook
 import AVFoundation
+import PhotosUI
 
 /// An enumeration representing different types of chats.
 @objc public enum ChatType: UInt {
@@ -35,7 +36,7 @@ import AVFoundation
     /// Right images of the ``EaseChatNavigationBar``.
     /// - Returns: `[UIImage]`
     @objc open func rightImages() -> [UIImage] {
-        var images = [UIImage(named: "message_action_topic", in: .chatBundle, with: nil)!,UIImage(named: "pinned_messages", in: .chatBundle, with: nil)!]
+        var images = [UIImage(chatNamed: "message_action_topic")!,UIImage(chatNamed: "pinned_messages")!]
         if self.chatType == .chat {
             images = []
         }
@@ -139,6 +140,7 @@ import AVFoundation
         }
         self.navigation.title = nickname
         self.navigation.avatarURL = info.avatarURL
+        self.processFollowInputAttachmentAction()
     }
     
     open override func viewWillDisappear(_ animated: Bool) {
@@ -164,7 +166,6 @@ import AVFoundation
         if Appearance.chat.enablePinMessage,self.chatType == .group {
             self.pinContainer.isHidden = true
         }
-        
         self.navigation.clickClosure = { [weak self] in
             self?.navigationClick(type: $0, indexPath: $1)
         }
@@ -175,8 +176,20 @@ import AVFoundation
         Theme.registerSwitchThemeViews(view: self)
         self.switchTheme(style: Theme.style)
         self.view.addSubview(self.loadingView)
+        self.processFollowInputAttachmentAction()
     }
+    
+    
    
+    @objc open func processFollowInputAttachmentAction() {
+        if Appearance.chat.messageAttachmentMenuStyle == .followInput {
+            for item in Appearance.chat.inputExtendActions {
+                item.action = { [weak self] item,object in
+                    self?.handleAttachmentAction(item: item)
+                }
+            }
+        }
+    }
     
     @objc open func setupNavigation() {
         self.navigation.subtitle = nil
@@ -398,6 +411,7 @@ extension MessageListController: MessageListDriverEventsListener {
             self.messageContainer.editMode = !$0
             self.navigation.editMode = !$0
         }
+        
         UIViewController.currentController?.present(vc, animated: true)
     }
     
@@ -426,7 +440,6 @@ extension MessageListController: MessageListDriverEventsListener {
         if let thread = entity.message.chatThread {
             self.enterTopic(threadId: thread.threadId, message: entity.message)
         }
-        
     }
     
     @objc open func enterTopic(threadId: String,message: ChatMessage) {
@@ -499,7 +512,7 @@ extension MessageListController: MessageListDriverEventsListener {
                 messageActions.removeAll { $0.tag == "OriginalText" }
             }
         }
-        if !Appearance.chat.enablePinMessage,self.chatType != .chat {
+        if !Appearance.chat.enablePinMessage {
             messageActions.removeAll { $0.tag == "Pin" }
         }
         if !Appearance.chat.contentStyle.contains(.withReply) {
@@ -516,14 +529,12 @@ extension MessageListController: MessageListDriverEventsListener {
                 messageActions.removeAll { $0.tag == "Recall" }
             }
         }
-        if self.chatType == .chat {
-            messageActions.removeAll { $0.tag == "Pin" }
-        }
+        
         return messageActions
     }
     
-    public func onMessageBubbleLongPressed(message: MessageEntity) {
-        self.showMessageLongPressedDialog(message: message)
+    public func onMessageBubbleLongPressed(cell: MessageCell) {
+        self.showMessageLongPressedDialog(cell: cell)
     }
     
     /**
@@ -532,24 +543,69 @@ extension MessageListController: MessageListDriverEventsListener {
      - Parameters:
      - message: The chat message for which the dialog is shown.
      */
-    @objc open func showMessageLongPressedDialog(message: MessageEntity) {
+    @objc open func showMessageLongPressedDialog(cell: MessageCell) {
         if self.messageContainer.editMode {
             return
         }
-        let header =  CommonReactionView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 44), message: message.message).backgroundColor(.clear)
+        let items = self.filterMessageActions(message: cell.entity)
+        var width = ScreenWidth
+        if Appearance.chat.messageLongPressMenuStyle == .withArrow {
+            width = (items.count < 5 ? 5:CGFloat(min(items.count, 5))) * PopItemWidth - PopLeftRightMargin * 4
+        }
+        
+        let header =  CommonReactionView(frame: CGRect(x: 0, y: 0, width: width, height: 44), message: cell.entity.message).backgroundColor(.clear)
         header.reactionClosure = { [weak self] emoji,rawMessage in
+            if Appearance.chat.messageLongPressMenuStyle == .withArrow {
+                MessageLongPressMenu.shared.hiddenMenu()
+            }
             UIViewController.currentController?.dismiss(animated: true) {
                 if emoji.isEmpty {
                     //more reaction
-                    self?.showAllReactionsController(message: message)
+                    self?.showAllReactionsController(message: cell.entity)
                 } else {
                     self?.viewModel.operationReaction(emoji: emoji, message: rawMessage)
                 }
             }
         }
-        DialogManager.shared.showMessageActions(actions: self.filterMessageActions(message: message),withHeader: Appearance.chat.contentStyle.contains(.withMessageReaction) ? header:nil) { [weak self] item in
-            self?.processMessage(item: item, message: message.message)
+        switch Appearance.chat.messageLongPressMenuStyle {
+        case .withArrow:
+            self.showMessageLongPressedMenuWithArrow(cell: cell, items: items,header: Appearance.chat.contentStyle.contains(.withMessageReaction) ? header:nil)
+        case .actionSheet:
+            self.showMessageLongPressedMenuActionSheet(cell: cell, items: items,header: Appearance.chat.contentStyle.contains(.withMessageReaction) ? header:nil)
+        default:
+            break
         }
+        self.feedback(with: .medium)
+        
+    }
+    
+    @objc open func showMessageLongPressedMenuWithArrow(cell: MessageCell,items: [ActionSheetItemProtocol],header: UIView? = nil) {
+        if cell is ImageMessageCell || cell is VideoMessageCell {
+            if let content = cell.contentViewIfPresent() {
+                MessageLongPressMenu.shared.showMenu(items: items, targetView: content, header: header) { [weak self] item, _ in
+                    self?.processMessage(item: item, message: cell.entity.message)
+                }
+            }
+        } else {
+            MessageLongPressMenu.shared.showMenu(items: items, targetView: Appearance.chat.bubbleStyle == .withArrow ? cell.bubbleWithArrow:cell.bubbleMultiCorners, header: header){ [weak self] item, _ in
+                self?.processMessage(item: item, message: cell.entity.message)
+            }
+        }
+    }
+    
+    @objc open func showMessageLongPressedMenuActionSheet(cell: MessageCell,items: [ActionSheetItemProtocol],header: UIView? = nil) {
+        if UIViewController.currentController is DialogContainerViewController {
+            return
+        }
+        DialogManager.shared.showMessageActions(actions: items,withHeader: header) { [weak self] item in
+            self?.processMessage(item: item, message: cell.entity.message)
+        }
+    }
+    
+    @objc open func feedback(with style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let feedbackGenerator = UIImpactFeedbackGenerator(style: style)
+        feedbackGenerator.prepare()
+        feedbackGenerator.impactOccurred()
     }
     
     @objc open func showAllReactionsController(message: MessageEntity) {
@@ -611,6 +667,7 @@ extension MessageListController: MessageListDriverEventsListener {
         self.messageContainer.messages.first { $0.message.messageId == message.messageId }?.selected = true
         self.messageContainer.editMode = true
         self.navigation.editMode = true
+        self.messageContainer.messageList.reloadData()
     }
     
     @objc open func toCreateThread(message: ChatMessage) {
@@ -625,15 +682,21 @@ extension MessageListController: MessageListDriverEventsListener {
      - message: The chat message to be edited.
      */
     @objc open func editAction(message: ChatMessage) {
+        if let current = UIViewController.currentController as? DialogContainerViewController {
+            current.dismiss(animated: false)
+        }
         if let body = message.body as? ChatTextMessageBody {
             let editor = MessageEditor(content: body.text) { text in
                 if !text.isEmpty {
                     self.viewModel.processMessage(operation: .edit, message: message, edit: text)
                 }
-                UIViewController.currentController?.dismiss(animated: true)
+                if let current = UIViewController.currentController as? DialogContainerViewController {
+                    current.dismiss(animated: true)
+                }
             }
             DialogManager.shared.showCustomDialog(customView: editor,dismiss: false)
-            DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.5) {
+
+            DispatchQueue.main.asyncAfter(wallDeadline: .now()+0.2) {
                 editor.editor.textView.becomeFirstResponder()
             }
             
@@ -681,6 +744,12 @@ extension MessageListController: MessageListDriverEventsListener {
             }
             if let body = message.message.body as? ChatCustomMessageBody,body.event == EaseChatUIKit_alert_message {
                 self.viewAlertDetail(message: message.message)
+            }
+            if let body = message.message.body as? ChatCustomMessageBody,body.event == EaseChatUIKit_alert_message {
+                let threadId = message.message.alertMessageThreadId
+                if let messageId = message.message.ext?["messageId"] as? String,let message = ChatClient.shared().chatManager?.getMessageWithMessageId(messageId) {
+                    self.enterTopic(threadId: threadId, message: message)
+                }
             }
         case .combine:
             self.viewHistoryMessages(entity: message)
@@ -811,11 +880,46 @@ extension MessageListController: MessageListDriverEventsListener {
     @objc open func handleAttachmentAction(item: ActionSheetItemProtocol) {
         switch item.tag {
         case "File": self.selectFile()
-        case "Photo": self.selectPhoto()
+        case "Photo": self.selectPhotoWithPHPicker()
         case "Camera": self.openCamera()
         case "Contact": self.selectContact()
         default:
             break
+        }
+    }
+    
+    @objc open func selectPhotoWithPHPicker() {
+        let processPHPicker = {
+            var config = PHPickerConfiguration()
+            config.selectionLimit = 1
+            config.preferredAssetRepresentationMode = .current // origin file
+            
+            let picker = PHPickerViewController(configuration: config)
+            picker.delegate = self
+            self.present(picker, animated: true)
+        }
+        let status = PHPhotoLibrary.authorizationStatus()
+        switch status {
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization { status in
+                DispatchQueue.main.async {
+                    if status == .denied {
+                        DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "photo_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
+                            
+                        }
+                    } else {
+                        processPHPicker()
+                        return
+                    }
+                }
+            }
+        case .denied:
+            DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "photo_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
+                
+            }
+            return
+            
+        default: processPHPicker()
         }
     }
     
@@ -1026,5 +1130,76 @@ extension MessageListController: ThemeSwitchProtocol {
         self.navigation.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
         self.view.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
     }
-    
+}
+
+extension MessageListController: PHPickerViewControllerDelegate {
+    public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        // Dismiss picker first to improve UX
+        picker.dismiss(animated: true, completion: nil)
+        
+        // Handle case when no results are selected
+        guard !results.isEmpty else { return }
+        
+        // Process each selected item
+        for result in results {
+            let itemProvider = result.itemProvider
+            
+            // Determine file type and appropriate extension
+            var type: MessageCellStyle = .image
+            var fileExtension = "jpeg"
+            var typeIdentifier = UTType.image.identifier
+            var extensionInfo: [String: Any] = [:]
+            
+            // Check for GIF
+            if itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
+                type = .gif
+                fileExtension = "gif"
+                typeIdentifier = UTType.gif.identifier
+            } 
+            // Check for Video
+            else if itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                type = .video
+                fileExtension = "mp4"
+                typeIdentifier = UTType.movie.identifier
+            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.mpeg4Movie.identifier) {
+                type = .video
+                fileExtension = "mp4"
+                typeIdentifier = UTType.mpeg4Movie.identifier
+            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.quickTimeMovie.identifier) {
+                type = .video
+                fileExtension = "mov"
+                typeIdentifier = UTType.quickTimeMovie.identifier
+            }
+            
+            // Generate a unique filename with appropriate extension
+            let timestamp = Int(Date().timeIntervalSince1970 * 1000)
+            let fileName = "\(itemProvider.suggestedName ?? "media_\(timestamp)").\(fileExtension)"
+            
+            // Load the data representation for the selected item
+            itemProvider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { [weak self] data, error in
+                guard let self = self, let data = data else { 
+                    if let error = error {
+                        consoleLogInfo("Error loading media: \(error.localizedDescription)", type: .error)
+                    }
+                    return 
+                }
+                
+                // Create file path and save the data
+                let fileURL = URL(fileURLWithPath: MediaConvertor.filePath() + "/\(fileName)")
+                FileManager.default.createFile(atPath: fileURL.path, contents: data)
+                
+                // For video, get duration if possible
+                if type == .video {
+                    let asset = AVURLAsset(url: fileURL)
+                    let duration = asset.duration.value
+                    extensionInfo["duration"] = duration
+                }
+                
+                // Send the message on the main thread
+                DispatchQueue.main.async {
+                    self.viewModel.sendMessage(text: fileURL.path, type: type, extensionInfo: extensionInfo)
+                }
+            }
+        }
+    }
 }

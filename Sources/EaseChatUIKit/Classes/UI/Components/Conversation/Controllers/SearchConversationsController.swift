@@ -56,7 +56,7 @@ import UIKit
     }()
     
     public private(set) lazy var empty: EmptyStateView = {
-        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.searchList.frame.width, height: self.searchList.frame.height),emptyImage: UIImage(named: "empty",in: .chatBundle, with: nil)) {
+        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.searchList.frame.width, height: self.searchList.frame.height),emptyImage: UIImage(chatNamed: "empty")) {
             
         }
     }()
@@ -87,17 +87,17 @@ import UIKit
         self.searchHeader.textChanged = { [weak self] in
             guard let `self` = self else { return }
             self.searchText = $0.lowercased()
-            self.searchResults = self.datas.filter({ $0.nickname.lowercased().contains(self.searchText) || $0.id.lowercased().contains(self.searchText) || $0.remark.contains(self.searchText) })
+            self.searchResults = self.datas.filter({ $0.nickname.lowercased().contains(self.searchText) || $0.id.lowercased().contains(self.searchText) || $0.remark.lowercased().contains(self.searchText)})
             self.searchList.reloadData()
         }
-        self.searchHeader.textFieldState = { [weak self] in
-            self?.active = $0 == .began
+        self.searchHeader.textFieldState = { [weak self] _ in
+//            self?.active = $0 == .began
         }
         self.searchHeader.actionClosure = { [weak self] in
-            self?.active = false
-            self?.searchText = ""
-            self?.searchList.reloadData()
             if $0 == .cancel {
+                self?.active = false
+                self?.searchText = ""
+                self?.searchList.reloadData()
                 self?.pop()
             }
         }
@@ -122,7 +122,7 @@ extension SearchConversationsController: UITableViewDelegate,UITableViewDataSour
     }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        self.searchResults.count
+        self.active ? self.searchResults.count:self.datas.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -134,6 +134,10 @@ extension SearchConversationsController: UITableViewDelegate,UITableViewDataSour
             if let info = self.searchResults[safe: indexPath.row] {
                 cell?.refresh(info: info, keyword: self.searchText)
             }
+        } else {
+            if let info = self.datas[safe: indexPath.row] {
+                cell?.refresh(info: info, keyword: self.searchText)
+            }
         }
         cell?.selectionStyle = .none
         return cell ?? UITableViewCell()
@@ -143,6 +147,10 @@ extension SearchConversationsController: UITableViewDelegate,UITableViewDataSour
         tableView.deselectRow(at: indexPath, animated: true)
         if self.active {
             if let info = self.searchResults[safe: indexPath.row] {
+                self.chatClosure?(info)
+            }
+        } else {
+            if let info = self.datas[safe: indexPath.row] {
                 self.chatClosure?(info)
             }
         }

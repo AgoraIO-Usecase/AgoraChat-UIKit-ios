@@ -25,12 +25,12 @@ import UIKit
     }
     
     @objc open func refresh(reaction: Reaction) {
-        if let imageName = ChatEmojiConvertor.shared.emojiReactionMap.isEmpty ? reaction.emoji:ChatEmojiConvertor.shared.reactionEmojis[reaction.emoji],let image = UIImage(named: imageName, in: .chatBundle, with: nil) {
+        if let imageName = ChatEmojiConvertor.shared.emojiReactionMap.isEmpty ? reaction.emoji:ChatEmojiConvertor.shared.reactionEmojis[reaction.emoji],let image = UIImage(chatNamed: imageName) {
             self.icon.image = image
         }
         var addedColor = UIColor.clear
         if reaction.addBySelf {
-            addedColor = Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5
+            addedColor = Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor
         }
         self.background.backgroundColor = addedColor
     

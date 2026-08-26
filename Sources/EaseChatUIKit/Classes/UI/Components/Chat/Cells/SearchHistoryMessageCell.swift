@@ -58,7 +58,7 @@ import UIKit
         if !keyword.isEmpty {
             var range = (string as NSString).range(of: keyword, options: .caseInsensitive)
             while range.location != NSNotFound {
-                attributedString.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5, range: range)
+                attributedString.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor, range: range)
                 let remainingRange = NSRange(location: range.location + range.length, length: string.count - (range.location + range.length))
                 range = (string as NSString).range(of: keyword, options: .caseInsensitive, range: remainingRange)
             }
@@ -69,7 +69,7 @@ import UIKit
 
 extension SearchHistoryMessageCell: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
-        self.conversationName.textColor = style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor1
+        self.conversationName.textColor = style == .dark ? UIColor.theme.neutralColor98:UIColor.theme.neutralColor1    
     }
     
 }

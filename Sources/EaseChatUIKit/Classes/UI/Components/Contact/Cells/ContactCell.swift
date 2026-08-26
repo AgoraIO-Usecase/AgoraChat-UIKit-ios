@@ -57,11 +57,6 @@ import UIKit
     
     @objc open func refresh(profile: ChatUserProfileProtocol) {
         self.avatar.cornerRadius(Appearance.avatarRadius)
-        var avatarURL = profile.avatarURL
-        if avatarURL.isEmpty {
-            avatarURL = ChatUIKitContext.shared?.userCache?[profile.id]?.avatarURL ?? ""
-        }
-        self.avatar.image(with: avatarURL, placeHolder: Appearance.conversation.singlePlaceHolder)
         var showName = ChatUIKitContext.shared?.userCache?[profile.id]?.remark ?? ""
         if showName.isEmpty {
             showName = ChatUIKitContext.shared?.userCache?[profile.id]?.nickname ?? ""
@@ -69,9 +64,14 @@ import UIKit
         if showName.isEmpty {
             showName = profile.id
         }
+        var avatarURL = profile.avatarURL
+        if avatarURL.isEmpty {
+            avatarURL = ChatUIKitContext.shared?.userCache?[profile.id]?.avatarURL ?? ""
+        }
+        self.avatar.image(with: avatarURL, placeHolder: Appearance.conversation.singlePlaceHolder)
         self.nickName.text = showName
         if self.display == .withCheckBox {
-            self.checkbox.image = UIImage(named: profile.selected ? "select":"unselect", in: .chatBundle, with: nil)
+            self.checkbox.image = UIImage(chatNamed: profile.selected ? "select":"unselect")
         }
         self.checkbox.isHidden = self.display != .withCheckBox
     }
@@ -91,7 +91,7 @@ import UIKit
         self.nickName.attributedText = self.highlightKeywords(keyword: keyword, in: showName)
         self.avatar.image(with: avatarURL, placeHolder: Appearance.conversation.singlePlaceHolder)
         if self.display == .withCheckBox {
-            self.checkbox.image = UIImage(named: profile.selected ? "select":"unselect", in: .chatBundle, with: nil)
+            self.checkbox.image = UIImage(chatNamed: profile.selected ? "select":"unselect")
         }
         self.checkbox.isHidden = self.display != .withCheckBox
     }
@@ -103,7 +103,7 @@ import UIKit
         if !keyword.isEmpty {
             var range = (string as NSString).range(of: keyword, options: .caseInsensitive)
             while range.location != NSNotFound {
-                attributedString.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5, range: range)
+                attributedString.addAttribute(.foregroundColor, value: Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor, range: range)
                 let remainingRange = NSRange(location: range.location + range.length, length: string.count - (range.location + range.length))
                 range = (string as NSString).range(of: keyword, options: .caseInsensitive, range: remainingRange)
             }

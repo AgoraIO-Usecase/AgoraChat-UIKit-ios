@@ -43,7 +43,9 @@ import UIKit
     }
     
     open override func clickAction(gesture: UITapGestureRecognizer) {
-        
+        if !self.entity.message.alertMessageThreadId.isEmpty {
+            self.clickAction?(.cell,self.entity)
+        }
     }
     
     open override func layoutSubviews() {
@@ -63,3 +65,5 @@ import UIKit
         self.time.textColor = style == .dark ? UIColor.theme.neutralColor6:UIColor.theme.neutralColor7
     }
 }
+
+

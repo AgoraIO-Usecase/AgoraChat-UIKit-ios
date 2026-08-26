@@ -116,15 +116,15 @@ public let urlPreviewImageHeight = CGFloat(137)
     open func getStateImage() -> UIImage? {
         switch self.state {
         case .sending:
-            return UIImage(named: "message_status_spinner", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "message_status_spinner")
         case .succeed:
-            return UIImage(named: "message_status_succeed", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "message_status_succeed")
         case .failure:
-            return UIImage(named: "message_status_failure", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "message_status_failure")
         case .delivered:
-            return UIImage(named: "message_status_delivery", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "message_status_delivery")
         case .read:
-            return UIImage(named: "message_status_read", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "message_status_read")
         }
     }
     
@@ -144,10 +144,13 @@ public let urlPreviewImageHeight = CGFloat(137)
     }()
     
     open func cellHeight() -> CGFloat {
-        if let body = self.message.body as? ChatCustomMessageBody,body.event == EaseChatUIKit_alert_message {
-            return self.bubbleSize.height
+        if message.body.type != .custom {
+            return 8+(Appearance.chat.contentStyle.contains(.withNickName) ? 28:2)+(Appearance.chat.contentStyle.contains(.withReply) ? self.replySize.height:2)+self.bubbleSize.height+(Appearance.chat.contentStyle.contains(.withDateAndTime) ? 22:6)+self.topicContentHeight()+self.reactionContentHeight()
         } else {
-            return 8+(Appearance.chat.contentStyle.contains(.withNickName) ? 28:2)+(Appearance.chat.contentStyle.contains(.withReply) ? self.replySize.height:2)+self.bubbleSize.height+(Appearance.chat.contentStyle.contains(.withDateAndTime) ? 24:8)+self.topicContentHeight()+self.reactionContentHeight()
+            if let body = self.message.body as? ChatCustomMessageBody,body.event == EaseChatUIKit_user_card_message {
+                return 8+(Appearance.chat.contentStyle.contains(.withNickName) ? 28:2)+(Appearance.chat.contentStyle.contains(.withReply) ? self.replySize.height:2)+self.bubbleSize.height+(Appearance.chat.contentStyle.contains(.withDateAndTime) ? 22:6)+self.topicContentHeight()+self.reactionContentHeight()
+            }
+            return self.bubbleSize.height
         }
     }
     
@@ -460,17 +463,16 @@ public let urlPreviewImageHeight = CGFloat(137)
     
     open func customSize() -> CGSize {
         if let body = self.message.body as? ChatCustomMessageBody {
-            if body.event == EaseChatUIKit_user_card_message {
+            switch body.event {
+            case EaseChatUIKit_user_card_message:
                 return CGSize(width: self.historyMessage ? ScreenWidth-32:limitBubbleWidth, height: contactCardHeight)
-            } else {
-                if body.event == EaseChatUIKit_alert_message {
-                    let label = UILabel().numberOfLines(0).lineBreakMode(.byWordWrapping)
-                    label.attributedText = self.convertTextAttribute()
-                    let size = label.sizeThatFits(CGSize(width: ScreenWidth-32, height: 9999))
-                    return CGSize(width: ScreenWidth-32, height: size.height+50)
-                } else {
-                    return self.message.contentSize
-                }
+            case EaseChatUIKit_alert_message:
+                let label = UILabel().numberOfLines(0).lineBreakMode(.byWordWrapping)
+                label.attributedText = self.convertTextAttribute()
+                let size = label.sizeThatFits(CGSize(width: ScreenWidth-32, height: 9999))
+                return CGSize(width: ScreenWidth-32, height: size.height+50)
+            default:
+                return self.message.contentSize
             }
         } else {
             return .zero
@@ -513,11 +515,11 @@ public let urlPreviewImageHeight = CGFloat(137)
                         text.append(NSAttributedString {
                             AttributedText(something).foregroundColor(Theme.style == .dark ? Color.theme.neutralColor6:Color.theme.neutralColor7).font(UIFont.theme.bodySmall).lineHeight(multiple: 1.15, minimum: 14).alignment(.center)
                         })
-                        text.addAttribute(NSAttributedString.Key.foregroundColor, value: Theme.style == .dark ? Color.theme.primaryColor6:Color.theme.primaryColor5, range: range)
+                        text.addAttribute(NSAttributedString.Key.foregroundColor, value: Theme.style == .dark ? Color.theme.primaryDarkColor:Color.theme.primaryLightColor, range: range)
                     } else {
                         let user = self.message.user
                         var nickname = user?.remark ?? ""
-                        if nickname.isEmpty  {
+                        if nickname.isEmpty {
                             nickname = user?.nickname ?? ""
                             if nickname.isEmpty {
                                 nickname = self.message.from
@@ -568,7 +570,7 @@ public let urlPreviewImageHeight = CGFloat(137)
                         AttributedText(content).foregroundColor(textColor).font(self.historyMessage ? UIFont.theme.bodyMedium:UIFont.theme.bodyLarge).lineHeight(multiple: 1.15, minimum: self.historyMessage ? 16:18).lineBreakMode(Appearance.chat.targetLanguage == .Chinese ? .byCharWrapping:.byWordWrapping)
                     }
                     if mentionRange.location != NSNotFound,mentionRange.length != NSNotFound {
-                        mentionAttribute.addAttribute(.foregroundColor, value: (Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5), range: range)
+                        mentionAttribute.addAttribute(.foregroundColor, value: (Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor), range: range)
                     }
                     text.append(mentionAttribute)
                 } else {
@@ -580,7 +582,7 @@ public let urlPreviewImageHeight = CGFloat(137)
                         AttributedText(content).foregroundColor(textColor).font(self.historyMessage ? UIFont.theme.bodyMedium:UIFont.theme.bodyLarge).lineHeight(multiple: 1.15, minimum: self.historyMessage ? 16:18).lineBreakMode(.byWordWrapping)
                     }
                     if mentionRange.location != NSNotFound,mentionRange.length != NSNotFound {
-                        mentionAttribute.addAttribute(.foregroundColor, value: (Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5), range: range)
+                        mentionAttribute.addAttribute(.foregroundColor, value: (Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor), range: range)
                     }
                     text.append(mentionAttribute)
                 }
@@ -598,11 +600,13 @@ public let urlPreviewImageHeight = CGFloat(137)
             if !Appearance.chat.enableURLPreview {
                 return text
             }
+            // 创建 NSDataDetector 实例以检测文本中的链接
             guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue ) else {
                 return text
             }
 
 
+            // 检测文本中的链接
             let matches = detector.matches(in: text.string, options: [], range: NSRange(location: 0, length: text.string.count))
             if matches.count == 1 {
                 self.containURL = true
@@ -615,7 +619,7 @@ public let urlPreviewImageHeight = CGFloat(137)
             }
             if let result = matches.first, result.range.length > 0,result.range.location != NSNotFound,let linkURL = result.url {
                 self.previewURL = linkURL.absoluteString
-                let receiveLinkColor = Theme.style == .dark ? UIColor.theme.primaryColor6:UIColor.theme.primaryColor5
+                let receiveLinkColor = Theme.style == .dark ? UIColor.theme.primaryDarkColor:UIColor.theme.primaryLightColor
                 let sendLinkColor = Appearance.chat.sendTextColor
                 let color = self.message.direction == .send ? sendLinkColor:receiveLinkColor
                 text.addAttributes([.link:linkURL,.underlineStyle:NSUnderlineStyle.single.rawValue,.underlineColor:color,.foregroundColor:color], range: result.range)
@@ -848,6 +852,9 @@ extension ChatMessage {
         if chatUser?.nickname.isEmpty ?? true {
             chatUser?.nickname = cacheUser?.nickname ?? ""
         }
+        if from == ChatClient.shared().currentUsername ?? "",let currentUser = ChatUIKitContext.shared?.currentUser {
+            return currentUser
+        }
         if chatUser == nil,cacheUser != nil {
             return cacheUser
         }
@@ -919,21 +926,21 @@ extension ChatMessage {
     @objc open var replyIcon: UIImage? {
         switch self.body.type {
         case .image:
-            return UIImage(named: "reply_image", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "reply_image")
         case .voice:
-            return UIImage(named: "reply_audio", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "reply_audio")
         case .video:
-            return UIImage(named: "reply_video", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "reply_video")
         case .file:
-            return UIImage(named: "reply_file", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "reply_file")
         case .combine:
-            return UIImage(named: "reply_history", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "reply_history")
         case .location:
-            return UIImage(named: "reply_location", in: .chatBundle, with: nil)
+            return UIImage(chatNamed: "reply_location")
         case .custom:
             if let body = self.body as? ChatCustomMessageBody {
                 if body.event == EaseChatUIKit_user_card_message {
-                    return UIImage(named: "reply_contact", in: .chatBundle, with: nil)
+                    return UIImage(chatNamed: "reply_contact")
                 }
             }
             return nil
@@ -1022,6 +1029,10 @@ extension ChatMessage {
     /// Translation of the text message.
     @objc public var translation: String? {
         (self.body as? ChatTextMessageBody)?.translations?.first?.value
+    }
+    
+    @objc public var alertMessageThreadId: String {
+        self.ext?["threadId"] as? String ?? ""
     }
     
 }

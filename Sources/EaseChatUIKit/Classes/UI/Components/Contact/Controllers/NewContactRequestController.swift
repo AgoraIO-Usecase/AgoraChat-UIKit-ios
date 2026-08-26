@@ -30,21 +30,17 @@ import UIKit
     }()
     
     public private(set) lazy var empty: EmptyStateView = {
-        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.requestList.frame.width, height: self.requestList.frame.height),emptyImage: UIImage(named: "empty",in: .chatBundle, with: nil), onRetry: {
+        EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.requestList.frame.width, height: self.requestList.frame.height),emptyImage: UIImage(chatNamed: "empty"), onRetry: {
             
         }).backgroundColor(.clear)
     }()
     
-    lazy var loadingView: LoadingView = {
-        LoadingView(frame: self.view.bounds)
-    }()
-    
+
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.navigation.title = "New Request".chat.localize
         self.datas.sort { $0.time > $1.time }
-        self.view.addSubViews([self.navigation,self.requestList,self.loadingView])
-        self.loadingView.isHidden = true
+        self.view.addSubViews([self.navigation,self.requestList])
         // Do any additional setup after loading the view.
         //Back button click of the navigation
         self.navigation.clickClosure = { [weak self] in
@@ -61,8 +57,14 @@ import UIKit
     }
     
     @objc open func requestProfiles() {
+        var userIds = [String]()
+        for user in self.datas {
+            if let userCache = ChatUIKitContext.shared?.userCache?[user.userId],!userCache.nickname.isEmpty {
+                continue
+            }
+            userIds.append(user.userId)
+        }
         if ChatUIKitContext.shared?.userProfileProvider != nil {
-            let userIds = self.datas.map { $0.userId }
             Task(priority: .background) {
                 let profiles = await ChatUIKitContext.shared?.userProfileProvider?.fetchProfiles(profileIds: userIds) ?? []
                 for profile in profiles {
@@ -77,7 +79,7 @@ import UIKit
             }
         } else {
             if ChatUIKitContext.shared?.userProfileProviderOC != nil {
-                ChatUIKitContext.shared?.userProfileProviderOC?.fetchProfiles(profileIds: self.datas.map { $0.userId }, completion: { [weak self] profiles in
+                ChatUIKitContext.shared?.userProfileProviderOC?.fetchProfiles(profileIds: userIds, completion: { [weak self] profiles in
                     for profile in profiles {
                         if let info = self?.datas.first(where: { $0.userId == profile.id }) {
                             info.nickname = profile.nickname
@@ -201,9 +203,7 @@ extension NewContactRequestController: UITableViewDelegate,UITableViewDataSource
      - Parameter userId: The ID of the user who sent the friend request.
      */
     @objc open func agreeFriendRequest(userId: String) {
-        self.loadingView.startAnimating()
         self.contactService.agreeFriendRequest(from: userId) { [weak self] error, userId in
-            self?.loadingView.stopAnimating()
             guard let self = self else { return }
             if error != nil,error?.code == .userAlreadyLoginAnother {
                 consoleLogInfo("agreeFriendRequest error: \(error?.errorDescription ?? "")", type: .error)
@@ -232,12 +232,6 @@ extension NewContactRequestController: UITableViewDelegate,UITableViewDataSource
         ChatClient.shared().userInfoManager?.fetchUserInfo(byId: [userId], type: [0,1],completion: { infoMap, error in
             if error != nil {
                 consoleLogInfo("requestFriendInfo error:\(error?.errorDescription ?? "")", type: .error)
-            } else {
-                let profile = ChatUserProfile()
-                profile.id = userId
-                profile.nickname = infoMap?[userId]?.nickname ?? ""
-                profile.avatarURL = infoMap?[userId]?.avatarUrl ?? ""
-                ChatUIKitContext.shared?.userCache?[userId] = profile
             }
         })
     }

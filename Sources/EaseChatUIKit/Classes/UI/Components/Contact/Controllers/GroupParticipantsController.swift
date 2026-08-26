@@ -51,12 +51,12 @@ import UIKit
     /// Creates and returns a navigation bar for the GroupParticipantsController.
     /// - Returns: An instance of EaseChatNavigationBar.
     @objc open func createNavigation() -> ChatNavigationBar {
-        ChatNavigationBar(frame: self.operation == .mention ? CGRect(x: 0, y: 0, width: ScreenWidth, height: 44):CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: true, textAlignment: .left, rightImages:  self.rightImages ,hiddenAvatar: true).backgroundColor(.clear)
+        ChatNavigationBar(show: self.operation == .mention ? CGRect(x: 0, y: 0, width: ScreenWidth, height: 44):CGRect(x: 0, y: 0, width: ScreenWidth, height: NavigationHeight),showLeftItem: true, textAlignment: .left, rightImages:  self.rightImages ,hiddenAvatar: true).backgroundColor(.clear)
     }
     
     private var rightImages: [UIImage] {
         ((self.chatGroup.owner == ChatUIKitContext.shared?.currentUserId ?? "" && !self.chatGroup
-            .isDisabled)&&self.operation == .normal) ? [UIImage(named: "person_add", in: .chatBundle, with: nil)!,UIImage(named: "members_remove", in: .chatBundle, with: nil)!]:[]
+            .isDisabled)&&self.operation == .normal) ? [UIImage(chatNamed: "person_add")!,UIImage(chatNamed: "members_remove")!]:[]
     }
     
     public private(set) lazy var participantsList: UITableView = {
@@ -108,14 +108,16 @@ import UIKit
     }
     
     @objc private func refreshList() {
-        for participant in participants {
-            if let user = ChatUIKitContext.shared?.userCache?[participant.id]{
-                participant.nickname = user.nickname
-                participant.remark = user.remark
-                participant.avatarURL = user.avatarURL
+        DispatchQueue.main.async {
+            for participant in self.participants {
+                if let user = ChatUIKitContext.shared?.userCache?[participant.id]{
+                    participant.nickname = user.nickname
+                    participant.remark = user.remark
+                    participant.avatarURL = user.avatarURL
+                }
             }
+            self.participantsList.reloadData()
         }
-        self.participantsList.reloadData()
     }
     
     private func setupTitle() {
@@ -213,7 +215,7 @@ import UIKit
     }
 
     @objc open func fetchParticipants() {
-        if self.recursiveCount > 0 {
+        if self.participants.count < Appearance.chat.groupParticipantsLimitCount {
             self.service.fetchParticipants(groupId: self.chatGroup.groupId, cursor: self.cursor, pageSize: self.pageSize) { [weak self] result, error in
                 guard let `self` = self else { return }
                 if error == nil {
@@ -249,6 +251,9 @@ import UIKit
                                     }
                                     self.participants.insert(profile, at: 0)
                                 }
+                                self.loadFinished = true
+                                self.participantsList.reloadData()
+                                return
                             }
                         } else {
                             self.participants.append(contentsOf: list.map({
