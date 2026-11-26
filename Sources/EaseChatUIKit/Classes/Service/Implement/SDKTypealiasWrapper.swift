@@ -14,10 +14,11 @@ import Foundation
  */
 
 #if canImport(HyphenateChat)
-import HyphenateChat
+@_exported import HyphenateChat
 public typealias ChatClient = EMClient
 public typealias ChatClientListener = EMClientDelegate
 public typealias ChatEventsListener = EMChatManagerDelegate
+public typealias ChatConversationEventsListener = EMConversationDelegate
 public typealias ChatError = EMError
 public typealias ChatErrorCode = EMErrorCode
 public typealias ChatMessage = EMChatMessage
@@ -53,7 +54,7 @@ public typealias ChatConversation = EMConversation
 public typealias ChatConversationType = EMConversationType
 public typealias GroupLeaveReason = EMGroupLeaveReason
 public typealias ChatGroup = EMGroup
-public typealias ChatGroupOption = EMGroupOptions
+public typealias ChatGroupOption = EMGroupConfigs
 public typealias SilentModeResult = EMSilentModeResult
 public typealias SilentModeParam = EMSilentModeParam
 public typealias Contact = EMContact
@@ -63,12 +64,17 @@ public typealias GroupChatThreadEvent = EMChatThreadEvent
 public typealias GroupChatThread = EMChatThread
 public typealias MessagePinOperation = EMMessagePinOperation
 public typealias MessagePinInfo = EMMessagePinInfo
-public typealias MessageTranslateTargetLanguage = EMTranslateLanguage
+public typealias UserInfoManagerDelegate = EMUserInfoManagerDelegate
+public typealias DataSyncType = EMDataSyncType
+public typealias LoginExtensionInfo = EMLoginExtensionInfo
+public typealias ChatFetchServerMessagesOption = EMFetchServerMessagesOption
+public typealias MessageReadReceipt = EMMessageReadReceipt
 #elseif canImport(AgoraChat)
 import AgoraChat
 public typealias ChatClient = AgoraChatClient
 public typealias ChatClientListener = AgoraChatClientDelegate
 public typealias ChatEventsListener = AgoraChatManagerDelegate
+public typealias ChatConversationEventsListener = AgoraChatConversationDelegate
 public typealias ChatError = AgoraChatError
 public typealias ChatErrorCode = AgoraChatErrorCode
 public typealias ChatMessage = AgoraChatMessage
@@ -104,7 +110,7 @@ public typealias ChatConversation = AgoraChatConversation
 public typealias ChatConversationType = AgoraChatConversationType
 public typealias GroupLeaveReason = AgoraChatGroupLeaveReason
 public typealias ChatGroup = AgoraChatGroup
-public typealias ChatGroupOption = AgoraChatGroupOptions
+public typealias ChatGroupOption = AgoraChatGroupConfigs
 public typealias SilentModeResult = AgoraChatSilentModeResult
 public typealias SilentModeParam = AgoraChatSilentModeParam
 public typealias Contact = AgoraChatContact
@@ -114,8 +120,11 @@ public typealias GroupChatThreadEvent = AgoraChatThreadEvent
 public typealias GroupChatThread = AgoraChatThread
 public typealias MessagePinOperation = AgoraChatMessagePinOperation
 public typealias MessagePinInfo = AgoraChatMessagePinInfo
-public typealias MessageTranslateTargetLanguage = AgoraChatTranslateLanguage
+public typealias UserInfoManagerDelegate = AgoraChatUserInfoManagerDelegate
+public typealias DataSyncType = EMDataSyncType
+public typealias LoginExtensionInfo = AgoraChatLoginExtensionInfo
+public typealias ChatFetchServerMessagesOption = AgoraChatFetchServerMessagesOption
+public typealias MessageReadReceipt = AgoraChatMessageReadReceipt
 #endif
-
 
 

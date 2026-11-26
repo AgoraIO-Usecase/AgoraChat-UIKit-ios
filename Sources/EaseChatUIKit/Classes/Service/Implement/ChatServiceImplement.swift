@@ -9,6 +9,10 @@ import UIKit
 
 @objcMembers public class ChatServiceImplement: NSObject {
     private var responseDelegates: NSHashTable<ChatResponseListener> = NSHashTable<ChatResponseListener>.weakObjects()
+    private let readReceiptLock = NSLock()
+    private var pendingReadReceipts = Set<String>()
+    private var serverHistoryEndTime = -1
+    private var serverHistoryAnchorMessageId = ""
     
     public private(set) var to = ""
     
@@ -24,9 +28,14 @@ import UIKit
 }
 
 extension ChatServiceImplement: ChatService {
-    public func fetchChatThreadHistoryMessages(conversationId: String, start messageId: String, pageSize: UInt, completion: @escaping (ChatError?, [ChatMessage]) -> Void) {
-        ChatClient.shared().chatManager?.asyncFetchHistoryMessages(fromServer: conversationId, conversationType: .groupChat, startMessageId: messageId, fetch: .down, pageSize: Int32(pageSize), completion: { result, error in
-            completion(error, result?.list ?? [])
+    public func fetchChatThreadHistoryMessages(conversationId: String, cursor: String?, pageSize: UInt, completion: @escaping (ChatError?, [ChatMessage], String?) -> Void) {
+        // SDK 5.0 pages server history via an opaque cursor (``EMCursorResult/cursor``). The caller owns
+        // the cursor and the "no more" flag; here we simply fetch from the given cursor and hand back the
+        // next one (nil for the first page).
+        let option = ChatFetchServerMessagesOption()
+        option.direction = .down
+        ChatClient.shared().chatManager?.fetchMessagesFromServer(by: conversationId, conversationType: .groupChat, cursor: cursor, pageSize: pageSize, option: option, completion: { result, error in
+            completion(error, result?.list ?? [], result?.cursor)
         })
     }
     
@@ -56,7 +65,7 @@ extension ChatServiceImplement: ChatService {
         if let rawBody = rawMessage?.body as? ChatTextMessageBody {
             body.targetLanguages = rawBody.targetLanguages
         }
-        ChatClient.shared().chatManager?.modifyMessage(messageId, body: body, completion: { error, message in
+        ChatClient.shared().chatManager?.modifyMessage(messageId, body: body, ext: nil, completion: { error, message in
             completion(error,message)
         })
     }
@@ -82,7 +91,7 @@ extension ChatServiceImplement: ChatService {
     
     public func send(message: ChatMessage, completion: @escaping (ChatError?, ChatMessage?) -> Void) {
         let message = message
-        ChatClient.shared().chatManager?.send(message, progress: nil, completion: { [weak self] message, error in
+        ChatClient.shared().chatManager?.send(message, progress: nil, completion: { message, error in
 //            self?.pushSendNotification(message: message)
             completion(error,message)
         })
@@ -104,14 +113,60 @@ extension ChatServiceImplement: ChatService {
     }
     
     public func markMessageAsRead(messageId: String) {
-        ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.markMessageAsRead(withId: messageId, error: nil)
+        guard let manager = ChatClient.shared().chatManager,
+              let message = manager.getMessageWithMessageId(messageId),
+              Self.shouldSendReadReceipt(for: message) else { return }
+
+        self.readReceiptLock.lock()
+        let inserted = self.pendingReadReceipts.insert(messageId).inserted
+        self.readReceiptLock.unlock()
+        guard inserted else { return }
+
+        manager.sendMessageReadReceipts([message]) { [weak self] error in
+            // Only SDK success changes isPeerRead. Releasing the in-flight ID on failure permits retry.
+            if let self = self {
+                self.readReceiptLock.lock()
+                self.pendingReadReceipts.remove(messageId)
+                self.readReceiptLock.unlock()
+            }
+            if let error = error {
+                consoleLogInfo("sendMessageReadReceipts error:\(error.errorDescription ?? "")", type: .error)
+            }
+        }
+    }
+
+    static func shouldSendReadReceipt(for message: ChatMessage) -> Bool {
+        message.direction == .receive && message.isNeedReadReceipt && !message.isPeerRead
+    }
+
+    // A server cursor belongs to its original time window. Keep that window even as the UI's
+    // first visible message changes after each inserted page.
+    func serverHistoryOption(start messageId: String, cursor: String?, anchorTimestamp: Int64?) -> ChatFetchServerMessagesOption {
+        if cursor == nil || messageId.isEmpty {
+            self.serverHistoryEndTime = messageId.isEmpty ? -1 : anchorTimestamp.map(Int.init) ?? -1
+            self.serverHistoryAnchorMessageId = messageId
+        }
+        let option = ChatFetchServerMessagesOption()
+        option.direction = .up
+        option.endTime = self.serverHistoryEndTime
+        return option
+    }
+
+    static func uniqueServerMessages(_ messages: [ChatMessage], excluding anchorId: String) -> [ChatMessage] {
+        var seen = Set<String>()
+        if !anchorId.isEmpty { seen.insert(anchorId) }
+        return messages.filter { seen.insert($0.messageId).inserted }
     }
     
     public func markAllMessagesAsRead() {
-        ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.markAllMessages(asRead: nil)
+        ChatClient.shared().chatManager?.clearConversationUnreadMessageCount(self.to) { error in
+            if error != nil {
+                consoleLogInfo("clearConversationUnreadMessageCount error:\(error?.errorDescription ?? "")", type: .error)
+            }
+        }
     }
     
-    public func loadMessages(start messageId: String, pageSize: UInt, searchMessage: Bool, completion: @escaping (ChatError?, [ChatMessage]) -> Void) {
+    public func loadMessages(start messageId: String, cursor: String?, pageSize: UInt, searchMessage: Bool, completion: @escaping (ChatError?, [ChatMessage], String?) -> Void) {
         if ChatUIKitContext.shared?.chatCache == nil {
             ChatUIKitContext.shared?.chatCache = [String:ChatUserProfileProtocol]()
         }
@@ -119,16 +174,20 @@ extension ChatServiceImplement: ChatService {
             ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.loadMessagesStart(fromId: messageId, count: Int32(pageSize), searchDirection: searchMessage ? .down:.up,completion: { messages, error in
                 if error == nil,let messages = messages {
                     for message in messages {
-                        if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
-                            let user = ChatUIKitContext.shared?.userCache?[message.from] as? ChatUserProfile
-                            if user?.modifyTime ?? 0 < message.timestamp {
-                                let user = ChatUserProfile()
-                                user.setValuesForKeys(dic)
-                                if user.id.isEmpty {
-                                    user.id = message.from
+                        // Compatibility with old data: legacy messages have no `senderInfo`, so fall back
+                        // to the sender profile previously stored in the message's `ease_chat_uikit_user_info` ext.
+                        if message.senderInfo == nil {
+                            if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
+                                let user = ChatUIKitContext.shared?.userCache?[message.from] as? ChatUserProfile
+                                if user?.modifyTime ?? 0 < message.timestamp {
+                                    let user = ChatUserProfile()
+                                    user.setValuesForKeys(dic)
+                                    if user.id.isEmpty {
+                                        user.id = message.from
+                                    }
+                                    user.modifyTime = message.timestamp
+                                    ChatUIKitContext.shared?.chatCache?[message.from] = user
                                 }
-                                user.modifyTime = message.timestamp
-                                ChatUIKitContext.shared?.chatCache?[message.from] = user
                             }
                         }
                         if let dic = message.ext?["ease_chat_uikit_text_url_preview"] as? Dictionary<String,String>,let url = dic["url"] {
@@ -147,34 +206,61 @@ extension ChatServiceImplement: ChatService {
                         }
                     }
                 }
-                completion(error,messages ?? [])
+                completion(error,messages ?? [],nil)
             })
         } else {
             let type = ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.type ?? .chat
-            ChatClient.shared().chatManager?.asyncFetchHistoryMessages(fromServer: self.to, conversationType: type, startMessageId: messageId, fetch: searchMessage ? .down:.up, pageSize: Int32(pageSize),completion: { result, error in
-                if error == nil,let messages = result?.list {
-                    for message in messages {
-                        if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
-                            let user = ChatUIKitContext.shared?.userCache?[message.from] as? ChatUserProfile
-                            if user?.modifyTime ?? 0 < message.timestamp {
-                                let user = ChatUserProfile()
-                                user.setValuesForKeys(dic)
-                                if user.id.isEmpty {
-                                    user.id = message.from
-                                }
-                                user.modifyTime = message.timestamp
-                                ChatUIKitContext.shared?.chatCache?[message.from] = user
-                            }
+            let cacheSenderInfo: (ChatMessage) -> Void = { message in
+                guard message.senderInfo == nil else { return }
+                if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
+                    let user = ChatUIKitContext.shared?.userCache?[message.from] as? ChatUserProfile
+                    if user?.modifyTime ?? 0 < message.timestamp {
+                        let user = ChatUserProfile()
+                        user.setValuesForKeys(dic)
+                        if user.id.isEmpty {
+                            user.id = message.from
                         }
+                        user.modifyTime = message.timestamp
+                        ChatUIKitContext.shared?.chatCache?[message.from] = user
                     }
                 }
-                completion(error,result?.list ?? [])
+            }
+            if searchMessage {
+                // Anchored jump to a specific (locally available) message: page forward from its
+                // timestamp. The new server API has no message-id anchor, so we use the time window.
+                let option = ChatFetchServerMessagesOption()
+                option.direction = .down
+                if let timestamp = ChatClient.shared().chatManager?.getMessageWithMessageId(messageId)?.timestamp {
+                    // Include the boundary millisecond; another message can share the anchor's time.
+                    option.startTime = Int(timestamp)
+                }
+                ChatClient.shared().chatManager?.fetchMessagesFromServer(by: self.to, conversationType: type, cursor: nil, pageSize: pageSize, option: option, completion: { result, error in
+                    let messages = Self.uniqueServerMessages(result?.list ?? [], excluding: messageId)
+                    if error == nil {
+                        for message in messages { cacheSenderInfo(message) }
+                    }
+                    // Anchored search is a one-shot fetch, so there is no continuation cursor.
+                    completion(error,messages,nil)
+                })
+                return
+            }
+            // Load older page. SDK 5.0 pages via an opaque cursor. The caller owns the cursor and the
+            // "no more" flag and passes the cursor in (nil for the first page); we hand back the next one.
+            let timestamp = ChatClient.shared().chatManager?.getMessageWithMessageId(messageId)?.timestamp
+            let option = self.serverHistoryOption(start: messageId, cursor: cursor, anchorTimestamp: timestamp)
+            let anchorId = self.serverHistoryAnchorMessageId
+            ChatClient.shared().chatManager?.fetchMessagesFromServer(by: self.to, conversationType: type, cursor: cursor, pageSize: pageSize, option: option, completion: { result, error in
+                let messages = Self.uniqueServerMessages(result?.list ?? [], excluding: anchorId)
+                if error == nil {
+                    for message in messages { cacheSenderInfo(message) }
+                }
+                completion(error,messages,result?.cursor)
             })
         }
     }
     
     public func searchMessage(keyword: String, pageSize: UInt, userId: String, completion: @escaping (ChatError?, [ChatMessage]) -> Void) {
-        ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.loadMessages(withKeyword: keyword, timestamp: -1, count: Int32(pageSize), fromUser: userId, searchDirection: .up, scope: .content, completion: { messages, error in
+        ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.loadMessages(withKeyword: keyword, timestamp: -1, count: Int32(pageSize), fromUsers: [userId], searchDirection: .up, scope: .content, completion: { messages, error in
             completion(error,messages ?? [])
         })
     }
@@ -206,11 +292,9 @@ extension ChatServiceImplement: ChatService {
 
 extension ChatServiceImplement: ChatEventsListener {
     
-    public func cmdMessagesDidReceive(_ aCmdMessages: [ChatMessage]) {
+    public func onMessageReadReceipts(_ aReceipts: [MessageReadReceipt]) {
         for listener in self.responseDelegates.allObjects {
-            for message in aCmdMessages {
-                listener.onCMDMessageDidReceived(message: message)
-            }
+            listener.messageReadReceiptReceived(receipt: aReceipts)
         }
     }
     
@@ -223,11 +307,49 @@ extension ChatServiceImplement: ChatEventsListener {
     public func messagesDidReceive(_ aMessages: [ChatMessage]) {
         for listener in self.responseDelegates.allObjects {
             for message in aMessages {
+                if message.senderInfo == nil {
+                    if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
+                        let profile = ChatUserProfile()
+                        profile.setValuesForKeys(dic)
+                        profile.id = message.from
+                        profile.modifyTime = message.timestamp
+                        ChatUIKitContext.shared?.chatCache?[message.from] = profile
+                        if ChatUIKitContext.shared?.userCache?[message.from] == nil {
+                            ChatUIKitContext.shared?.userCache?[message.from] = profile
+                        } else {
+                            ChatUIKitContext.shared?.userCache?[message.from]?.nickname = profile.nickname
+                            ChatUIKitContext.shared?.userCache?[message.from]?.avatarURL = profile.avatarURL
+                        }
+                    }
+                } else {
+                    if let profile = message.senderInfo {
+                        if ChatUIKitContext.shared?.userCache?[message.from] == nil {
+                            let user = ChatUserProfile()
+                            user.id = profile.userId ?? message.from
+                            user.nickname = profile.nickname ?? ""
+                            user.avatarURL = profile.avatarUrl ?? ""
+                            user.modifyTime = message.timestamp
+                            user.remark = profile.remark ?? ""
+                            ChatUIKitContext.shared?.userCache?[message.from] = user
+                        } else {
+                            ChatUIKitContext.shared?.userCache?[message.from]?.nickname = message.senderInfo?.nickname ?? ""
+                            ChatUIKitContext.shared?.userCache?[message.from]?.avatarURL = message.senderInfo?.avatarUrl ?? ""
+                        }
+                    }
+                }
                 listener.onMessageDidReceived(message: message)
             }
         }
     }
     
+    public func cmdMessagesDidReceive(_ aCmdMessages: [ChatMessage]) {
+        for listener in self.responseDelegates.allObjects {
+            for message in aCmdMessages {
+                listener.onCMDMessageDidReceived(message: message)
+            }
+        }
+    }
+
     public func messagesInfoDidRecall(_ aRecallMessagesInfo: [RecallInfo]) {
         for listener in self.responseDelegates.allObjects {
             for info in aRecallMessagesInfo {
@@ -262,29 +384,12 @@ extension ChatServiceImplement: ChatEventsListener {
         }
     }
     
-    public func messagesDidRead(_ aMessages: [ChatMessage]) {
-        for aMessage in aMessages {
-            for listener in self.responseDelegates.allObjects {
-                listener.onMessageStatusDidChanged(message: aMessage, status: .read, error: nil)
-            }
-        }
-    }
-    
     public func onMessageContentChanged(_ message: ChatMessage, operatorId: String, operationTime: UInt) {
         for listener in self.responseDelegates.allObjects {
             listener.onMessageDidEdited(message: message)
         }
     }
     
-    public func onConversationRead(_ from: String, to: String) {
-        if ChatUIKitContext.shared?.currentUserId ?? "" != from {
-            for listener in self.responseDelegates.allObjects {
-                listener.messagesAlreadyRead(conversationId: from)
-            }
-        } else {
-           //如果是多设备服务端会投递对方已读的状态给其他设备
-        }
-    }
+
     
 }
-

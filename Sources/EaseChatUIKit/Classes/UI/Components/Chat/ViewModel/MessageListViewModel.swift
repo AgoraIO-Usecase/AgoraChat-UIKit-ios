@@ -69,6 +69,18 @@ import UIKit
     
     public private(set) var chatType = ChatType.chat
     
+    /// Opaque server-history pagination cursor. Owned here because the chat service is stateless.
+    /// Only meaningful when loading server history (``UIOptions/loadLocalHistoryMessages`` is `false`).
+    private var historyCursor: String?
+
+    /// Whether the server has no more older history for this conversation (server history only).
+    private var historyNoMore = false
+
+    private var historyLoading = false
+
+    /// Whether history is loaded from the local database (vs. the server).
+    private var loadLocalHistory: Bool { ChatUIKitClient.shared.option.option_UI.loadLocalHistoryMessages }
+
     public private(set) weak var driver: IMessageListViewDriver?
     
     public private(set) weak var pinDriver: IPinnedMessagesContainerDriver?
@@ -94,6 +106,13 @@ import UIKit
         }
     }
     
+    @nonobjc convenience init(conversationId: String, type: ChatType, historyService: ChatService) {
+        self.init(conversationId: conversationId, type: type)
+        self.chatService?.unbindChatEventsListener(listener: self)
+        self.chatService = historyService
+        self.chatService?.bindChatEventsListener(listener: self)
+    }
+
     /// Bind ``IMessageListViewDriver``
     /// - Parameters:
     ///   - driver: ``IMessageListViewDriver``
@@ -102,6 +121,8 @@ import UIKit
     open func bindDriver(driver: IMessageListViewDriver,searchMessageId: String = "") {
         self.driver = driver
         self.searchMessageId = searchMessageId
+        self.historyCursor = nil
+        self.historyNoMore = false
         driver.addActionHandler(actionHandler: self)
         if !searchMessageId.isEmpty {
             self.loadSearchMessage()
@@ -134,35 +155,61 @@ import UIKit
     }
     
     open func loadSearchMessage() {
+        guard !self.historyLoading, let service = self.chatService else { return }
+        self.historyLoading = true
         let searchId = self.searchMessageId
-        self.chatService?.loadMessages(start: self.searchMessageId, pageSize: 20, searchMessage: true, completion: { [weak self] error, messages in
+        service.loadMessages(start: searchId, cursor: nil, pageSize: 20, searchMessage: true, completion: { [weak self] error, messages, _ in
+            guard let self = self else { return }
+            self.historyLoading = false
+            self.driver?.endRefreshing()
             if error == nil {
+                // Search loads forward; the next pull starts a separate backward cursor sequence.
+                self.historyCursor = nil
+                self.historyNoMore = false
                 if let searchMessage = ChatClient.shared().chatManager?.getMessageWithMessageId(searchId) {
-                    var refreshMessages = messages
-                    refreshMessages.insert(searchMessage, at: 0)
-                    self?.driver?.refreshMessages(messages: refreshMessages)
+                    var seen = Set([searchMessage.messageId])
+                    let refreshMessages = [searchMessage] + messages.filter { seen.insert($0.messageId).inserted }
+                    self.driver?.refreshMessages(messages: refreshMessages)
                 }
             } else {
                 consoleLogInfo("loadSearchMessage error:\(error?.errorDescription ?? "")", type: .error)
             }
         })
     }
-    
+
     @objc open func loadMessages() {
-        if let start = self.driver?.firstMessageId {
-            self.chatService?.loadMessages(start: start, pageSize: 20, searchMessage: false, completion: { [weak self] error, messages in
-                self?.driver?.endRefreshing()
-                if error == nil,messages.count > 0 {
-                    if (self?.driver?.firstMessageId ?? "").isEmpty {
-                        self?.driver?.refreshMessages(messages: messages)
-                    } else {
-                        self?.driver?.insertMessages(messages: messages)
-                    }
-                } else {
-                    consoleLogInfo("loadMessages error:\(error?.errorDescription ?? "")", type: .error)
-                }
-            })
+        guard !self.historyLoading,
+              let start = self.driver?.firstMessageId,
+              let service = self.chatService else { return }
+        let usesLocalHistory = self.loadLocalHistory
+        if !usesLocalHistory, self.historyNoMore {
+            self.driver?.endRefreshing()
+            return
         }
+        self.historyLoading = true
+        service.loadMessages(start: start, cursor: self.historyCursor, pageSize: 20, searchMessage: false, completion: { [weak self] error, messages, cursor in
+            guard let self = self else { return }
+            self.historyLoading = false
+            self.driver?.endRefreshing()
+            guard error == nil else {
+                consoleLogInfo("loadMessages error:\(error?.errorDescription ?? "")", type: .error)
+                return
+            }
+            if !usesLocalHistory {
+                self.historyCursor = cursor
+                self.historyNoMore = cursor?.isEmpty ?? true
+            }
+            // Inclusive timestamp windows may overlap the search anchor or an earlier page.
+            var seen = Set(self.driver?.dataSource.map { $0.messageId } ?? [])
+            let newMessages = messages.filter { seen.insert($0.messageId).inserted }
+            if !newMessages.isEmpty {
+                if (self.driver?.firstMessageId ?? "").isEmpty {
+                    self.driver?.refreshMessages(messages: newMessages)
+                } else {
+                    self.driver?.insertMessages(messages: newMessages)
+                }
+            }
+        })
     }
 
     /// Send message with text&type&extension info.
@@ -192,9 +239,11 @@ import UIKit
     @objc open func constructMessage(text: String,type: MessageCellStyle,extensionInfo: Dictionary<String,Any> = [:]) -> ChatMessage? {
         
         var ext = extensionInfo
-        let json = ChatUIKitContext.shared?.currentUser?.toJsonObject() ?? [:]
-        ext.merge(json) { _, new in
-            new
+        if ChatUIKitClient.shared.option.option_UI.compatibilityModeForUserInfo {
+            let json = ChatUIKitContext.shared?.currentUser?.toJsonObject() ?? [:]
+            ext.merge(json) { _, new in
+                new
+            }
         }
         var chatMessage: ChatMessage?
         switch type {
@@ -266,6 +315,9 @@ import UIKit
             chatMessage?.chatType = .groupChat
         case .chatroom:
             chatMessage?.chatType = .chatRoom
+        }
+        if !(type == .alert || type == .cmd) {
+            chatMessage?.isNeedReadReceipt = self.chatType == .chat
         }
         return chatMessage
     }
@@ -493,8 +545,9 @@ extension MessageListViewModel: MessageListViewActionEventsDelegate {
     
     
     public func onMoreMessagesClicked() {
-        ChatClient.shared().chatManager?.getConversationWithConvId(self.to)?.markAllMessages(asRead: nil)
-        ChatClient.shared().chatManager?.ackConversationRead(self.to)
+        ChatClient.shared().chatManager?.clearConversationUnreadMessageCount(self.to) { error in
+            consoleLogInfo("clearConversationUnreadMessageCount error:\(error?.errorDescription ?? "")", type: .error)
+        }
     }
     
     
@@ -548,20 +601,20 @@ extension MessageListViewModel: MessageListViewActionEventsDelegate {
     }
     
     @objc open func messageVisibleMark(entity: MessageEntity) {
-        let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(self.to)
-        if !entity.message.isRead {
-            
-            conversation?.markMessageAsRead(withId: entity.message.messageId, error: nil)
-            if conversation?.type ?? .chat == .chat {
-                switch entity.message.body.type {
-                case .text,.location,.custom,.image:
-                    ChatClient.shared().chatManager?.sendMessageReadAck(entity.message.messageId, toUser: self.to)
-                default:
-                    break
-                }
-            }
+        self.sendVisibleMessageReadReceipt(entity.message)
+    }
+
+    private func sendVisibleMessageReadReceipt(_ message: ChatMessage) {
+        guard message.direction == .receive,
+              message.isNeedReadReceipt,
+              !message.isPeerRead,
+              message.chatType == .chat else { return }
+        switch message.body.type {
+        case .text, .location, .custom, .image:
+            self.chatService?.markMessageAsRead(messageId: message.messageId)
+        default:
+            break
         }
-        
     }
     
     public func onFailureMessageRetrySend(entity: MessageEntity) {
@@ -642,6 +695,8 @@ extension MessageListViewModel: MessageListViewActionEventsDelegate {
                                 body?.localPath = tuple.1
                                 ChatClient.shared().chatManager?.update(message.message)
                                 self.audioMessagePlay(message: message)
+                            } else {
+                                consoleLogInfo("audio message decode failed, localPath: \(path)", type: .error)
                             }
                         }
                     }
@@ -802,6 +857,17 @@ extension MessageListViewModel: MessageListViewActionEventsDelegate {
 }
 
 extension MessageListViewModel: ChatResponseListener {
+
+    public func messageReadReceiptReceived(receipt: [MessageReadReceipt]) {
+        for r in receipt {
+            if r.conversationId == self.to {
+                if let message = ChatClient.shared().chatManager?.getMessageWithMessageId(r.messageId) {
+                    self.driver?.updateMessageStatus(message: message, status: r.isPeerReceipt ? .read:.delivered)
+                }
+            }
+        }
+    }
+
     public func onCMDMessageDidReceived(message: ChatMessage) {
         if let body = message.body as? ChatCMDMessageBody,body.action == "TypingBegin",message.conversationId == self.to,message.from != ChatUIKitContext.shared?.currentUserId ?? "",self.chatType == .chat {
             for handler in self.handlers.allObjects {
@@ -811,12 +877,14 @@ extension MessageListViewModel: ChatResponseListener {
     }
     
     public func onMessageStickiedTop(conversationId: String, messageId: String, operation: MessagePinOperation, info: MessagePinInfo) {
-        self.pinAlert(info: info,operation: operation)
         let message = ChatClient.shared().chatManager?.getMessageWithMessageId(messageId)
         if message == nil {
             ChatUIKitContext.shared?.pinnedCache?.removeValue(forKey: conversationId)
         }
-        self.pinDriver?.refresh(entities: self.showPinnedMessages())
+        if conversationId == self.to {
+            self.pinAlert(info: info,operation: operation)
+            self.pinDriver?.refresh(entities: self.showPinnedMessages())
+        }
     }
     
     public func onMessageDidReceived(message: ChatMessage) {
@@ -833,19 +901,6 @@ extension MessageListViewModel: ChatResponseListener {
         if message.conversationId == self.to {
             if let alreadyShow = self.driver?.dataSource.contains(where: { $0.messageId == message.messageId }),alreadyShow {
                 return
-            }
-            if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
-                let profile = ChatUserProfile()
-                profile.setValuesForKeys(dic)
-                profile.id = message.from
-                profile.modifyTime = message.timestamp
-                ChatUIKitContext.shared?.chatCache?[message.from] = profile
-                if ChatUIKitContext.shared?.userCache?[message.from] == nil {
-                    ChatUIKitContext.shared?.userCache?[message.from] = profile
-                } else {
-                    ChatUIKitContext.shared?.userCache?[message.from]?.nickname = profile.nickname
-                    ChatUIKitContext.shared?.userCache?[message.from]?.avatarURL = profile.avatarURL
-                }
             }
             if let dic = message.ext?["ease_chat_uikit_text_url_preview"] as? Dictionary<String,String>,let url = dic["url"] {
                 let content = URLPreviewManager.HTMLContent()
@@ -865,16 +920,7 @@ extension MessageListViewModel: ChatResponseListener {
             entity.direction = message.direction
             self.driver?.showMessage(message: entity)
             if let scrolledBottom = self.driver?.scrolledBottom,scrolledBottom {
-                let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(self.to)
-                conversation?.markMessageAsRead(withId: message.messageId, error: nil)
-                if conversation?.type ?? .chat == .chat {
-                    switch message.body.type {
-                    case .text,.location,.custom,.image:
-                        ChatClient.shared().chatManager?.sendMessageReadAck(message.messageId, toUser: self.to)
-                    default:
-                        break
-                    }
-                }
+                self.sendVisibleMessageReadReceipt(message)
             }
         }
     }
@@ -988,14 +1034,7 @@ extension MessageListViewModel: GroupServiceListener {
     
     
     public func onCurrentUserLeft(groupId: String, reason: GroupLeaveReason) {
-        switch reason {
-        case .destroyed:
-            ""
-        case .beRemoved:
-            ""
-        default: break
-            
-        }
+
     }
     
     
@@ -1003,11 +1042,11 @@ extension MessageListViewModel: GroupServiceListener {
         
     }
     
-    public func onUserJoinedGroup(groupId: String, userId: String) {
+    public func onUserJoinedGroup(groupId: String, userIds: [String]) {
         
     }
     
-    public func onUserLeaveGroup(groupId: String, userId: String) {
+    public func onUserLeaveGroup(groupId: String, userIds: [String]) {
         
     }
         
@@ -1059,7 +1098,7 @@ extension MessageListViewModel: GroupChatThreadEventListener {
     
     public func onAttributesChangedOfGroupMember(groupId: String, userId: String, operatorId: String, attributes: Dictionary<String, String>) {
         if userId != ChatUIKitContext.shared?.currentUserId ?? "" {
-            ChatClient.shared().chatManager?.getConversationWithConvId(groupId)?.loadMessages(withKeyword: "", timestamp: Int64(Date().timeIntervalSince1970*1000), count: 1, fromUser: userId, searchDirection: .up, scope: .content, completion: { messages, error in
+            ChatClient.shared().chatManager?.getConversationWithConvId(groupId)?.loadMessages(withKeyword: "", timestamp: Int64(Date().timeIntervalSince1970*1000), count: 1, fromUsers: [userId], searchDirection: .up, scope: .content, completion: { messages, error in
                 if error === nil,let message = messages?.first {
                     message.ext?["remark"] = attributes["nickName"]
                     ChatClient.shared().chatManager?.update(message)

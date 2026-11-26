@@ -40,7 +40,11 @@ import UIKit
     
     public private(set) var selectedAttachmentImage = UIImage(chatNamed: "attachmentSelected")
     
-    public private(set) var collapsedState = false
+    public private(set) var collapsedState = true
+
+    var isInputActive: Bool {
+        self.inputField.isFirstResponder || self.frame.minY != self.rawFrame.minY || self.frame.height != self.rawFrame.height || !(self.emoji?.isHidden ?? true) || !self.extensionMenus.isHidden
+    }
     
     private var style: NSParagraphStyle {
         let paragraph = NSMutableParagraphStyle()
@@ -77,6 +81,8 @@ import UIKit
     
     private var hiddenDuration = Double(0.2)
     
+    private var lastTypingTime: TimeInterval = 0
+
     public private(set) lazy var rightView: UIButton = {
         UIButton(type: .custom).frame(CGRect(x: self.frame.width-80, y: self.inputField.frame.maxY-32, width: 30, height: 30)).addTargetFor(self, action: #selector(changeToEmoji), for: .touchUpInside).backgroundColor(.clear)
     }()
@@ -178,6 +184,25 @@ import UIKit
         self.emoji?.frame = CGRect(x: 0, y: self.inputField.frame.maxY+8, width: self.frame.width, height: self.keyboardHeight)
         self.extensionMenus.frame = CGRect(x: 0, y: self.inputField.frame.maxY+15, width: self.frame.width, height: (Appearance.chat.inputExtendActions.count > 4 ? 230:132))
     }
+
+    func updateContainerFrame(newFrame: CGRect, preserveInputState: Bool) {
+        if !preserveInputState {
+            self.resetFrame(newFrame: newFrame)
+            return
+        }
+        self.rawFrame = newFrame
+        self.rawHeight = newFrame.height
+        self.rawTextHeight = max(self.inputField.frame.height, self.rawHeight-16)
+        self.frame = CGRect(x: self.frame.minX, y: self.frame.minY, width: newFrame.width, height: self.frame.height)
+        self.recordedFrame = self.frame
+        self.rightView.frame = CGRect(x: self.frame.width-80, y: self.inputField.frame.maxY-32, width: 30, height: 30)
+        self.audio.frame = CGRect(x: 12, y: self.inputField.frame.maxY-32, width: 30, height: 30)
+        self.inputField.frame = CGRect(x: 50, y: self.inputField.frame.minY, width: self.frame.width-142, height: self.inputField.frame.height)
+        self.attachment.frame = CGRect(x: self.frame.width - 42, y: self.inputField.frame.maxY-32, width: 30, height: 30)
+        self.line.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: 0.5)
+        self.emoji?.frame = CGRect(x: 0, y: self.inputField.frame.maxY+8, width: self.frame.width, height: self.keyboardHeight)
+        self.extensionMenus.frame = CGRect(x: 0, y: self.inputField.frame.maxY+15, width: self.frame.width, height: (Appearance.chat.inputExtendActions.count > 4 ? 230:132))
+    }
    
 }
 
@@ -266,7 +291,11 @@ extension MessageInputBar: UITextViewDelegate {
         if textView.text.isEmpty {
             self.updateHeight()
         }
-        self.actionClosure?(.startTyping,nil)
+        let currentTime = Date().timeIntervalSince1970
+        if currentTime - self.lastTypingTime >= 5.0 {
+            self.lastTypingTime = currentTime
+            self.actionClosure?(.startTyping,nil)
+        }
     }
     
     public func textViewDidEndEditing(_ textView: UITextView) {
@@ -429,13 +458,15 @@ extension MessageInputBar: UITextViewDelegate {
                 return childView
             }
         }
-        self.hiddenInput()
-        self.attachment.isSelected = false
-        self.emoji?.isHidden  = true
-        self.extensionMenus.isHidden = true
-        self.extensionMenus.isUserInteractionEnabled = false
-        self.attachment.setImage(self.attachmentImage, for: .normal)
-        self.rightView.isSelected = false
+        if self.collapsedState {
+            self.hiddenInput()
+            self.attachment.isSelected = false
+            self.emoji?.isHidden  = true
+            self.extensionMenus.isHidden = true
+            self.extensionMenus.isUserInteractionEnabled = false
+            self.attachment.setImage(self.attachmentImage, for: .normal)
+            self.rightView.isSelected = false
+        }
         return super.hitTest(point, with: event)
     }
 
@@ -497,7 +528,7 @@ extension MessageInputBar: UITextViewDelegate {
     
     @objc private func keyboardWillHide(notification: Notification) {
         if self.rightView.isSelected {
-            guard let frame = notification.chat.keyboardEndFrame else { return }
+            guard let _ = notification.chat.keyboardEndFrame else { return }
             guard let duration = notification.chat.keyboardAnimationDuration else { return }
             self.hiddenDuration = duration
             self.showEmojiKeyboard()
@@ -579,7 +610,7 @@ extension MessageInputBar: UITextViewDelegate {
 //        if (self.inputField.text ?? "").isEmpty,!self.inputField.isFirstResponder {
 //            return
 //        }
-        if self.collapsedState {
+        if self.collapsedState,self.frame.minY == self.rawFrame.minY,self.frame.height == self.rawFrame.height,!self.inputField.isFirstResponder {
             return
         }
         self.collapsedState = true
@@ -689,6 +720,3 @@ public extension NSAttributedString {
         return result.string
     }
 }
-
-
-

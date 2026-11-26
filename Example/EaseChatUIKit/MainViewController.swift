@@ -142,10 +142,10 @@ extension MainViewController: ThemeSwitchProtocol {
     
 }
 
-//MARK: - ChatProfileProvider for conversations&contacts usage.
+//MARK: - ChatUserProfileProvider for conversations&contacts usage.
 //For example using conversations controller,as follows.
-extension MainViewController: ChatProfileProvider,ChatGroupProfileProvider {
-    //MARK: - ChatProfileProvider
+extension MainViewController: ChatUserProfileProvider,ChatGroupProfileProvider {
+    //MARK: - ChatUserProfileProvider
     func fetchProfiles(profileIds: [String]) async -> [any chat_uikit.ChatUserProfileProtocol] {
         return await withTaskGroup(of: [chat_uikit.ChatUserProfileProtocol].self, returning: [chat_uikit.ChatUserProfileProtocol].self) { group in
             var resultProfiles: [chat_uikit.ChatUserProfileProtocol] = []

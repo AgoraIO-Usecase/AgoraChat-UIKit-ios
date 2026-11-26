@@ -8,7 +8,7 @@
 import UIKit
 
 public var saveIdentifier: String {
-    (ChatClient.shared().options.appId ?? "")+(ChatUIKitContext.shared?.currentUserId ?? "")
+    ChatClient.shared().options.appkey+(ChatUIKitContext.shared?.currentUserId ?? "")
 }
 
 @objc public final class UserServiceImplement: NSObject {
@@ -39,10 +39,14 @@ public var saveIdentifier: String {
     
     @objc public func registerEventListener() {
         ChatClient.shared().add(self, delegateQueue: nil)
+        if ChatClient.shared().options.enableUserInfo {
+            ChatClient.shared().userInfoManager?.add(self, delegateQueue: nil)
+        }
     }
     
     @objc public func removeEventListener() {
         ChatClient.shared().removeDelegate(self)
+        ChatClient.shared().userInfoManager?.remove(self)
     }
     
     deinit {
@@ -68,37 +72,50 @@ extension UserServiceImplement:UserServiceProtocol {
     }
     
     public func userInfo(userId: String, completion: @escaping (ChatUserProfileProtocol?,ChatError?) -> Void) {
-//        self.userInfos(userIds: [userId]) { infos,error in
-//            completion(infos.first,error)
-//        }
+        self.userInfos(userIds: [userId]) { users, error in
+            completion(users.first, error)
+        }
     }
-    
+
     public func userInfos(userIds: [String], completion: @escaping ([ChatUserProfileProtocol],ChatError?) -> Void) {
-//        ChatClient.shared().userInfoManager?.fetchUserInfo(byId: userIds,completion: { [weak self] infoMap, error in
-//            guard let dic = infoMap as? Dictionary<String,UserInfo> else { return }
-//            var users = [EaseProfile]()
-//            for userId in userIds {
-//                if let info = dic[userId] {
-//                    if let user = self?.convertToUser(info: info) {
-//                        users.append(user)
-//                    }
-//                }
-//            }
-//            completion(users,error)
-//        })
+        guard !userIds.isEmpty else {
+            completion([], nil)
+            return
+        }
+        guard let manager = ChatClient.shared().userInfoManager else {
+            completion([], ChatError(description: "User information manager is unavailable", code: .general))
+            return
+        }
+        manager.fetchUserInfo(byId: userIds) { [self] infoMap, error in
+            let users = userIds.compactMap { userId in
+                infoMap?[userId].map { self.convertToUser(info: $0) }
+            }
+            if error == nil {
+                ChatUIKitContext.shared?.updateChatAndUserTypeCaches(profiles: users)
+            }
+            completion(users, error)
+        }
     }
-    
+
     public func updateUserInfo(userInfo: ChatUserProfileProtocol, completion: @escaping (Bool, ChatError?) -> Void) {
-//        if userInfo.id == ChatUIKitContext.shared?.currentUserId ?? "" {
-//            ChatUIKitContext.shared?.currentUser = userInfo
-//            ChatUIKitContext.shared?.userCache?[userInfo.id] = userInfo
-//        } else {
-//            ChatUIKitContext.shared?.updateCache(type: .chat, profile: userInfo)
-//            ChatUIKitContext.shared?.updateCache(type: .user, profile: userInfo)
-//            ChatUIKitContext.shared?.updateCache(type: .group, profile: userInfo)
-//        }
+        guard userInfo.id == ChatUIKitContext.shared?.currentUserId else {
+            completion(false, ChatError(description: "Only the current user's information can be updated", code: .invalidParam))
+            return
+        }
+        guard let manager = ChatClient.shared().userInfoManager else {
+            completion(false, ChatError(description: "User information manager is unavailable", code: .general))
+            return
+        }
+        manager.updateOwn(self.convertToUserInfo(user: userInfo)) { [self] info, error in
+            if error == nil {
+                let profile: ChatUserProfileProtocol = info.map { self.convertToUser(info: $0) } ?? userInfo
+                ChatUIKitContext.shared?.currentUser = profile
+                ChatUIKitContext.shared?.updateChatAndUserTypeCaches(profiles: [profile])
+            }
+            completion(error == nil, error)
+        }
     }
-    
+
     public func login(userId: String, token: String, completion: @escaping (Bool, ChatError?) -> Void) {
         ChatClient.shared().login(withUsername: userId, token: token) { user_id, error in
             completion(error == nil,error)
@@ -111,10 +128,13 @@ extension UserServiceImplement:UserServiceProtocol {
         }
     }
     
-    private func convertToUser(info: UserInfo) -> ChatUserProfile {
+    fileprivate func convertToUser(info: UserInfo) -> ChatUserProfile {
         let user = ChatUserProfile()
         user.id = info.userId ?? ""
         user.nickname = info.nickname ?? ""
+        if let remark = ChatClient.shared().contactManager?.getContact(user.id)?.remark {
+            user.remark = remark
+        }
         user.avatarURL = info.avatarUrl ?? ""
         return user
     }
@@ -130,7 +150,6 @@ extension UserServiceImplement:UserServiceProtocol {
 }
 
 //MARK: - ChatClientDelegate
-//MARK: - ChatClientDelegate
 extension UserServiceImplement: ChatClientListener {
     public func tokenDidExpire(_ aErrorCode: ChatErrorCode) {
         for response in self.responseDelegates.allObjects {
@@ -144,11 +163,9 @@ extension UserServiceImplement: ChatClientListener {
         }
     }
     
-    public func userAccountDidLogin(fromOtherDevice aDeviceName: String?) {
+    public func userAccountDidLoginFromOtherDevice(with info: LoginExtensionInfo?) {
         for response in self.responseDelegates.allObjects {
-            if let device = aDeviceName {
-                response.onUserLoginOtherDevice(device: device)
-            }
+            response.onUserLoginOtherDevice(device: info?.deviceName ?? "")
         }
     }
     
@@ -176,11 +193,32 @@ extension UserServiceImplement: ChatClientListener {
         }
     }
     
-    public func autoLoginDidCompleteWithError(_ aError: ChatError?) {
+    public func onDatabaseOpened(_ error: ChatError?, username: String) {
         for response in self.responseDelegates.allObjects {
-            response.onUserAutoLoginCompletion(error: aError)
+            response.onUserDatabaseOpened?(error: error, userId: username)
+        }
+    }
+
+    public func syncDataStart(with type: DataSyncType) {
+        for response in self.responseDelegates.allObjects {
+            response.onUserDataSyncStart?(type: type)
+        }
+    }
+
+    public func syncDataFinished(_ error: ChatError?, type: DataSyncType) {
+        for response in self.responseDelegates.allObjects {
+            response.onUserDataSyncFinished?(error: error, type: type)
         }
     }
 }
 
+extension UserServiceImplement: UserInfoManagerDelegate {
+    public func onSelfUserInfoUpdate(_ aUserInfo: UserInfo) {
+        ChatUIKitContext.shared?.updateChatAndUserTypeCaches(profiles: [self.convertToUser(info: aUserInfo)])
+    }
+
+    public func onUserInfoUpdate(_ aUserInfos: [String : UserInfo]) {
+        ChatUIKitContext.shared?.updateChatAndUserTypeCaches(profiles: aUserInfos.values.map { self.convertToUser(info: $0) })
+    }
+}
 

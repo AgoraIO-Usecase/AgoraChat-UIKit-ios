@@ -1,0 +1,24 @@
+{
+  "originHash" : "d97c5e8fdd7b15ea3aba14632c48f4fecc3ea0d485b65f9d09f585fca9641d8b",
+  "pins" : [
+    {
+      "identity" : "agorainfra_ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/AgoraIO/AgoraInfra_iOS.git",
+      "state" : {
+        "revision" : "4dfb30919815b1d4f2abb9e2cfbff345cfe5e493",
+        "version" : "1.3.16"
+      }
+    },
+    {
+      "identity" : "flanimatedimage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flipboard/FLAnimatedImage.git",
+      "state" : {
+        "revision" : "d4f07b6f164d53c1212c3e54d6460738b1981e9f",
+        "version" : "1.0.17"
+      }
+    }
+  ],
+  "version" : 3
+}

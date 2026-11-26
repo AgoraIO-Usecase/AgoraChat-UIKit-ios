@@ -17,9 +17,7 @@ import UIKit
     public var chatGroup = ChatGroup()
     
     public private(set) var service: GroupService = GroupServiceImplement()
-    
-    public private(set) var conversationService = ConversationServiceImplement()
-    
+
     /**
      A private array of `ActionSheetItem` objects representing the owner options in the group info view controller.
      Each `ActionSheetItem` contains a title, type, and tag.
@@ -59,11 +57,13 @@ import UIKit
         ChatNavigationBar(showLeftItem: true, textAlignment: .left, rightImages: self.chatGroup.isDisabled ? []:[UIImage(chatNamed: "more_detail")!] ,hiddenAvatar: true).backgroundColor(.clear)
     }
     
-    @UserDefault("EaseChatUIKit_conversation_mute_map", defaultValue: Dictionary<String,Dictionary<String,Int>>()) private var muteMap
+    public var isConversationMuted: Bool {
+        (ChatClient.shared().chatManager?.getConversationWithConvId(self.chatGroup.groupId)?.disturbType ?? .all) != .all
+    }
     
     private lazy var jsons: [[Dictionary<String,Any>]] = {
         [
-            [["title":"group_details_button_members".chat.localize,"detail":"\(self.chatGroup.occupantsCount)","withSwitch": false,"switchValue":false],["title":"contact_details_switch_donotdisturb".chat.localize,"detail":"","withSwitch": true,"switchValue":self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[self.chatGroup.groupId] ?? 0 == 1],
+            [["title":"group_details_button_members".chat.localize,"detail":"\(self.chatGroup.occupantsCount)","withSwitch": false,"switchValue":false],["title":"contact_details_switch_donotdisturb".chat.localize,"detail":"","withSwitch": true,"switchValue":self.isConversationMuted],
                 ["title":"contact_details_button_clearchathistory".chat.localize,"detail":"","withSwitch": false,"switchValue":false]
          ],
          [
@@ -264,7 +264,7 @@ import UIKit
      Opens the chat conversation for the current group.
      
      This method is called when the user wants to open the chat conversation for the current group. It performs the following steps:
-     1. Acknowledges the conversation read by calling `ackConversationRead` method of the shared `ChatClient` instance.
+     1. Clears the conversation unread count by calling `clearConversationUnreadMessageCount` of the shared `ChatClient` instance.
      2. Checks if the previous view controller in the navigation stack is `MessageListController`.
          - If it is, pops to the view controller before that and then pushes a new instance of `ComponentsRegister.shared.MessageViewController` with the conversation ID and chat type set to `.group`.
          - If it is not, directly pushes a new instance of `ComponentsRegister.shared.MessageViewController` with the conversation ID and chat type set to `.group`.
@@ -274,7 +274,11 @@ import UIKit
      4. If there is no presenting view controller, creates a new instance of `ComponentsRegister.shared.MessageViewController` with the conversation ID and chat type set to `.group` and navigates to it using `ControllerStack.toDestination` method.
      */
     @objc open func alreadyChat() {
-        ChatClient.shared().chatManager?.ackConversationRead(self.chatGroup.groupId)
+        ChatClient.shared().chatManager?.clearConversationUnreadMessageCount(self.chatGroup.groupId) { error in
+            if let error = error {
+                consoleLogInfo("clearConversationUnreadMessageCount error:\(error.errorDescription ?? "")", type: .error)
+            }
+        }
         if let count = self.navigationController?.viewControllers.count {
             if self.navigationController?.viewControllers[safe: count - 2] is MessageListController {
                 if let root = self.navigationController?.viewControllers[safe: count - 3] {
@@ -607,23 +611,31 @@ extension GroupInfoViewController: UITableViewDelegate,UITableViewDataSource {
             - indexPath: The index path of the cell containing the switch.
     */
     @objc open func switchChanged(isOn: Bool, indexPath: IndexPath) {
+        guard let pushManager = ChatClient.shared().pushManager else {
+            self.menuList.reloadData()
+            return
+        }
         if let name = self.datas[safe: indexPath.section]?[safe: indexPath.row]?.title {
             if isOn {
-                self.conversationService.setSilentMode(conversationId: self.chatGroup.groupId) { [weak self] result, error in
+                let params = SilentModeParam(paramType: .remindType)
+                params.remindType = .mentionOnly
+                pushManager.setSilentModeForConversation(self.chatGroup.groupId, conversationType: .groupChat, params: params) { [weak self] result, error in
                     guard let `self` = self else { return }
                     if error == nil {
                         self.processSilentMode(name: name, isOn: isOn)
                     } else {
+                        self.menuList.reloadData()
                         consoleLogInfo("ContactInfoViewController set silent mode error:\(error?.errorDescription ?? "")", type: .error)
                     
                     }
                 }
             } else {
-                self.conversationService.clearSilentMode(conversationId: self.chatGroup.groupId) { [weak self] result, error in
+                pushManager.clearRemindType(forConversation: self.chatGroup.groupId, conversationType: .groupChat) { [weak self] result, error in
                     guard let `self` = self else { return }
                     if error == nil {
                         self.processSilentMode(name: name, isOn: isOn)
                     } else {
+                        self.menuList.reloadData()
                         consoleLogInfo("ContactInfoViewController clear silent mode error:\(error?.errorDescription ?? "")", type: .error)
                     }
                 }
@@ -632,13 +644,9 @@ extension GroupInfoViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     @objc open func processSilentMode(name: String,isOn: Bool) {
-        if var userMap = self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] {
-            userMap[self.chatGroup.groupId] = isOn ? 1:0
-            self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] = userMap
-        } else {
-            self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] = [self.chatGroup.groupId:isOn ? 1:0]
-        }
         if name == "contact_details_switch_donotdisturb".chat.localize,let groupId = self.chatGroup.groupId {
+            self.datas.flatMap { $0 }.first(where: { $0.title == name })?.switchValue = isOn
+            self.menuList.reloadData()
             NotificationCenter.default.post(name: Notification.Name(rawValue: disturb_change), object: nil,userInfo: ["id":groupId,"value":isOn])
         }
     }

@@ -202,9 +202,16 @@ public let MessageInputBarHeight = CGFloat(52)
     
     open override var frame: CGRect {
         didSet {
+            guard self.frame.size != oldValue.size else { return }
+            let inputWasActive = self.inputBar.isInputActive
             self.oldFrame = self.frame
-            self.messageList.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-MessageInputBarHeight)
-            self.inputBar.resetFrame(newFrame: CGRect(x: 0, y: self.frame.height-MessageInputBarHeight-BottomBarHeight, width: self.frame.width, height: MessageInputBarHeight))
+            let inputFrame = CGRect(x: 0, y: self.frame.height-MessageInputBarHeight-BottomBarHeight, width: self.frame.width, height: MessageInputBarHeight)
+            self.inputBar.updateContainerFrame(newFrame: inputFrame, preserveInputState: inputWasActive)
+            if inputWasActive {
+                self.inputBar.textViewFirstResponder?(true)
+            } else {
+                self.messageList.frame = CGRect(x: 0, y: 0, width: self.frame.width, height: self.frame.height-BottomBarHeight-MessageInputBarHeight)
+            }
             self.editBottomBar.frame = CGRect(x: 0, y: self.frame.height-MessageInputBarHeight-BottomBarHeight, width: self.frame.width, height: 52)
             self.replyBar.frame = CGRect(x: 0, y: self.inputBar.frame.minY-MessageInputBarHeight, width: self.frame.width, height: 53)
         }
@@ -1043,7 +1050,7 @@ extension MessageListView: IMessageListViewDriver {
     private func convertStatus(message: ChatMessage) -> ChatMessageStatus {
         switch message.status {
         case .succeed:
-            if message.isReadAcked {
+            if message.isPeerRead {
                 return .read
             }
             if message.isDeliverAcked {
@@ -1229,6 +1236,4 @@ extension MessageListView: IMessageListViewDriver {
     
     
 }
-
-
 

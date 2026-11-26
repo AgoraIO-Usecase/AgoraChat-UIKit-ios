@@ -15,13 +15,13 @@ import UIKit
     
     private var index = 0
     
-    private var page = 0
-    
-    private var pageSize = 20
-    
     private var searchKeyWord = ""
     
     private var searchMode = false
+
+    private lazy var contactService: ContactServiceProtocol = ChatUIKitClient.shared.contactService ?? ContactServiceImplement()
+
+    private let groupService: GroupService = GroupServiceImplement()
         
     private var datas = [ChatUserProfileProtocol]() {
         didSet {
@@ -51,7 +51,7 @@ import UIKit
             } else {
                 self?.targetsList.tableHeaderView = nil
             }
-            self?.fillDatas(refresh: true)
+            self?.fillDatas()
         }
     }()
     
@@ -80,8 +80,6 @@ import UIKit
     }()
     
     public var dismissClosure: ((Bool) -> Void)?
-        
-    private var noMoreGroup = false
     
     public required init(messages: [ChatMessage],combine: Bool = true) {
         self.messages = messages
@@ -93,6 +91,10 @@ import UIKit
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        self.contactService.unregisterEmergencyListener(listener: self)
+    }
+
     open override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.dismissClosure?(self.forwarded)
@@ -104,85 +106,58 @@ import UIKit
         self.view.addSubViews([self.indicator,self.toolBar,self.targetsList])
         // Do any additional setup after loading the view.
         self.targetsList.keyboardDismissMode = .onDrag
-        self.fillDatas(refresh: true)
+        self.contactService.registerEmergencyListener(listener: self)
+        self.fillDatas()
         Theme.registerSwitchThemeViews(view: self)
         self.switchTheme(style: Theme.style)
     }
     
-    open func fillDatas(refresh: Bool) {
-        if refresh {
-            if self.index == 0 {
-                self.fetchContacts()
-            } else {
-                self.page = 0
-                self.datas.removeAll()
-                self.fetchGroups()
-            }
+    open func fillDatas() {
+        if self.index == 0 {
+            self.fetchContacts()
         } else {
-            if self.index == 1 {
-                self.fetchGroups()
-            }
+            self.fetchGroups()
         }
     }
    
     open func fetchContacts() {
-        if !UserDefaults.standard.bool(forKey: "EaseChatUIKit_contact_fetch_server_finished"+saveIdentifier) {
-            ChatClient.shared().contactManager?.getAllContactsFromServer(completion: { [weak self] contacts, error in
-                if error == nil {
-                    UserDefaults.standard.set(true, forKey: "EaseChatUIKit_contact_fetch_server_finished"+saveIdentifier)
-                    if let contacts = ChatClient.shared().contactManager?.getAllContacts() {
-                        self?.datas.removeAll()
-                        self?.datas = contacts.map {
-                            let profile = ChatUserProfile()
-                            profile.id = $0.userId
-                            profile.nickname = ChatUIKitContext.shared?.userCache?[$0.userId]?.nickname ?? ""
-                            profile.remark = $0.remark ?? ""
-                            profile.avatarURL = ChatUIKitContext.shared?.userCache?[$0.userId]?.avatarURL ?? ""
-                            return profile
-                        }
-                        self?.targetsList.reloadData()
-                    }
-                } else {
-                    consoleLogInfo("ForwardTargetViewController fetchContacts error:\(error?.errorDescription ?? "")", type: .error)
-                }
-            })
-        } else {
-            let contacts = ChatClient.shared().contactManager?.getAllContacts() ?? []
+        if let contacts = ChatClient.shared().contactManager?.getAllContacts() {
             self.datas.removeAll()
-            self.datas = contacts.map {
-                let profile = ChatUserProfile()
-                profile.id = $0.userId
-                profile.nickname = ChatUIKitContext.shared?.userCache?[$0.userId]?.nickname ?? ""
-                profile.remark = $0.remark ?? ""
-                profile.avatarURL = ChatUIKitContext.shared?.userCache?[$0.userId]?.avatarURL ?? ""
-                return profile
-            }
+            self.datas = contacts.map { self.profile(from: $0) }
             self.targetsList.reloadData()
         }
     }
     
+    private func profile(from contact: Contact) -> ChatUserProfileProtocol {
+        let profile = ChatUserProfile()
+        profile.id = contact.userId
+        profile.nickname = contact.userInfo?.nickname ?? ChatUIKitContext.shared?.userCache?[contact.userId]?.nickname ?? ""
+        profile.remark = contact.remark ?? ""
+        profile.avatarURL = contact.userInfo?.avatarUrl ?? ChatUIKitContext.shared?.userCache?[contact.userId]?.avatarURL ?? ""
+        return profile
+    }
+
     open func fetchGroups() {
-        ChatClient.shared().groupManager?.getJoinedGroupsFromServer(withPage: self.page, pageSize: self.pageSize, needMemberCount: false, needRole: false, completion: { [weak self] groups, error in
-            if error == nil {
-                if let groups = groups,let size = self?.pageSize {
-                    if groups.count < size {
-                        self?.noMoreGroup = true
-                    }
-                    self?.datas.append(contentsOf: groups.map {
-                        let profile = ChatUserProfile()
-                        profile.id = $0.groupId
-                        profile.nickname = $0.groupName
-                        profile.avatarURL = ChatUIKitContext.shared?.groupCache?[$0.groupId]?.avatarURL ?? ""
-                        return profile
-                    })
-                    self?.targetsList.reloadData()
-                }
-                self?.page += 1
-            } else {
-                consoleLogInfo("ForwardTargetViewController fetchGroups error:\(error?.errorDescription ?? "")", type: .error)
-            }
-        })
-        
+        // SDK 5.0 removed the server fetch API. Joined groups are synced by the SDK after login,
+        // so read them all from the local database via the group service.
+        let groups = self.groupService.loadLocalJoinedGroups()
+        self.datas = groups.map {
+            let profile = ChatUserProfile()
+            profile.id = $0.groupId
+            profile.nickname = $0.groupName
+            profile.avatarURL = ChatUIKitContext.shared?.groupCache?[$0.groupId]?.avatarURL ?? ""
+            return profile
+        }
+        self.targetsList.reloadData()
+    }
+}
+
+extension ForwardTargetViewController: ContactEmergencyListener {
+    public func onResult(error: ChatError?, type: ContactEmergencyType, operatorId: String) {
+        guard type == .fetchContacts,self.index == 0 else { return }
+        DispatchQueue.main.async { [weak self] in
+            self?.fetchContacts()
+        }
     }
 }
 
@@ -232,79 +207,37 @@ extension ForwardTargetViewController: UITableViewDelegate,UITableViewDataSource
         return cell ?? UITableViewCell()
     }
     
-    public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if self.index == 1,indexPath.row > self.datas.count - 2,!self.noMoreGroup {
-            self.fetchGroups()
-        }
-    }
-    
     @objc open func forwardMessages(indexPath: IndexPath) {
-        guard var body = self.messages.first?.body else { return }
-
-        if self.combineForward {
-            body = ChatCombineMessageBody(
-                title: "Chat History".chat.localize,
-                summary: self.forwardSummary(),
-                compatibleText: "[Chat History]",
-                messageIdList: self.messages
-                    .filter {
-                        ChatClient.shared().chatManager?
-                            .getMessageWithMessageId($0.messageId)?
-                            .status == .succeed
-                    }
-                    .map { $0.messageId }
-            )
-        }
-
-        let target = self.searchMode
-            ? self.searchResults[safe: indexPath.row]
-            : self.datas[safe: indexPath.row]
-
-        guard let target else { return }
-
-        let message = ChatMessage(
-            conversationID: target.id,
-            body: body,
-            ext: ChatUIKitContext.shared?.currentUser?.toJsonObject()
-        )
-
-        message.chatType = self.index == 0 ? .chat : .groupChat
-
-        ChatClient.shared().chatManager?.send(
-            message,
-            progress: nil,
-            completion: { [weak self] _, error in
-                guard let self else { return }
-
-                if let error {
-                    self.showToast(
-                        toast: error.errorDescription
-                    )
-
-                    consoleLogInfo(
-                        "ForwardTargetViewController forwardMessages error:\(error.errorDescription)",
-                        type: .error
-                    )
-                    return
-                }
-
-                self.forwarded = true
-
-                if let cell = self.targetsList.cellForRow(at: indexPath) as? ForwardTargetCell {
-                    var profile = ChatUserProfile()
-
-                    if let user = target as? ChatUserProfile {
-                        profile = user
-                    }
-
-                    cell.refresh(
-                        info: profile,
-                        keyword: self.searchKeyWord,
-                        forward: .forwarded
-                    )
-                }
+        if var body = self.messages.first?.body {
+            if self.combineForward {
+                body = ChatCombineMessageBody(title: "Chat History".chat.localize, summary: self.forwardSummary(), compatibleText: "[Chat History]", messageIdList: self.messages.filter({ChatClient.shared().chatManager?.getMessageWithMessageId($0.messageId)?.status == .succeed}).map({ $0.messageId }))
             }
-        )
+
+            var conversationId = ""
+            if self.searchMode {
+                conversationId = self.searchResults[indexPath.row].id
+            } else {
+                conversationId = self.datas[indexPath.row].id
+            }
+            let message =  ChatMessage(conversationID: conversationId, body: body, ext: nil)
+            message.chatType = self.index == 0 ? .chat:.groupChat
+            ChatClient.shared().chatManager?.send(message, progress: nil, completion: { [weak self] successMessage, error in
+                guard let `self` = self else { return }
+                if error == nil {
+                    self.forwarded = true
+                    if let cell = self.targetsList.cellForRow(at: indexPath) as? ForwardTargetCell {
+                        var profile = ChatUserProfile()
+                        if let user = (self.searchMode ? self.searchResults:self.datas)[safe: indexPath.row] as? ChatUserProfile {
+                            profile = user
+                        }
+                        cell.refresh(info: profile, keyword: self.searchKeyWord, forward: .forwarded)
+                    }
+                } else {
+                    self.showToast(toast: error?.errorDescription ?? "Failed to forward message")
+                    consoleLogInfo("ForwardTargetViewController forwardMessages error:\(error?.errorDescription ?? "")", type: .error)
+                }
+            })
+        }
     }
     
     @objc open func forwardSummary() -> String {

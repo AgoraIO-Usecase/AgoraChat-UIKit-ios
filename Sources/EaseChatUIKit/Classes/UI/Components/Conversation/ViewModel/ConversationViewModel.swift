@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 import AudioToolbox
 
 public let disturb_change = "EaseUIKit_do_not_disturb_changed"
@@ -13,12 +14,13 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
 /// Bind service and driver
 @objc open class ConversationViewModel: NSObject {
     
-    /// Map to store session settings do not disturb.
-    @UserDefault("EaseChatUIKit_conversation_mute_map", defaultValue: Dictionary<String,Dictionary<String,Int>>()) public private(set) var muteMap
-    
     /// When conversation clicked.
     @objc public var toChat: ((IndexPath,ConversationInfo) -> Void)?
     
+    /// Callback when the conversation data-sync status changes after login.
+    /// `true` means the SDK is syncing conversations (show loading), `false` means finished (hide loading).
+    @objc public var conversationSyncClosure: ((Bool) -> Void)?
+
     @objc public var chatId = ""
     
     public required override init() {
@@ -70,6 +72,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
         self.multiService?.unbindMultiDeviceListener(listener: self)
         self.multiService?.bindMultiDeviceListener(listener: self)
         self.driver?.addActionHandler(actionHandler: self)
+        ChatUIKitClient.shared.addDataSyncListener(self)
         self.loadExistLocalDataIfEmptyFetchServer()
     }
     
@@ -124,6 +127,7 @@ public let disturb_change = "EaseUIKit_do_not_disturb_changed"
         self.driver?.removeActionHandler(actionHandler: self)
         self.service?.unbindConversationEventsListener(listener: self)
         self.multiService?.unbindMultiDeviceListener(listener: self)
+        ChatUIKitClient.shared.removeDataSyncListener(self)
         self.driver = nil
         self.service = nil
         self.multiService = nil
@@ -151,6 +155,12 @@ extension ConversationViewModel: ConversationListActionEventsDelegate {
         var groupChats = [String]()
         for id in ids {
             if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(id) {
+                // SDK 会话昵称、头像都齐时，不再向接入方 provider 要资料
+                let sdkName = conversation.conversationName() ?? ""
+                let sdkAvatar = conversation.conversationAvatar() ?? ""
+                if !sdkName.isEmpty, !sdkAvatar.isEmpty {
+                    continue
+                }
                 if conversation.type == .chat {
                     if let userCache = ChatUIKitContext.shared?.userCache?[id],!userCache.nickname.isEmpty {
                         continue
@@ -164,29 +174,25 @@ extension ConversationViewModel: ConversationListActionEventsDelegate {
                 }
             }
         }
-        if ChatUIKitContext.shared?.userProfileProvider != nil {
+        if !privateChats.isEmpty, ChatUIKitContext.shared?.userProfileProvider != nil {
             let userIds = privateChats.map { $0 }
             Task(priority: .background) { [weak self] in
                 guard let `self` = self else { return }
                 let profiles = await ChatUIKitContext.shared?.userProfileProvider?.fetchProfiles(profileIds: userIds) ?? []
                 self.cacheUser(profiles: profiles)
-                DispatchQueue.main.async {
-                    self.renderDriver(infos: profiles)
-                }
+                self.renderDriver(infos: profiles)
             }
         }
-        if ChatUIKitContext.shared?.groupProfileProvider != nil {
+        if !groupChats.isEmpty, ChatUIKitContext.shared?.groupProfileProvider != nil {
             let groupIds = groupChats
             Task(priority: .background) { [weak self] in
                 guard let `self` = self else { return }
                 let profiles = await ChatUIKitContext.shared?.groupProfileProvider?.fetchGroupProfiles(profileIds: groupIds) ?? []
                 self.cacheGroup(profiles: profiles)
-                DispatchQueue.main.async {
-                    self.driver?.refreshProfiles(infos: profiles)
-                }
+                self.driver?.refreshProfiles(infos: profiles)
             }
         }
-        if ChatUIKitContext.shared?.userProfileProviderOC != nil {
+        if !privateChats.isEmpty, ChatUIKitContext.shared?.userProfileProviderOC != nil {
             ChatUIKitContext.shared?.userProfileProviderOC?.fetchProfiles(profileIds: privateChats, completion: { [weak self] profiles in
                 self?.cacheUser(profiles: profiles)
                 DispatchQueue.main.async {
@@ -194,7 +200,7 @@ extension ConversationViewModel: ConversationListActionEventsDelegate {
                 }
             })
         }
-        if ChatUIKitContext.shared?.groupProfileProviderOC != nil {
+        if !groupChats.isEmpty, ChatUIKitContext.shared?.groupProfileProviderOC != nil {
             ChatUIKitContext.shared?.groupProfileProviderOC?.fetchGroupProfiles(profileIds: groupChats, completion: { [weak self] profiles in
                 self?.cacheGroup(profiles: profiles)
                 DispatchQueue.main.async {
@@ -268,14 +274,7 @@ extension ConversationViewModel: ConversationListActionEventsDelegate {
             if error != nil {
                 consoleLogInfo("onConversationSwipe mute:\(error?.errorDescription ?? "")", type: .error)
             } else {
-                let currentUser = ChatUIKitContext.shared?.currentUserId ?? ""
-                var conversationMap = self?.muteMap[currentUser]
-                if conversationMap != nil {
-                    conversationMap?[info.id] = 1
-                } else {
-                    conversationMap = [info.id:1]
-                }
-                self?.muteMap[currentUser] = conversationMap
+                info.doNotDisturb = true
                 self?.driver?.swipeMenuOperation(info: info, type: .mute)
                 self?.updateUnreadCount()
             }
@@ -321,14 +320,7 @@ extension ConversationViewModel: ConversationListActionEventsDelegate {
             if error != nil {
                 consoleLogInfo("onConversationSwipe unmute:\(error?.errorDescription ?? "")", type: .error)
             } else {
-                let currentUser = ChatUIKitContext.shared?.currentUserId ?? ""
-                var conversationMap = self.muteMap[currentUser]
-                if conversationMap != nil {
-                    conversationMap?[info.id] = 0
-                } else {
-                    conversationMap = [info.id:0]
-                }
-                self.muteMap[currentUser] = conversationMap
+                info.doNotDisturb = false
                 self.driver?.swipeMenuOperation(info: info, type: .unmute)
                 self.updateUnreadCount()
             }
@@ -365,7 +357,11 @@ extension ConversationViewModel: ConversationListActionEventsDelegate {
     @objc open func conversationDidSelected(indexPath: IndexPath, info: ConversationInfo) {
         self.chatId = info.id
         self.service?.markAllMessagesAsRead(conversationId: info.id)
-        ChatClient.shared().chatManager?.ackConversationRead(info.id)
+        ChatClient.shared().chatManager?.clearConversationUnreadMessageCount(info.id) { error in
+            if error != nil {
+                consoleLogInfo("onConversationSwipe read:\(error?.errorDescription ?? "")", type: .error)
+            }
+        }
         self.driver?.swipeMenuOperation(info: info, type: .read)
         self.toChat?(indexPath,info)
         self.updateUnreadCount()
@@ -433,6 +429,7 @@ extension ConversationViewModel: ConversationServiceListener {
     }
     
     
+
     public func onChatConversationListDidChanged(list: [ConversationInfo]) {
         if let infos = ChatClient.shared().chatManager?.getAllConversations(true) {
             let items = self.mapper(objects: infos)
@@ -490,7 +487,16 @@ extension ConversationViewModel: MultiDeviceListener {
                 self.driver?.refreshList(infos: self.mapper(objects: infos))
                 self.service?.handleResult(error: nil, type: .delete)
             }
-            
+        case .conversationMuteInfoChanged:
+            if let infos = ChatClient.shared().chatManager?.getAllConversations(true) {
+                self.driver?.refreshList(infos: self.mapper(objects: infos))
+                self.service?.handleResult(error: nil, type: .setSilent)
+            }
+        case .conversationUnreadMessageCountCleared,.allConversationUnreadMessageCountCleared:
+            if let infos = ChatClient.shared().chatManager?.getAllConversations(true) {
+                self.driver?.refreshList(infos: self.mapper(objects: infos))
+                self.service?.handleResult(error: nil, type: .read)
+            }
         default: break
         }
     }
@@ -526,13 +532,32 @@ extension ConversationViewModel: MultiDeviceListener {
             conversation.nickname = profile?.nickname ?? ""
             conversation.remark = profile?.remark ?? ""
             conversation.avatarURL = profile?.avatarURL ?? ""
-            conversation.doNotDisturb = false
-            if let silentMode = self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[$0.conversationId] {
-                conversation.doNotDisturb = silentMode != 0
-            }
+            conversation.applySDKDisplayInfoIfNeeded(from: $0)
+            conversation.doNotDisturb = $0.disturbType != .all
             
             _ = conversation.showContent
             return conversation
+        }
+    }
+}
+
+//MARK: - ChatDataSyncListener
+extension ConversationViewModel: ChatDataSyncListener {
+
+    public var interestedSyncType: DataSyncType { .conversations }
+
+    public func onChatDatabaseOpened() {
+        self.service?.loadExistConversations()
+    }
+
+    public func onChatDataSyncStart(type: DataSyncType) {
+        self.conversationSyncClosure?(true)
+    }
+
+    public func onChatDataSyncFinished(error: ChatError?, type: DataSyncType) {
+        self.conversationSyncClosure?(false)
+        if error == nil {
+            self.service?.loadExistConversations()
         }
     }
 }
