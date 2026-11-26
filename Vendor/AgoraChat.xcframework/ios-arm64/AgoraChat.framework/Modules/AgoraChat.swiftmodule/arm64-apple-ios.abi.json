@@ -1,0 +1,1126 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "AgoraChat",
+    "printedName": "AgoraChat",
+    "children": [
+      {
+        "kind": "TypeDecl",
+        "name": "AgoraChatMessageBaseBody",
+        "printedName": "AgoraChatMessageBaseBody",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "text",
+            "printedName": "text",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(content: Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO4textyACSS_tcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO4textyACSS_tcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "image",
+            "printedName": "image",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(localPath: Swift.String, displayName: Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO5imageyACSS_SStcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO5imageyACSS_SStcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "video",
+            "printedName": "video",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(localPath: Swift.String, displayName: Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO5videoyACSS_SStcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO5videoyACSS_SStcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "location",
+            "printedName": "location",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.Double, Swift.Double, Swift.String?, Swift.String?) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Double, Swift.Double, Swift.String?, Swift.String?) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(latitude: Swift.Double, longitude: Swift.Double, address: Swift.String?, buildingName: Swift.String?)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Double",
+                            "printedName": "Swift.Double",
+                            "usr": "s:Sd"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Double",
+                            "printedName": "Swift.Double",
+                            "usr": "s:Sd"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "Swift.String?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "Swift.String?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO8locationyACSd_SdSSSgAEtcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO8locationyACSd_SdSSSgAEtcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "voice",
+            "printedName": "voice",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(localPath: Swift.String, displayName: Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO5voiceyACSS_SStcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO5voiceyACSS_SStcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "file",
+            "printedName": "file",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String, Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(localPath: Swift.String, displayName: Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO4fileyACSS_SStcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO4fileyACSS_SStcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "cmd",
+            "printedName": "cmd",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(action: Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO3cmdyACSS_tcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO3cmdyACSS_tcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "custom",
+            "printedName": "custom",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String, [Swift.String : Swift.String]) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String, [Swift.String : Swift.String]) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(event: Swift.String, customExt: [Swift.String : Swift.String])",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Dictionary",
+                            "printedName": "[Swift.String : Swift.String]",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ],
+                            "usr": "s:SD"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO6customyACSS_SDyS2SGtcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO6customyACSS_SDyS2SGtcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "combine",
+            "printedName": "combine",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(AgoraChat.AgoraChatMessageBaseBody.Type) -> (Swift.String?, Swift.String?, Swift.String?, [Swift.String]) -> AgoraChat.AgoraChatMessageBaseBody",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String?, Swift.String?, Swift.String?, [Swift.String]) -> AgoraChat.AgoraChatMessageBaseBody",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(title: Swift.String?, summary: Swift.String?, compatibleText: Swift.String?, messageIdList: [Swift.String])",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "Swift.String?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "Swift.String?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "Swift.String?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Array",
+                            "printedName": "[Swift.String]",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "String",
+                                "printedName": "Swift.String",
+                                "usr": "s:SS"
+                              }
+                            ],
+                            "usr": "s:Sa"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AgoraChatMessageBaseBody",
+                        "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                        "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:9AgoraChat0aB15MessageBaseBodyO7combineyACSSSg_A2ESaySSGtcACmF",
+            "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO7combineyACSSSg_A2ESaySSGtcACmF",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:9AgoraChat0aB15MessageBaseBodyO",
+        "mangledName": "$s9AgoraChat0aB15MessageBaseBodyO",
+        "moduleName": "AgoraChat",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "AgoraChatClient",
+        "printedName": "AgoraChatClient",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "shared",
+            "printedName": "shared",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AgoraChatClient",
+                "printedName": "AgoraChat.AgoraChatClient",
+                "usr": "c:objc(cs)AgoraChatClient"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:So15AgoraChatClientC0aB0E6sharedABvpZ",
+            "mangledName": "$sSo15AgoraChatClientC0aB0E6sharedABvpZ",
+            "moduleName": "AgoraChat",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AgoraChatClient",
+                    "printedName": "AgoraChat.AgoraChatClient",
+                    "usr": "c:objc(cs)AgoraChatClient"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:So15AgoraChatClientC0aB0E6sharedABvgZ",
+                "mangledName": "$sSo15AgoraChatClientC0aB0E6sharedABvgZ",
+                "moduleName": "AgoraChat",
+                "static": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "isFromExtension": true,
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:objc(cs)AgoraChatClient",
+        "moduleName": "AgoraChat",
+        "isOpen": true,
+        "objc_name": "AgoraChatClient",
+        "declAttributes": [
+          "ObjC",
+          "Dynamic"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "isExternal": true,
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "AgoraChatMessage",
+        "printedName": "AgoraChatMessage",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "swiftBody",
+            "printedName": "swiftBody",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AgoraChatMessageBaseBody",
+                "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:So16AgoraChatMessageC0aB0E9swiftBodyAC0abc4BaseE0Ovp",
+            "mangledName": "$sSo16AgoraChatMessageC0aB0E9swiftBodyAC0abc4BaseE0Ovp",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AgoraChatMessageBaseBody",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                    "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:So16AgoraChatMessageC0aB0E9swiftBodyAC0abc4BaseE0Ovg",
+                "mangledName": "$sSo16AgoraChatMessageC0aB0E9swiftBodyAC0abc4BaseE0Ovg",
+                "moduleName": "AgoraChat",
+                "isFromExtension": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(conversationId:from:to:body:ext:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AgoraChatMessage",
+                "printedName": "AgoraChat.AgoraChatMessage",
+                "usr": "c:objc(cs)AgoraChatMessage"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "ImplicitlyUnwrappedOptional",
+                "printedName": "AgoraChat.AgoraChatMessageBaseBody?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AgoraChatMessageBaseBody",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                    "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "ImplicitlyUnwrappedOptional",
+                "printedName": "[Swift.AnyHashable : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.AnyHashable : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AnyHashable",
+                        "printedName": "Swift.AnyHashable",
+                        "usr": "s:s11AnyHashableV"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:So16AgoraChatMessageC0aB0E14conversationId4from2to4body3extABSS_S2SAC0abC8BaseBodyOSgSDys11AnyHashableVypGSgtcfc",
+            "mangledName": "$sSo16AgoraChatMessageC0aB0E14conversationId4from2to4body3extABSS_S2SAC0abC8BaseBodyOSgSDys11AnyHashableVypGSgtcfc",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "Convenience",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "init_kind": "Convenience"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(conversationId:body:ext:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "AgoraChatMessage",
+                "printedName": "AgoraChat.AgoraChatMessage",
+                "usr": "c:objc(cs)AgoraChatMessage"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "ImplicitlyUnwrappedOptional",
+                "printedName": "AgoraChat.AgoraChatMessageBaseBody?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "AgoraChatMessageBaseBody",
+                    "printedName": "AgoraChat.AgoraChatMessageBaseBody",
+                    "usr": "s:9AgoraChat0aB15MessageBaseBodyO"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "ImplicitlyUnwrappedOptional",
+                "printedName": "[Swift.AnyHashable : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.AnyHashable : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "AnyHashable",
+                        "printedName": "Swift.AnyHashable",
+                        "usr": "s:s11AnyHashableV"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:So16AgoraChatMessageC0aB0E14conversationId4body3extABSS_AC0abC8BaseBodyOSgSDys11AnyHashableVypGSgtcfc",
+            "mangledName": "$sSo16AgoraChatMessageC0aB0E14conversationId4body3extABSS_AC0abC8BaseBodyOSgSDys11AnyHashableVypGSgtcfc",
+            "moduleName": "AgoraChat",
+            "declAttributes": [
+              "Convenience",
+              "RawDocComment"
+            ],
+            "isFromExtension": true,
+            "init_kind": "Convenience"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:objc(cs)AgoraChatMessage",
+        "moduleName": "AgoraChat",
+        "isOpen": true,
+        "objc_name": "AgoraChatMessage",
+        "declAttributes": [
+          "ObjC",
+          "Dynamic"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "isExternal": true,
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          }
+        ]
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": []
+}

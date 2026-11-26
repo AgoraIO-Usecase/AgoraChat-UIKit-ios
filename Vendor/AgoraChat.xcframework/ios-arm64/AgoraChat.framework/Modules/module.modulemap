@@ -1,0 +1,11 @@
+framework module AgoraChat {
+  umbrella header "AgoraChat.h"
+  export *
+
+  module * { export * }
+}
+
+module AgoraChat.Swift {
+  header "AgoraChat-Swift.h"
+  requires objc
+}

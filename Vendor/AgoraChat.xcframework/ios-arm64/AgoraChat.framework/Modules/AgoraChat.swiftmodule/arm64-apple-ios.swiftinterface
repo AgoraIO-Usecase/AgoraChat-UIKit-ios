@@ -1,0 +1,32 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.0.2 effective-5.10 (swiftlang-6.0.2.1.2 clang-1600.0.26.4)
+// swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name AgoraChat
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface
+@_exported import AgoraChat
+import Swift
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+extension AgoraChat.AgoraChatClient {
+  public static var shared: AgoraChat.AgoraChatClient {
+    get
+  }
+}
+public enum AgoraChatMessageBaseBody {
+  case text(content: Swift.String)
+  case image(localPath: Swift.String, displayName: Swift.String)
+  case video(localPath: Swift.String, displayName: Swift.String)
+  case location(latitude: Swift.Double, longitude: Swift.Double, address: Swift.String?, buildingName: Swift.String?)
+  case voice(localPath: Swift.String, displayName: Swift.String)
+  case file(localPath: Swift.String, displayName: Swift.String)
+  case cmd(action: Swift.String)
+  case custom(event: Swift.String, customExt: Swift.Dictionary<Swift.String, Swift.String>)
+  case combine(title: Swift.String?, summary: Swift.String?, compatibleText: Swift.String?, messageIdList: [Swift.String])
+}
+extension AgoraChat.AgoraChatMessage {
+  public var swiftBody: AgoraChat.AgoraChatMessageBaseBody {
+    get
+  }
+  convenience public init(conversationId: Swift.String, from: Swift.String, to: Swift.String, body: AgoraChat.AgoraChatMessageBaseBody!, ext: [Swift.AnyHashable : Any]!)
+  convenience public init(conversationId: Swift.String, body: AgoraChat.AgoraChatMessageBaseBody!, ext: [Swift.AnyHashable : Any]!)
+}
