@@ -89,9 +89,11 @@ smoke app. It uses this checkout and does not require an IM account.
 The existing pod identity and version remain `chat-uikit` **2.2.0**. Until the
 matching SDK is publicly available, use the local specifications together:
 
-```ruby
-platform :ios, '15.0'
-use_frameworks!
+> 如果`pod install`失败报错 RuntimeError - `PBXGroup` attempted to initialize an object with unknown ISA `PBXFileSystemSynchronizedRootGroup` from attributes: `{"isa"=>"PBXFileSystemSynchronizedRootGroup"`，请尝试升级pod版本为1.14.3
+ Xcode16及其以下版本打开会报错 `Adjust the project format using a compatible version of Xcode to allow it to be opened by this version of Xcode.`
+
+## Swift Package Manager 
+Add the URL of this repository to your Xcode 15+ Project.
 
 target 'YourTarget' do
   pod 'chat-uikit', :path => '/path/to/AgoraChat-UIKit-ios'
