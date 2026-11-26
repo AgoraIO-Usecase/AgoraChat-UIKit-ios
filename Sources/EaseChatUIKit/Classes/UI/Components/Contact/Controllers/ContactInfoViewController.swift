@@ -22,9 +22,8 @@ import UIKit
  */
 @objc open class ContactInfoViewController: UIViewController {
     
-    public let service = ContactServiceImplement()
+    public let service: ContactServiceImplement = ChatUIKitClient.shared.contactService as? ContactServiceImplement ?? ContactServiceImplement()
     
-    public let conversationService = ConversationServiceImplement()
     
     public private(set) var profile: ChatUserProfileProtocol = ChatUserProfile()
     
@@ -32,7 +31,9 @@ import UIKit
     
     private var contacts = [String]()
     
-    @UserDefault("EaseChatUIKit_conversation_mute_map", defaultValue: Dictionary<String,Dictionary<String,Int>>()) public private(set) var muteMap
+    public var isConversationMuted: Bool {
+        (ChatClient.shared().chatManager?.getConversationWithConvId(self.profile.id)?.disturbType ?? .all) != .all
+    }
     
     @UserDefault("EaseChatUIKit_contact_block_list_exist", defaultValue: Dictionary<String,Bool>()) public private(set) var blockListExist
     
@@ -47,7 +48,7 @@ import UIKit
             ["title":"contact_details_switch_donotdisturb".chat.localize,
              "detail":"",
              "withSwitch": true,
-             "switchValue":self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[self.profile.id] ?? 0 == 1],
+             "switchValue":self.isConversationMuted],
             ["title":"contact_details_switch_block".chat.localize,
              "detail":"",
              "withSwitch": true,
@@ -60,7 +61,7 @@ import UIKit
             ["title":"contact_details_switch_donotdisturb".chat.localize,
              "detail":"",
              "withSwitch": true,
-             "switchValue":self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[self.profile.id] ?? 0 == 1],
+             "switchValue":self.isConversationMuted],
             ["title":"contact_details_button_clearchathistory".chat.localize,
              "detail":"",
              "withSwitch": false,
@@ -198,7 +199,7 @@ import UIKit
             ["title":"contact_details_switch_donotdisturb".chat.localize,
              "detail":"",
              "withSwitch": true,
-             "switchValue":self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[self.profile.id] ?? 0 == 1],
+             "switchValue":self.isConversationMuted],
             ["title":"contact_details_switch_block".chat.localize,
              "detail":"",
              "withSwitch": true,
@@ -218,7 +219,7 @@ import UIKit
             ["title":"contact_details_switch_donotdisturb".chat.localize,
              "detail":"",
              "withSwitch": true,
-             "switchValue":self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[self.profile.id] ?? 0 == 1],
+             "switchValue":self.isConversationMuted],
             ["title":"contact_details_button_clearchathistory".chat.localize,
              "detail":"",
              "withSwitch": false,
@@ -239,20 +240,10 @@ import UIKit
      This method first checks if there are any locally stored contacts. If there are, it updates the `contacts` array with the locally stored contacts and calls the `setup()` method. If there are no locally stored contacts, it fetches the contacts from the server using the `getContactsFromServer(completion:)` method of the `ChatClient`'s `contactManager`. Once the contacts are fetched, it updates the `contacts` array and calls the `setup()` method.
      */
     @objc open func fetchAllContactIds() {
-        if let allContacts = ChatClient.shared().contactManager?.getContacts() {
-            if allContacts.count > 0 {
-                self.contacts = allContacts
-                self.setup()
-                self.fetchBlockList()
-            } else {
-                ChatClient.shared().contactManager?.getContactsFromServer(completion: { [weak self] contacts, error in
-                    if error == nil {
-                        self?.contacts = contacts ?? []
-                        self?.setup()
-                        self?.fetchBlockList()
-                    }
-                })
-            }
+        if let contacts = ChatClient.shared().contactManager?.getContacts() {
+            self.contacts = contacts
+            self.setup()
+            self.fetchBlockList()
         }
     }
     
@@ -354,9 +345,13 @@ import UIKit
      4. If there is no presenting view controller, creates a new instance of MessageViewController with the selected conversation ID and sets it as the desired view controller using ControllerStack.
      */
     @objc open func alreadyChat() {
-        ChatClient.shared().chatManager?.ackConversationRead(self.profile.id)
+        ChatClient.shared().chatManager?.clearConversationUnreadMessageCount(self.profile.id) { error in
+            if error != nil {
+                consoleLogInfo("ContactInfoViewController clearConversationUnreadMessageCount error:\(error?.errorDescription ?? "")", type: .error)
+            }
+        }
         if let count = self.navigationController?.viewControllers.count {
-            if let previousViewController = self.navigationController?.viewControllers[safe: count - 2] as? MessageListController {
+            if let _ = self.navigationController?.viewControllers[safe: count - 2] as? MessageListController {
                 if let root = self.navigationController?.viewControllers[safe: count - 3] {
                     self.navigationController?.popToViewController(root, animated: true)
                     let vc = ComponentsRegister.shared.MessageViewController.init(conversationId: self.profile.id)
@@ -532,7 +527,6 @@ extension ContactInfoViewController: UITableViewDelegate,UITableViewDataSource {
             switch name {
             case "contact_details_switch_donotdisturb".chat.localize:
                 self.operateDisturb(isOn: isOn,name: name)
-                self.datas[indexPath.row].switchValue = isOn
             case "contact_details_switch_block".chat.localize:
                 self.operateBlock(isOn: isOn, name: name)
             default:
@@ -542,22 +536,30 @@ extension ContactInfoViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     @objc open func operateDisturb(isOn: Bool,name: String) {
+        guard let pushManager = ChatClient.shared().pushManager else {
+            self.menuList.reloadData()
+            return
+        }
         if isOn {
-            self.conversationService.setSilentMode(conversationId: self.profile.id) { [weak self] result, error in
+            let params = SilentModeParam(paramType: .remindType)
+            params.remindType = .none
+            pushManager.setSilentModeForConversation(self.profile.id, conversationType: .chat, params: params) { [weak self] result, error in
                 guard let `self` = self else { return }
                 if error == nil {
                     self.processSilentMode(name: name, isOn: isOn)
                 } else {
+                    self.menuList.reloadData()
                     consoleLogInfo("ContactInfoViewController set silent mode error:\(error?.errorDescription ?? "")", type: .error)
                 
                 }
             }
         } else {
-            self.conversationService.clearSilentMode(conversationId: self.profile.id) { [weak self] result, error in
+            pushManager.clearRemindType(forConversation: self.profile.id, conversationType: .chat) {[weak self] result, error in
                 guard let `self` = self else { return }
                 if error == nil {
                     self.processSilentMode(name: name, isOn: isOn)
                 } else {
+                    self.menuList.reloadData()
                     consoleLogInfo("ContactInfoViewController clear silent mode error:\(error?.errorDescription ?? "")", type: .error)
                 }
             }
@@ -605,13 +607,9 @@ extension ContactInfoViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     @objc open func processSilentMode(name: String,isOn: Bool) {
-        if var userMap = self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] {
-            userMap[self.profile.id] = isOn ? 1:0
-            self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] = userMap
-        } else {
-            self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""] = [self.profile.id:isOn ? 1:0]
-        }
         if name == "contact_details_switch_donotdisturb".chat.localize {
+            self.datas.first(where: { $0.title == name })?.switchValue = isOn
+            self.menuList.reloadData()
             NotificationCenter.default.post(name: Notification.Name(rawValue: disturb_change), object: nil,userInfo: ["id":self.profile.id,"value":isOn])
         }
     }

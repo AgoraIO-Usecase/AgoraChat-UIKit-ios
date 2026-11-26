@@ -11,12 +11,11 @@ s.author           = { 'agora' => 'dev@agora.com' }
 s.source = { :git => 'https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios.git', :tag => s.version.to_s}
 s.ios.deployment_target = '15.0'
 
-s.xcconfig = {'ENABLE_BITCODE' => 'NO'}
 
 
-s.source_files = [ 'Sources/EaseChatUIKit/Classes/**/*.{h,swift}' ]
+s.source_files = [ 'Sources/EaseChatUIKit/Classes/**/*.swift', 'Sources/EaseChatUIKit/Classes/UI/Core/Foundation/chat-uikit-Bridge.h' ]
 s.resources = ['Sources/EaseChatUIKit/Classes/UI/**/*.bundle','Sources/EaseChatUIKit/Classes/UI/**/*.xcprivacy']
-s.dependency 'Agora_Chat_iOS', '1.4.0'
+s.dependency 'Agora_Chat_iOS', '5.2.0'
 s.dependency 'FLAnimatedImage', '~> 1.0'
 s.static_framework = true
 
@@ -28,21 +27,23 @@ s.prefix_header_contents = '
 #import "chat-uikit-Bridge.h"
 # endif
 '
-s.public_header_files = 'Sources/EaseChatUIKit/Classes/UI/Foundation/chat-uikit-Bridge.h'
+s.public_header_files = 'Sources/EaseChatUIKit/Classes/UI/Core/Foundation/chat-uikit-Bridge.h'
 
-s.preserve_paths =  ['Sources/EaseChatUIKit/Classes/UI/Core/Foundation/third-party/**/*.a','Sources/EaseChatUIKit/Classes/UI/Core/Foundation/third-party/vo-amrwbenc/lib/*.a']
-
-
-s.vendored_libraries = ['Sources/EaseChatUIKit/Classes/UI/Core/Foundation/third-party/**/*.a','Sources/EaseChatUIKit/Classes/UI/Core/Foundation/third-party/vo-amrwbenc/lib/*.a']
-
-s.xcconfig = { 'LIBRARY_SEARCH_PATHS' => '$(PODS_ROOT)/Sources/EaseChatUIKit/Classes/UI/Core/Foundation/third-party/**/*' } #
-
-
-s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',
-'VALID_ARCHS' => 'arm64 armv7 x86_64'
-}
-s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+s.vendored_frameworks = 'Sources/EaseChatUIKit/Classes/UI/Core/Foundation/third-party/AMRCodec.xcframework'
+s.pod_target_xcconfig = { 'ENABLE_BITCODE' => 'NO' }
 
 s.frameworks = 'UIKit', 'Foundation', 'Combine', 'AudioToolbox', 'AVFoundation','AVFAudio','Photos'
 
+
+s.app_spec 'TestHost' do |app|
+  app.source_files = 'Tests/HostApp/*.swift'
+  app.resources = 'Tests/AgoraChatUIKitTests/HostResources/**/*'
+  app.info_plist = { 'UILaunchScreen' => {} }
+end
+s.test_spec 'IntegrationTests' do |test|
+  test.source_files = 'Tests/AgoraChatUIKitTests/*.swift'
+  test.dependency 'chat-uikit/TestHost'
+  test.requires_app_host = true
+  test.app_host_name = 'chat-uikit/TestHost'
+end
 end

@@ -66,7 +66,60 @@ extension UIImage {
     }
 }
 
+import ImageIO
+import UniformTypeIdentifiers
 
+extension UIImage {
+
+    func writeImage(
+        to url: URL,
+        metadata: [String: Any]? = nil,
+        compression: CGFloat = 0.95,
+        typeIdentifier: String = UTType.jpeg.identifier
+    ) throws {
+
+        guard let cgImage = self.cgImage else {
+            throw NSError(domain: "image", code: -1)
+        }
+
+        guard let destination = CGImageDestinationCreateWithURL(
+            url as CFURL,
+            typeIdentifier as CFString,
+            1,
+            nil
+        ) else {
+            throw NSError(domain: "image", code: -2)
+        }
+
+        var properties = metadata ?? [:]
+        properties[kCGImageDestinationLossyCompressionQuality as String] = compression
+
+        CGImageDestinationAddImage(
+            destination,
+            cgImage,
+            properties as CFDictionary
+        )
+
+        guard CGImageDestinationFinalize(destination) else {
+            throw NSError(domain: "image", code: -3)
+        }
+    }
+
+    static func preferredCameraImageRepresentation() -> (typeIdentifier: String, fileExtension: String) {
+        if self.canWriteImage(typeIdentifier: UTType.heic.identifier) {
+            return (UTType.heic.identifier, "heic")
+        }
+        if self.canWriteImage(typeIdentifier: UTType.heif.identifier) {
+            return (UTType.heif.identifier, "heif")
+        }
+        return (UTType.jpeg.identifier, "jpeg")
+    }
+
+    private static func canWriteImage(typeIdentifier: String) -> Bool {
+        let identifiers = CGImageDestinationCopyTypeIdentifiers() as NSArray
+        return identifiers.contains(typeIdentifier)
+    }
+}
 
 extension UIImage {
     /// 自定义初始化方法：优先加载主工程图片，如果没有则加载 SDK 图片

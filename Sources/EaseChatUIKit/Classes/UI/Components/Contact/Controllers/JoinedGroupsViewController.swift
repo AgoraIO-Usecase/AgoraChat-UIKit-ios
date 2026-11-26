@@ -10,10 +10,7 @@ import UIKit
 @objcMembers open class JoinedGroupsViewController: UIViewController {
     
     private let groupService = GroupServiceImplement()
-    
-    private var page = UInt(0)
-    
-    private var loadFinished = false
+    private var cacheObserver: NSObjectProtocol?
     
     public private(set) var datas: [ChatUserProfileProtocol] = [] {
         didSet {
@@ -39,10 +36,9 @@ import UIKit
     
     private lazy var empty: EmptyStateView = {
         EmptyStateView(frame: CGRect(x: 0, y: 0, width: self.groupList.frame.width, height: self.groupList.frame.height),emptyImage: UIImage(chatNamed: "empty"), onRetry: { [weak self] in
-            self?.requestGroups()
+            self?.loadLocalGroups()
         }).backgroundColor(.clear)
     }()
-
 
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,14 +52,23 @@ import UIKit
         }
         Theme.registerSwitchThemeViews(view: self)
         self.switchTheme(style: Theme.style)
-        self.requestGroups()
+        ChatUIKitClient.shared.addDataSyncListener(self)
+        self.loadLocalGroups()
         NotificationCenter.default.addObserver(self, selector: #selector(removeGroup(notification:)), name: Notification.Name("EaseChatUIKit_leaveGroup"), object: nil)
-        NotificationCenter.default.addObserver(forName: Notification.Name(rawValue: cache_update_notification), object: nil, queue: .main) { [weak self] notify in
+        self.cacheObserver = NotificationCenter.default.addObserver(forName: Notification.Name(rawValue: cache_update_notification), object: nil, queue: .main) { [weak self] notify in
             guard let `self` = self else { return }
             self.groupList.reloadData()
         }
     }
     
+    deinit {
+        ChatUIKitClient.shared.removeDataSyncListener(self)
+        NotificationCenter.default.removeObserver(self)
+        if let observer = self.cacheObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
     @objc open func removeGroup(notification: Notification) {
         if let groupId = notification.object as? String {
             self.datas.removeAll { $0.id == groupId }
@@ -86,31 +91,16 @@ import UIKit
         }
     }
     
-    @objc open func requestGroups() {
-        if !self.loadFinished {
-            self.groupService.getJoinedGroups(page: self.page, pageSize: 20, needMemberCount: true, needRole: true) { [weak self] groups, error in
-                guard let `self` = self else { return }
-                if error == nil {
-                    if let groups = groups {
-                        self.datas.append(contentsOf: groups.map({
-                            let profile = ChatUserProfile()
-                            profile.id = $0.groupId
-                            profile.nickname = $0.groupName
-                            profile.avatarURL = ChatUIKitContext.shared?.groupCache?[$0.groupId]?.avatarURL ?? ""
-                            return profile
-                        }))
-                        self.groupList.reloadData()
-                        if groups.count >= 20 {
-                            self.page += 1
-                        } else {
-                            self.loadFinished = true
-                        }
-                    }
-                } else {
-                    consoleLogInfo("requestGroups error:\(error?.errorDescription ?? "")", type: .error)
-                }
-            }
-        }
+    @objc open func loadLocalGroups() {
+        let groups = self.groupService.loadLocalJoinedGroups()
+        self.datas = groups.map({
+            let profile = ChatUserProfile()
+            profile.id = $0.groupId
+            profile.nickname = $0.groupName
+            profile.avatarURL = ChatUIKitContext.shared?.groupCache?[$0.groupId]?.avatarURL ?? ""
+            return profile
+        })
+        self.groupList.reloadData()
     }
 
 }
@@ -144,11 +134,6 @@ extension JoinedGroupsViewController: UITableViewDelegate,UITableViewDataSource 
         }
     }
     
-    public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row > self.datas.count-3,!self.loadFinished {
-            self.requestGroups()
-        }
-    }
     
     @objc open func chatTo(group: String) {
         let vc = ComponentsRegister.shared.GroupInfoController.init(group: group) { [weak self] groupId, name in
@@ -159,7 +144,7 @@ extension JoinedGroupsViewController: UITableViewDelegate,UITableViewDataSource 
     }
     
     @objc open func refreshGroup(groupId: String,name: String) {
-        for (index,profile) in self.datas.enumerated() {
+        for (_,profile) in self.datas.enumerated() {
             if profile.id == groupId {
                 profile.nickname = name
                 break
@@ -173,5 +158,18 @@ extension JoinedGroupsViewController: UITableViewDelegate,UITableViewDataSource 
 extension JoinedGroupsViewController: ThemeSwitchProtocol {
     public func switchTheme(style: ThemeStyle) {
         self.view.backgroundColor = style == .dark ? UIColor.theme.neutralColor1:UIColor.theme.neutralColor98
+    }
+}
+
+
+extension JoinedGroupsViewController: ChatDataSyncListener {
+    public var interestedSyncType: DataSyncType { .joinedGroups }
+
+    public func onChatDatabaseOpened() {
+        self.loadLocalGroups()
+    }
+
+    public func onChatDataSyncFinished(error: ChatError?, type: DataSyncType) {
+        self.loadLocalGroups()
     }
 }

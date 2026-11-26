@@ -15,7 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
 
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         // You can initialize chat_uikit when your app loads or before your app is ready to use。
         // Pass in the app key.
@@ -23,7 +23,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // https://docs.agora.io/en/agora-chat/get-started/enable#get-chat-project-information
         let option = ChatOptions(appkey: ExampleRequiredConfig.appKey)
         option.enableConsoleLog = true
-        option.isAutoLogin = false
+        option.dataSyncType = [.conversations, .contacts, .joinedGroups]
+        option.enableUserInfo = true
         _ = ChatUIKitClient.shared.setup(option: option)
         self.setupEaseChatUIKitConfig()
         return true

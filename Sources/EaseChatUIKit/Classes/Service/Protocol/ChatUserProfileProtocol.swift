@@ -25,12 +25,12 @@ import Foundation
 }
 
 @objcMembers open class ChatUserProfile:NSObject, ChatUserProfileProtocol {
-    public var remark: String = ""
     
     public func toJsonObject() -> Dictionary<String, Any>? {
         ["ease_chat_uikit_user_info":["nickname":self.nickname,"avatarURL":self.avatarURL,"userId":self.id]]
     }
     
+    public var remark: String = ""
     
     public var id: String = ""
     

@@ -1,0 +1,63 @@
+name: Swift
+
+on:
+  push:
+    branches: [main, sdk-5.0, SwiftUIKit]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Available on macos-15; its default Xcode is still 16.4.
+  DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spm:
+    runs-on: macos-15
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test and archive the current Swift package
+        run: bash scripts/ci_ios.sh spm
+      - name: Upload SPM diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spm-diagnostics
+          path: |
+            ${{ runner.temp }}/AgoraChatUIKit-spm/*.log
+            ${{ runner.temp }}/AgoraChatUIKit-spm/*.xcresult
+          if-no-files-found: warn
+          retention-days: 14
+
+  cocoapods:
+    runs-on: macos-15
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CocoaPods
+        run: gem install cocoapods -v 1.16.2 --no-document
+      - name: Test and archive CocoaPods integration
+        run: bash scripts/ci_ios.sh pods
+      - name: Upload CocoaPods diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cocoapods-diagnostics
+          path: |
+            ${{ runner.temp }}/AgoraChatUIKit-pods/*.log
+            ${{ runner.temp }}/AgoraChatUIKit-pods/*.xcresult
+          if-no-files-found: warn
+          retention-days: 14

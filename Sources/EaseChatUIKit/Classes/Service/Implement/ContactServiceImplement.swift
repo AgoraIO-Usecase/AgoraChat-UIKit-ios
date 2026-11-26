@@ -13,6 +13,8 @@ import UIKit
     
     private var eventsNotifiers: NSHashTable<ContactEmergencyListener> = NSHashTable<ContactEmergencyListener>.weakObjects()
     
+    @UserDefault("EaseChatUIKit_contact_new_request", defaultValue: Dictionary<String,Array<Dictionary<String,Any>>>()) private var newFriends
+
     @objc public override init() {
         super.init()
         ChatClient.shared().contactManager?.add(self, delegateQueue: .main)
@@ -48,22 +50,6 @@ extension ContactServiceImplement: ContactServiceProtocol {
     public func unbindContactEventListener(listener: ContactEventsResponse) {
         if self.responseDelegates.contains(listener) {
             self.responseDelegates.remove(listener)
-        }
-    }
-    
-    public func contacts(completion: @escaping (ChatError?, [Contact]) -> Void) {
-        let contacts = ChatClient.shared().contactManager?.getAllContacts()
-        let loadFinish = UserDefaults.standard.bool(forKey: "EaseChatUIKit_contact_fetch_server_finished"+saveIdentifier)
-        if !loadFinish,contacts?.count ?? 0 <= 0 {
-            ChatClient.shared().contactManager?.getAllContactsFromServer(completion: { [weak self] contacts, error in
-                if error == nil {
-                    UserDefaults.standard.set(true, forKey: "EaseChatUIKit_contact_fetch_server_finished"+saveIdentifier)
-                }
-                completion(error,contacts ?? [])
-                self?.handleResult(error: error, type: .fetchContacts, operatorId: ChatUIKitContext.shared?.currentUserId ?? "")
-            })
-        } else {
-            completion(nil,contacts ?? [])
         }
     }
     
@@ -145,6 +131,10 @@ extension ContactServiceImplement: ContactEventsListener {
     }
     
     public func friendRequestDidApprove(byUser aUsername: String) {
+        let conversation = ChatClient.shared().chatManager?.getConversation(aUsername, type: .chat, createIfNotExist: true)
+        let ext = ["something":("You have added".chat.localize+" "+aUsername+" "+"to say hello".chat.localize)]
+        let message = ChatMessage(conversationID: aUsername, body: ChatCustomMessageBody(event: EaseChatUIKit_alert_message, customExt: nil), ext: ext)
+        conversation?.insert(message, error: nil)
         for listener in self.responseDelegates.allObjects {
             listener.friendRequestDidAgree(by: aUsername)
         }
@@ -159,6 +149,7 @@ extension ContactServiceImplement: ContactEventsListener {
     }
     
     public func friendRequestDidReceive(fromUser aUsername: String, message aMessage: String?) {
+        self.saveFriendRequest(from: aUsername)
         for listener in self.responseDelegates.allObjects {
             listener.friendRequestDidReceive(by: aUsername)
         }
@@ -167,6 +158,34 @@ extension ContactServiceImplement: ContactEventsListener {
         }
     }
     
+    public func onFriendInfoChanged(_ contact: Contact) {
+        let profile = ChatUserProfile()
+        profile.id = contact.userId
+        profile.nickname = contact.userInfo?.nickname ?? ChatUIKitContext.shared?.userCache?[contact.userId]?.nickname ?? ""
+        profile.remark = contact.remark ?? ChatUIKitContext.shared?.userCache?[contact.userId]?.remark ?? ""
+        profile.avatarURL = contact.userInfo?.avatarUrl ?? ChatUIKitContext.shared?.userCache?[contact.userId]?.avatarURL ?? ""
+        ChatUIKitContext.shared?.updateCaches(type: .user, profiles: [profile])
+        self.handleResult(error: nil, type: .fetchContacts, operatorId: contact.userId)
+    }
+
+    private func saveFriendRequest(from userId: String) {
+        let requestInfo: [String:Any] = ["userId":userId,"timestamp":Date().timeIntervalSince1970*1000,"groupApply":0,"read":0]
+        var exist = self.newFriends[saveIdentifier]
+        if exist == nil {
+            self.newFriends[saveIdentifier] = [requestInfo]
+        } else if exist?.first(where: { $0["userId"] as? String == userId }) == nil {
+            exist?.append(requestInfo)
+            self.newFriends[saveIdentifier] = exist
+        }
+        if let index = Appearance.contact.listHeaderExtensionActions.firstIndex(where: { $0.featureIdentify == "NewFriendRequest" }) {
+            let item = Appearance.contact.listHeaderExtensionActions[index]
+            item.showBadge = true
+            let unreadCount = self.newFriends[saveIdentifier]?.filter({ $0["read"] as? Int == 0 }).count ?? 0
+            item.numberCount = UInt(unreadCount)
+            Appearance.contact.listHeaderExtensionActions[index].numberCount = UInt(unreadCount)
+        }
+    }
+
     func handleResult(error: ChatError?,type: ContactEmergencyType,operatorId: String) {
         for listener in self.eventsNotifiers.allObjects {
             listener.onResult(error: error, type: type, operatorId: operatorId)
@@ -174,4 +193,3 @@ extension ContactServiceImplement: ContactEventsListener {
     }
     
 }
-

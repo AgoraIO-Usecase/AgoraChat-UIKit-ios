@@ -1,0 +1,41 @@
+PODS:
+  - Agora_Chat_iOS (5.2.0):
+    - AgoraInfra_iOS (~> 1.3.0)
+  - AgoraInfra_iOS (1.3.16)
+  - chat-uikit (2.2.0):
+    - Agora_Chat_iOS (= 5.2.0)
+    - FLAnimatedImage (~> 1.0)
+  - chat-uikit/IntegrationTests (2.2.0):
+    - Agora_Chat_iOS (= 5.2.0)
+    - chat-uikit/TestHost
+    - FLAnimatedImage (~> 1.0)
+  - chat-uikit/TestHost (2.2.0):
+    - Agora_Chat_iOS (= 5.2.0)
+    - FLAnimatedImage (~> 1.0)
+  - FLAnimatedImage (1.0.17)
+
+DEPENDENCIES:
+  - Agora_Chat_iOS (from `../Vendor`)
+  - chat-uikit (from `../`)
+  - chat-uikit/IntegrationTests (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - AgoraInfra_iOS
+    - FLAnimatedImage
+
+EXTERNAL SOURCES:
+  Agora_Chat_iOS:
+    :path: "../Vendor"
+  chat-uikit:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Agora_Chat_iOS: 93dd0ae39f13c6cf732d947621e442840419ad3d
+  AgoraInfra_iOS: 1a79dcac542de9b174281a1ee17858a0bca7008f
+  chat-uikit: c827600b64a5431aec8ba6e76e9c000c070202b0
+  FLAnimatedImage: bbf914596368867157cc71b38a8ec834b3eeb32b
+
+PODFILE CHECKSUM: 58edaa6042a8b83e9a291bd865b2e7014a6db5ad
+
+COCOAPODS: 1.17.0

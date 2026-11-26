@@ -10,6 +10,7 @@ import MobileCoreServices
 import QuickLook
 import AVFoundation
 import PhotosUI
+import UniformTypeIdentifiers
 
 @objcMembers open class ChatThreadCreateController: UIViewController {
     
@@ -232,24 +233,6 @@ import PhotosUI
         }
     }
     
-    /**
-     Opens the photo library and allows the user to select a photo.
-     
-     - Note: This method checks if the photo library is available on the device. If it is not available, an alert is displayed to the user.
-     */
-    @objc open func selectPhoto() {
-        guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else {
-            DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "photo_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
-                
-            }
-            return
-        }
-        let imagePickerController = UIImagePickerController()
-        imagePickerController.delegate = self
-        imagePickerController.sourceType = .photoLibrary
-        self.present(imagePickerController, animated: true, completion: nil)
-    }
-    
     @objc open func openCamera() {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "camera_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
@@ -273,7 +256,22 @@ import PhotosUI
      - Note: The selected file will be handled by the `UIDocumentPickerDelegate` methods implemented in the `MessageListController`.
      */
     @objc open func selectFile() {
-        let documentPicker = UIDocumentPickerViewController(documentTypes: ["public.content", "public.text", "public.source-code", "public.image", "public.jpeg", "public.png", "com.adobe.pdf", "com.apple.keynote.key", "com.microsoft.word.doc", "com.microsoft.excel.xls", "com.microsoft.powerpoint.ppt","public.data"], in: .open)
+        let contentTypes = [
+            "public.content",
+            "public.text",
+            "public.source-code",
+            "public.image",
+            "public.jpeg",
+            "public.png",
+            "com.adobe.pdf",
+            "com.apple.keynote.key",
+            "com.microsoft.word.doc",
+            "com.microsoft.excel.xls",
+            "com.microsoft.powerpoint.ppt",
+            "public.data"
+        ].map { UTType($0) ?? UTType(importedAs: $0) }
+
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: contentTypes)
         documentPicker.delegate = self
         documentPicker.modalPresentationStyle = .fullScreen
         self.present(documentPicker, animated: true, completion: nil)
@@ -413,11 +411,12 @@ extension ChatThreadCreateController:UIImagePickerControllerDelegate, UINavigati
                 self.createChatThread(text: fileURL.path, type: .image)
             } else {
                 guard let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage else { return }
-                let correctImage = image.fixOrientation()
-                let fileName = "\(Int(Date().timeIntervalSince1970)).jpeg"
+                guard let metaData = info[.mediaMetadata] as? [String: Any] else { return }
+                let representation = UIImage.preferredCameraImageRepresentation()
+                let fileName = "\(Int(Date().timeIntervalSince1970)).\(representation.fileExtension)"
                 let fileURL = URL(fileURLWithPath: MediaConvertor.filePath()+"/\(fileName)")
                 do {
-                    try correctImage.jpegData(compressionQuality: 1)?.write(to: fileURL)
+                    try image.writeImage(to: fileURL,metadata: metaData,compression: 1,typeIdentifier: representation.typeIdentifier)
                 } catch {
                     consoleLogInfo("write camera fixOrientation image error:\(error.localizedDescription)", type: .error)
                 }
@@ -439,23 +438,21 @@ extension ChatThreadCreateController: UIDocumentPickerDelegate {
     }
     
     @objc open func documentPickerOpenFile(controller: UIDocumentPickerViewController,urls: [URL]) {
-        if controller.documentPickerMode == UIDocumentPickerMode.open {
-            guard let selectedFileURL = urls.first else {
-                return
+        guard let selectedFileURL = urls.first else {
+            return
+        }
+        if selectedFileURL.startAccessingSecurityScopedResource() {
+            let fileURL = URL(fileURLWithPath: MediaConvertor.filePath()+"/\(selectedFileURL.lastPathComponent)")
+            do {
+                try Data(contentsOf: selectedFileURL).write(to: fileURL)
+            } catch {
+                consoleLogInfo("write file error:\(error.localizedDescription)", type: .error)
             }
-            if selectedFileURL.startAccessingSecurityScopedResource() {
-                let fileURL = URL(fileURLWithPath: MediaConvertor.filePath()+"/\(selectedFileURL.lastPathComponent)")
-                do {
-                    try Data(contentsOf: selectedFileURL).write(to: fileURL)
-                } catch {
-                    consoleLogInfo("write file error:\(error.localizedDescription)", type: .error)
-                }
-                self.createChatThread(text: fileURL.path, type: .file)
-                selectedFileURL.stopAccessingSecurityScopedResource()
-            } else {
-                DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "file_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
-                    
-                }
+            self.createChatThread(text: fileURL.path, type: .file)
+            selectedFileURL.stopAccessingSecurityScopedResource()
+        } else {
+            DialogManager.shared.showAlert(title: "permissions disable".chat.localize, content: "file_disable".chat.localize, showCancel: false, showConfirm: true) { _ in
+
             }
         }
     }
@@ -488,32 +485,15 @@ extension ChatThreadCreateController: PHPickerViewControllerDelegate {
         for result in results {
             let itemProvider = result.itemProvider
             
-            // Determine file type and appropriate extension
-            var type: MessageCellStyle = .image
-            var fileExtension = "jpeg"
-            var typeIdentifier = UTType.image.identifier
+            guard let representation = PHPickerMediaResolver.resolve(itemProvider: itemProvider) else {
+                consoleLogInfo("Unsupported media type selected", type: .error)
+                continue
+            }
+
+            let type = representation.type
+            let fileExtension = representation.fileExtension
+            let typeIdentifier = representation.typeIdentifier
             var extensionInfo: [String: Any] = [:]
-            
-            // Check for GIF
-            if itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
-                type = .gif
-                fileExtension = "gif"
-                typeIdentifier = UTType.gif.identifier
-            }
-            // Check for Video
-            else if itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
-                type = .video
-                fileExtension = "mp4"
-                typeIdentifier = UTType.movie.identifier
-            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.mpeg4Movie.identifier) {
-                type = .video
-                fileExtension = "mp4"
-                typeIdentifier = UTType.mpeg4Movie.identifier
-            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.quickTimeMovie.identifier) {
-                type = .video
-                fileExtension = "mov"
-                typeIdentifier = UTType.quickTimeMovie.identifier
-            }
             
             // Generate a unique filename with appropriate extension
             let timestamp = Int(Date().timeIntervalSince1970 * 1000)
@@ -523,6 +503,9 @@ extension ChatThreadCreateController: PHPickerViewControllerDelegate {
             itemProvider.loadDataRepresentation(forTypeIdentifier: typeIdentifier) { [weak self] data, error in
                 guard let self = self, let data = data else {
                     if let error = error {
+                        DispatchQueue.main.async {
+                            self?.showToast(toast: "Failed to load media: \(error.localizedDescription)")
+                        }
                         consoleLogInfo("Error loading media: \(error.localizedDescription)", type: .error)
                     }
                     return
@@ -539,10 +522,11 @@ extension ChatThreadCreateController: PHPickerViewControllerDelegate {
                     extensionInfo["duration"] = duration
                 }
                 
-                self.createChatThread(text: fileURL.path, type: type, extensionInfo: extensionInfo)
+                // Send the message on the main thread
+                DispatchQueue.main.async {
+                    self.createChatThread(text: fileURL.path, type: type, extensionInfo: extensionInfo)
+                }
             }
         }
     }
 }
-
-

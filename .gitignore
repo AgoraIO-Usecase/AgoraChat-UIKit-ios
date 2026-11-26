@@ -1,5 +1,13 @@
+/Example/Pods/
+/Example/EaseChatUIKit.xcworkspace/
+**/xcuserdata/
+.build/
+.swiftpm/
+.DS_Store
+*.xcresult/
+DerivedData/
+# Original SDK delivery (the reproducible package copy is in Vendor/).
+/AgoraSDK_2026-11-26-145753/
 
-/Example/Pods
-/Example/EaseChatUIKit.xcworkspace
-/Example/EaseChatUIKit.xcodeproj/xcuserdata
-/Example/EaseChatUIKit.xcodeproj/xcshareddata
+# Keep integration dependency resolutions despite machine-wide lockfile ignores.
+!/Example/Podfile.lock

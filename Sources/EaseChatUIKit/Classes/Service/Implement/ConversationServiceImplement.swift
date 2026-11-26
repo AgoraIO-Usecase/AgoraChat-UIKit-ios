@@ -11,16 +11,6 @@ import UIKit
 
 @objc public class ConversationServiceImplement: NSObject {
     
-    private let pageSize = UInt8(20)
-    
-    private var cursor = ""
-    
-    var aa = ""
-    
-    @UserDefault("EaseChatUIKit_conversation_load_more_finished", defaultValue: [(ChatClient.shared().currentUsername ?? ""):false]) private var loadFinished
-    
-    @UserDefault("EaseChatUIKit_conversation_mute_map", defaultValue: Dictionary<String,Dictionary<String,Int>>()) private var muteMap
-    
     private var responseDelegates: NSHashTable<ConversationServiceListener> = NSHashTable<ConversationServiceListener>.weakObjects()
     
     public private(set) var eventsNotifiers: NSHashTable<ConversationEmergencyListener> = NSHashTable<ConversationEmergencyListener>.weakObjects()
@@ -28,11 +18,12 @@ import UIKit
     public override init() {
         super.init()
         ChatClient.shared().chatManager?.add(self, delegateQueue: .main)
-        
+        ChatClient.shared().chatManager?.addConversation(delegate: self, queue: .main)
     }
     
     deinit {
         ChatClient.shared().chatManager?.remove(self)
+        ChatClient.shared().chatManager?.removeConversation(delegate: self)
     }
 }
 
@@ -47,86 +38,10 @@ extension ConversationServiceImplement: ConversationService {
     
     
     public func loadExistConversations() {
-        let items = ChatClient.shared().chatManager?.getAllConversations(true) ?? []
-        let userId = ChatClient.shared().currentUsername ?? ""
-        if items.count <= 0,!(self.loadFinished[userId] ?? false) {
-            let taskGroup = DispatchGroup()
-            let queue1 = DispatchQueue(label: "conversations.pin")
-            let queue2 = DispatchQueue(label: "conversations")
-
-            taskGroup.enter()
-            queue1.async {
-                self.fetchPinnedConversations(cursor: "", pageSize: self.pageSize) { [weak self] result, error in
-                    guard let `self` = self else { return  }
-                    if error == nil {
-                        self.fetchSilentMode(conversationIds: result?.list?.map({ $0.id }) ?? []) { [weak self] resultSilent, silentError in
-                            guard let `self` = self else { return }
-                            if silentError == nil {
-                                if let list = result?.list {
-                                    for item in list {
-                                        if let silentMode = resultSilent?[item.id]?.remindType {
-                                            let currentUser = ChatUIKitContext.shared?.currentUserId ?? ""
-                                            var conversationMap = self.muteMap[currentUser]
-                                            if conversationMap != nil {
-                                                conversationMap?[item.id] = silentMode.rawValue
-                                            } else {
-                                                conversationMap = [item.id:silentMode.rawValue]
-                                            }
-                                            self.muteMap[currentUser] = conversationMap
-                                        }
-                                    }
-                                    
-                                }
-                            } else {
-                                self.handleResult(error: error, type: .fetchSilent)
-                            }
-                            taskGroup.leave()
-                        }
-                        
-                    } else {
-                        self.handleResult(error: error, type: .loadAllConversationFirstLoadUIKit)
-                        taskGroup.leave()
-                    }
-                }
-            }
-
-            taskGroup.enter()
-            queue2.async {
-                self.fetchAllConversations {  _, _ in
-                    taskGroup.leave()
-                }
-                
-            }
-
-            taskGroup.notify(queue: .main) {
-                if let conversations = ChatClient.shared().chatManager?.getAllConversations(true) {
-                    for listener in self.responseDelegates.allObjects {
-                        listener.onChatConversationListDidChanged(list: self.mapper(objects: conversations))
-                    }
-                }
-            }
-
-        } else {
-            if let conversations = ChatClient.shared().chatManager?.getAllConversations(true) {
-                for listener in self.responseDelegates.allObjects {
-                    listener.onChatConversationListDidChanged(list: self.mapper(objects: conversations))
-                }
-            }
+        let conversations = ChatClient.shared().chatManager?.getAllConversations(true) ?? []
+        for listener in self.responseDelegates.allObjects {
+            listener.onChatConversationListDidChanged(list: self.mapper(objects: conversations))
         }
-    }
-    
-    
-    public func fetchSilentMode(conversationIds: [String], completion: @escaping (Dictionary<String, SilentModeResult>?, ChatError?) -> Void) {
-        var conversations = [ChatConversation]()
-        for id in conversationIds {
-            if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(id) {
-                conversations.append(conversation)
-            }
-        }
-        ChatClient.shared().pushManager?.getSilentMode(for: conversations,completion: { [weak self] result, error in
-            self?.handleResult(error: error, type: .fetchSilent)
-            completion(result,error)
-        })
     }
     
     public func setSilentMode(conversationId: String, completion: @escaping (SilentModeResult?, ChatError?) -> Void) {
@@ -142,85 +57,11 @@ extension ConversationServiceImplement: ConversationService {
     
     public func clearSilentMode(conversationId: String, completion: @escaping (SilentModeResult?, ChatError?) -> Void) {
         if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(conversationId) {
-            let params = SilentModeParam(paramType: .remindType)
-            params.remindType = .all
-            ChatClient.shared().pushManager?.setSilentModeForConversation(conversationId, conversationType: conversation.type, params: params,completion: { [weak self] result, error in
+            ChatClient.shared().pushManager?.clearRemindType(forConversation: conversationId, conversationType: conversation.type, completion: { [weak self] result, error in
                 self?.handleResult(error: error, type: .setSilent)
                 completion(result,error)
             })
         }
-    }
-    
-    public func fetchPinnedConversations(cursor: String, pageSize: UInt8, completion: @escaping (CursorResult<ConversationInfo>?, ChatError?) -> Void) {
-        ChatClient.shared().chatManager?.getPinnedConversationsFromServer(withCursor: cursor, pageSize: pageSize, completion: { [weak self] result, error in
-            self?.handleResult(error: error, type: .fetchPinned)
-            completion(CursorResult(list: self?.mapper(objects: result?.list ?? []), andCursor: cursor),error)
-        })
-    }
-    
-    public func fetchAllConversations(completion: ((CursorResult<ConversationInfo>?,ChatError?) -> Void)?) {
-        ChatClient.shared().chatManager?.getConversationsFromServer(withCursor: self.cursor, pageSize: self.pageSize, completion: { [weak self] result, error in
-            if error == nil {
-                self?.cursor = result?.cursor ?? ""
-                if (result?.cursor ?? "").isEmpty {
-                    guard let `self` = self else { return }
-                    self.loadFinished[ChatClient.shared().currentUsername ?? ""] = true
-                    if let list = result?.list {
-                        self.fetchSilentMode(conversationIds: list.map({ $0.conversationId }), completion: { [weak self] resultSilent, silentError in
-                            if silentError == nil {
-                                for item in list {
-                                    if let silentMode = resultSilent?[item.conversationId]?.remindType {
-                                        let currentUser = ChatUIKitContext.shared?.currentUserId ?? ""
-                                        var conversationMap = self?.muteMap[currentUser]
-                                        if conversationMap != nil {
-                                            conversationMap?[item.conversationId] = silentMode.rawValue
-                                        } else {
-                                            conversationMap = [item.conversationId:silentMode.rawValue]
-                                        }
-                                        self?.muteMap[currentUser] = conversationMap
-                                    }
-                                }
-                            }
-                            completion?(CursorResult(list: self?.mapper(objects: list), andCursor: result?.cursor ?? ""),silentError)
-                        })
-                    } else {
-                        completion?(nil,nil)
-                    }
-                    return
-                } else {
-                    let list = result?.list ?? []
-                    let size = self?.pageSize ?? 50
-                    if list.count >= size {
-                        self?.fetchSilentMode(conversationIds: list.map({ $0.conversationId }), completion: { resultSilent, silentError in
-                            if silentError == nil {
-                                for item in list {
-                                    if let silentMode = resultSilent?[item.conversationId]?.remindType {
-                                        let currentUser = ChatUIKitContext.shared?.currentUserId ?? ""
-                                        var conversationMap = self?.muteMap[currentUser]
-                                        if conversationMap != nil {
-                                            conversationMap?[item.conversationId] = silentMode.rawValue
-                                        } else {
-                                            conversationMap = [item.conversationId:silentMode.rawValue]
-                                        }
-                                        self?.muteMap[currentUser] = conversationMap
-                                    }
-                                }
-                            }
-                            completion?(CursorResult(list: self?.mapper(objects: list), andCursor: result?.cursor ?? ""),silentError)
-                            self?.fetchAllConversations(completion: completion)
-                        })
-                    } else {
-                        guard let `self` = self else { return }
-                        for listener in self.responseDelegates.allObjects {
-                            listener.onChatConversationListDidChanged(list: [])
-                        }
-                    }
-                }
-            } else {
-                completion?(nil,error)
-                return
-            }
-        })
     }
     
     public func pin(conversationId: String, completion: @escaping (ChatError?) -> Void) {
@@ -238,7 +79,7 @@ extension ConversationServiceImplement: ConversationService {
     }
     
     public func deleteConversation(conversationId: String, completion: @escaping (ChatError?) -> Void) {
-        if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(conversationId) {
+        if let _ = ChatClient.shared().chatManager?.getConversationWithConvId(conversationId) {
             ChatClient.shared().chatManager?.deleteConversation(conversationId, isDeleteMessages: true, completion: { [weak self] localId, error in
                 ChatUIKitContext.shared?.pinnedCache?.removeValue(forKey: conversationId)
                 self?.handleResult(error: error, type: .delete)
@@ -249,8 +90,9 @@ extension ConversationServiceImplement: ConversationService {
     }
     
     public func markAllMessagesAsRead(conversationId: String) {
-        let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(conversationId)
-        conversation?.markAllMessages(asRead: nil)
+        ChatClient.shared().chatManager?.clearConversationUnreadMessageCount(conversationId) { error in
+            self.handleResult(error: error, type: .read)
+        }
     }
     
     public func bindConversationEventsListener(listener: ConversationServiceListener) {
@@ -324,19 +166,6 @@ extension ConversationServiceImplement: ConversationService {
             }
             conversation.unreadCount = UInt($0.unreadMessagesCount)
             conversation.lastMessage = $0.latestMessage
-            if let dic = conversation.lastMessage?.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
-                let from = conversation.lastMessage?.from ?? ""
-                let profile_chat = ChatUserProfile()
-                profile_chat.setValuesForKeys(dic)
-                profile_chat.id = from
-                profile_chat.modifyTime = conversation.lastMessage?.timestamp ?? 0
-                if ChatUIKitContext.shared?.userCache?[from] == nil {
-                    ChatUIKitContext.shared?.userCache?[from] = profile_chat
-                } else {
-                    ChatUIKitContext.shared?.userCache?[from]?.nickname = profile_chat.nickname
-                    ChatUIKitContext.shared?.userCache?[from]?.avatarURL = profile_chat.avatarURL
-                }
-            }
             conversation.type = ChatUserProfileProviderType(rawValue: UInt($0.type.rawValue)) ?? .chat
             conversation.pinned = $0.isPinned
             if ChatUIKitClient.shared.option.option_UI.saveConversationInfo {
@@ -356,10 +185,8 @@ extension ConversationServiceImplement: ConversationService {
                     }
                 }
             }
-            conversation.doNotDisturb = false
-            if let silentMode = self.muteMap[ChatUIKitContext.shared?.currentUserId ?? ""]?[$0.conversationId] {
-                conversation.doNotDisturb = silentMode != 0
-            }
+            conversation.applySDKDisplayInfoIfNeeded(from: $0)
+            conversation.doNotDisturb = $0.disturbType != .all
             
             _ = conversation.showContent
             return conversation
@@ -404,19 +231,6 @@ extension ConversationServiceImplement: ChatEventsListener {
         if !message.mention.isEmpty {
             conversation.ext?["EaseChatUIKit_mention"] = true
         }
-        if let dic = message.ext?["ease_chat_uikit_user_info"] as? Dictionary<String,Any> {
-            let profile = ChatUserProfile()
-            profile.setValuesForKeys(dic)
-            profile.id = message.from
-            profile.modifyTime = message.timestamp
-            ChatUIKitContext.shared?.chatCache?[message.from] = profile
-            if ChatUIKitContext.shared?.userCache?[message.from] == nil {
-                ChatUIKitContext.shared?.userCache?[message.from] = profile
-            } else {
-                ChatUIKitContext.shared?.userCache?[message.from]?.nickname = profile.nickname
-                ChatUIKitContext.shared?.userCache?[message.from]?.avatarURL = profile.avatarURL
-            }
-        }
         let list = self.mapper(objects: [conversation])
         for listener in self.responseDelegates.allObjects {
             if let info = list.first {
@@ -432,28 +246,7 @@ extension ConversationServiceImplement: ChatEventsListener {
         }
     }
     
-    public func conversationListDidUpdate(_ aConversationList: [ChatConversation]) {
-        let list = self.mapper(objects: aConversationList)
-        for listener in self.responseDelegates.allObjects {
-            listener.onChatConversationListDidChanged(list: list)
-        }
-    }
-    
-    public func onConversationRead(_ from: String, to: String) {
-        if from == ChatUIKitContext.shared?.currentUserId ?? "" {
-            if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(to) {
-                self.onConversationReadCallback(conversation: conversation)
-            } else {
-                if let conversation = ChatClient.shared().chatManager?.getConversationWithConvId(from) {
-                    self.onConversationReadCallback(conversation: conversation)
-                }
-            }
-        }
-        
-    }
-    
     @objc open func onConversationReadCallback(conversation: ChatConversation ) {
-//        conversation.markAllMessages(asRead: nil)
         if let info = self.mapper(objects: [conversation]).first{
             info.unreadCount = 0
             for listener in self.responseDelegates.allObjects {
@@ -466,4 +259,13 @@ extension ConversationServiceImplement: ChatEventsListener {
         }
     }
 
+}
+
+extension ConversationServiceImplement: ChatConversationEventsListener {
+    public func conversationListDidUpdate(_ aConversationList: [ChatConversation]) {
+        let list = self.mapper(objects: aConversationList)
+        for listener in self.responseDelegates.allObjects {
+            listener.onChatConversationListDidChanged(list: list)
+        }
+    }
 }
