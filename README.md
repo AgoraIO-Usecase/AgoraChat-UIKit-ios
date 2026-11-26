@@ -41,61 +41,84 @@ This guide provides an overview and usage examples of the chat_uikit framework i
 
 # Development Environment
 
-- Xcode 15.0 or later. The reason is that the audio detection AVAudioApplication API is used in UIKit to adapt to iOS 17 and later. 
-- Minimum system version: iOS 13.0
+- Xcode 26.0.1 or later for the current source and CI test suite.
+- Minimum system version: iOS 15.0
 - A valid developer signature for your project
 
 # Installation
 
-You can install chat_uikit using CocoaPods as a dependency of your Xcode project.
+## Swift Package Manager (recommended)
 
-## CocoaPods
+This migration prepares **AgoraChatUIKit 2.0.0** for SPM. The Swift module remains
+`chat_uikit`. This migration has not been published. The current fork
+(`zjc19891106/AgoraChat-UIKit-ios`) has no `2.0.0` tag; the official
+`AgoraIO-Usecase/AgoraChat-UIKit-ios` repository already has a historical `2.0.0`
+tag that does not contain this migration. Do not overwrite or use that old tag
+for this SPM release.
 
-Add the following dependencies to `podfile`.
+For local development, add this repository folder as a local package in Xcode,
+select the **AgoraChatUIKit** library product, and use:
+
+```swift
+import chat_uikit
+
+let options = ChatOptions(appkey: "your-app-key")
+options.dataSyncType = [.conversations, .contacts, .joinedGroups]
+options.enableUserInfo = true
+let error = ChatUIKitClient.shared.setup(option: options)
+```
+
+Log in explicitly with a user ID and a token from your application server.
+SDK 5 does not perform automatic login. Never embed production tokens in the app.
+
+The package includes the supplied AgoraChat **5.2.0** snapshot as a local binary
+in `Vendor/AgoraChat.xcframework`, plus AMRCodec. AgoraInfra_iOS 1.3.16 supplies
+its `aosl` runtime dependency; FLAnimatedImage is resolved through SPM. The official
+AgoraChat SPM repository did not expose a matching 5.2.0 release at migration time.
+Keep the vendored SDK in the Git checkout when distributing this package.
+
+After this change is pushed and an actual `2.0.0` tag exists in the chosen release
+repository, consumers can add that repository URL and select version **2.0.0**.
+See [remote consumer validation](ExampleSPMRemote/README.md) before publishing.
+
+Open `ExampleSPM/AgoraChatUIKitSPMExample.xcodeproj` for an offline integration
+smoke app. It uses this checkout and does not require an IM account.
+
+## CocoaPods compatibility
+
+The existing pod identity and version remain `chat-uikit` **2.2.0**. Until the
+matching SDK is publicly available, use the local specifications together:
 
 ```ruby
-source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '13.0'
+platform :ios, '15.0'
+use_frameworks!
 
 target 'YourTarget' do
-  use_frameworks!
-
-  pod 'chat_uikit'
-end
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
-    end
-  end
+  pod 'chat-uikit', :path => '/path/to/AgoraChat-UIKit-ios'
+  pod 'Agora_Chat_iOS', :path => '/path/to/AgoraChat-UIKit-ios/Vendor'
 end
 ```
 
-Then run the `cd` command on the terminal to navigate to the folder where `podfile` is located:
+For the full example, run `pod install --project-directory=Example` and open
+`Example/EaseChatUIKit.xcworkspace`. Do not exclude arm64 simulator builds.
+Set `AGORA_CHAT_APP_KEY`, `AGORA_CHAT_USER_ID`, and `AGORA_CHAT_TOKEN` in your
+local Run scheme environment to exercise login; empty defaults keep credentials
+out of the checkout.
 
+## Integration checks
+
+```sh
+bash scripts/ci_ios.sh spm
+bash scripts/ci_ios.sh pods
 ```
-    pod install
-```
 
->⚠️If the compilation error `Sandbox: rsync.samba(47334) deny(1) file-write-create...` is reported in Xcode15, you can: 
+These commands run hosted iOS tests, create an unsigned device archive, and check
+images, translations, privacy resources, and embedded SDK/codec runtimes. Results
+are written to a temporary directory; set `CI_OUTPUT_DIR` to choose another one.
+SPM and CocoaPods runs should use separate output directories.
 
-> Search for `ENABLE_USER_SCRIPT_SANDBOXING` in **Build Setting** and change `User Script Sandboxing` to `NO`.
-
-## Swift Package Manager 
-Add the URL of this repository to your Xcode 15+ Project.
-
-Go to File > Swift Packages > Add Package Dependency, and paste in the link to this repository:
-
-`https://github.com/AgoraIO-Usecase/AgoraChat-UIKit-ios`
-
----
-
-If you have issues installing this Swift Package:
-
-In Xcode's File menu, select 'Swift Packages' and then 'Reset Package Caches'.
-
+See [SDK 5 migration and validation](Documentation/sdk5-spm-migration.md) for API
+changes, upstream provenance, and validation limits.
 
 # Structure
 
